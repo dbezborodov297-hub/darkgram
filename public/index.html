@@ -7,213 +7,51 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{
---bg:#0f1620;
---bg-grad-1:#0f1620;
---bg-grad-2:#141d2a;
---card:#18222f;
---card-2:#1f2b3a;
---line:#26333f;
---line-2:#2f3d4d;
---accent:#4d8fd6;
---accent-2:#6ba6e3;
---green:#4dcd5e;
---red:#e0455a;
---gold:#e8b64c;
---text:#ffffff;
---text-dim:#93a3b3;
---muted:#5f7183;
-}
+:root{--bg:#0f1620;--bg-2:#141d2a;--card:#18222f;--card-2:#1f2b3a;--line:#26333f;--line-2:#2f3d4d;--accent:#4d8fd6;--accent-2:#6ba6e3;--green:#4dcd5e;--red:#e0455a;--gold:#e8b64c;--text:#fff;--text-dim:#93a3b3;--muted:#5f7183}
 html,body{height:100%;overflow-x:hidden}
-body{
-font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;
-background:linear-gradient(180deg,var(--bg-grad-1) 0%,var(--bg-grad-2) 100%);
-background-attachment:fixed;
-color:var(--text);
--webkit-font-smoothing:antialiased;
-font-size:15px;
-line-height:1.45;
-padding-bottom:50px;
-min-height:100vh;
-}
-
-/* HEADER */
-.header{
-background:rgba(24,34,47,0.85);
-backdrop-filter:blur(20px);
--webkit-backdrop-filter:blur(20px);
-border-bottom:1px solid var(--line);
-position:sticky;
-top:0;
-z-index:50;
-}
-.header-inner{
-max-width:860px;
-margin:0 auto;
-padding:14px 18px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%);background-attachment:fixed;color:var(--text);-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.45;padding-bottom:50px;min-height:100vh}
+.header{background:rgba(24,34,47,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+.header-inner{max-width:860px;margin:0 auto;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
 .logo{font-size:20px;font-weight:700;letter-spacing:-.3px;line-height:1.1}
 .logo-sub{font-size:11px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:1.5px}
-.balance-badge{
-display:flex;
-align-items:center;
-gap:6px;
-font-size:15px;
-font-weight:700;
-color:var(--gold);
-background:rgba(232,182,76,0.1);
-border:1px solid rgba(232,182,76,0.25);
-padding:8px 14px;
-border-radius:12px;
-}
-
-/* TABS */
-.tabs{
-display:flex;
-max-width:860px;
-margin:0 auto;
-padding:0 12px;
-background:rgba(24,34,47,0.85);
-backdrop-filter:blur(20px);
--webkit-backdrop-filter:blur(20px);
-border-bottom:1px solid var(--line);
-position:sticky;
-top:63px;
-z-index:49;
-overflow-x:auto;
-scrollbar-width:none;
-}
+.balance-badge{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:700;color:var(--gold);background:rgba(232,182,76,.1);border:1px solid rgba(232,182,76,.25);padding:8px 14px;border-radius:12px}
+.tabs{display:flex;max-width:860px;margin:0 auto;padding:0 12px;background:rgba(24,34,47,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--line);position:sticky;top:63px;z-index:49;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
-.tab{
-flex-shrink:0;
-padding:14px 16px;
-font-size:13px;
-font-weight:600;
-color:var(--muted);
-cursor:pointer;
-border-bottom:2px solid transparent;
-background:transparent;
-border-top:none;
-border-left:none;
-border-right:none;
-font-family:inherit;
-white-space:nowrap;
-transition:all .2s;
-}
+.tab{flex-shrink:0;padding:14px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:transparent;border-top:none;border-left:none;border-right:none;font-family:inherit;white-space:nowrap;transition:all .2s}
 .tab.active{color:var(--accent-2);border-bottom-color:var(--accent-2)}
 .tab.admin{color:var(--gold)}
 .tab.admin.active{color:var(--gold);border-bottom-color:var(--gold)}
 .tab.hidden{display:none}
-
 .container{max-width:860px;margin:0 auto;padding:18px}
 .page{display:none}
 .page.active{display:block;animation:fadeIn .3s}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-/* CARDS */
-.big-card{
-background:var(--card);
-border:1px solid var(--line);
-border-radius:16px;
-padding:22px;
-margin-bottom:12px;
-box-shadow:0 4px 20px rgba(0,0,0,0.2);
-}
+.big-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:12px;box-shadow:0 4px 20px rgba(0,0,0,.2)}
 .big-title{font-size:19px;font-weight:700;margin-bottom:6px;letter-spacing:-.3px}
 .big-sub{font-size:14px;color:var(--text-dim);margin-bottom:18px;line-height:1.5}
-.info-box{
-background:var(--card-2);
-border:1px solid var(--line-2);
-border-radius:12px;
-padding:14px 16px;
-margin-bottom:16px;
-}
+.info-box{background:var(--card-2);border:1px solid var(--line-2);border-radius:12px;padding:14px 16px;margin-bottom:16px}
 .info-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:14px}
 .info-row:not(:last-child){border-bottom:1px solid var(--line)}
 .info-lbl{color:var(--text-dim)}
 .info-val{font-weight:700;color:var(--text)}
-
-/* BUTTONS */
-.big-btn{
-width:100%;
-background:linear-gradient(180deg,var(--accent-2),var(--accent));
-color:#fff;
-border:none;
-border-radius:12px;
-padding:15px;
-font-size:15px;
-font-weight:700;
-cursor:pointer;
-font-family:inherit;
-transition:all .15s;
-box-shadow:0 4px 14px rgba(77,143,214,0.35);
-letter-spacing:.2px;
-}
-.big-btn:active{transform:scale(0.98);box-shadow:0 2px 8px rgba(77,143,214,0.3)}
+.big-btn{width:100%;background:linear-gradient(180deg,var(--accent-2),var(--accent));color:#fff;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 4px 14px rgba(77,143,214,.35);letter-spacing:.2px}
+.big-btn:active{transform:scale(.98);box-shadow:0 2px 8px rgba(77,143,214,.3)}
 .big-btn:disabled{background:var(--card-2);color:var(--muted);box-shadow:none;cursor:not-allowed;transform:none}
-.big-btn.gold{
-background:linear-gradient(180deg,#f5c555,var(--gold));
-color:#1a1408;
-box-shadow:0 4px 14px rgba(232,182,76,0.35);
-}
-.big-btn.gold:active{box-shadow:0 2px 8px rgba(232,182,76,0.3)}
-
-/* CLICKER */
+.big-btn.gold{background:linear-gradient(180deg,#f5c555,var(--gold));color:#1a1408;box-shadow:0 4px 14px rgba(232,182,76,.35)}
+.big-btn.gold:active{box-shadow:0 2px 8px rgba(232,182,76,.3)}
 .clicker-wrap{text-align:center;padding:30px 20px 20px;position:relative}
-.clicker-iris{
-font-size:150px;
-cursor:pointer;
-user-select:none;
-display:inline-block;
-transition:transform .08s ease-out;
-filter:drop-shadow(0 0 50px rgba(232,182,76,0.4)) drop-shadow(0 0 20px rgba(232,182,76,0.3));
-position:relative;
-}
-.clicker-iris:active{transform:scale(0.92)}
-.clicker-iris:hover{filter:drop-shadow(0 0 60px rgba(232,182,76,0.5)) drop-shadow(0 0 25px rgba(232,182,76,0.4))}
+.clicker-iris{font-size:150px;cursor:pointer;user-select:none;display:inline-block;transition:transform .08s ease-out;filter:drop-shadow(0 0 50px rgba(232,182,76,.4)) drop-shadow(0 0 20px rgba(232,182,76,.3));position:relative}
+.clicker-iris:active{transform:scale(.92)}
 .clicker-hint{font-size:13px;color:var(--muted);margin-top:22px;letter-spacing:.3px}
 .clicker-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
-.clicker-stat{
-background:var(--card);
-border:1px solid var(--line);
-border-radius:14px;
-padding:16px;
-text-align:center;
-box-shadow:0 4px 16px rgba(0,0,0,0.15);
-}
+.clicker-stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.15)}
 .clicker-stat-val{font-size:24px;font-weight:700;color:var(--gold);line-height:1.1}
 .clicker-stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-top:6px;font-weight:600}
-
-.float-num{
-position:fixed;
-font-size:26px;
-font-weight:800;
-color:var(--gold);
-pointer-events:none;
-z-index:1000;
-text-shadow:0 2px 8px rgba(232,182,76,0.5);
-animation:floatUp 0.9s cubic-bezier(.2,.8,.4,1) forwards;
-}
-@keyframes floatUp{
-from{opacity:1;transform:translateY(0) scale(1)}
-30%{opacity:1;transform:translateY(-30px) scale(1.15)}
-to{opacity:0;transform:translateY(-90px) scale(1)}
-}
-
-/* MARKET */
-.market-lot{
-background:var(--card);
-border:1px solid var(--line);
-border-radius:14px;
-padding:16px;
-margin-bottom:10px;
-box-shadow:0 4px 16px rgba(0,0,0,0.15);
-}
+.float-num{position:fixed;font-size:26px;font-weight:800;color:var(--gold);pointer-events:none;z-index:1000;text-shadow:0 2px 8px rgba(232,182,76,.5);animation:floatUp .9s cubic-bezier(.2,.8,.4,1) forwards}
+@keyframes floatUp{from{opacity:1;transform:translateY(0) scale(1)}30%{opacity:1;transform:translateY(-30px) scale(1.15)}to{opacity:0;transform:translateY(-90px) scale(1)}}
+.market-lot{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px;box-shadow:0 4px 16px rgba(0,0,0,.15)}
 .lot-top{display:flex;align-items:center;gap:14px;margin-bottom:14px}
-.lot-emoji{font-size:48px;flex-shrink:0;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.3))}
+.lot-emoji{font-size:48px;flex-shrink:0;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))}
 .lot-info{flex:1;min-width:0}
 .lot-name{font-size:16px;font-weight:700;margin-bottom:5px;word-break:break-word}
 .lot-seller{font-size:12px;color:var(--muted);margin-bottom:8px;word-break:break-word}
@@ -223,233 +61,404 @@ box-shadow:0 4px 16px rgba(0,0,0,0.15);
 .lot-price-seller{color:var(--gold);font-weight:700}
 .lot-price-seller span{color:var(--gold);font-weight:700;font-size:15px}
 .lot-actions{display:flex;gap:8px}
-.lot-btn{
-flex:1;
-background:linear-gradient(180deg,var(--accent-2),var(--accent));
-color:#fff;
-border:none;
-border-radius:10px;
-padding:13px;
-font-size:14px;
-font-weight:700;
-cursor:pointer;
-font-family:inherit;
-transition:all .15s;
-box-shadow:0 3px 10px rgba(77,143,214,0.3);
-}
-.lot-btn:active{transform:scale(0.97)}
+.lot-btn{flex:1;background:linear-gradient(180deg,var(--accent-2),var(--accent));color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 3px 10px rgba(77,143,214,.3)}
+.lot-btn:active{transform:scale(.97)}
 .lot-btn:disabled{background:var(--card-2);color:var(--muted);box-shadow:none;cursor:not-allowed;transform:none}
 .lot-btn.cancel{background:var(--card-2);color:var(--text-dim);box-shadow:none}
-
-.section-title{
-font-size:12px;
-font-weight:700;
-color:var(--muted);
-margin:22px 0 10px;
-padding-left:4px;
-text-transform:uppercase;
-letter-spacing:1.5px;
-}
+.section-title{font-size:12px;font-weight:700;color:var(--muted);margin:22px 0 10px;padding-left:4px;text-transform:uppercase;letter-spacing:1.5px}
 .section-title:first-child{margin-top:0}
-
-/* NFT CARD */
-.gift-card{
-background:var(--card);
-border:1px solid var(--line);
-border-radius:14px;
-padding:16px;
-margin-bottom:10px;
-box-shadow:0 4px 16px rgba(0,0,0,0.15);
-}
+.gift-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px;box-shadow:0 4px 16px rgba(0,0,0,.15)}
 .gift-top{display:flex;align-items:center;gap:14px;margin-bottom:14px}
-.gift-emoji{font-size:48px;flex-shrink:0;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.3))}
+.gift-emoji{font-size:48px;flex-shrink:0;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))}
 .gift-info{flex:1;min-width:0}
 .gift-name{font-size:16px;font-weight:700;margin-bottom:5px;word-break:break-word}
 .gift-meta{font-size:13px;color:var(--muted);word-break:break-word}
 .gift-actions{display:flex;gap:8px}
-.gift-btn{
-flex:1;
-background:linear-gradient(180deg,var(--accent-2),var(--accent));
-color:#fff;
-border:none;
-border-radius:10px;
-padding:13px;
-font-size:14px;
-font-weight:700;
-cursor:pointer;
-font-family:inherit;
-transition:all .15s;
-box-shadow:0 3px 10px rgba(77,143,214,0.3);
-}
-.gift-btn:active{transform:scale(0.97)}
-.gift-btn.give{
-background:linear-gradient(180deg,#5fd870,var(--green));
-box-shadow:0 3px 10px rgba(77,205,94,0.3);
-}
-
+.gift-btn{flex:1;background:linear-gradient(180deg,var(--accent-2),var(--accent));color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 3px 10px rgba(77,143,214,.3)}
+.gift-btn:active{transform:scale(.97)}
+.gift-btn.give{background:linear-gradient(180deg,#5fd870,var(--green));box-shadow:0 3px 10px rgba(77,205,94,.3)}
 .rarity-common{color:#8b9aa9}
 .rarity-rare{color:#6ba6e3}
 .rarity-epic{color:#c486ff}
 .rarity-legendary{color:var(--gold)}
-
-/* TOP */
-.top-item{
-background:var(--card);
-border:1px solid var(--line);
-border-radius:12px;
-padding:14px 16px;
-margin-bottom:8px;
-display:flex;
-align-items:center;
-gap:14px;
-box-shadow:0 3px 12px rgba(0,0,0,0.12);
-}
-.top-place{
-font-size:18px;
-font-weight:800;
-color:var(--gold);
-min-width:36px;
-text-align:center;
-flex-shrink:0;
-}
+.top-item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;box-shadow:0 3px 12px rgba(0,0,0,.12)}
+.top-place{font-size:18px;font-weight:800;color:var(--gold);min-width:36px;text-align:center;flex-shrink:0}
 .top-info{flex:1;min-width:0}
 .top-name{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .top-irises{font-size:13px;color:var(--text-dim);margin-top:3px;font-weight:600}
-.top-medal{font-size:28px;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(232,182,76,0.4))}
-
-/* EMPTY */
+.top-medal{font-size:28px;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(232,182,76,.4))}
 .empty{text-align:center;padding:60px 24px;color:var(--muted)}
-.empty-box{
-width:72px;
-height:72px;
-margin:0 auto 18px;
-border:2px solid var(--line);
-border-radius:20px;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:26px;
-color:var(--muted);
-background:var(--card);
-}
+.empty-box{width:72px;height:72px;margin:0 auto 18px;border:2px solid var(--line);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--muted);background:var(--card)}
 .empty-title{font-size:16px;font-weight:700;color:var(--text-dim);margin-bottom:6px}
 .empty-desc{font-size:13px;color:var(--muted)}
-
-/* MODAL */
-.modal-bg{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,0.7);
-backdrop-filter:blur(6px);
--webkit-backdrop-filter:blur(6px);
-z-index:1000;
-display:none;
-align-items:flex-start;
-justify-content:center;
-padding:20px;
-overflow-y:auto;
-}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:1000;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
 .modal-bg.show{display:flex;animation:fadeIn .2s}
-.modal{
-background:linear-gradient(180deg,var(--card),var(--bg-2));
-border:1px solid var(--line-2);
-border-radius:18px;
-padding:24px;
-width:100%;
-max-width:500px;
-margin:auto;
-box-shadow:0 20px 60px rgba(0,0,0,0.5);
-}
+.modal{background:linear-gradient(180deg,var(--card),var(--bg-2));border:1px solid var(--line-2);border-radius:18px;padding:24px;width:100%;max-width:500px;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 .modal-title{font-size:18px;font-weight:700;margin-bottom:20px;text-align:center;letter-spacing:-.3px}
-
 .field{margin-bottom:16px}
-.field label{
-display:block;
-font-size:11px;
-font-weight:700;
-color:var(--muted);
-text-transform:uppercase;
-letter-spacing:1.2px;
-margin-bottom:8px;
-}
-.field input,.field select{
-width:100%;
-background:var(--bg);
-border:1px solid var(--line-2);
-border-radius:12px;
-padding:14px 16px;
-color:var(--text);
-font-size:15px;
-font-family:inherit;
-transition:border-color .15s;
-}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px}
+.field input,.field select{width:100%;background:var(--bg);border:1px solid var(--line-2);border-radius:12px;padding:14px 16px;color:var(--text);font-size:15px;font-family:inherit;transition:border-color .15s}
 .field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
 .field input::placeholder{color:var(--muted)}
-
 .modal-actions{display:flex;gap:10px;margin-top:22px}
-.modal-btn{
-flex:1;
-padding:14px;
-border-radius:12px;
-font-size:15px;
-font-weight:700;
-border:none;
-cursor:pointer;
-font-family:inherit;
-transition:all .15s;
-}
-.modal-btn:active{transform:scale(0.97)}
-.modal-btn.primary{
-background:linear-gradient(180deg,var(--accent-2),var(--accent));
-color:#fff;
-box-shadow:0 4px 14px rgba(77,143,214,0.35);
-}
+.modal-btn{flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:all .15s}
+.modal-btn:active{transform:scale(.97)}
+.modal-btn.primary{background:linear-gradient(180deg,var(--accent-2),var(--accent));color:#fff;box-shadow:0 4px 14px rgba(77,143,214,.35)}
 .modal-btn.ghost{background:var(--card-2);color:var(--text-dim)}
-
-.sell-preview{
-display:flex;
-align-items:center;
-gap:16px;
-padding:18px;
-background:var(--bg);
-border:1px solid var(--line);
-border-radius:14px;
-margin-bottom:18px;
-}
-.sell-preview .emoji{font-size:52px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.3))}
+.sell-preview{display:flex;align-items:center;gap:16px;padding:18px;background:var(--bg);border:1px solid var(--line);border-radius:14px;margin-bottom:18px}
+.sell-preview .emoji{font-size:52px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))}
 .sell-preview .name{font-weight:700;font-size:16px;margin-bottom:5px}
 .sell-preview .meta{font-size:13px;color:var(--muted)}
 .sell-preview .base-price{font-size:13px;color:var(--text-dim);margin-top:6px;font-weight:600}
-
-.loading{
-text-align:center;
-padding:60px 20px;
-color:var(--muted);
-font-size:12px;
-font-weight:700;
-letter-spacing:2px;
-text-transform:uppercase;
-}
-.toast{
-position:fixed;
-bottom:24px;
-left:50%;
-transform:translateX(-50%) translateY(120%);
-background:var(--card-2);
-border:1px solid var(--line-2);
-color:var(--text);
-padding:14px 22px;
-border-radius:14px;
-font-size:14px;
-font-weight:600;
-z-index:99999;
-opacity:0;
-transition:all .25s cubic-bezier(.2,.8,.4,1);
-pointer-events:none;
-max-width:90vw;
-text-align:center;
-box-shadow:0 10px 30px rgba(0,0,0,0.4);
-}
+.loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--card-2);border:1px solid var(--line-2);color:var(--text);padding:14px 22px;border-radius:14px;font-size:14px;font-weight:600;z-index:99999;opacity:0;transition:all .25s cubic-bezier(.2,.8,.4,1);pointer-events:none;max-width:90vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.4)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <div class="logo">Darkgram</div>
+      <div class="logo-sub">clicker</div>
+    </div>
+    <div class="balance-badge"><span id="headerBalance">0</span></div>
+  </div>
+</div>
+
+<div class="tabs" id="tabsBar">
+  <button class="tab active" onclick="switchTab('clicker', event)">Кликер</button>
+  <button class="tab" onclick="switchTab('market', event)">Рынок</button>
+  <button class="tab" onclick="switchTab('profile', event)">Профиль</button>
+  <button class="tab" onclick="switchTab('top', event)">Топ</button>
+  <button class="tab admin hidden" id="adminTab" onclick="switchTab('admin', event)">Админ</button>
+</div>
+
+<div class="container">
+  <div class="page active" id="page-clicker"><div id="clickerContent"><div class="loading">Загрузка...</div></div></div>
+  <div class="page" id="page-market"><div id="marketContent"><div class="loading">Загрузка...</div></div></div>
+  <div class="page" id="page-profile"><div id="profileContent"><div class="loading">Загрузка...</div></div></div>
+  <div class="page" id="page-top"><div id="topContent"><div class="loading">Загрузка...</div></div></div>
+  <div class="page" id="page-admin"><div id="adminContent"><div class="loading">Загрузка...</div></div></div>
+</div>
+
+<div class="modal-bg" id="sellModal">
+  <div class="modal">
+    <div class="modal-title">Продать NFT</div>
+    <div class="sell-preview" id="sellPreview"></div>
+    <div class="field"><label>Цена в ирисках</label><input type="number" id="sellPriceInput" placeholder="Введи цену" min="1" step="0.1"></div>
+    <div class="modal-actions">
+      <button class="modal-btn ghost" onclick="closeSellModal()">Отмена</button>
+      <button class="modal-btn primary" onclick="confirmSell()">Выставить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="giveModal">
+  <div class="modal">
+    <div class="modal-title">Подарить NFT</div>
+    <div class="sell-preview" id="givePreview"></div>
+    <div class="field"><label>Кому (введи @username)</label><input type="text" id="giveUsernameInput" placeholder="@username"></div>
+    <div class="modal-actions">
+      <button class="modal-btn ghost" onclick="closeGiveModal()">Отмена</button>
+      <button class="modal-btn primary" onclick="confirmGive()">Подарить</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand()}
+const urlParams=new URLSearchParams(window.location.search);
+const TG_USER_ID=urlParams.get('user_id')||tg?.initDataUnsafe?.user?.id||null;
+const TG_FIRST_NAME=tg?.initDataUnsafe?.user?.first_name||'Аноним';
+const TG_USERNAME=tg?.initDataUnsafe?.user?.username||'';
+const CASE_PRICE=100;
+let myGifts=[],sellTarget=null,giveTarget=null,catalog=[],isAdmin=false,selectedUser=null,balance=0,myLots=[];
+
+async function api(url,opts={}){try{const c=new AbortController();const t=setTimeout(()=>c.abort(),8000);const r=await fetch(url,{headers:{'Content-Type':'application/json'},signal:c.signal,...opts});clearTimeout(t);return await r.json()}catch(e){return null}}
+function showToast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2000)}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function rarityClass(r){return r?'rarity-'+r.toLowerCase():''}
+function updateBalance(){$('#headerBalance')&&($('#headerBalance').textContent=balance.toFixed(1))}
+function $(s){return document.querySelector(s)}
+function switchTab(name,event){
+  if(event)event.preventDefault();
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const tabs=['clicker','market','profile','top','admin'];const idx=tabs.indexOf(name);
+  const els=document.querySelectorAll('.tab');if(idx>=0&&els[idx])els[idx].classList.add('active');
+  const pg=document.getElementById('page-'+name);if(pg)pg.classList.add('active');
+  if(name==='clicker')loadClicker();
+  if(name==='market')loadMarket();
+  if(name==='profile')loadProfile();
+  if(name==='top')loadTop();
+  if(name==='admin')loadAdmin();
+}
+
+async function loadClicker(){
+  const el=document.getElementById('clickerContent');if(!el)return;
+  if(!TG_USER_ID){el.innerHTML='<div class="empty"><div class="empty-box">?</div><div class="empty-title">Открой из Telegram</div></div>';return}
+  const u=await api('/api/user/'+TG_USER_ID)||{};balance=u.irises||0;updateBalance();
+  el.innerHTML='<div class="big-card clicker-wrap">'+
+    '<div class="clicker-iris" id="irisBtn" onclick="doClick(event)">🍬</div>'+
+    '<div class="clicker-hint">Тапай ириску — получай +0.1 за клик</div>'+
+    '</div>'+
+    '<div class="clicker-stats">'+
+      '<div class="clicker-stat"><div class="clicker-stat-val" id="statIrises">'+balance.toFixed(1)+'</div><div class="clicker-stat-lbl">Ирисок</div></div>'+
+      '<div class="clicker-stat"><div class="clicker-stat-val" id="statClicks">'+(u.clicks||0)+'</div><div class="clicker-stat-lbl">Кликов</div></div>'+
+    '</div>';
+}
+async function doClick(event){
+  if(!TG_USER_ID)return;
+  const r=event.target.getBoundingClientRect();
+  const x=event.clientX||(r.left+r.width/2);const y=event.clientY||(r.top+r.height/2);
+  spawnFloat(x,y,'+0.1');balance+=0.1;updateBalance();
+  const si=document.getElementById('statIrises');if(si)si.textContent=balance.toFixed(1);
+  await api('/api/click',{method:'POST',body:JSON.stringify({user_id:TG_USER_ID})});
+}
+function spawnFloat(x,y,text){const e=document.createElement('div');e.className='float-num';e.textContent=text;e.style.left=x+'px';e.style.top=(y-20)+'px';document.body.appendChild(e);setTimeout(()=>e.remove(),900)}
+
+async function loadMarket(){
+  const el=document.getElementById('marketContent');if(!el)return;
+  const lots=await api('/api/market')||[];
+  const list=Array.isArray(lots)?lots:[];
+  const myLotsList=list.filter(l=>String(l.seller_id)===String(TG_USER_ID));
+  const otherLots=list.filter(l=>String(l.seller_id)!==String(TG_USER_ID));
+  let html='';
+  if(myLotsList.length){
+    html+='<div class="section-title">Мои лоты</div>';
+    myLotsList.forEach(lot=>{
+      html+='<div class="market-lot">'+
+        '<div class="lot-top">'+
+          '<div class="lot-emoji">'+esc(lot.emoji||'?')+'</div>'+
+          '<div class="lot-info">'+
+            '<div class="lot-name">'+esc(lot.name)+' #'+esc(lot.unique)+'</div>'+
+            '<div class="lot-seller">Твой лот</div>'+
+            '<div class="lot-prices">'+
+              '<div class="lot-price-base">Базовая цена: <span>'+lot.base_price+'</span></div>'+
+              '<div class="lot-price-seller">Цена продажи: <span>'+lot.price+'</span></div>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="lot-actions"><button class="lot-btn cancel" onclick="cancelLot('+lot.unique+')">Снять с продажи</button></div>'+
+      '</div>';
+    });
+  }
+  html+='<div class="section-title">Лоты игроков</div>';
+  if(!otherLots.length){
+    html+='<div class="empty"><div class="empty-box">—</div><div class="empty-title">Рынок пуст</div><div class="empty-desc">Никто пока не выставил NFT</div></div>';
+  }else{
+    otherLots.forEach(lot=>{
+      const seller=lot.seller_username?'@'+lot.seller_username:(lot.seller_name||'Аноним');
+      html+='<div class="market-lot">'+
+        '<div class="lot-top">'+
+          '<div class="lot-emoji">'+esc(lot.emoji||'?')+'</div>'+
+          '<div class="lot-info">'+
+            '<div class="lot-name">'+esc(lot.name)+' #'+esc(lot.unique)+'</div>'+
+            '<div class="lot-seller">Продаёт: '+esc(seller)+'</div>'+
+            '<div class="lot-prices">'+
+              '<div class="lot-price-base">Базовая цена: <span>'+lot.base_price+'</span></div>'+
+              '<div class="lot-price-seller">Цена продавца: <span>'+lot.price+'</span></div>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="lot-actions"><button class="lot-btn" onclick="buyLot('+lot.unique+')">Купить</button></div>'+
+      '</div>';
+    });
+  }
+  el.innerHTML=html;
+}
+async function buyLot(unique){
+  if(!TG_USER_ID){showToast('Открой из Telegram');return}
+  if(!confirm('Купить этот NFT?'))return;
+  const res=await api('/api/market/buy',{method:'POST',body:JSON.stringify({user_id:TG_USER_ID,unique:unique})});
+  if(res&&res.ok){showToast('Куплено за '+res.price);loadMarket()}
+  else if(res&&res.error==='not_enough')showToast('Мало ирисок');
+  else if(res&&res.error==='own_lot')showToast('Это твой лот');
+  else if(res&&res.error==='lot_not_found'){showToast('Уже продан');loadMarket()}
+  else showToast('Ошибка');
+}
+async function cancelLot(unique){
+  if(!confirm('Снять NFT с продажи?'))return;
+  const res=await api('/api/market/cancel',{method:'POST',body:JSON.stringify({user_id:TG_USER_ID,unique:unique})});
+  if(res&&res.ok){showToast('Снято с продажи');loadMarket()}
+  else showToast('Ошибка');
+}
+
+async function loadProfile(){
+  const el=document.getElementById('profileContent');if(!el)return;
+  if(!TG_USER_ID){el.innerHTML='<div class="empty"><div class="empty-box">?</div><div class="empty-title">Открой из Telegram</div></div>';return}
+  const u=await api('/api/user/'+TG_USER_ID)||{};
+  const gifts=await api('/api/gifts/'+TG_USER_ID)||[];
+  myGifts=Array.isArray(gifts)?gifts:[];balance=u.irises||0;updateBalance();
+  const visibleGifts=myGifts.filter(g=>!g.on_market);
+  let html='<div class="big-card">'+
+    '<div class="big-title">'+esc(u.first_name||'Игрок')+'</div>'+
+    '<div class="big-sub">'+(u.username?'@'+esc(u.username):'Профиль')+'</div>'+
+    '<div class="info-box">'+
+      '<div class="info-row"><span class="info-lbl">Ириски</span><span class="info-val">'+(u.irises||0).toFixed(1)+'</span></div>'+
+      '<div class="info-row"><span class="info-lbl">Кликов</span><span class="info-val">'+(u.clicks||0)+'</span></div>'+
+      '<div class="info-row"><span class="info-lbl">NFT в наличии</span><span class="info-val">'+visibleGifts.length+'</span></div>'+
+      '<div class="info-row"><span class="info-lbl">NFT на рынке</span><span class="info-val">'+(myGifts.length-visibleGifts.length)+'</span></div>'+
+    '</div>'+
+    '<button class="big-btn gold" onclick="openCase()">Открыть кейс за '+CASE_PRICE+'</button>'+
+  '</div>';
+  html+='<div class="big-card"><div class="big-title">Мои NFT</div><div class="big-sub">Всего в наличии: '+visibleGifts.length+'</div>';
+  if(!visibleGifts.length){
+    html+='<div class="empty"><div class="empty-box">—</div><div class="empty-title">Пусто</div><div class="empty-desc">Открой кейс, чтобы получить NFT</div></div>';
+  }else{
+    visibleGifts.forEach(g=>{
+      html+='<div class="gift-card">'+
+        '<div class="gift-top">'+
+          '<div class="gift-emoji">'+esc(g.emoji||'?')+'</div>'+
+          '<div class="gift-info">'+
+            '<div class="gift-name">'+esc(g.name)+' #'+esc(g.unique)+'</div>'+
+            '<div class="gift-meta '+rarityClass(g.rarity)+'">'+esc(g.rarity)+' · База '+(g.base_price||0)+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="gift-actions">'+
+          '<button class="gift-btn give" onclick="openGiveModal('+g.unique+')">Подарить</button>'+
+          '<button class="gift-btn" onclick="openSellModal('+g.unique+')">Продать</button>'+
+        '</div>'+
+      '</div>';
+    });
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+async function openCase(){
+  if(!TG_USER_ID)return;
+  const res=await api('/api/case/open',{method:'POST',body:JSON.stringify({user_id:TG_USER_ID})});
+  if(res&&res.ok){showToast('Выпало: '+res.gift.emoji+' '+res.gift.name+' ('+res.gift.rarity+')');loadProfile()}
+  else if(res&&res.error==='not_enough')showToast('Нужно '+CASE_PRICE);
+  else showToast('Ошибка');
+}
+function openSellModal(unique){
+  const g=myGifts.find(x=>x.unique===unique);if(!g)return;
+  sellTarget=g;
+  document.getElementById('sellPreview').innerHTML='<div class="emoji">'+esc(g.emoji||'?')+'</div>'+
+    '<div><div class="name">'+esc(g.name)+' #'+esc(g.unique)+'</div>'+
+    '<div class="meta '+rarityClass(g.rarity)+'">'+esc(g.rarity)+'</div>'+
+    '<div class="base-price">Базовая цена: '+(g.base_price||0)+' ирисок</div></div>';
+  document.getElementById('sellPriceInput').value=g.base_price||100;
+  document.getElementById('sellModal').classList.add('show');
+}
+function closeSellModal(){document.getElementById('sellModal').classList.remove('show');sellTarget=null}
+async function confirmSell(){
+  if(!sellTarget)return;
+  const price=parseFloat(document.getElementById('sellPriceInput').value);
+  if(!price||price<=0){showToast('Введи цену');return}
+  const res=await api('/api/market/sell',{method:'POST',body:JSON.stringify({user_id:TG_USER_ID,unique:sellTarget.unique,price:price})});
+  if(res&&res.ok){showToast('Выставлено за '+price);closeSellModal();loadProfile()}
+  else if(res&&res.error==='already_on_market'){showToast('Уже на рынке');closeSellModal();loadProfile()}
+  else showToast('Ошибка');
+}
+function openGiveModal(unique){
+  const g=myGifts.find(x=>x.unique===unique);if(!g)return;
+  giveTarget=g;
+  document.getElementById('givePreview').innerHTML='<div class="emoji">'+esc(g.emoji||'?')+'</div>'+
+    '<div><div class="name">'+esc(g.name)+' #'+esc(g.unique)+'</div>'+
+    '<div class="meta '+rarityClass(g.rarity)+'">'+esc(g.rarity)+'</div></div>';
+  document.getElementById('giveUsernameInput').value='';
+  document.getElementById('giveModal').classList.add('show');
+}
+function closeGiveModal(){document.getElementById('giveModal').classList.remove('show');giveTarget=null}
+async function confirmGive(){
+  if(!giveTarget)return;
+  let u=document.getElementById('giveUsernameInput').value.trim();
+  if(!u){showToast('Введи @username');return}
+  u=u.replace('@','');
+  const res=await api('/api/gift/send',{method:'POST',body:JSON.stringify({user_id:TG_USER_ID,to_username:u,unique:giveTarget.unique})});
+  if(res&&res.ok){showToast('Подарено @'+u);closeGiveModal();loadProfile()}
+  else if(res&&res.error==='user_not_found')showToast('Юзер не найден');
+  else if(res&&res.error==='self')showToast('Себе нельзя');
+  else if(res&&res.error==='on_market')showToast('NFT на рынке');
+  else showToast('Ошибка');
+}
+
+async function loadTop(){
+  const el=document.getElementById('topContent');if(!el)return;
+  const data=await api('/api/top')||[];
+  if(!data.length){el.innerHTML='<div class="empty"><div class="empty-box">—</div><div class="empty-title">Пока пусто</div></div>';return}
+  let html='<div class="big-card"><div class="big-title">Топ игроков</div><div class="big-sub">Лучшие кликеры</div></div>';
+  data.forEach(u=>{
+    const medal=u.place===1?'🥇':u.place===2?'🥈':u.place===3?'🥉':'';
+    const name=u.username?'@'+u.username:(u.first_name||'Аноним');
+    html+='<div class="top-item">'+
+      (medal?'<div class="top-medal">'+medal+'</div>':'<div class="top-place">'+u.place+'</div>')+
+      '<div class="top-info"><div class="top-name">'+esc(name)+'</div><div class="top-irises">'+u.irises+'</div></div>'+
+    '</div>';
+  });
+  el.innerHTML=html;
+}
+
+async function loadAdmin(){
+  const el=document.getElementById('adminContent');if(!el)return;
+  if(!isAdmin){el.innerHTML='<div class="empty"><div class="empty-box">?</div><div class="empty-title">Только админ</div></div>';return}
+  if(!catalog.length)catalog=await api('/api/gifts_catalog')||[];
+  const opts=catalog.map(c=>'<option value="'+c.id+'">'+c.emoji+' '+c.name+' ('+c.rarity+')</option>').join('');
+  el.innerHTML='<div class="big-card">'+
+    '<div class="big-title">Найти юзера</div>'+
+    '<div class="field"><input type="text" id="adminFindInput" placeholder="@username или ID"></div>'+
+    '<button class="big-btn" onclick="adminFind()">Найти</button>'+
+    '<div id="adminUserBox" style="margin-top:16px"></div>'+
+  '</div>'+
+  '<div class="big-card">'+
+    '<div class="big-title">Выдать ириски</div>'+
+    '<div class="field"><input type="number" id="adminIrisesInput" placeholder="Например 100" step="0.1"></div>'+
+    '<button class="big-btn gold" onclick="adminGiveIrises()">Выдать</button>'+
+  '</div>'+
+  '<div class="big-card">'+
+    '<div class="big-title">Подарить NFT</div>'+
+    '<div class="field"><select id="adminGiftSelect">'+opts+'</select></div>'+
+    '<button class="big-btn gold" onclick="adminGiveGift()">Подарить</button>'+
+  '</div>';
+}
+async function adminFind(){
+  const q=document.getElementById('adminFindInput').value.trim();
+  if(!q){showToast('Введи @username или ID');return}
+  const res=await api('/api/admin/find_user?q='+encodeURIComponent(q)+'&admin_id='+TG_USER_ID);
+  const box=document.getElementById('adminUserBox');
+  if(res&&res.ok){
+    selectedUser=res.user;const u=res.user;
+    box.innerHTML='<div class="info-box">'+
+      '<div class="info-row"><span class="info-lbl">Имя</span><span class="info-val">'+esc(u.first_name)+'</span></div>'+
+      '<div class="info-row"><span class="info-lbl">@username</span><span class="info-val">'+(u.username?'@'+esc(u.username):'—')+'</span></div>'+
+      '<div class="info-row"><span class="info-lbl">ID</span><span class="info-val">'+esc(u.id)+'</span></div>'+
+      '<div class="info-row"><span class="info-lbl">Ириски</span><span class="info-val">'+u.irises+'</span></div>'+
+      '<div class="info-row"><span class="info-lbl">NFT</span><span class="info-val">'+(u.gifts_count||0)+'</span></div>'+
+    '</div>';
+  }else if(res&&res.error==='not_admin')box.innerHTML='<div class="empty-title">Не админ</div>';
+  else box.innerHTML='<div class="empty-title">Не найден</div>';
+}
+async function adminGiveIrises(){
+  if(!selectedUser){showToast('Сначала найди юзера');return}
+  const amt=parseFloat(document.getElementById('adminIrisesInput').value);
+  if(!amt){showToast('Введи сумму');return}
+  const res=await api('/api/admin/give_irises',{method:'POST',body:JSON.stringify({admin_id:TG_USER_ID,target_id:selectedUser.id,amount:amt})});
+  if(res&&res.ok){showToast('Выдано '+amt);adminFind()}
+  else showToast('Ошибка');
+}
+async function adminGiveGift(){
+  if(!selectedUser){showToast('Сначала найди юзера');return}
+  const gid=document.getElementById('adminGiftSelect').value;
+  if(!gid){showToast('Выбери NFT');return}
+  const res=await api('/api/admin/give_gift',{method:'POST',body:JSON.stringify({admin_id:TG_USER_ID,target_id:selectedUser.id,gift_id:gid})});
+  if(res&&res.ok){showToast('Подарено');adminFind()}
+  else showToast('Ошибка');
+}
+async function checkAdmin(){
+  if(!TG_USER_ID)return;
+  const res=await api('/api/admin/is_admin/'+TG_USER_ID)||{};
+  isAdmin=!!res.is_admin;
+  const tab=document.getElementById('adminTab');
+  if(isAdmin&&tab)tab.classList.remove('hidden');
+}
+async function init(){await checkAdmin();await loadClicker()}
+init();
+</script>
+</body>
+</html>
