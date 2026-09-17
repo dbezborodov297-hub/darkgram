@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Darkgram</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+--bg:#17212b;--bg-2:#1c2733;--card:#1c2733;--card-2:#232e3c;
+--line:#2b3845;--accent:#5288c1;--accent-2:#6ab3f3;--green:#4dcd5e;
+--red:#e0455a;--gold:#e8b64c;--text:#ffffff;--text-dim:#8b9aa9;--muted:#708499;
+}
+html,body{height:100%;overflow-x:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.45;padding-bottom:50px}
+
+.header{background:var(--bg-2);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+.header-inner{max-width:860px;margin:0 auto;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:19px;font-weight:600;line-height:1.1}
+.logo-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.balance-badge{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--gold);background:var(--card-2);padding:6px 12px;border-radius:8px}
+
+.tabs{display:flex;max-width:860px;margin:0 auto;padding:0 16px;background:var(--bg-2);border-bottom:1px solid var(--line);position:sticky;top:57px;z-index:49;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:12px 14px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:transparent;border-top:none;border-left:none;border-right:none;font-family:inherit;white-space:nowrap}
+.tab.active{color:var(--accent-2);border-bottom-color:var(--accent-2)}
+.tab.admin{color:var(--gold)}
+.tab.admin.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab.hidden{display:none}
+
+.container{max-width:860px;margin:0 auto;padding:16px}
+.page{display:none}
+.page.active{display:block}
+
+.big-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:12px}
+.big-title{font-size:18px;font-weight:600;margin-bottom:6px}
+.big-sub{font-size:14px;color:var(--text-dim);margin-bottom:18px;line-height:1.5}
+.info-box{background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:16px}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:14px}
+.info-row:not(:last-child){border-bottom:1px solid var(--line)}
+.info-lbl{color:var(--text-dim)}
+.info-val{font-weight:600;color:var(--accent-2)}
+.big-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.big-btn:disabled{background:var(--card-2);color:var(--muted);cursor:not-allowed}
+.big-btn.gold{background:var(--gold);color:#1a1408}
+
+.clicker-wrap{text-align:center;padding:40px 20px}
+.clicker-iris{font-size:140px;cursor:pointer;user-select:none;display:inline-block;transition:transform .08s;filter:drop-shadow(0 0 40px rgba(232,182,76,.4))}
+.clicker-iris:active{transform:scale(0.9)}
+.clicker-hint{font-size:13px;color:var(--muted);margin-top:20px}
+.clicker-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px}
+.clicker-stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center}
+.clicker-stat-val{font-size:22px;font-weight:700;color:var(--gold)}
+.clicker-stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+
+.float-num{position:fixed;font-size:24px;font-weight:700;color:var(--gold);pointer-events:none;z-index:1000;animation:floatUp 0.8s ease-out forwards}
+@keyframes floatUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-80px)}}
+
+.market-lot{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:14px}
+.lot-emoji{font-size:36px;flex-shrink:0}
+.lot-info{flex:1;min-width:0}
+.lot-name{font-size:15px;font-weight:600;margin-bottom:2px}
+.lot-seller{font-size:12px;color:var(--muted);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lot-price{font-size:14px;font-weight:700;color:var(--gold)}
+.lot-buy{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0}
+.lot-buy:disabled{background:var(--card-2);color:var(--muted);cursor:not-allowed}
+
+.gift-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:10px}
+.gift-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.gift-emoji{font-size:40px;flex-shrink:0}
+.gift-info{flex:1;min-width:0}
+.gift-name{font-size:15px;font-weight:600;margin-bottom:4px;word-break:break-word}
+.gift-meta{font-size:13px;color:var(--muted);word-break:break-word}
+.gift-actions{display:flex;gap:8px}
+.gift-btn{flex:1;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.gift-btn.cancel{background:var(--card-2);color:var(--text-dim)}
+.gift-btn.give{background:var(--green);color:#fff}
+.gift-badge{display:inline-block;padding:3px 8px;background:rgba(232,182,76,.15);border:1px solid rgba(232,182,76,.4);color:var(--gold);border-radius:5px;font-size:10px;font-weight:600;margin-top:4px}
+
+.rarity-common{color:#8b9aa9}
+.rarity-rare{color:#6ab3f3}
+.rarity-epic{color:#c486ff}
+.rarity-legendary{color:#e8b64c}
+
+.top-item{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:14px}
+.top-place{font-size:20px;font-weight:700;color:var(--gold);min-width:34px;text-align:center;flex-shrink:0}
+.top-info{flex:1;min-width:0}
+.top-name{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top-irises{font-size:13px;color:var(--text-dim);margin-top:2px}
+.top-medal{font-size:26px;flex-shrink:0}
+
+.empty{text-align:center;padding:60px 24px;color:var(--muted)}
+.empty-box{width:64px;height:64px;margin:0 auto 16px;border:1px solid var(--line);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--muted)}
+.empty-title{font-size:15px;font-weight:600;color:var(--text-dim);margin-bottom:4px}
+.empty-desc{font-size:13px}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:none;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto}
+.modal-bg.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;width:100%;max-width:500px;margin:auto}
+.modal-title{font-size:17px;font-weight:600;margin-bottom:16px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.field input,.field select{width:100%;background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:11px 13px;color:var(--text);font-size:14px;font-family:inherit}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
+
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.modal-btn{flex:1;padding:12px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:inherit}
+.modal-btn.primary{background:var(--accent);color:#fff}
+.modal-btn.ghost{background:var(--card-2);color:var(--text-dim)}
+
+.sell-preview{display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;margin-bottom:14px}
+.sell-preview .emoji{font-size:36px}
+.sell-preview .name{font-weight:600}
+.sell-preview .meta{font-size:12px;color:var(--muted)}
+
+.loading{text-align:center;padding:50px 20px;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--card-2);border:1px solid var(--line);color:var(--text);padding:12px 20px;border-radius:8px;font-size:14px;font-weight:500;z-index:99999;opacity:0;transition:all .25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <div class="logo">Darkgram</div>
+      <div class="logo-sub">clicker</div>
+    </div>
+    <div class="balance-badge">🍬 <span id="headerBalance">0</span></div>
+  </div>
+</div>
+
+<div class="tabs" id="tabsBar">
+  <button class="tab active" onclick="switchTab('clicker', event)">🍬 Кликер</button>
+  <button class="tab" onclick="switchTab('market', event)">🏪 Рынок</button>
+  <button class="tab" onclick="switchTab('profile', event)">👤 Профиль</button>
+  <button class="tab" onclick="switchTab('top', event)">🏆 Топ</button>
+  <button class="tab admin hidden" id="adminTab" onclick="switchTab('admin', event)">⚙️ Админ</button>
+</div>
+
+<div class="container">
+  <div class="page active" id="page-clicker"><div id="clickerContent"><div class="loading">Загрузка...</div></div></div>
+  <div class="page" id="page-market"><div id="marketContent"><div class="loading">Загрузка...</div></div></div>
+  <div class="page" id="page-profile"><div id="profileContent"><div class="loading">Загрузка...</div></div></div>
+  <div class="page" id="page-top"><div id="topContent"><div class="loading">Загрузка...</div></div></div>
+  <div class="page" id="page-admin"><div id="adminContent"><div class="loading">Загрузка...</div></div></div>
+</div>
+
+<div class="modal-bg" id="sellModal">
+  <div class="modal">
+    <div class="modal-title">Продать NFT</div>
+    <div class="sell-preview" id="sellPreview"></div>
+    <div class="field"><label>Цена в ирисках</label><input type="number" id="sellPriceInput" placeholder="Введи цену" min="1" step="0.1"></div>
+    <div class="modal-actions">
+      <button class="modal-btn ghost" onclick="closeSellModal()">Отмена</button>
+      <button class="modal-btn primary" onclick="confirmSell()">Выставить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="giveModal">
+  <div class="modal">
+    <div class="modal-title">Подарить NFT</div>
+    <div class="sell-preview" id="givePreview"></div>
+    <div class="field"><label>Кому (введи @username)</label><input type="text" id="giveUsernameInput" placeholder="@username"></div>
+    <div class="modal-actions">
+      <button class="modal-btn ghost" onclick="closeGiveModal()">Отмена</button>
+      <button class="modal-btn primary" onclick="confirmGive()">Подарить</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+
+const urlParams = new URLSearchParams(window.location.search);
+const TG_USER_ID = urlParams.get('user_id') || tg?.initDataUnsafe?.user?.id || null;
+const TG_FIRST_NAME = tg?.initDataUnsafe?.user?.first_name || 'Аноним';
+const TG_USERNAME = tg?.initDataUnsafe?.user?.username || '';
+
+const CASE_PRICE = 100;
+
+let myGifts = [];
+let sellTarget = null;
+let giveTarget = null;
+let catalog = [];
+let isAdmin = false;
+let selectedUser = null;
+let balance = 0;
+
+async function api(url, opts = {}) {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(url, {
+      headers: {'Content-Type':'application/json'},
+      signal: controller.signal,
+      ...opts
+    });
+    clearTimeout(timeout);
+    return await res.json();
+  } catch (e) { return null; }
+}
+
+function showToast(text) {
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function rarityClass(r) {
+  if (!r) return '';
+  return 'rarity-' + r.toLowerCase();
+}
+
+function updateHeaderBalance() {
+  const el = document.getElementById('headerBalance');
+  if (el) el.textContent = balance.toFixed(1);
+}
+
+function switchTab(name, event) {
+  if (event) event.preventDefault();
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const tabs = ['clicker','market','profile','top','admin'];
+  const idx = tabs.indexOf(name);
+  const tabEls = document.querySelectorAll('.tab');
+  if (idx >= 0 && tabEls[idx]) tabEls[idx].classList.add('active');
+  const page = document.getElementById('page-' + name);
+  if (page) page.classList.add('active');
+
+  if (name === 'clicker') loadClicker();
+  if (name === 'market') loadMarket();
+  if (name === 'profile') loadProfile();
+  if (name === 'top') loadTop();
+  if (name === 'admin') loadAdmin();
+}
+
+/* CLICKER */
+async function loadClicker() {
+  const el = document.getElementById('clickerContent');
+  if (!el) return;
+  if (!TG_USER_ID) {
+    el.innerHTML = '<div class="empty"><div class="empty-box">🍬</div><div class="empty-title">Открой из Telegram</div></div>';
+    return;
+  }
+  const user = await api('/api/user/' + TG_USER_ID) || {};
+  balance = user.irises || 0;
+  updateHeaderBalance();
+
+  el.innerHTML = '<div class="big-card clicker-wrap">' +
+    '<div class="clicker-iris" id="irisBtn" onclick="doClick(event)">🍬</div>' +
+    '<div class="clicker-hint">Тапай ириску — получай +0.1 за клик</div>' +
+  '</div>' +
+  '<div class="clicker-stats">' +
+    '<div class="clicker-stat"><div class="clicker-stat-val" id="statIrises">'+balance.toFixed(1)+'</div><div class="clicker-stat-lbl">Ирисок</div></div>' +
+    '<div class="clicker-stat"><div class="clicker-stat-val" id="statClicks">'+(user.clicks || 0)+'</div><div class="clicker-stat-lbl">Кликов</div></div>' +
+  '</div>';
+}
+
+async function doClick(event) {
+  if (!TG_USER_ID) return;
+
+  const rect = event.target.getBoundingClientRect();
+  const x = event.clientX || (rect.left + rect.width/2);
+  const y = event.clientY || (rect.top + rect.height/2);
+  spawnFloat(x, y, '+0.1');
+
+  balance += 0.1;
+  updateHeaderBalance();
+  const si = document.getElementById('statIrises');
+  if (si) si.textContent = balance.toFixed(1);
+
+  await api('/api/click', { method: 'POST', body: JSON.stringify({ user_id: TG_USER_ID }) });
+}
+
+function spawnFloat(x, y, text) {
+  const el = document.createElement('div');
+  el.className = 'float-num';
+  el.textContent = text;
+  el.style.left = x + 'px';
+  el.style.top = (y - 20) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
+
+/* MARKET */
+async function loadMarket() {
+  const data = await api('/api/market') || [];
+  const el = document.getElementById('marketContent');
+  if (!el) return;
+  const lots = Array.isArray(data) ? data : [];
+  if (!lots.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-box">🏪</div><div class="empty-title">Рынок пуст</div><div class="empty-desc">Никто пока не выставил NFT</div></div>';
+    return;
+  }
+  let html = '<div class="big-card"><div class="big-title">🏪 Рынок NFT</div><div class="big-sub">Покупай у других игроков</div></div>';
+  lots.forEach(lot => {
+    const seller = lot.seller_username ? '@'+lot.seller_username : (lot.seller_name || 'Аноним');
+    const isOwn = String(lot.seller_id) === String(TG_USER_ID);
+    html += '<div class="market-lot">' +
+      '<div class="lot-emoji">'+esc(lot.emoji || '🎁')+'</div>' +
+      '<div class="lot-info">' +
+        '<div class="lot-name">'+esc(lot.name)+' #'+esc(lot.unique)+'</div>' +
+        '<div class="lot-seller">Продаёт: '+esc(seller)+'</div>' +
+        '<div class="lot-price">'+lot.price+' 🍬</div>' +
+      '</div>' +
+      (isOwn ? '<button class="lot-buy" disabled>Твой лот</button>'
+             : '<button class="lot-buy" onclick="buyLot('+lot.unique+')">Купить</button>') +
+    '</div>';
+  });
+  el.innerHTML = html;
+}
+
+async function buyLot(unique) {
+  if (!TG_USER_ID) { showToast('Открой из Telegram'); return; }
+  if (!confirm('Купить этот NFT?')) return;
+  const res = await api('/api/market/buy', { method: 'POST', body: JSON.stringify({ user_id: TG_USER_ID, unique: unique }) });
+  if (res && res.ok) { showToast('Куплено за ' + res.price + ' 🍬'); loadMarket(); }
+  else if (res && res.error === 'not_enough') showToast('Мало ирисок');
+  else if (res && res.error === 'own_lot') showToast('Это твой лот');
+  else if (res && res.error === 'lot_not_found') { showToast('Уже продан'); loadMarket(); }
+  else showToast('Ошибка');
+}
+
+/* PROFILE */
+async function loadProfile() {
+  const el = document.getElementById('profileContent');
+  if (!el) return;
+  if (!TG_USER_ID) {
+    el.innerHTML = '<div class="empty"><div class="empty-box">👤</div><div class="empty-title">Открой из Telegram</div></div>';
+    return;
+  }
+  const user = await api('/api/user/' + TG_USER_ID) || {};
+  const gifts = await api('/api/gifts/' + TG_USER_ID) || [];
+  myGifts = Array.isArray(gifts) ? gifts : [];
+  balance = user.irises || 0;
+  updateHeaderBalance();
+
+  let html = '<div class="big-card">' +
+    '<div class="big-title">'+esc(user.first_name || 'Игрок')+'</div>' +
+    '<div class="big-sub">'+(user.username ? '@'+esc(user.username) : 'Профиль')+'</div>' +
+    '<div class="info-box">' +
+      '<div class="info-row"><span class="info-lbl">Ириски</span><span class="info-val">'+(user.irises || 0).toFixed(1)+'</span></div>' +
+      '<div class="info-row"><span class="info-lbl">Кликов</span><span class="info-val">'+(user.clicks || 0)+'</span></div>' +
+      '<div class="info-row"><span class="info-lbl">NFT</span><span class="info-val">'+myGifts.length+'</span></div>' +
+    '</div>' +
+    '<button class="big-btn gold" onclick="openCase()">🎁 Открыть кейс за '+CASE_PRICE+' 🍬</button>' +
+  '</div>';
+
+  html += '<div class="big-card">' +
+    '<div class="big-title">Мои NFT</div>' +
+    '<div class="big-sub">Всего: '+myGifts.length+'</div>';
+
+  if (!myGifts.length) {
+    html += '<div class="empty"><div class="empty-box">🎁</div><div class="empty-title">Пусто</div><div class="empty-desc">Открой кейс</div></div>';
+  } else {
+    myGifts.forEach(g => {
+      const onMarket = g.on_market;
+      html += '<div class="gift-card">' +
+        '<div class="gift-top">' +
+          '<div class="gift-emoji">'+esc(g.emoji || '🎁')+'</div>' +
+          '<div class="gift-info">' +
+            '<div class="gift-name">'+esc(g.name)+' #'+esc(g.unique)+'</div>' +
+            '<div class="gift-meta '+rarityClass(g.rarity)+'">'+esc(g.rarity)+' · база '+(g.base_price||0)+' 🍬</div>' +
+            (onMarket ? '<div class="gift-badge">На рынке</div>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="gift-actions">' +
+          (onMarket
+            ? '<button class="gift-btn cancel" onclick="cancelLot('+g.unique+')">Снять</button>'
+            : '<button class="gift-btn give" onclick="openGiveModal('+g.unique+')">Подарить</button>' +
+              '<button class="gift-btn" onclick="openSellModal('+g.unique+')">Продать</button>') +
+        '</div>' +
+      '</div>';
+    });
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+async function openCase() {
+  if (!TG_USER_ID) return;
+  const res = await api('/api/case/open', { method: 'POST', body: JSON.stringify({ user_id: TG_USER_ID }) });
+  if (res && res.ok) {
+    const g = res.gift;
+    showToast('Выпало: ' + g.emoji + ' ' + g.name + ' (' + g.rarity + ')');
+    loadProfile();
+  } else if (res && res.error === 'not_enough') showToast('Нужно ' + CASE_PRICE + ' 🍬');
+  else showToast('Ошибка');
+}
+
+function openSellModal(unique) {
+  const g = myGifts.find(x => x.unique === unique);
+  if (!g) return;
+  sellTarget = g;
+  document.getElementById('sellPreview').innerHTML = '<div class="emoji">'+esc(g.emoji||'🎁')+'</div>' +
+    '<div><div class="name">'+esc(g.name)+' #'+esc(g.unique)+'</div>' +
+    '<div class="meta '+rarityClass(g.rarity)+'">'+esc(g.rarity)+' · база '+(g.base_price||0)+' 🍬</div></div>';
+  document.getElementById('sellPriceInput').value = g.base_price || 100;
+  document.getElementById('sellModal').classList.add('show');
+}
+function closeSellModal() { document.getElementById('sellModal').classList.remove('show'); sellTarget = null; }
+
+async function confirmSell() {
+  if (!sellTarget) return;
+  const price = parseFloat(document.getElementById('sellPriceInput').value);
+  if (!price || price <= 0) { showToast('Введи цену'); return; }
+  const res = await api('/api/market/sell', { method: 'POST', body: JSON.stringify({ user_id: TG_USER_ID, unique: sellTarget.unique, price: price }) });
+  if (res && res.ok) { showToast('Выставлено'); closeSellModal(); loadProfile(); }
+  else if (res && res.error === 'already_on_market') { showToast('Уже на рынке'); closeSellModal(); loadProfile(); }
+  else showToast('Ошибка');
+}
+
+async function cancelLot(unique) {
+  if (!confirm('Снять с продажи?')) return;
+  const res = await api('/api/market/cancel', { method: 'POST', body: JSON.stringify({ user_id: TG_USER_ID, unique: unique }) });
+  if (res && res.ok) { showToast('Снято'); loadProfile(); }
+  else showToast('Ошибка');
+}
+
+function openGiveModal(unique) {
+  const g = myGifts.find(x => x.unique === unique);
+  if (!g) return;
+  giveTarget = g;
+  document.getElementById('givePreview').innerHTML = '<div class="emoji">'+esc(g.emoji||'🎁')+'</div>' +
+    '<div><div class="name">'+esc(g.name)+' #'+esc(g.unique)+'</div>' +
+    '<div class="meta '+rarityClass(g.rarity)+'">'+esc(g.rarity)+'</div></div>';
+  document.getElementById('giveUsernameInput').value = '';
+  document.getElementById('giveModal').classList.add('show');
+}
+function closeGiveModal() { document.getElementById('giveModal').classList.remove('show'); giveTarget = null; }
+
+async function confirmGive() {
+  if (!giveTarget) return;
+  let username = document.getElementById('giveUsernameInput').value.trim();
+  if (!username) { showToast('Введи @username'); return; }
+  username = username.replace('@','');
+  const res = await api('/api/gift/send', { method: 'POST', body: JSON.stringify({ user_id: TG_USER_ID, to_username: username, unique: giveTarget.unique }) });
+  if (res && res.ok) { showToast('Подарено @'+username); closeGiveModal(); loadProfile(); }
+  else if (res && res.error === 'user_not_found') showToast('Юзер не найден');
+  else if (res && res.error === 'self') showToast('Себе нельзя');
+  else if (res && res.error === 'on_market') showToast('NFT на рынке');
+  else showToast('Ошибка');
+}
+
+/* TOP */
+async function loadTop() {
+  const data = await api('/api/top') || [];
+  const el = document.getElementById('topContent');
+  if (!el) return;
+  if (!data.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-box">🏆</div><div class="empty-title">Пока пусто</div></div>';
+    return;
+  }
+  let html = '<div class="big-card"><div class="big-title">🏆 Топ игроков</div><div class="big-sub">Лучшие кликеры</div></div>';
+  data.forEach(u => {
+    const medal = u.place === 1 ? '🥇' : u.place === 2 ? '🥈' : u.place === 3 ? '🥉' : '';
+    const name = u.username ? '@'+u.username : (u.first_name || 'Аноним');
+    html += '<div class="top-item">' +
+      (medal ? '<div class="top-medal">'+medal+'</div>'
+             : '<div class="top-place">'+u.place+'</div>') +
+      '<div class="top-info">' +
+        '<div class="top-name">'+esc(name)+'</div>' +
+        '<div class="top-irises">'+u.irises+' 🍬</div>' +
+      '</div>' +
+    '</div>';
+  });
+  el.innerHTML = html;
+}
+
+/* ADMIN */
+async function loadAdmin() {
+  const el = document.getElementById('adminContent');
+  if (!el) return;
+  if (!isAdmin) {
+    el.innerHTML = '<div class="empty"><div class="empty-box">🔒</div><div class="empty-title">Только админ</div></div>';
+    return;
+  }
+  if (!catalog.length) catalog = await api('/api/gifts_catalog') || [];
+  const opts = catalog.map(c => '<option value="'+c.id+'">'+c.emoji+' '+c.name+' ('+c.rarity+')</option>').join('');
+
+  el.innerHTML = '<div class="big-card">' +
+    '<div class="big-title">🔍 Найти юзера</div>' +
+    '<div class="field"><input type="text" id="adminFindInput" placeholder="@username или ID"></div>' +
+    '<button class="big-btn" onclick="adminFind()">Найти</button>' +
+    '<div id="adminUserBox" style="margin-top:16px"></div>' +
+  '</div>' +
+  '<div class="big-card">' +
+    '<div class="big-title">💰 Выдать ириски</div>' +
+    '<div class="field"><input type="number" id="adminIrisesInput" placeholder="Например 100" step="0.1"></div>' +
+    '<button class="big-btn gold" onclick="adminGiveIrises()">Выдать</button>' +
+  '</div>' +
+  '<div class="big-card">' +
+    '<div class="big-title">🎁 Подарить NFT</div>' +
+    '<div class="field"><select id="adminGiftSelect">'+opts+'</select></div>' +
+    '<button class="big-btn gold" onclick="adminGiveGift()">Подарить</button>' +
+  '</div>';
+}
+
+async function adminFind() {
+  const q = document.getElementById('adminFindInput').value.trim();
+  if (!q) { showToast('Введи @username или ID'); return; }
+  const res = await api('/api/admin/find_user?q=' + encodeURIComponent(q) + '&admin_id=' + TG_USER_ID);
+  const box = document.getElementById('adminUserBox');
+  if (res && res.ok) {
+    selectedUser = res.user;
+    const u = res.user;
+    box.innerHTML = '<div class="info-box">' +
+      '<div class="info-row"><span class="info-lbl">Имя</span><span class="info-val">'+esc(u.first_name)+'</span></div>' +
+      '<div class="info-row"><span class="info-lbl">@username</span><span class="info-val">'+(u.username ? '@'+esc(u.username) : '—')+'</span></div>' +
+      '<div class="info-row"><span class="info-lbl">ID</span><span class="info-val">'+esc(u.id)+'</span></div>' +
+      '<div class="info-row"><span class="info-lbl">Ириски</span><span class="info-val">'+u.irises+'</span></div>' +
+      '<div class="info-row"><span class="info-lbl">NFT</span><span class="info-val">'+(u.gifts_count||0)+'</span></div>' +
+    '</div>';
+  } else if (res && res.error === 'not_admin') box.innerHTML = '<div class="empty-title">Не админ</div>';
+  else box.innerHTML = '<div class="empty-title">Не найден</div>';
+}
+
+async function adminGiveIrises() {
+  if (!selectedUser) { showToast('Сначала найди юзера'); return; }
+  const amount = parseFloat(document.getElementById('adminIrisesInput').value);
+  if (!amount) { showToast('Введи сумму'); return; }
+  const res = await api('/api/admin/give_irises', { method: 'POST', body: JSON.stringify({ admin_id: TG_USER_ID, target_id: selectedUser.id, amount: amount }) });
+  if (res && res.ok) { showToast('Выдано ' + amount); adminFind(); }
+  else showToast('Ошибка');
+}
+
+async function adminGiveGift() {
+  if (!selectedUser) { showToast('Сначала найди юзера'); return; }
+  const giftId = document.getElementById('adminGiftSelect').value;
+  if (!giftId) { showToast('Выбери NFT'); return; }
+  const res = await api('/api/admin/give_gift', { method: 'POST', body: JSON.stringify({ admin_id: TG_USER_ID, target_id: selectedUser.id, gift_id: giftId }) });
+  if (res && res.ok) { showToast('Подарено'); adminFind(); }
+  else showToast('Ошибка');
+}
+
+async function checkAdmin() {
+  if (!TG_USER_ID) return;
+  const res = await api('/api/admin/is_admin/' + TG_USER_ID) || {};
+  isAdmin = !!res.is_admin;
+  const tab = document.getElementById('adminTab');
+  if (isAdmin && tab) tab.classList.remove('hidden');
+}
+
+async function init() {
+  await checkAdmin();
+  await loadClicker();
+}
+
+init();
+</script>
+</body>
+</html>
