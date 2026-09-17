@@ -10,7 +10,7 @@ from telebot import types
 STATS_FILE = 'stats.json'
 MARKET_FILE = 'market.json'
 
-WEBAPP_URL = 'https://otg-critic-bot.onrender.com/'
+WEBAPP_URL = 'https://darkgram-fkc2.onrender.com/'
 ADMIN_IDS = [8907438590]
 
 CLICK_REWARD = 0.1
