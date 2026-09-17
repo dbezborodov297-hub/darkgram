@@ -28,6 +28,8 @@ GIFTS = {
     'rocket':   {'name': 'Ракета',   'emoji': '🚀', 'rarity': 'Legendary', 'chance': 1,  'price': 500},
     'beach':    {'name': 'Пляж',     'emoji': '🏖️', 'rarity': 'Legendary', 'chance': 0.5,'price': 550},
     'rosette':  {'name': 'Розетка',  'emoji': '🏵️', 'rarity': 'Legendary', 'chance': 0.5,'price': 650},
+    'lollipop': {'name': 'Леденец',  'emoji': '🍭', 'rarity': 'Legendary', 'chance': 0.3,'price': 890},
+    'cookie':   {'name': 'Печенье',  'emoji': '🍪', 'rarity': 'Legendary', 'chance': 0.3,'price': 920},
 }
 
 def load_json(filename, default):
@@ -164,13 +166,6 @@ class Handler(BaseHTTPRequestHandler):
             except Exception:
                 continue
         print('HTML not found in paths:', paths)
-        print('CWD:', os.getcwd())
-        try:
-            print('Files in CWD:', os.listdir(os.getcwd()))
-            if os.path.exists('public'):
-                print('Files in public:', os.listdir('public'))
-        except Exception as e:
-            print('List error:', e)
         self.send_response(404)
         self.end_headers()
 
@@ -482,35 +477,35 @@ def cmd_start(message):
     get_user(user_id, first_name, username)
     kb = types.InlineKeyboardMarkup(row_width=1)
     kb.add(types.InlineKeyboardButton(
-        text='🍬 Открыть Darkgram',
+        text='Открыть Darkgram',
         web_app=types.WebAppInfo(url=f'{WEBAPP_URL}?user_id={user_id}')
     ))
     text = (
-        f"🌟 <b>DARKGRAM</b> 🌟\n\n"
-        f"👋 Привет, <b>{first_name}</b>!\n\n"
-        f"🍬 Кликай на ириску — получай ириски\n"
-        f"🎁 Открывай кейсы — получай NFT\n"
-        f"🏪 Торгуй NFT на рынке\n"
-        f"🏆 Поднимайся в топ\n\n"
-        f"👇 Жми кнопку, чтобы играть"
+        f"<b>DARKGRAM</b>\n\n"
+        f"Привет, <b>{first_name}</b>!\n\n"
+        f"Кликай на ириску — получай ириски\n"
+        f"Открывай кейсы — получай NFT\n"
+        f"Торгуй NFT на рынке\n"
+        f"Поднимайся в топ\n\n"
+        f"Нажми кнопку ниже, чтобы играть"
     )
     bot.send_message(message.chat.id, text, parse_mode='HTML', reply_markup=kb)
 
 @bot.message_handler(commands=['help'])
 def cmd_help(message):
     text = (
-        f"❓ <b>ПОМОЩЬ</b>\n\n"
-        f"🍬 <b>Кликер</b> — тапай ириску, получай +0.1 за клик\n"
-        f"🎁 <b>Кейсы</b> — открывай за 100 ирисок, получай NFT\n"
-        f"🏪 <b>Рынок</b> — покупай и продавай NFT\n"
-        f"🏆 <b>Топ</b> — лучшие игроки\n\n"
-        f"📋 <b>Правила:</b>\n"
+        f"<b>ПОМОЩЬ</b>\n\n"
+        f"<b>Кликер</b> — тапай ириску, получай +0.1 за клик\n"
+        f"<b>Кейсы</b> — открывай за 100 ирисок, получай NFT\n"
+        f"<b>Рынок</b> — покупай и продавай NFT\n"
+        f"<b>Топ</b> — лучшие игроки\n\n"
+        f"<b>Правила:</b>\n"
         f"• Не читерить\n• Не оскорблять игроков\n"
         f"• Ириски — игровая валюта без реальной ценности\n\n"
-        f"🔒 <b>Конфиденциальность:</b>\n"
+        f"<b>Конфиденциальность:</b>\n"
         f"Храним Telegram ID, имя, username — только для игры. "
         f"Не передаём третьим лицам.\n\n"
-        f"🎮 Открыть игру — /start"
+        f"Открыть игру — /start"
     )
     bot.send_message(message.chat.id, text, parse_mode='HTML')
 
@@ -519,12 +514,12 @@ def cmd_profile(message):
     user_id = message.from_user.id
     user = get_user(user_id, message.from_user.first_name, message.from_user.username)
     text = (
-        f"👤 <b>ПРОФИЛЬ</b>\n\n"
-        f"🌟 <b>{user.get('first_name')}</b>\n"
-        f"📛 {('@'+user['username']) if user.get('username') else '—'}\n\n"
-        f"🍬 Ириски: <b>{round(user.get('irises', 0), 1)}</b>\n"
-        f"👆 Кликов: <b>{user.get('clicks', 0)}</b>\n"
-        f"🎁 NFT: <b>{len(user.get('gifts', []))}</b>"
+        f"<b>ПРОФИЛЬ</b>\n\n"
+        f"<b>{user.get('first_name')}</b>\n"
+        f"{('@'+user['username']) if user.get('username') else '—'}\n\n"
+        f"Ириски: <b>{round(user.get('irises', 0), 1)}</b>\n"
+        f"Кликов: <b>{user.get('clicks', 0)}</b>\n"
+        f"NFT: <b>{len(user.get('gifts', []))}</b>"
     )
     bot.send_message(message.chat.id, text, parse_mode='HTML')
 
@@ -532,14 +527,14 @@ def cmd_profile(message):
 def cmd_top(message):
     stats = load_stats()
     if not stats:
-        bot.send_message(message.chat.id, "🏆 Пока пусто."); return
+        bot.send_message(message.chat.id, "Пока пусто."); return
     sorted_stats = sorted(stats.items(), key=lambda x: x[1].get('irises', 0), reverse=True)[:15]
-    text = "🏆 <b>ТОП</b>\n\n"
+    text = "<b>ТОП</b>\n\n"
     for i, (uid, data) in enumerate(sorted_stats, 1):
         name = data.get('first_name') or 'Аноним'
         if data.get('username'): name = f"@{data['username']}"
         medal = '🥇' if i==1 else '🥈' if i==2 else '🥉' if i==3 else f'<b>{i}.</b>'
-        text += f"{medal} {name} — {round(data.get('irises', 0), 1)} 🍬\n"
+        text += f"{medal} {name} — {round(data.get('irises', 0), 1)}\n"
     bot.send_message(message.chat.id, text, parse_mode='HTML')
 
 def set_commands():
