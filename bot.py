@@ -143,17 +143,36 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(data, ensure_ascii=False).encode())
 
     def send_html(self):
+        paths = [
+            'public/index.html',
+            'index.html',
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), 'public', 'index.html'),
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index.html'),
+            os.path.join(os.getcwd(), 'public', 'index.html'),
+            os.path.join(os.getcwd(), 'index.html'),
+        ]
+        for path in paths:
+            try:
+                with open(path, 'rb') as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(content)
+                print('HTML served from:', path)
+                return
+            except Exception:
+                continue
+        print('HTML not found in paths:', paths)
+        print('CWD:', os.getcwd())
         try:
-            with open('public/index.html', 'rb') as f:
-                content = f.read()
-            self.send_response(200)
-            self.send_header('Content-Type', 'text/html; charset=utf-8')
-            self.end_headers()
-            self.wfile.write(content)
+            print('Files in CWD:', os.listdir(os.getcwd()))
+            if os.path.exists('public'):
+                print('Files in public:', os.listdir('public'))
         except Exception as e:
-            print('HTML error:', e)
-            self.send_response(404)
-            self.end_headers()
+            print('List error:', e)
+        self.send_response(404)
+        self.end_headers()
 
     def read_body(self):
         length = int(self.headers.get('Content-Length', 0))
@@ -161,7 +180,7 @@ class Handler(BaseHTTPRequestHandler):
         return json.loads(self.rfile.read(length).decode())
 
     def do_GET(self):
-        if self.path == '/' or self.path.startswith('/index.html'):
+        if self.path == '/' or self.path.startswith('/index.html') or self.path.startswith('/?'):
             self.send_html(); return
 
         if self.path == '/api/top':
