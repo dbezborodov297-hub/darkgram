@@ -22,9 +22,22 @@ DUEL_NOAIM_CHANCE = 0.6
 MAFIA_MIN_PLAYERS = 4
 MAFIA_MAX_PLAYERS = 50
 MAFIA_NIGHT_TIME = 60
-MAFIA_VOTE_TIME = 90
+MAFIA_VOTE_TIME = 45
 
 TOKEN = '8883984473:AAF12ux76ov704A-CDbFAbBoDWp1rr3j_4k'
+
+DISTRACT_MESSAGES = [
+    "🎭 Сделал отвлекающий маневр, сбил прицел соперника!",
+    "💨 Резко ушёл в сторону — соперник потерял цель!",
+    "🪞 Бросил зеркальце — прицел сбит!",
+    "🌫 Выпустил дымовую шашку — соперник ничего не видит!",
+    "🎪 Сделал сальто — враг растерялся!",
+    "🦅 Взлетел на секунду — прицел сорван!",
+    "🎯 Бросил песок в глаза — соперник промахнётся!",
+    "🌀 Резкий кульбит — соперник целится в пустоту!",
+    "🎺 Громко крикнул — враг дёрнулся!",
+    "🌟 Ослепил вспышкой — прицел сбит!",
+]
 
 def load_json(filename, default):
     if not os.path.exists(filename):
@@ -179,19 +192,15 @@ def cmd_help(message):
         f"💬 <b>ПОМОЩЬ</b>\n\n"
         f"⚔️ <b>Дуэли:</b>\n"
         f"В группе ответь на сообщение игрока и напиши /duel\n"
-        f"Кнопки: 🔫 Выстрел / 🎯 Прицелиться\n"
-        f"У каждого 100 HP. Кто первый снял — победил.\n\n"
+        f"Кнопки: 🔫 Выстрел / 🎯 Прицелиться / 🎭 Отвлечь\n"
+        f"У каждого 100 HP. Кто первый снял — победил.\n"
+        f"🎭 Отвлечь — сбивает прицел сопернику!\n\n"
         f"🎭 <b>Мафия:</b>\n"
         f"В группе напиши /mafia\n"
         f"Жми 🎭 Присоединиться в лобби\n"
         f"Хост запускает ▶️ Начать игру (минимум 4)\n"
         f"Роли приходят в личку 💌\n"
-        f"Ночью действуй, днём голосуй 🗳️\n\n"
-        f"<b>Команды:</b>\n"
-        f"/profile — профиль 👤\n"
-        f"/top — топ по победам 🏆\n"
-        f"/duel — вызов на дуэль ⚔️\n"
-        f"/mafia — новая игра 🎭"
+        f"Ночью действуй (60 сек), днём голосуй (45 сек) 🗳️"
     )
     bot.send_message(message.chat.id, text, parse_mode='HTML')
 
@@ -282,7 +291,8 @@ def cmd_duel(message):
         'p2_aim': False,
         'turn': str(message.from_user.id),
         'status': 'pending',
-        'created': int(time.time())
+        'created': int(time.time()),
+        'last_action_msg': ''
     }
     save_duel(message.chat.id, duel)
     kb = types.InlineKeyboardMarkup(row_width=2)
@@ -300,10 +310,11 @@ def cmd_duel(message):
     )
 
 def duel_kb(duel):
-    kb = types.InlineKeyboardMarkup(row_width=2)
+    kb = types.InlineKeyboardMarkup(row_width=3)
     kb.add(
         types.InlineKeyboardButton(text='🔫 Выстрел', callback_data='duel_shoot'),
-        types.InlineKeyboardButton(text='🎯 Прицелиться', callback_data='duel_aim')
+        types.InlineKeyboardButton(text='🎯 Прицел', callback_data='duel_aim'),
+        types.InlineKeyboardButton(text='🎭 Отвлечь', callback_data='duel_distract')
     )
     return kb
 
@@ -311,12 +322,15 @@ def duel_status_text(duel):
     p1_aim = ' 🎯' if duel['p1_aim'] else ''
     p2_aim = ' 🎯' if duel['p2_aim'] else ''
     turn_name = duel['p1_name'] if duel['turn']==duel['p1_id'] else duel['p2_name']
-    return (
+    text = (
         f"⚔️ <b>ДУЭЛЬ</b>\n\n"
         f"🥷 <b>{duel['p1_name']}</b>: {duel['p1_hp']} HP{p1_aim}\n"
         f"🥷 <b>{duel['p2_name']}</b>: {duel['p2_hp']} HP{p2_aim}\n\n"
         f"🎯 Ход: <b>{turn_name}</b>"
     )
+    if duel.get('last_action_msg'):
+        text += f"\n\n{duel['last_action_msg']}"
+    return text
 
 def next_turn(duel):
     duel['turn'] = duel['p2_id'] if duel['turn'] == duel['p1_id'] else duel['p1_id']
@@ -335,6 +349,7 @@ def duel_cb(call):
             bot.answer_callback_query(call.id, "❌ Не твой вызов")
             return
         duel['status'] = 'active'
+        duel['last_action_msg'] = ''
         save_duel(chat_id, duel)
         bot.edit_message_text(
             duel_status_text(duel),
@@ -368,6 +383,7 @@ def duel_cb(call):
             duel['p1_aim'] = True
         else:
             duel['p2_aim'] = True
+        duel['last_action_msg'] = "🎯 Игрок прицелился!"
         next_turn(duel)
         save_duel(chat_id, duel)
         bot.edit_message_text(
@@ -378,6 +394,32 @@ def duel_cb(call):
             reply_markup=duel_kb(duel)
         )
         bot.answer_callback_query(call.id, "🎯 Прицел!")
+        return
+
+    if call.data == 'duel_distract':
+        # Сбиваем прицел сопернику
+        if uid == duel['p1_id']:
+            had_aim = duel['p2_aim']
+            duel['p2_aim'] = False
+        else:
+            had_aim = duel['p1_aim']
+            duel['p1_aim'] = False
+        msg = random.choice(DISTRACT_MESSAGES)
+        if had_aim:
+            msg += "\n💥 Прицел соперника сбит!"
+        else:
+            msg += "\n🤷 У соперника не было прицела — но он отвлёкся."
+        duel['last_action_msg'] = msg
+        next_turn(duel)
+        save_duel(chat_id, duel)
+        bot.edit_message_text(
+            duel_status_text(duel),
+            chat_id=chat_id,
+            message_id=call.message.message_id,
+            parse_mode='HTML',
+            reply_markup=duel_kb(duel)
+        )
+        bot.answer_callback_query(call.id, "🎭 Отвлёк!")
         return
 
     if call.data == 'duel_shoot':
@@ -402,6 +444,8 @@ def duel_cb(call):
             else:
                 msg = "🌫 Промах!"
 
+        duel['last_action_msg'] = msg
+
         if duel['p1_hp'] <= 0 or duel['p2_hp'] <= 0:
             winner_id = duel['p1_id'] if duel['p2_hp'] <= 0 else duel['p2_id']
             loser_id = duel['p2_id'] if winner_id == duel['p1_id'] else duel['p1_id']
@@ -421,7 +465,7 @@ def duel_cb(call):
         next_turn(duel)
         save_duel(chat_id, duel)
         bot.edit_message_text(
-            duel_status_text(duel) + f"\n\n{msg}",
+            duel_status_text(duel),
             chat_id=chat_id,
             message_id=call.message.message_id,
             parse_mode='HTML',
@@ -471,6 +515,7 @@ def cmd_mafia(message):
         'day': 0,
         'night_actions': {},
         'votes': {},
+        'vote_msg_id': None,
         'log': []
     }
     game['players'][str(message.from_user.id)] = {
@@ -520,7 +565,7 @@ def mafia_lobby_cb(call):
             bot.answer_callback_query(call.id, "❌ Ты не в игре")
             return
         if uid == game['host_id']:
-            bot.answer_callback_query(call.id, "❌ Хост не может выйти. Отмени игру.")
+            bot.answer_callback_query(call.id, "❌ Хост не может выйти")
             return
         del game['players'][uid]
         save_mafia_game(chat_id, game)
@@ -584,8 +629,9 @@ def start_night(chat_id):
     game['day'] += 1
     game['night_actions'] = {}
     game['votes'] = {}
+    game['vote_msg_id'] = None
     save_mafia_game(chat_id, game)
-    bot.send_message(chat_id, f"🌙 <b>НОЧЬ {game['day']}</b>\n\nВсе засыпают... 💤\nНочные роли — действуйте в личке 💌", parse_mode='HTML')
+    bot.send_message(chat_id, f"🌙 <b>НОЧЬ {game['day']}</b>\n\nВсе засыпают... 💤\n⏱ 60 секунд\nНочные роли — действуйте в личке 💌", parse_mode='HTML')
     for uid, p in game['players'].items():
         if not p['alive']: continue
         role = p['role']
@@ -596,20 +642,23 @@ def start_night(chat_id):
                     if not tp['alive']: continue
                     if tp['role'] == 'mafia': continue
                     kb.add(types.InlineKeyboardButton(text=f"🔪 {tp['name']}", callback_data=f'mafia_kill_{tuid}'))
-                bot.send_message(int(uid), "🔪 Выбери жертву:", reply_markup=kb)
+                if kb.keyboard:
+                    bot.send_message(int(uid), "🔪 Выбери жертву:", reply_markup=kb)
             elif role == 'doctor':
                 kb = types.InlineKeyboardMarkup(row_width=2)
                 for tuid, tp in game['players'].items():
                     if not tp['alive']: continue
                     kb.add(types.InlineKeyboardButton(text=f"💉 {tp['name']}", callback_data=f'mafia_heal_{tuid}'))
-                bot.send_message(int(uid), "💉 Кого лечить?", reply_markup=kb)
+                if kb.keyboard:
+                    bot.send_message(int(uid), "💉 Кого лечить?", reply_markup=kb)
             elif role == 'sheriff':
                 kb = types.InlineKeyboardMarkup(row_width=2)
                 for tuid, tp in game['players'].items():
                     if not tp['alive']: continue
                     if tuid == uid: continue
                     kb.add(types.InlineKeyboardButton(text=f"🔍 {tp['name']}", callback_data=f'mafia_check_{tuid}'))
-                bot.send_message(int(uid), "🔍 Кого проверить?", reply_markup=kb)
+                if kb.keyboard:
+                    bot.send_message(int(uid), "🔍 Кого проверить?", reply_markup=kb)
         except: pass
     threading.Timer(MAFIA_NIGHT_TIME, end_night, args=[chat_id]).start()
 
@@ -627,6 +676,12 @@ def mafia_night_cb(call):
         p = game['players'].get(uid)
         if not p or p.get('role') != action_to_role(action):
             bot.answer_callback_query(call.id, "❌ Не твоя роль")
+            return
+        if not p.get('alive'):
+            bot.answer_callback_query(call.id, "💀 Ты мёртв")
+            return
+        if target_id not in game['players'] or not game['players'][target_id].get('alive'):
+            bot.answer_callback_query(call.id, "❌ Цель мертва")
             return
         game['night_actions'][action] = target_id
         save_mafia_game(call.message.chat.id, game)
@@ -689,19 +744,40 @@ def end_night(chat_id):
         del_mafia(chat_id)
         return
 
-    start_vote(chat_id)
+    threading.Timer(2.0, start_vote, args=[chat_id]).start()
+
+def build_vote_text(game):
+    votes = game.get('votes', {})
+    counts = {}
+    for t in votes.values():
+        counts[t] = counts.get(t, 0) + 1
+    text = "🗳️ <b>ГОЛОСОВАНИЕ</b>\n\n⏱ 45 секунд\n\n<b>Голоса:</b>\n"
+    for uid, p in game['players'].items():
+        if not p['alive']: continue
+        cnt = counts.get(uid, 0)
+        bar = '█' * cnt if cnt > 0 else '·'
+        text += f"• {p['name']} — {cnt} {bar}\n"
+    text += f"\nВсего голосов: {len(votes)}"
+    return text
 
 def start_vote(chat_id):
     game = get_mafia(chat_id)
     if not game: return
     game['status'] = 'vote'
     game['votes'] = {}
+    game['vote_msg_id'] = None
     save_mafia_game(chat_id, game)
     kb = types.InlineKeyboardMarkup(row_width=2)
     for uid, p in game['players'].items():
         if p['alive']:
             kb.add(types.InlineKeyboardButton(text=f"🗳️ {p['name']}", callback_data=f'vote_{uid}'))
-    bot.send_message(chat_id, f"🗳️ <b>ГОЛОСОВАНИЕ</b>\n\nКого казнить?\n⏱ У всех {MAFIA_VOTE_TIME} сек.", reply_markup=kb, parse_mode='HTML')
+    if not kb.keyboard:
+        bot.send_message(chat_id, "🤷 Все мертвы. Игра завершена.")
+        del_mafia(chat_id)
+        return
+    msg = bot.send_message(chat_id, build_vote_text(game), reply_markup=kb, parse_mode='HTML')
+    game['vote_msg_id'] = msg.message_id
+    save_mafia_game(chat_id, game)
     threading.Timer(MAFIA_VOTE_TIME, end_vote, args=[chat_id]).start()
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith('vote_'))
@@ -715,8 +791,25 @@ def vote_cb(call):
         bot.answer_callback_query(call.id, "💀 Ты мёртв")
         return
     target = call.data.replace('vote_','')
+    if target not in game['players'] or not game['players'][target].get('alive'):
+        bot.answer_callback_query(call.id, "❌ Недоступно")
+        return
     game['votes'][uid] = target
     save_mafia_game(call.message.chat.id, game)
+    # Обновляем сообщение с голосами
+    try:
+        kb = types.InlineKeyboardMarkup(row_width=2)
+        for tuid, tp in game['players'].items():
+            if tp['alive']:
+                kb.add(types.InlineKeyboardButton(text=f"🗳️ {tp['name']}", callback_data=f'vote_{tuid}'))
+        bot.edit_message_text(
+            build_vote_text(game),
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            parse_mode='HTML',
+            reply_markup=kb
+        )
+    except: pass
     bot.answer_callback_query(call.id, f"🗳️ Голос: {game['players'][target]['name']}")
 
 def end_vote(chat_id):
