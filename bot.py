@@ -9,7 +9,6 @@ from telebot import types
 
 STATS_FILE = 'stats.json'
 DUELS_FILE = 'duels.json'
-MAFIA_FILE = 'mafia.json'
 BOSS_FILE = 'boss.json'
 GROUPS_FILE = 'groups.json'
 
@@ -21,13 +20,6 @@ DUEL_SHOOT_MAX = 45
 DUEL_AIM_BONUS = 0.9
 DUEL_NOAIM_CHANCE = 0.6
 DUEL_ACCEPT_TIMEOUT = 300
-
-MAFIA_MIN_PLAYERS = 4
-MAFIA_MAX_PLAYERS = 50
-MAFIA_NIGHT_TIME = 60
-MAFIA_VOTE_TIME = 45
-MAFIA_LOBBY_TIME = 230
-MAFIA_TIMER_UPDATE = 15
 
 BOSS_MAX_HP = 2000
 BOSS_DMG_MIN = 50
@@ -85,8 +77,6 @@ def load_stats(): return load_json(STATS_FILE, {})
 def save_stats(d): save_json(STATS_FILE, d)
 def load_duels(): return load_json(DUELS_FILE, {})
 def save_duels(d): save_json(DUELS_FILE, d)
-def load_mafia(): return load_json(MAFIA_FILE, {})
-def save_mafia(d): save_json(MAFIA_FILE, d)
 def load_boss(): return load_json(BOSS_FILE, {})
 def save_boss(d): save_json(BOSS_FILE, d)
 def load_groups(): return load_json(GROUPS_FILE, {})
@@ -98,10 +88,7 @@ def remember_group(chat):
             groups = load_groups()
             cid = str(chat.id)
             if cid not in groups:
-                groups[cid] = {
-                    'title': chat.title or 'Группа',
-                    'added': int(time.time())
-                }
+                groups[cid] = {'title': chat.title or 'Группа', 'added': int(time.time())}
                 save_groups(groups)
     except:
         pass
@@ -121,19 +108,15 @@ def update_username(user_id, first_name='', username=''):
         if key in stats:
             changed = False
             if stats[key].get('username') != uname:
-                stats[key]['username'] = uname
-                changed = True
+                stats[key]['username'] = uname; changed = True
             if stats[key].get('first_name') != fname:
-                stats[key]['first_name'] = fname
-                changed = True
-            if changed:
-                save_stats(stats)
+                stats[key]['first_name'] = fname; changed = True
+            if changed: save_stats(stats)
         else:
             stats[key] = {
                 'first_name': fname, 'username': uname,
                 'wins': 0, 'losses': 0,
-                'mafia_wins': 0, 'mafia_losses': 0,
-                'duels_played': 0, 'mafia_played': 0,
+                'duels_played': 0,
                 'boss_wins': 0, 'boss_losses': 0,
                 'eggs': 0, 'max_hp': BOSS_PLAYER_MIN_HP
             }
@@ -149,18 +132,16 @@ def get_player(user_id, first_name='Аноним', username=''):
             'first_name': first_name or 'Аноним',
             'username': username or '',
             'wins': 0, 'losses': 0,
-            'mafia_wins': 0, 'mafia_losses': 0,
-            'duels_played': 0, 'mafia_played': 0,
+            'duels_played': 0,
             'boss_wins': 0, 'boss_losses': 0,
-            'eggs': 0,
-            'max_hp': BOSS_PLAYER_MIN_HP
+            'eggs': 0, 'max_hp': BOSS_PLAYER_MIN_HP
         }
     else:
         stats[key]['first_name'] = first_name or stats[key].get('first_name', 'Аноним')
         stats[key]['username'] = username or stats[key].get('username', '')
         defaults = {
-            'wins':0,'losses':0,'mafia_wins':0,'mafia_losses':0,
-            'duels_played':0,'mafia_played':0,'boss_wins':0,'boss_losses':0,
+            'wins':0,'losses':0,'duels_played':0,
+            'boss_wins':0,'boss_losses':0,
             'eggs':0,'max_hp':BOSS_PLAYER_MIN_HP
         }
         for f, v in defaults.items():
@@ -179,12 +160,6 @@ def add_duel_win(user_id):
 def add_duel_loss(user_id):
     p = get_player(user_id); p['losses'] += 1; p['duels_played'] += 1; update_player(user_id, p)
 
-def add_mafia_win(user_id):
-    p = get_player(user_id); p['mafia_wins'] += 1; p['mafia_played'] += 1; update_player(user_id, p)
-
-def add_mafia_loss(user_id):
-    p = get_player(user_id); p['mafia_losses'] += 1; p['mafia_played'] += 1; update_player(user_id, p)
-
 def add_boss_win(user_id, eggs=0):
     p = get_player(user_id); p['boss_wins'] += 1; p['eggs'] = p.get('eggs',0) + eggs; update_player(user_id, p)
 
@@ -199,14 +174,6 @@ def del_duel(chat_id):
     if str(chat_id) in d:
         del d[str(chat_id)]; save_duels(d)
 
-def get_mafia(chat_id): return load_mafia().get(str(chat_id))
-def save_mafia_game(chat_id, game):
-    m = load_mafia(); m[str(chat_id)] = game; save_mafia(m)
-def del_mafia(chat_id):
-    m = load_mafia()
-    if str(chat_id) in m:
-        del m[str(chat_id)]; save_mafia(m)
-
 def get_boss(chat_id): return load_boss().get(str(chat_id))
 def save_boss_game(chat_id, game):
     b = load_boss(); b[str(chat_id)] = game; save_boss(b)
@@ -214,27 +181,6 @@ def del_boss(chat_id):
     b = load_boss()
     if str(chat_id) in b:
         del b[str(chat_id)]; save_boss(b)
-
-def assign_roles(players):
-    ids = list(players.keys())
-    count = len(ids)
-    random.shuffle(ids)
-    if count <= 5: mafia_count = 1
-    elif count <= 8: mafia_count = 2
-    elif count <= 12: mafia_count = 3
-    elif count <= 20: mafia_count = 4
-    else: mafia_count = max(1, count // 5)
-    roles = ['mafia'] * mafia_count
-    if count >= 4: roles.append('doctor')
-    if count >= 4: roles.append('sheriff')
-    while len(roles) < count: roles.append('civilian')
-    random.shuffle(roles)
-    for i, uid in enumerate(ids):
-        players[uid]['role'] = roles[i]
-    return players
-
-def role_ru(role):
-    return {'mafia':'🔪 Мафия','doctor':'💉 Доктор','sheriff':'🔍 Шериф','civilian':'👤 Мирный житель'}.get(role, role)
 
 def fmt_time(sec):
     sec = max(0, int(sec))
@@ -282,12 +228,9 @@ def main_menu():
     )
     kb.add(
         types.InlineKeyboardButton(text='⚔️ Дуэль', callback_data='menu_duel'),
-        types.InlineKeyboardButton(text='🎭 Мафия', callback_data='menu_mafia')
+        types.InlineKeyboardButton(text='🐉 Босс', callback_data='menu_boss')
     )
-    kb.add(
-        types.InlineKeyboardButton(text='🐉 Босс', callback_data='menu_boss'),
-        types.InlineKeyboardButton(text='🥚 Яйца', callback_data='menu_eggs')
-    )
+    kb.add(types.InlineKeyboardButton(text='🥚 Яйца', callback_data='menu_eggs'))
     kb.add(types.InlineKeyboardButton(text='💬 Помощь', callback_data='menu_help'))
     return kb
 
@@ -452,7 +395,6 @@ def cmd_start(message):
         f"🎭 <b>DARKGRAM</b> 🎭\n\n"
         f"Привет, <b>{message.from_user.first_name}</b>!\n\n"
         f"⚔️ Дуэли 1 на 1\n"
-        f"🎭 Мафия 4-50 игроков\n"
         f"🐉 Босс 2-4 игрока\n"
         f"🥚 Яйца → HP\n"
         f"🏆 Топ по победам\n\n"
@@ -467,7 +409,6 @@ def cmd_help(message):
     text = (
         f"💬 <b>ПОМОЩЬ</b>\n\n"
         f"⚔️ <b>Дуэли:</b> /duel в ответ на сообщение\n"
-        f"🎭 <b>Мафия:</b> /mafia в группе (4-50)\n"
         f"🐉 <b>Босс:</b> /boss в группе (2-4)\n\n"
         f"🏏 <b>Бой с боссом:</b>\n"
         f"🔫 Атака — 40-90\n"
@@ -494,13 +435,10 @@ def cmd_profile(message):
     p = get_player(uid, message.from_user.first_name, message.from_user.username)
     total = p['wins'] + p['losses']
     wr = round(p['wins'] / total * 100) if total else 0
-    mafia_total = p['mafia_wins'] + p['mafia_losses']
-    mafia_wr = round(p['mafia_wins'] / mafia_total * 100) if mafia_total else 0
     text = (
         f"👤 <b>ПРОФИЛЬ</b>\n\n"
         f"<b>{display_name(p)}</b>\n\n"
         f"⚔️ <b>Дуэли:</b> 🏆 {p['wins']} / 💀 {p['losses']} ({wr}%)\n"
-        f"🎭 <b>Мафия:</b> 🏆 {p['mafia_wins']} / 💀 {p['mafia_losses']} ({mafia_wr}%)\n"
         f"🐉 <b>Босс:</b> 🏆 {p.get('boss_wins',0)} / 💀 {p.get('boss_losses',0)}\n\n"
         f"🥚 Яйца: <b>{p.get('eggs',0)}</b>\n"
         f"❤️ Макс. HP: <b>{p.get('max_hp', BOSS_PLAYER_MIN_HP)}</b>"
@@ -564,6 +502,7 @@ def eggs_buy_cb(call):
     bot.answer_callback_query(call.id, f"✅ +{add_hp} HP")
     safe_edit(call.message.chat.id, call.message.message_id, eggs_menu_text(uid), eggs_menu_kb())
 
+# ===== БОСС =====
 def boss_lobby_kb(is_admin=False):
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(
@@ -609,14 +548,12 @@ def cmd_boss(message):
         'boss_name': boss_name,
         'boss_hp': BOSS_MAX_HP,
         'players': {},
-        'order': [],
         'turn_idx': 0,
         'status': 'lobby',
         'deadline': now + BOSS_LOBBY_TIME,
         'lobby_msg_id': None,
         'fight_msg_id': None,
-        'last_msg': '',
-        'log': []
+        'last_msg': ''
     }
     game['players'][str(message.from_user.id)] = {
         'name': message.from_user.first_name,
@@ -625,9 +562,9 @@ def cmd_boss(message):
         'max_hp': p.get('max_hp', BOSS_PLAYER_MIN_HP),
         'alive': True,
         'aim': False,
-        'dmg_done': 0
+        'dmg_done': 0,
+        'order': 0
     }
-    game['order'] = [str(message.from_user.id)]
     save_boss_game(message.chat.id, game)
     sent = bot.send_message(
         message.chat.id,
@@ -685,6 +622,7 @@ def boss_lobby_cb(call):
             bot.answer_callback_query(call.id, f"❌ Макс {BOSS_MAX_PLAYERS}")
             return
         p = get_player(uid, call.from_user.first_name, call.from_user.username)
+        order = max([pl.get('order', 0) for pl in game['players'].values()] + [0]) + 1
         game['players'][uid] = {
             'name': call.from_user.first_name,
             'username': call.from_user.username or '',
@@ -692,9 +630,9 @@ def boss_lobby_cb(call):
             'max_hp': p.get('max_hp', BOSS_PLAYER_MIN_HP),
             'alive': True,
             'aim': False,
-            'dmg_done': 0
+            'dmg_done': 0,
+            'order': order
         }
-        game['order'].append(uid)
         save_boss_game(chat_id, game)
         safe_edit(chat_id, msg_id, boss_lobby_text(game), boss_lobby_kb(is_admin))
         bot.answer_callback_query(call.id, "⚔️ В команде!")
@@ -706,10 +644,8 @@ def boss_lobby_cb(call):
             return
         was_host = (uid == game['host_id'])
         del game['players'][uid]
-        if uid in game['order']:
-            game['order'].remove(uid)
         if was_host and game['players']:
-            new_host_id = list(game['players'].keys())[0]
+            new_host_id = sorted(game['players'].keys(), key=lambda u: game['players'][u].get('order',0))[0]
             game['host_id'] = new_host_id
         elif not game['players']:
             del_boss(chat_id)
@@ -759,18 +695,21 @@ def boss_fight_kb():
     )
     return kb
 
+def get_alive_players_sorted(game):
+    """Живые игроки, отсортированные по порядку вступления."""
+    alive = [(uid, p) for uid, p in game['players'].items() if p['alive']]
+    alive.sort(key=lambda x: x[1].get('order', 0))
+    return alive
+
 def boss_fight_text(game):
-    alive_players = [(uid, p) for uid, p in game['players'].items() if p['alive']]
+    alive_players = get_alive_players_sorted(game)
     players_text = "\n".join([f"• {p['name']} — {p['hp']}/{p['max_hp']} HP{' 🎯' if p.get('aim') else ''}" for _, p in alive_players])
     if not players_text:
         players_text = "💀 Все погибли"
     turn_name = '?'
-    if game['order']:
-        idx = game.get('turn_idx', 0) % len(game['order'])
-        if idx < len(game['order']):
-            turn_uid = game['order'][idx]
-            if turn_uid in game['players']:
-                turn_name = game['players'][turn_uid]['name']
+    if alive_players:
+        idx = game.get('turn_idx', 0) % len(alive_players)
+        turn_name = alive_players[idx][1]['name']
     text = (
         f"🐉 <b>{game['boss_name']}</b>\n"
         f"❤️ HP босса: <b>{game['boss_hp']}/{BOSS_MAX_HP}</b>\n\n"
@@ -790,7 +729,6 @@ def start_boss_fight(chat_id):
     game['last_msg'] = 'Бой начался!'
     for uid in game['players']:
         game['players'][uid]['aim'] = False
-    game['order'] = [uid for uid in game['order'] if game['players'][uid]['alive']]
     save_boss_game(chat_id, game)
     try:
         msg = bot.send_message(
@@ -805,14 +743,17 @@ def start_boss_fight(chat_id):
         pass
 
 def next_boss_turn(game):
-    if not game['order']:
+    """Переходит к следующему ЖИВОМУ игроку."""
+    alive = get_alive_players_sorted(game)
+    if not alive:
         return
     game['turn_idx'] += 1
-    if game['turn_idx'] % len(game['order']) == 0 and game['turn_idx'] > 0:
+    # Если полный круг — босс бьёт
+    if game['turn_idx'] % len(alive) == 0:
         boss_attack(game)
 
 def boss_attack(game):
-    alive = [(uid, p) for uid, p in game['players'].items() if p['alive']]
+    alive = get_alive_players_sorted(game)
     if not alive:
         return
     target_uid, target = random.choice(alive)
@@ -835,11 +776,13 @@ def boss_fight_cb(call):
     if uid not in game['players'] or not game['players'][uid]['alive']:
         bot.answer_callback_query(call.id, "💀 Не можешь ходить")
         return
-    if not game['order']:
+    alive = get_alive_players_sorted(game)
+    if not alive:
         bot.answer_callback_query(call.id, "Ошибка")
         return
-    idx = game['turn_idx'] % len(game['order'])
-    if uid != game['order'][idx]:
+    idx = game['turn_idx'] % len(alive)
+    current_uid = alive[idx][0]
+    if uid != current_uid:
         bot.answer_callback_query(call.id, "🎯 Не твой ход")
         return
     p = game['players'][uid]
@@ -914,6 +857,7 @@ def check_boss_end(chat_id, game):
         return True
     return False
 
+# ===== ДУЭЛИ =====
 @bot.message_handler(commands=['duel'])
 def cmd_duel(message):
     remember_group(message.chat)
@@ -1119,491 +1063,6 @@ def duel_cb(call):
         safe_edit(chat_id, duel['msg_id'], duel_status_text(duel), duel_kb(duel))
         bot.answer_callback_query(call.id)
 
-def mafia_lobby_kb(is_admin=False):
-    kb = types.InlineKeyboardMarkup(row_width=2)
-    kb.add(
-        types.InlineKeyboardButton(text='🎭 Присоединиться', callback_data='mafia_join'),
-        types.InlineKeyboardButton(text='🚪 Выйти', callback_data='mafia_leave')
-    )
-    kb.add(
-        types.InlineKeyboardButton(text='▶️ Начать', callback_data='mafia_start'),
-        types.InlineKeyboardButton(text='❌ Отменить', callback_data='mafia_cancel')
-    )
-    if is_admin:
-        kb.add(types.InlineKeyboardButton(text='➕ Продлить 3:50', callback_data='mafia_extend'))
-    return kb
-
-def mafia_lobby_text(game):
-    players_list = "\n".join([f"• {p['name']}" for p in game['players'].values()])
-    left = game.get('deadline', 0) - int(time.time())
-    return (
-        f"🎭 <b>МАФИЯ — СБОР</b>\n\n"
-        f"👑 Хост: <b>{game['host_name']}</b>\n"
-        f"👥 {len(game['players'])}/{MAFIA_MAX_PLAYERS} (мин. {MAFIA_MIN_PLAYERS})\n"
-        f"⏱ До закрытия: <b>{fmt_time(left)}</b>\n\n"
-        f"<b>Игроки:</b>\n{players_list}"
-    )
-
-@bot.message_handler(commands=['mafia'])
-def cmd_mafia(message):
-    remember_group(message.chat)
-    if message.chat.type == 'private':
-        bot.send_message(message.chat.id, "🎭 Только в группах.")
-        return
-    update_username(message.from_user.id, message.from_user.first_name, message.from_user.username)
-    game = get_mafia(message.chat.id)
-    if game and game.get('status') not in ('finished',):
-        bot.send_message(message.chat.id, "🎭 Уже идёт.")
-        return
-    now = int(time.time())
-    game = {
-        'chat_id': message.chat.id,
-        'host_id': str(message.from_user.id),
-        'host_name': message.from_user.first_name,
-        'players': {},
-        'status': 'lobby',
-        'day': 0,
-        'night_actions': {},
-        'votes': {},
-        'vote_msg_id': None,
-        'lobby_msg_id': None,
-        'game_msg_id': None,
-        'deadline': now + MAFIA_LOBBY_TIME,
-        'log': []
-    }
-    game['players'][str(message.from_user.id)] = {
-        'name': message.from_user.first_name,
-        'username': message.from_user.username or '',
-        'alive': True,
-        'role': None
-    }
-    save_mafia_game(message.chat.id, game)
-    sent = bot.send_message(
-        message.chat.id,
-        mafia_lobby_text(game),
-        parse_mode='HTML',
-        reply_markup=mafia_lobby_kb(is_admin_id(message.from_user.id))
-    )
-    game['lobby_msg_id'] = sent.message_id
-    save_mafia_game(message.chat.id, game)
-    threading.Timer(MAFIA_LOBBY_TIME, mafia_lobby_timeout, args=[message.chat.id]).start()
-    threading.Timer(MAFIA_TIMER_UPDATE, mafia_lobby_tick, args=[message.chat.id]).start()
-
-def mafia_lobby_tick(chat_id):
-    game = get_mafia(chat_id)
-    if not game or game.get('status') != 'lobby':
-        return
-    left = game.get('deadline', 0) - int(time.time())
-    if left <= 0:
-        return
-    if game.get('lobby_msg_id'):
-        safe_edit(chat_id, game['lobby_msg_id'], mafia_lobby_text(game),
-                  mafia_lobby_kb(is_admin_id(game['host_id'])))
-    threading.Timer(MAFIA_TIMER_UPDATE, mafia_lobby_tick, args=[chat_id]).start()
-
-def mafia_lobby_timeout(chat_id):
-    game = get_mafia(chat_id)
-    if not game or game.get('status') != 'lobby':
-        return
-    count = len(game['players'])
-    if count >= MAFIA_MIN_PLAYERS:
-        start_mafia_game(chat_id)
-    else:
-        try:
-            bot.send_message(chat_id, f"⏱ Мало игроков ({count}). Закрыто.", parse_mode='HTML')
-        except:
-            pass
-        del_mafia(chat_id)
-
-@bot.callback_query_handler(func=lambda c: c.data.startswith('mafia_join') or c.data.startswith('mafia_leave') or c.data.startswith('mafia_start') or c.data.startswith('mafia_cancel') or c.data.startswith('mafia_extend'))
-def mafia_lobby_cb(call):
-    chat_id = call.message.chat.id
-    game = get_mafia(chat_id)
-    if not game or game.get('status') != 'lobby':
-        bot.answer_callback_query(call.id, "❌ Закрыто")
-        return
-    uid = str(call.from_user.id)
-    update_username(uid, call.from_user.first_name, call.from_user.username)
-    is_admin = is_admin_id(uid)
-    msg_id = game.get('lobby_msg_id') or call.message.message_id
-
-    if call.data == 'mafia_join':
-        if uid in game['players']:
-            bot.answer_callback_query(call.id, "✅ Уже в игре")
-            return
-        if len(game['players']) >= MAFIA_MAX_PLAYERS:
-            bot.answer_callback_query(call.id, f"❌ Макс {MAFIA_MAX_PLAYERS}")
-            return
-        game['players'][uid] = {
-            'name': call.from_user.first_name,
-            'username': call.from_user.username or '',
-            'alive': True,
-            'role': None
-        }
-        save_mafia_game(chat_id, game)
-        safe_edit(chat_id, msg_id, mafia_lobby_text(game), mafia_lobby_kb(is_admin))
-        bot.answer_callback_query(call.id, "🎭 В игре!")
-        return
-
-    if call.data == 'mafia_leave':
-        if uid not in game['players']:
-            bot.answer_callback_query(call.id, "❌ Не в игре")
-            return
-        was_host = (uid == game['host_id'])
-        del game['players'][uid]
-        if was_host and game['players']:
-            new_host_id = list(game['players'].keys())[0]
-            game['host_id'] = new_host_id
-            game['host_name'] = game['players'][new_host_id]['name']
-        elif not game['players']:
-            del_mafia(chat_id)
-            safe_edit(chat_id, msg_id, "❌ Закрыто.")
-            bot.answer_callback_query(call.id, "🚪")
-            return
-        save_mafia_game(chat_id, game)
-        safe_edit(chat_id, msg_id, mafia_lobby_text(game), mafia_lobby_kb(is_admin))
-        bot.answer_callback_query(call.id, "🚪 Вышел")
-        return
-
-    if call.data == 'mafia_start':
-        if uid != game['host_id'] and not is_admin:
-            bot.answer_callback_query(call.id, "❌ Только хост")
-            return
-        if len(game['players']) < MAFIA_MIN_PLAYERS:
-            bot.answer_callback_query(call.id, f"❌ Минимум {MAFIA_MIN_PLAYERS}")
-            return
-        bot.answer_callback_query(call.id, "🎭 Начинаем!")
-        start_mafia_game(chat_id)
-        return
-
-    if call.data == 'mafia_cancel':
-        if uid != game['host_id'] and not is_admin:
-            bot.answer_callback_query(call.id, "❌ Только хост")
-            return
-        del_mafia(chat_id)
-        safe_edit(chat_id, msg_id, "❌ Отменено.")
-        bot.answer_callback_query(call.id, "Отменено")
-        return
-
-    if call.data == 'mafia_extend':
-        if not is_admin:
-            bot.answer_callback_query(call.id, "❌ Только админ")
-            return
-        game['deadline'] = int(time.time()) + MAFIA_LOBBY_TIME
-        save_mafia_game(chat_id, game)
-        safe_edit(chat_id, msg_id, mafia_lobby_text(game), mafia_lobby_kb(is_admin))
-        bot.answer_callback_query(call.id, "➕ Продлено 3:50")
-
-def mafia_game_text(game):
-    players_list = []
-    for uid, p in game['players'].items():
-        status = "💀" if not p['alive'] else "❤️"
-        players_list.append(f"{status} {p['name']}")
-    players_text = "\n".join(players_list)
-    day = game.get('day', 0)
-    status = game.get('status', '')
-    if status == 'night':
-        stage = f"🌙 <b>НОЧЬ {day}</b>\n💤 Все засыпают... ⏱ 60 сек"
-    elif status == 'vote':
-        stage = f"🗳️ <b>ДЕНЬ {day}</b>\n🎯 Голосование: 45 сек"
-    else:
-        stage = f"☀️ <b>ДЕНЬ {day}</b>"
-    return f"🎭 <b>МАФИЯ</b>\n\n{stage}\n\n<b>Игроки:</b>\n{players_text}"
-
-def start_mafia_game(chat_id):
-    game = get_mafia(chat_id)
-    if not game:
-        return
-    assign_roles(game['players'])
-    game['status'] = 'roles'
-    save_mafia_game(chat_id, game)
-    try:
-        msg = bot.send_message(chat_id, mafia_game_text(game), parse_mode='HTML')
-        game['game_msg_id'] = msg.message_id
-        save_mafia_game(chat_id, game)
-    except:
-        pass
-    for uid, p in game['players'].items():
-        try:
-            role = p['role']
-            role_text = f"🎭 <b>ТВОЯ РОЛЬ: {role_ru(role)}</b>\n\n"
-            if role == 'mafia':
-                role_text += "🌙 Ночью выбирай жертву.\n☀️ Днём притворяйся мирным! 🤫"
-            elif role == 'doctor':
-                role_text += "🌙 Ночью лечи игроков.\nЕсли мафия выбрала того же — выживет! 💉"
-            elif role == 'sheriff':
-                role_text += "🌙 Ночью проверяй игроков. 🔍"
-            else:
-                role_text += "🌙 Ночью спишь.\n☀️ Днём голосуй против мафии 🗳️"
-            bot.send_message(int(uid), role_text, parse_mode='HTML')
-        except:
-            pass
-    threading.Timer(3.0, start_night, args=[chat_id]).start()
-
-def start_night(chat_id):
-    game = get_mafia(chat_id)
-    if not game or game.get('status') == 'finished':
-        return
-    game['status'] = 'night'
-    game['day'] += 1
-    game['night_actions'] = {}
-    game['votes'] = {}
-    game['vote_msg_id'] = None
-    save_mafia_game(chat_id, game)
-    if game.get('game_msg_id'):
-        safe_edit(chat_id, game['game_msg_id'], mafia_game_text(game))
-    for uid, p in game['players'].items():
-        if not p['alive']:
-            continue
-        role = p['role']
-        try:
-            if role == 'mafia':
-                kb = types.InlineKeyboardMarkup(row_width=2)
-                for tuid, tp in game['players'].items():
-                    if not tp['alive'] or tp['role'] == 'mafia':
-                        continue
-                    kb.add(types.InlineKeyboardButton(text=f"🔪 {tp['name']}", callback_data=f'mafia_kill_{tuid}'))
-                if kb.keyboard:
-                    bot.send_message(int(uid), "🔪 Выбери жертву:", reply_markup=kb)
-            elif role == 'doctor':
-                kb = types.InlineKeyboardMarkup(row_width=2)
-                for tuid, tp in game['players'].items():
-                    if not tp['alive']:
-                        continue
-                    kb.add(types.InlineKeyboardButton(text=f"💉 {tp['name']}", callback_data=f'mafia_heal_{tuid}'))
-                if kb.keyboard:
-                    bot.send_message(int(uid), "💉 Кого лечить?", reply_markup=kb)
-            elif role == 'sheriff':
-                kb = types.InlineKeyboardMarkup(row_width=2)
-                for tuid, tp in game['players'].items():
-                    if not tp['alive'] or tuid == uid:
-                        continue
-                    kb.add(types.InlineKeyboardButton(text=f"🔍 {tp['name']}", callback_data=f'mafia_check_{tuid}'))
-                if kb.keyboard:
-                    bot.send_message(int(uid), "🔍 Кого проверить?", reply_markup=kb)
-        except:
-            pass
-    threading.Timer(MAFIA_NIGHT_TIME, end_night, args=[chat_id]).start()
-
-@bot.callback_query_handler(func=lambda c: c.data.startswith('mafia_kill_') or c.data.startswith('mafia_heal_') or c.data.startswith('mafia_check_'))
-def mafia_night_cb(call):
-    try:
-        parts = call.data.split('_')
-        action = parts[1]
-        target_id = parts[2]
-        uid = str(call.from_user.id)
-        game = get_mafia(call.message.chat.id)
-        if not game or game.get('status') != 'night':
-            bot.answer_callback_query(call.id, "🌙 Не ночь")
-            return
-        p = game['players'].get(uid)
-        if not p or p.get('role') != action_to_role(action):
-            bot.answer_callback_query(call.id, "❌ Не твоя роль")
-            return
-        if not p.get('alive'):
-            bot.answer_callback_query(call.id, "💀 Мёртв")
-            return
-        if target_id not in game['players'] or not game['players'][target_id].get('alive'):
-            bot.answer_callback_query(call.id, "❌ Цель мертва")
-            return
-        game['night_actions'][action] = target_id
-        save_mafia_game(call.message.chat.id, game)
-        target_name = game['players'][target_id]['name']
-        if action == 'kill':
-            safe_edit(call.message.chat.id, call.message.message_id, f"🔪 Ты выбрал убить: {target_name}")
-            bot.answer_callback_query(call.id, "🔪")
-        elif action == 'heal':
-            safe_edit(call.message.chat.id, call.message.message_id, f"💉 Ты лечишь: {target_name}")
-            bot.answer_callback_query(call.id, "💉")
-        elif action == 'check':
-            is_mafia = (game['players'][target_id].get('role') == 'mafia')
-            safe_edit(call.message.chat.id, call.message.message_id,
-                f"🔍 Проверка: {target_name}\n\n{'🔪 МАФИЯ!' if is_mafia else '👤 не мафия'}")
-            bot.answer_callback_query(call.id, "🔍")
-    except:
-        bot.answer_callback_query(call.id, "Ошибка")
-
-def action_to_role(action):
-    return {'kill':'mafia','heal':'doctor','check':'sheriff'}.get(action)
-
-def end_night(chat_id):
-    game = get_mafia(chat_id)
-    if not game or game.get('status') != 'night':
-        return
-    kill_target = game['night_actions'].get('kill')
-    heal_target = game['night_actions'].get('heal')
-    killed_name = None
-    if kill_target and kill_target != heal_target:
-        if kill_target in game['players'] and game['players'][kill_target]['alive']:
-            game['players'][kill_target]['alive'] = False
-            killed_name = game['players'][kill_target]['name']
-    save_mafia_game(chat_id, game)
-
-    if game.get('game_msg_id'):
-        text = mafia_game_text(game)
-        if killed_name:
-            text += f"\n\n💀 Убит: <b>{killed_name}</b>"
-        else:
-            text += "\n\n☀️ Никто не погиб! 💉"
-        safe_edit(chat_id, game['game_msg_id'], text)
-
-    alive = [u for u,p in game['players'].items() if p['alive']]
-    alive_mafia = [u for u in alive if game['players'][u]['role'] == 'mafia']
-    alive_civ = [u for u in alive if game['players'][u]['role'] != 'mafia']
-    if not alive_mafia:
-        for uid, p in game['players'].items():
-            if p['role'] == 'mafia':
-                add_mafia_loss(uid)
-            else:
-                add_mafia_win(uid)
-        if game.get('game_msg_id'):
-            safe_edit(chat_id, game['game_msg_id'], "🏆 <b>МИРНЫЕ ПОБЕДИЛИ!</b>")
-        del_mafia(chat_id)
-        return
-    if len(alive_mafia) >= len(alive_civ):
-        for uid, p in game['players'].items():
-            if p['role'] == 'mafia':
-                add_mafia_win(uid)
-            else:
-                add_mafia_loss(uid)
-        if game.get('game_msg_id'):
-            safe_edit(chat_id, game['game_msg_id'], "🔪 <b>МАФИЯ ПОБЕДИЛА!</b>")
-        del_mafia(chat_id)
-        return
-    threading.Timer(2.0, start_vote, args=[chat_id]).start()
-
-def build_vote_text(game):
-    votes = game.get('votes', {})
-    counts = {}
-    for t in votes.values():
-        counts[t] = counts.get(t, 0) + 1
-    text = "🗳️ <b>ГОЛОСОВАНИЕ</b>\n\n⏱ 45 сек\n\n<b>Голоса:</b>\n"
-    for uid, p in game['players'].items():
-        if not p['alive']:
-            continue
-        cnt = counts.get(uid, 0)
-        text += f"• {p['name']} — {cnt} {'█'*cnt if cnt else '·'}\n"
-    text += f"\nВсего: {len(votes)}"
-    return text
-
-def start_vote(chat_id):
-    game = get_mafia(chat_id)
-    if not game:
-        return
-    game['status'] = 'vote'
-    game['votes'] = {}
-    save_mafia_game(chat_id, game)
-    kb = types.InlineKeyboardMarkup(row_width=2)
-    for uid, p in game['players'].items():
-        if p['alive']:
-            kb.add(types.InlineKeyboardButton(text=f"🗳️ {p['name']}", callback_data=f'vote_{uid}'))
-    if not kb.keyboard:
-        if game.get('game_msg_id'):
-            safe_edit(chat_id, game['game_msg_id'], "🤷 Все мертвы.")
-        del_mafia(chat_id)
-        return
-    if game.get('game_msg_id'):
-        safe_edit(chat_id, game['game_msg_id'], build_vote_text(game), kb)
-        game['vote_msg_id'] = game['game_msg_id']
-    else:
-        msg = bot.send_message(chat_id, build_vote_text(game), reply_markup=kb, parse_mode='HTML')
-        game['vote_msg_id'] = msg.message_id
-    save_mafia_game(chat_id, game)
-    threading.Timer(MAFIA_VOTE_TIME, end_vote, args=[chat_id]).start()
-
-@bot.callback_query_handler(func=lambda c: c.data.startswith('vote_'))
-def vote_cb(call):
-    game = get_mafia(call.message.chat.id)
-    if not game or game.get('status') != 'vote':
-        bot.answer_callback_query(call.id, "🗳️ Закрыто")
-        return
-    uid = str(call.from_user.id)
-    if not game['players'].get(uid, {}).get('alive'):
-        bot.answer_callback_query(call.id, "💀 Мёртв")
-        return
-    target = call.data.replace('vote_','')
-    if target not in game['players'] or not game['players'][target].get('alive'):
-        bot.answer_callback_query(call.id, "❌ Недоступно")
-        return
-    game['votes'][uid] = target
-    save_mafia_game(call.message.chat.id, game)
-    try:
-        kb = types.InlineKeyboardMarkup(row_width=2)
-        for tuid, tp in game['players'].items():
-            if tp['alive']:
-                kb.add(types.InlineKeyboardButton(text=f"🗳️ {tp['name']}", callback_data=f'vote_{tuid}'))
-        safe_edit(call.message.chat.id, call.message.message_id, build_vote_text(game), kb)
-    except:
-        pass
-    bot.answer_callback_query(call.id, f"🗳️ {game['players'][target]['name']}")
-
-def end_vote(chat_id):
-    game = get_mafia(chat_id)
-    if not game or game.get('status') != 'vote':
-        return
-    votes = game['votes']
-    if not votes:
-        if game.get('game_msg_id'):
-            safe_edit(chat_id, game['game_msg_id'], "🤷 Никто не голосовал. Ночь.")
-        threading.Timer(2.0, start_night, args=[chat_id]).start()
-        return
-    counts = {}
-    for t in votes.values():
-        counts[t] = counts.get(t, 0) + 1
-    max_v = max(counts.values())
-    top = [t for t, c in counts.items() if c == max_v]
-    if len(top) > 1:
-        if game.get('game_msg_id'):
-            safe_edit(chat_id, game['game_msg_id'], "🤝 Ничья. Ночь.")
-        threading.Timer(2.0, start_night, args=[chat_id]).start()
-        return
-    target = top[0]
-    target_name = game['players'][target]['name']
-    target_role = game['players'][target]['role']
-    game['players'][target]['alive'] = False
-    save_mafia_game(chat_id, game)
-    if game.get('game_msg_id'):
-        safe_edit(chat_id, game['game_msg_id'],
-            f"⚖️ <b>КАЗНЁН: {target_name}</b>\n🎭 {role_ru(target_role)}")
-
-    alive = [u for u,p in game['players'].items() if p['alive']]
-    alive_mafia = [u for u in alive if game['players'][u]['role'] == 'mafia']
-    alive_civ = [u for u in alive if game['players'][u]['role'] != 'mafia']
-    if not alive_mafia:
-        for uid, p in game['players'].items():
-            if p['role'] == 'mafia':
-                add_mafia_loss(uid)
-            else:
-                add_mafia_win(uid)
-        if game.get('game_msg_id'):
-            safe_edit(chat_id, game['game_msg_id'], "🏆 <b>МИРНЫЕ ПОБЕДИЛИ!</b>")
-        del_mafia(chat_id)
-        return
-    if len(alive_mafia) >= len(alive_civ):
-        for uid, p in game['players'].items():
-            if p['role'] == 'mafia':
-                add_mafia_win(uid)
-            else:
-                add_mafia_loss(uid)
-        if game.get('game_msg_id'):
-            safe_edit(chat_id, game['game_msg_id'], "🔪 <b>МАФИЯ ПОБЕДИЛА!</b>")
-        del_mafia(chat_id)
-        return
-    threading.Timer(2.0, start_night, args=[chat_id]).start()
-
-@bot.message_handler(commands=['stopgame'])
-def cmd_stopgame(message):
-    if message.chat.type == 'private':
-        return
-    game = get_mafia(message.chat.id)
-    if not game:
-        return
-    if str(message.from_user.id) != game['host_id'] and not is_admin_id(message.from_user.id):
-        bot.send_message(message.chat.id, "❌ Только хост или админ.")
-        return
-    del_mafia(message.chat.id)
-    bot.send_message(message.chat.id, "❌ Остановлено.")
-
 @bot.callback_query_handler(func=lambda c: c.data.startswith('menu_'))
 def menu_cb(call):
     data = call.data
@@ -1616,7 +1075,6 @@ def menu_cb(call):
         text = (
             f"👤 <b>ПРОФИЛЬ</b>\n\n<b>{display_name(p)}</b>\n\n"
             f"⚔️ Дуэли: 🏆 {p['wins']} / 💀 {p['losses']} ({wr}%)\n"
-            f"🎭 Мафия: 🏆 {p['mafia_wins']} / 💀 {p['mafia_losses']}\n"
             f"🐉 Босс: 🏆 {p.get('boss_wins',0)} / 💀 {p.get('boss_losses',0)}\n\n"
             f"🥚 Яйца: {p.get('eggs',0)}\n"
             f"❤️ Макс. HP: {p.get('max_hp', BOSS_PLAYER_MIN_HP)}"
@@ -1636,14 +1094,12 @@ def menu_cb(call):
         bot.send_message(call.message.chat.id, text or "🏆 Пусто", parse_mode='HTML')
     elif data == 'menu_duel':
         bot.send_message(call.message.chat.id, "⚔️ В группе ответь на сообщение игрока и напиши /duel")
-    elif data == 'menu_mafia':
-        bot.send_message(call.message.chat.id, "🎭 В группе напиши /mafia")
     elif data == 'menu_boss':
         bot.send_message(call.message.chat.id, "🐉 В группе напиши /boss")
     elif data == 'menu_eggs':
         bot.send_message(call.message.chat.id, eggs_menu_text(uid), parse_mode='HTML', reply_markup=eggs_menu_kb())
     elif data == 'menu_help':
-        bot.send_message(call.message.chat.id, "💬 Дуэли: /duel.\n🎭 Мафия: /mafia.\n🐉 Босс: /boss.\n🥚 Яйца: /eggs.\n\n📢 /post_new — пост (админ)")
+        bot.send_message(call.message.chat.id, "💬 Дуэли: /duel.\n🐉 Босс: /boss.\n🥚 Яйца: /eggs.\n\n📢 /post_new — пост (админ)")
     elif data == 'menu_back':
         bot.send_message(call.message.chat.id, "🎭 Меню:", reply_markup=main_menu())
     bot.answer_callback_query(call.id)
@@ -1656,7 +1112,6 @@ def set_commands():
             types.BotCommand('profile', '👤 Профиль'),
             types.BotCommand('top', '🏆 Топ'),
             types.BotCommand('duel', '⚔️ Дуэль'),
-            types.BotCommand('mafia', '🎭 Мафия'),
             types.BotCommand('boss', '🐉 Босс'),
             types.BotCommand('eggs', '🥚 Яйца'),
         ]
