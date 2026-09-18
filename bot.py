@@ -1,4 +1,4 @@
- import telebot
+import telebot
 import json
 import os
 import time
@@ -93,7 +93,6 @@ def load_groups(): return load_json(GROUPS_FILE, {})
 def save_groups(d): save_json(GROUPS_FILE, d)
 
 def remember_group(chat):
-    """Запоминает группу/чат, где находится бот."""
     try:
         if chat.type in ('group', 'supergroup'):
             groups = load_groups()
@@ -292,16 +291,13 @@ def main_menu():
     kb.add(types.InlineKeyboardButton(text='💬 Помощь', callback_data='menu_help'))
     return kb
 
-# ===== ПОСТЫ / РАССЫЛКА =====
-pending_posts = {}  # user_id -> {'text':..., 'media_type':..., 'file_id':..., 'caption':...}
+pending_posts = {}
 
 @bot.message_handler(commands=['post_new'])
 def cmd_post_new(message):
     if not is_admin_id(message.from_user.id):
         return
     uid = message.from_user.id
-
-    # Если это ответ на сообщение — берём его
     if message.reply_to_message:
         src = message.reply_to_message
         post = extract_post_from_message(src)
@@ -309,21 +305,18 @@ def cmd_post_new(message):
             show_post_preview(message.chat.id, uid, post)
             return
         else:
-            bot.send_message(message.chat.id, "❌ Не могу взять это сообщение. Отправь текст/фото/видео.")
+            bot.send_message(message.chat.id, "❌ Не могу взять это сообщение.")
             return
-
-    # Иначе — просим отправить пост
     pending_posts[uid] = None
     bot.send_message(
         message.chat.id,
         "📝 <b>Создание поста</b>\n\n"
         "Отправь мне <b>текст</b> поста, или <b>фото/видео с подписью</b>.\n\n"
-        "Или ответь командой <code>/post_new</code> на любое сообщение, чтобы взять его как пост.",
+        "Или ответь командой <code>/post_new</code> на любое сообщение.",
         parse_mode='HTML'
     )
 
 def extract_post_from_message(msg):
-    """Достаёт пост из сообщения: текст, фото, видео."""
     try:
         post = {'text': '', 'media_type': None, 'file_id': None, 'caption': ''}
         if msg.text:
@@ -348,7 +341,6 @@ def extract_post_from_message(msg):
         return None
 
 def show_post_preview(chat_id, uid, post):
-    """Показывает превью и кнопки Опубликовать/Отмена."""
     pending_posts[uid] = post
     preview_text = "📢 <b>ПРЕВЬЮ ПОСТА</b>\n\n"
     if post.get('caption'):
@@ -366,14 +358,9 @@ def show_post_preview(chat_id, uid, post):
     )
     bot.send_message(chat_id, preview_text, parse_mode='HTML', reply_markup=kb)
 
-@bot.message_handler(content_types=['text', 'photo', 'video', 'document'], func=lambda m: m.from_user and is_admin_id(m.from_user.id) and pending_posts.get(m.from_user.id) is None and m.chat.type == 'private')
+@bot.message_handler(content_types=['text', 'photo', 'video', 'document'], func=lambda m: m.from_user and is_admin_id(m.from_user.id) and m.chat.type == 'private' and m.from_user.id in pending_posts and pending_posts.get(m.from_user.id) is None)
 def admin_sending_post(message):
-    """Ловим сообщение админа, если он в процессе создания поста."""
     uid = message.from_user.id
-    if uid not in pending_posts:
-        return
-    if pending_posts.get(uid) is not None:
-        return  # уже есть пост, ждём кнопку
     post = extract_post_from_message(message)
     if post:
         show_post_preview(message.chat.id, uid, post)
@@ -389,7 +376,6 @@ def post_confirm_cb(call):
         safe_edit(call.message.chat.id, call.message.message_id, "❌ Пост отменён.")
         bot.answer_callback_query(call.id, "Отменено")
         return
-
     post = pending_posts.pop(uid, None)
     if not post:
         bot.answer_callback_query(call.id, "❌ Пост потерялся")
@@ -399,14 +385,11 @@ def post_confirm_cb(call):
     threading.Thread(target=broadcast_post, args=[post, call.message.chat.id]).start()
 
 def broadcast_post(post, admin_chat_id):
-    """Рассылает пост в группы и в личку юзерам."""
     stats = load_stats()
     groups = load_groups()
     total = len(groups) + len(stats)
     sent_groups = 0
     sent_users = 0
-
-    # 1. В группы
     for cid in list(groups.keys()):
         try:
             send_post_to_chat(int(cid), post)
@@ -414,8 +397,6 @@ def broadcast_post(post, admin_chat_id):
             time.sleep(0.05)
         except:
             pass
-
-    # 2. В личку юзерам
     for uid in list(stats.keys()):
         try:
             send_post_to_chat(int(uid), post)
@@ -423,21 +404,19 @@ def broadcast_post(post, admin_chat_id):
             time.sleep(0.05)
         except:
             pass
-
     try:
         bot.send_message(
             admin_chat_id,
             f"✅ <b>Пост опубликован!</b>\n\n"
             f"📢 Группы: {sent_groups}/{len(groups)}\n"
             f"👥 Игроки: {sent_users}/{len(stats)}\n"
-            f"Всего отправлено: {sent_groups + sent_users}/{total}",
+            f"Всего: {sent_groups + sent_users}/{total}",
             parse_mode='HTML'
         )
     except:
         pass
 
 def send_post_to_chat(chat_id, post):
-    """Отправляет пост в чат с учётом медиа."""
     try:
         if post.get('media_type') == 'photo':
             bot.send_photo(chat_id, post['file_id'], caption=post.get('caption', ''), parse_mode='HTML')
@@ -456,9 +435,9 @@ def cmd_groups(message):
         return
     groups = load_groups()
     if not groups:
-        bot.send_message(message.chat.id, "📭 Групп пока нет. Добавь бота в группу.")
+        bot.send_message(message.chat.id, "📭 Групп пока нет.")
         return
-    text = f"📢 <b>Группы с ботом ({len(groups)}):</b>\n\n"
+    text = f"📢 <b>Группы ({len(groups)}):</b>\n\n"
     for cid, g in groups.items():
         text += f"• {g.get('title', 'Группа')} — <code>{cid}</code>\n"
     bot.send_message(message.chat.id, text, parse_mode='HTML')
@@ -585,7 +564,6 @@ def eggs_buy_cb(call):
     bot.answer_callback_query(call.id, f"✅ +{add_hp} HP")
     safe_edit(call.message.chat.id, call.message.message_id, eggs_menu_text(uid), eggs_menu_kb())
 
-# ===== БОСС =====
 def boss_lobby_kb(is_admin=False):
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(
@@ -936,7 +914,6 @@ def check_boss_end(chat_id, game):
         return True
     return False
 
-# ===== ДУЭЛИ =====
 @bot.message_handler(commands=['duel'])
 def cmd_duel(message):
     remember_group(message.chat)
@@ -1142,7 +1119,6 @@ def duel_cb(call):
         safe_edit(chat_id, duel['msg_id'], duel_status_text(duel), duel_kb(duel))
         bot.answer_callback_query(call.id)
 
-# ===== МАФИЯ =====
 def mafia_lobby_kb(is_admin=False):
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(
@@ -1667,7 +1643,7 @@ def menu_cb(call):
     elif data == 'menu_eggs':
         bot.send_message(call.message.chat.id, eggs_menu_text(uid), parse_mode='HTML', reply_markup=eggs_menu_kb())
     elif data == 'menu_help':
-        bot.send_message(call.message.chat.id, "💬 Дуэли: /duel.\n🎭 Мафия: /mafia.\n🐉 Босс: /boss.\n🥚 Яйца: /eggs.\n\n📢 /post_new — создать пост (админ)")
+        bot.send_message(call.message.chat.id, "💬 Дуэли: /duel.\n🎭 Мафия: /mafia.\n🐉 Босс: /boss.\n🥚 Яйца: /eggs.\n\n📢 /post_new — пост (админ)")
     elif data == 'menu_back':
         bot.send_message(call.message.chat.id, "🎭 Меню:", reply_markup=main_menu())
     bot.answer_callback_query(call.id)
@@ -1685,8 +1661,8 @@ def set_commands():
             types.BotCommand('eggs', '🥚 Яйца'),
         ]
         if ADMIN_IDS:
-            cmds.append(types.BotCommand('post_new', '📢 Создать пост'))
-            cmds.append(types.BotCommand('groups', '📋 Список групп'))
+            cmds.append(types.BotCommand('post_new', '📢 Пост'))
+            cmds.append(types.BotCommand('groups', '📋 Группы'))
         bot.set_my_commands(cmds)
     except:
         pass
