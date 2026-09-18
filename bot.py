@@ -151,7 +151,51 @@ def fmt_time(sec):
     s = sec % 60
     return f"{m}:{s:02d}"
 
+def display_name(p):
+    """Единый способ получить имя игрока: @username, если есть, иначе first_name, иначе Аноним."""
+    if not p:
+        return 'Аноним'
+    uname = (p.get('username') or '').strip()
+    if uname:
+        return '@' + uname
+    fname = (p.get('first_name') or '').strip()
+    if fname and fname != 'Аноним':
+        return fname
+    return 'Аноним'
+
 bot = telebot.TeleBot(TOKEN)
+
+@bot.middleware_handler(update_types=['message'])
+def update_user_info(bot_instance, message):
+    try:
+        if message.from_user:
+            uid = message.from_user.id
+            uname = message.from_user.username or ''
+            fname = message.from_user.first_name or 'Аноним'
+            stats = load_stats()
+            key = str(uid)
+            if key in stats:
+                changed = False
+                if stats[key].get('username') != uname:
+                    stats[key]['username'] = uname
+                    changed = True
+                if stats[key].get('first_name') != fname:
+                    stats[key]['first_name'] = fname
+                    changed = True
+                if changed:
+                    save_stats(stats)
+            else:
+                # Создаём запись, если её нет
+                stats[key] = {
+                    'first_name': fname,
+                    'username': uname,
+                    'wins': 0, 'losses': 0,
+                    'mafia_wins': 0, 'mafia_losses': 0,
+                    'duels_played': 0, 'mafia_played': 0
+                }
+                save_stats(stats)
+    except:
+        pass
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, format, *args): pass
@@ -224,8 +268,7 @@ def cmd_profile(message):
     mafia_wr = round(p['mafia_wins'] / mafia_total * 100) if mafia_total else 0
     text = (
         f"👤 <b>ПРОФИЛЬ</b>\n\n"
-        f"<b>{p['first_name']}</b>\n"
-        f"{('@'+p['username']) if p.get('username') else '—'}\n\n"
+        f"<b>{display_name(p)}</b>\n\n"
         f"⚔️ <b>Дуэли:</b>\n"
         f"🏆 Побед: {p['wins']}\n"
         f"💀 Поражений: {p['losses']}\n"
@@ -245,11 +288,14 @@ def cmd_top(message):
         return
     sorted_stats = sorted(stats.items(), key=lambda x: x[1].get('wins', 0), reverse=True)[:20]
     text = "🏆 <b>ТОП ДУЭЛЯНТОВ</b>\n\n"
+    placed = 0
     for i, (uid, p) in enumerate(sorted_stats, 1):
         if p.get('wins', 0) == 0: continue
-        name = p.get('username') and ('@'+p['username']) or p.get('first_name', 'Аноним')
-        medal = '🥇' if i==1 else '🥈' if i==2 else '🥉' if i==3 else f'{i}.'
-        text += f"{medal} {name} — {p['wins']} побед ⚔️, {p['losses']} 💀\n"
+        placed += 1
+        medal = '🥇' if placed==1 else '🥈' if placed==2 else '🥉' if placed==3 else f'{placed}.'
+        text += f"{medal} {display_name(p)} — {p['wins']} побед ⚔️, {p['losses']} 💀\n"
+    if placed == 0:
+        text += "Пока никто не побеждал."
     bot.send_message(message.chat.id, text, parse_mode='HTML')
 
 @bot.message_handler(commands=['post'])
@@ -529,10 +575,10 @@ def mafia_lobby_kb(is_admin=False):
         kb.add(types.InlineKeyboardButton(text='➕ Продлить на 3:50', callback_data='mafia_extend'))
     return kb
 
-def mafia_lobby_text(game, admin_view=False):
+def mafia_lobby_text(game):
     players_list = "\n".join([f"• {p['name']}" for p in game['players'].values()])
     left = game.get('deadline', 0) - int(time.time())
-    text = (
+    return (
         f"🎭 <b>МАФИЯ — СБОР ИГРОКОВ</b>\n\n"
         f"👑 Хост: <b>{game['host_name']}</b>\n"
         f"👥 Игроков: <b>{len(game['players'])}/{MAFIA_MAX_PLAYERS}</b> (мин. {MAFIA_MIN_PLAYERS})\n"
@@ -540,7 +586,6 @@ def mafia_lobby_text(game, admin_view=False):
         f"<b>Игроки:</b>\n{players_list}\n\n"
         f"Жми кнопки ниже 👇"
     )
-    return text
 
 @bot.message_handler(commands=['mafia'])
 def cmd_mafia(message):
@@ -575,7 +620,7 @@ def cmd_mafia(message):
     save_mafia_game(message.chat.id, game)
     sent = bot.send_message(
         message.chat.id,
-        mafia_lobby_text(game, is_admin_id(message.from_user.id)),
+        mafia_lobby_text(game),
         parse_mode='HTML',
         reply_markup=mafia_lobby_kb(is_admin_id(message.from_user.id))
     )
@@ -999,7 +1044,7 @@ def menu_cb(call):
         total = p['wins'] + p['losses']
         wr = round(p['wins']/total*100) if total else 0
         text = (
-            f"👤 <b>ПРОФИЛЬ</b>\n\n<b>{p['first_name']}</b>\n\n"
+            f"👤 <b>ПРОФИЛЬ</b>\n\n<b>{display_name(p)}</b>\n\n"
             f"⚔️ Дуэли: 🏆 {p['wins']} / 💀 {p['losses']} ({wr}%)\n"
             f"🎭 Мафия: 🏆 {p['mafia_wins']} / 💀 {p['mafia_losses']}"
         )
@@ -1008,11 +1053,12 @@ def menu_cb(call):
         stats = load_stats()
         sorted_stats = sorted(stats.items(), key=lambda x: x[1].get('wins',0), reverse=True)[:15]
         text = "🏆 <b>ТОП ДУЭЛЯНТОВ</b>\n\n"
+        placed = 0
         for i, (u, p) in enumerate(sorted_stats, 1):
             if p.get('wins',0) == 0: continue
-            name = p.get('username') and ('@'+p['username']) or p.get('first_name','Аноним')
-            medal = '🥇' if i==1 else '🥈' if i==2 else '🥉' if i==3 else f'{i}.'
-            text += f"{medal} {name} — {p['wins']} ⚔️\n"
+            placed += 1
+            medal = '🥇' if placed==1 else '🥈' if placed==2 else '🥉' if placed==3 else f'{placed}.'
+            text += f"{medal} {display_name(p)} — {p['wins']} ⚔️\n"
         bot.send_message(call.message.chat.id, text or "🏆 Пусто", parse_mode='HTML')
     elif data == 'menu_duel':
         bot.send_message(call.message.chat.id, "⚔️ В группе ответь на сообщение игрока и напиши /duel")
