@@ -18,11 +18,14 @@ DUEL_SHOOT_MIN = 25
 DUEL_SHOOT_MAX = 45
 DUEL_AIM_BONUS = 0.9
 DUEL_NOAIM_CHANCE = 0.6
+DUEL_ACCEPT_TIMEOUT = 300
 
 MAFIA_MIN_PLAYERS = 4
 MAFIA_MAX_PLAYERS = 50
 MAFIA_NIGHT_TIME = 60
 MAFIA_VOTE_TIME = 45
+MAFIA_LOBBY_TIME = 230
+MAFIA_TIMER_UPDATE = 15
 
 TOKEN = '8883984473:AAF12ux76ov704A-CDbFAbBoDWp1rr3j_4k'
 
@@ -142,6 +145,12 @@ def assign_roles(players):
 def role_ru(role):
     return {'mafia':'🔪 Мафия','doctor':'💉 Доктор','sheriff':'🔍 Шериф','civilian':'👤 Мирный житель'}.get(role, role)
 
+def fmt_time(sec):
+    sec = max(0, int(sec))
+    m = sec // 60
+    s = sec % 60
+    return f"{m}:{s:02d}"
+
 bot = telebot.TeleBot(TOKEN)
 
 class Handler(BaseHTTPRequestHandler):
@@ -150,7 +159,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-Type', 'text/plain')
         self.end_headers()
-        self.wfile.write(b'Darkgram Mafia Bot is running')
+        self.wfile.write(b'Darkgram Bot is running')
 
 def run_http():
     port = int(os.environ.get('PORT', 10000))
@@ -192,15 +201,16 @@ def cmd_help(message):
         f"💬 <b>ПОМОЩЬ</b>\n\n"
         f"⚔️ <b>Дуэли:</b>\n"
         f"В группе ответь на сообщение игрока и напиши /duel\n"
-        f"Кнопки: 🔫 Выстрел / 🎯 Прицелиться / 🎭 Отвлечь\n"
-        f"У каждого 100 HP. Кто первый снял — победил.\n"
-        f"🎭 Отвлечь — сбивает прицел сопернику!\n\n"
+        f"У соперника 5 минут на принятие вызова\n"
+        f"Кнопки: 🔫 Выстрел / 🎯 Прицел / 🎭 Отвлечь\n"
+        f"Отвлечь — сбивает прицел сопернику!\n\n"
         f"🎭 <b>Мафия:</b>\n"
         f"В группе напиши /mafia\n"
-        f"Жми 🎭 Присоединиться в лобби\n"
-        f"Хост запускает ▶️ Начать игру (минимум 4)\n"
+        f"Лобби работает 3:50\n"
+        f"Если 4+ — автостарт по истечении\n"
+        f"Если меньше — лобби закрывается\n"
         f"Роли приходят в личку 💌\n"
-        f"Ночью действуй (60 сек), днём голосуй (45 сек) 🗳️"
+        f"Ночь 60 сек, день 45 сек"
     )
     bot.send_message(message.chat.id, text, parse_mode='HTML')
 
@@ -279,6 +289,7 @@ def cmd_duel(message):
     if existing and existing.get('status') in ('pending','active'):
         bot.send_message(message.chat.id, "⚔️ В этом чате уже идёт дуэль.")
         return
+    now = int(time.time())
     duel = {
         'chat_id': message.chat.id,
         'p1_id': str(message.from_user.id),
@@ -291,23 +302,48 @@ def cmd_duel(message):
         'p2_aim': False,
         'turn': str(message.from_user.id),
         'status': 'pending',
-        'created': int(time.time()),
+        'created': now,
+        'deadline': now + DUEL_ACCEPT_TIMEOUT,
+        'msg_id': None,
         'last_action_msg': ''
     }
-    save_duel(message.chat.id, duel)
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(
         types.InlineKeyboardButton(text='✅ Принять', callback_data='duel_accept'),
         types.InlineKeyboardButton(text='❌ Отклонить', callback_data='duel_decline')
     )
-    bot.send_message(
+    sent = bot.send_message(
         message.chat.id,
-        f"⚔️ <b>ВЫЗОВ НА ДУЭЛЬ!</b>\n\n"
-        f"🥷 <b>{message.from_user.first_name}</b> вызывает <b>{target.first_name}</b>!\n\n"
-        f"{target.first_name}, ты принимаешь?",
+        build_duel_pending_text(duel),
         parse_mode='HTML',
         reply_markup=kb
     )
+    duel['msg_id'] = sent.message_id
+    save_duel(message.chat.id, duel)
+    threading.Timer(DUEL_ACCEPT_TIMEOUT, duel_timeout, args=[message.chat.id]).start()
+
+def build_duel_pending_text(duel):
+    left = duel['deadline'] - int(time.time())
+    return (
+        f"⚔️ <b>ВЫЗОВ НА ДУЭЛЬ!</b>\n\n"
+        f"🥷 <b>{duel['p1_name']}</b> вызывает <b>{duel['p2_name']}</b>!\n\n"
+        f"{duel['p2_name']}, ты принимаешь?\n\n"
+        f"⏱ Осталось: <b>{fmt_time(left)}</b>"
+    )
+
+def duel_timeout(chat_id):
+    duel = get_duel(chat_id)
+    if not duel or duel.get('status') != 'pending':
+        return
+    try:
+        bot.edit_message_text(
+            "⌛ <b>Время вышло</b>\n\nВызов на дуэль отменён.",
+            chat_id=chat_id,
+            message_id=duel['msg_id'],
+            parse_mode='HTML'
+        )
+    except: pass
+    del_duel(chat_id)
 
 def duel_kb(duel):
     kb = types.InlineKeyboardMarkup(row_width=3)
@@ -345,6 +381,9 @@ def duel_cb(call):
     uid = str(call.from_user.id)
 
     if call.data == 'duel_accept':
+        if duel.get('status') != 'pending':
+            bot.answer_callback_query(call.id, "❌ Вызов уже неактуален")
+            return
         if uid != duel['p2_id']:
             bot.answer_callback_query(call.id, "❌ Не твой вызов")
             return
@@ -362,6 +401,9 @@ def duel_cb(call):
         return
 
     if call.data == 'duel_decline':
+        if duel.get('status') != 'pending':
+            bot.answer_callback_query(call.id, "❌ Вызов уже неактуален")
+            return
         if uid != duel['p2_id']:
             bot.answer_callback_query(call.id, "❌ Не твой вызов")
             return
@@ -370,7 +412,7 @@ def duel_cb(call):
         bot.answer_callback_query(call.id, "Отклонено")
         return
 
-    if duel['status'] != 'active':
+    if duel.get('status') != 'active':
         bot.answer_callback_query(call.id, "Дуэль ещё не началась")
         return
 
@@ -397,7 +439,6 @@ def duel_cb(call):
         return
 
     if call.data == 'duel_distract':
-        # Сбиваем прицел сопернику
         if uid == duel['p1_id']:
             had_aim = duel['p2_aim']
             duel['p2_aim'] = False
@@ -408,7 +449,7 @@ def duel_cb(call):
         if had_aim:
             msg += "\n💥 Прицел соперника сбит!"
         else:
-            msg += "\n🤷 У соперника не было прицела — но он отвлёкся."
+            msg += "\n🤷 У соперника не было прицела."
         duel['last_action_msg'] = msg
         next_turn(duel)
         save_duel(chat_id, duel)
@@ -474,7 +515,7 @@ def duel_cb(call):
         bot.answer_callback_query(call.id)
 
 # ===== МАФИЯ =====
-def mafia_lobby_kb():
+def mafia_lobby_kb(is_admin=False):
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(
         types.InlineKeyboardButton(text='🎭 Присоединиться', callback_data='mafia_join'),
@@ -484,18 +525,22 @@ def mafia_lobby_kb():
         types.InlineKeyboardButton(text='▶️ Начать игру', callback_data='mafia_start'),
         types.InlineKeyboardButton(text='❌ Отменить', callback_data='mafia_cancel')
     )
+    if is_admin:
+        kb.add(types.InlineKeyboardButton(text='➕ Продлить на 3:50', callback_data='mafia_extend'))
     return kb
 
-def mafia_lobby_text(game):
+def mafia_lobby_text(game, admin_view=False):
     players_list = "\n".join([f"• {p['name']}" for p in game['players'].values()])
-    return (
+    left = game.get('deadline', 0) - int(time.time())
+    text = (
         f"🎭 <b>МАФИЯ — СБОР ИГРОКОВ</b>\n\n"
         f"👑 Хост: <b>{game['host_name']}</b>\n"
-        f"👥 Игроков: <b>{len(game['players'])}/{MAFIA_MAX_PLAYERS}</b>\n"
-        f"📌 Минимум: {MAFIA_MIN_PLAYERS}\n\n"
+        f"👥 Игроков: <b>{len(game['players'])}/{MAFIA_MAX_PLAYERS}</b> (мин. {MAFIA_MIN_PLAYERS})\n"
+        f"⏱ До закрытия: <b>{fmt_time(left)}</b>\n\n"
         f"<b>Игроки:</b>\n{players_list}\n\n"
         f"Жми кнопки ниже 👇"
     )
+    return text
 
 @bot.message_handler(commands=['mafia'])
 def cmd_mafia(message):
@@ -506,6 +551,7 @@ def cmd_mafia(message):
     if game and game.get('status') not in ('finished',):
         bot.send_message(message.chat.id, "🎭 В этом чате уже идёт игра.")
         return
+    now = int(time.time())
     game = {
         'chat_id': message.chat.id,
         'host_id': str(message.from_user.id),
@@ -516,6 +562,8 @@ def cmd_mafia(message):
         'night_actions': {},
         'votes': {},
         'vote_msg_id': None,
+        'lobby_msg_id': None,
+        'deadline': now + MAFIA_LOBBY_TIME,
         'log': []
     }
     game['players'][str(message.from_user.id)] = {
@@ -525,9 +573,49 @@ def cmd_mafia(message):
         'role': None
     }
     save_mafia_game(message.chat.id, game)
-    bot.send_message(message.chat.id, mafia_lobby_text(game), parse_mode='HTML', reply_markup=mafia_lobby_kb())
+    sent = bot.send_message(
+        message.chat.id,
+        mafia_lobby_text(game, is_admin_id(message.from_user.id)),
+        parse_mode='HTML',
+        reply_markup=mafia_lobby_kb(is_admin_id(message.from_user.id))
+    )
+    game['lobby_msg_id'] = sent.message_id
+    save_mafia_game(message.chat.id, game)
+    threading.Timer(MAFIA_LOBBY_TIME, mafia_lobby_timeout, args=[message.chat.id]).start()
+    threading.Timer(MAFIA_TIMER_UPDATE, mafia_lobby_tick, args=[message.chat.id]).start()
 
-@bot.callback_query_handler(func=lambda c: c.data.startswith('mafia_join') or c.data.startswith('mafia_leave') or c.data.startswith('mafia_start') or c.data.startswith('mafia_cancel'))
+def mafia_lobby_tick(chat_id):
+    game = get_mafia(chat_id)
+    if not game or game.get('status') != 'lobby': return
+    left = game.get('deadline', 0) - int(time.time())
+    if left <= 0: return
+    try:
+        bot.edit_message_text(
+            mafia_lobby_text(game),
+            chat_id=chat_id,
+            message_id=game['lobby_msg_id'],
+            parse_mode='HTML',
+            reply_markup=mafia_lobby_kb(is_admin_id(game['host_id']))
+        )
+    except: pass
+    threading.Timer(MAFIA_TIMER_UPDATE, mafia_lobby_tick, args=[chat_id]).start()
+
+def mafia_lobby_timeout(chat_id):
+    game = get_mafia(chat_id)
+    if not game or game.get('status') != 'lobby': return
+    count = len(game['players'])
+    if count >= MAFIA_MIN_PLAYERS:
+        try:
+            bot.send_message(chat_id, f"⏱ Время лобби вышло. Игроков: {count}. Автостарт!", parse_mode='HTML')
+        except: pass
+        start_mafia_game(chat_id)
+    else:
+        try:
+            bot.send_message(chat_id, f"⏱ Время вышло. Игроков: {count} (нужно {MAFIA_MIN_PLAYERS}). Лобби закрыто.", parse_mode='HTML')
+        except: pass
+        del_mafia(chat_id)
+
+@bot.callback_query_handler(func=lambda c: c.data.startswith('mafia_join') or c.data.startswith('mafia_leave') or c.data.startswith('mafia_start') or c.data.startswith('mafia_cancel') or c.data.startswith('mafia_extend'))
 def mafia_lobby_cb(call):
     chat_id = call.message.chat.id
     game = get_mafia(chat_id)
@@ -535,6 +623,7 @@ def mafia_lobby_cb(call):
         bot.answer_callback_query(call.id, "❌ Лобби закрыто")
         return
     uid = str(call.from_user.id)
+    is_admin = is_admin_id(uid)
 
     if call.data == 'mafia_join':
         if uid in game['players']:
@@ -550,13 +639,15 @@ def mafia_lobby_cb(call):
             'role': None
         }
         save_mafia_game(chat_id, game)
-        bot.edit_message_text(
-            mafia_lobby_text(game),
-            chat_id=chat_id,
-            message_id=call.message.message_id,
-            parse_mode='HTML',
-            reply_markup=mafia_lobby_kb()
-        )
+        try:
+            bot.edit_message_text(
+                mafia_lobby_text(game),
+                chat_id=chat_id,
+                message_id=call.message.message_id,
+                parse_mode='HTML',
+                reply_markup=mafia_lobby_kb(is_admin)
+            )
+        except: pass
         bot.answer_callback_query(call.id, "🎭 Ты в игре!")
         return
 
@@ -564,23 +655,37 @@ def mafia_lobby_cb(call):
         if uid not in game['players']:
             bot.answer_callback_query(call.id, "❌ Ты не в игре")
             return
-        if uid == game['host_id']:
-            bot.answer_callback_query(call.id, "❌ Хост не может выйти")
-            return
+        was_host = (uid == game['host_id'])
         del game['players'][uid]
+        if was_host and game['players']:
+            new_host_id = list(game['players'].keys())[0]
+            game['host_id'] = new_host_id
+            game['host_name'] = game['players'][new_host_id]['name']
+            try:
+                bot.send_message(chat_id, f"👑 Новый хост: <b>{game['host_name']}</b>", parse_mode='HTML')
+            except: pass
+        elif not game['players']:
+            del_mafia(chat_id)
+            try:
+                bot.edit_message_text("❌ Лобби закрыто — все вышли.", chat_id=chat_id, message_id=call.message.message_id)
+            except: pass
+            bot.answer_callback_query(call.id, "🚪 Лобби закрыто")
+            return
         save_mafia_game(chat_id, game)
-        bot.edit_message_text(
-            mafia_lobby_text(game),
-            chat_id=chat_id,
-            message_id=call.message.message_id,
-            parse_mode='HTML',
-            reply_markup=mafia_lobby_kb()
-        )
+        try:
+            bot.edit_message_text(
+                mafia_lobby_text(game),
+                chat_id=chat_id,
+                message_id=call.message.message_id,
+                parse_mode='HTML',
+                reply_markup=mafia_lobby_kb(is_admin)
+            )
+        except: pass
         bot.answer_callback_query(call.id, "🚪 Ты вышел")
         return
 
     if call.data == 'mafia_start':
-        if uid != game['host_id']:
+        if uid != game['host_id'] and not is_admin:
             bot.answer_callback_query(call.id, "❌ Только хост")
             return
         if len(game['players']) < MAFIA_MIN_PLAYERS:
@@ -591,13 +696,32 @@ def mafia_lobby_cb(call):
         return
 
     if call.data == 'mafia_cancel':
-        if uid != game['host_id'] and not is_admin_id(uid):
+        if uid != game['host_id'] and not is_admin:
             bot.answer_callback_query(call.id, "❌ Только хост")
             return
         del_mafia(chat_id)
-        bot.edit_message_text("❌ Игра отменена.", chat_id=chat_id, message_id=call.message.message_id)
+        try:
+            bot.edit_message_text("❌ Игра отменена.", chat_id=chat_id, message_id=call.message.message_id)
+        except: pass
         bot.answer_callback_query(call.id, "Отменено")
         return
+
+    if call.data == 'mafia_extend':
+        if not is_admin:
+            bot.answer_callback_query(call.id, "❌ Только админ")
+            return
+        game['deadline'] = int(time.time()) + MAFIA_LOBBY_TIME
+        save_mafia_game(chat_id, game)
+        try:
+            bot.edit_message_text(
+                mafia_lobby_text(game),
+                chat_id=chat_id,
+                message_id=call.message.message_id,
+                parse_mode='HTML',
+                reply_markup=mafia_lobby_kb(is_admin)
+            )
+        except: pass
+        bot.answer_callback_query(call.id, "➕ Продлено на 3:50")
 
 def start_mafia_game(chat_id):
     game = get_mafia(chat_id)
@@ -796,7 +920,6 @@ def vote_cb(call):
         return
     game['votes'][uid] = target
     save_mafia_game(call.message.chat.id, game)
-    # Обновляем сообщение с голосами
     try:
         kb = types.InlineKeyboardMarkup(row_width=2)
         for tuid, tp in game['players'].items():
