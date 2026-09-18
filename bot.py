@@ -95,6 +95,36 @@ def is_admin_id(user_id):
     except:
         return False
 
+def update_username(user_id, first_name='', username=''):
+    """Обновляет имя и username игрока в базе."""
+    try:
+        stats = load_stats()
+        key = str(user_id)
+        fname = first_name or 'Аноним'
+        uname = username or ''
+        if key in stats:
+            changed = False
+            if stats[key].get('username') != uname:
+                stats[key]['username'] = uname
+                changed = True
+            if stats[key].get('first_name') != fname:
+                stats[key]['first_name'] = fname
+                changed = True
+            if changed:
+                save_stats(stats)
+        else:
+            stats[key] = {
+                'first_name': fname, 'username': uname,
+                'wins': 0, 'losses': 0,
+                'mafia_wins': 0, 'mafia_losses': 0,
+                'duels_played': 0, 'mafia_played': 0,
+                'boss_wins': 0, 'boss_losses': 0,
+                'eggs': 0, 'max_hp': BOSS_PLAYER_MIN_HP
+            }
+            save_stats(stats)
+    except:
+        pass
+
 def get_player(user_id, first_name='Аноним', username=''):
     stats = load_stats()
     key = str(user_id)
@@ -204,37 +234,6 @@ def display_name(p):
 
 bot = telebot.TeleBot(TOKEN)
 
-@bot.middleware_handler(update_types=['message'])
-def update_user_info(bot_instance, message):
-    try:
-        if message.from_user:
-            uid = message.from_user.id
-            uname = message.from_user.username or ''
-            fname = message.from_user.first_name or 'Аноним'
-            stats = load_stats()
-            key = str(uid)
-            if key in stats:
-                changed = False
-                if stats[key].get('username') != uname:
-                    stats[key]['username'] = uname
-                    changed = True
-                if stats[key].get('first_name') != fname:
-                    stats[key]['first_name'] = fname
-                    changed = True
-                if changed: save_stats(stats)
-            else:
-                stats[key] = {
-                    'first_name': fname, 'username': uname,
-                    'wins': 0, 'losses': 0,
-                    'mafia_wins': 0, 'mafia_losses': 0,
-                    'duels_played': 0, 'mafia_played': 0,
-                    'boss_wins': 0, 'boss_losses': 0,
-                    'eggs': 0, 'max_hp': BOSS_PLAYER_MIN_HP
-                }
-                save_stats(stats)
-    except:
-        pass
-
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, format, *args): pass
     def do_GET(self):
@@ -269,6 +268,7 @@ def main_menu():
 @bot.message_handler(commands=['start'])
 def cmd_start(message):
     uid = message.from_user.id
+    update_username(uid, message.from_user.first_name, message.from_user.username)
     get_player(uid, message.from_user.first_name, message.from_user.username)
     text = (
         f"🎭 <b>DARKGRAM</b> 🎭\n\n"
@@ -301,12 +301,14 @@ def cmd_help(message):
 @bot.message_handler(commands=['eggs'])
 def cmd_eggs(message):
     uid = message.from_user.id
+    update_username(uid, message.from_user.first_name, message.from_user.username)
     get_player(uid, message.from_user.first_name, message.from_user.username)
     bot.send_message(message.chat.id, eggs_menu_text(uid), parse_mode='HTML', reply_markup=eggs_menu_kb())
 
 @bot.message_handler(commands=['profile'])
 def cmd_profile(message):
     uid = message.from_user.id
+    update_username(uid, message.from_user.first_name, message.from_user.username)
     p = get_player(uid, message.from_user.first_name, message.from_user.username)
     total = p['wins'] + p['losses']
     wr = round(p['wins'] / total * 100) if total else 0
@@ -325,6 +327,7 @@ def cmd_profile(message):
 
 @bot.message_handler(commands=['top'])
 def cmd_top(message):
+    update_username(message.from_user.id, message.from_user.first_name, message.from_user.username)
     stats = load_stats()
     if not stats:
         bot.send_message(message.chat.id, "🏆 Пока пусто.")
@@ -359,7 +362,6 @@ def cmd_post(message):
             pass
     bot.send_message(message.chat.id, f"📢 Разослано: {sent} из {len(stats)}")
 
-# ===== ЯЙЦА =====
 def eggs_menu_text(uid):
     p = get_player(uid)
     return (
@@ -382,6 +384,7 @@ def eggs_menu_kb():
 @bot.callback_query_handler(func=lambda c: c.data.startswith('eggs_buy_'))
 def eggs_buy_cb(call):
     uid = str(call.from_user.id)
+    update_username(uid, call.from_user.first_name, call.from_user.username)
     p = get_player(uid, call.from_user.first_name, call.from_user.username)
     count = 5 if call.data == 'eggs_buy_5' else 1
     if p.get('eggs', 0) < count:
@@ -406,7 +409,6 @@ def eggs_buy_cb(call):
     except:
         pass
 
-# ===== БОСС =====
 def boss_lobby_kb(is_admin=False):
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(
@@ -437,6 +439,7 @@ def cmd_boss(message):
     if message.chat.type == 'private':
         bot.send_message(message.chat.id, "🐉 Босс только в группах.")
         return
+    update_username(message.from_user.id, message.from_user.first_name, message.from_user.username)
     game = get_boss(message.chat.id)
     if game and game.get('status') not in ('finished',):
         bot.send_message(message.chat.id, "🐉 Уже идёт бой.")
@@ -526,6 +529,7 @@ def boss_lobby_cb(call):
         bot.answer_callback_query(call.id, "❌ Закрыто")
         return
     uid = str(call.from_user.id)
+    update_username(uid, call.from_user.first_name, call.from_user.username)
     is_admin = is_admin_id(uid)
 
     if call.data == 'boss_join':
@@ -826,7 +830,6 @@ def check_boss_end(chat_id, game):
         bot.send_message(chat_id, "💀 <b>ВСЕ ПОГИБЛИ!</b>\n\nБосс выжил.", parse_mode='HTML')
         del_boss(chat_id)
 
-# ===== ДУЭЛИ =====
 @bot.message_handler(commands=['duel'])
 def cmd_duel(message):
     if message.chat.type == 'private':
@@ -842,6 +845,7 @@ def cmd_duel(message):
     if target.is_bot:
         bot.send_message(message.chat.id, "❌ С ботом нельзя.")
         return
+    update_username(message.from_user.id, message.from_user.first_name, message.from_user.username)
     existing = get_duel(message.chat.id)
     if existing and existing.get('status') in ('pending','active'):
         bot.send_message(message.chat.id, "⚔️ Уже идёт дуэль.")
@@ -937,6 +941,7 @@ def duel_cb(call):
         bot.answer_callback_query(call.id, "Не найдена")
         return
     uid = str(call.from_user.id)
+    update_username(uid, call.from_user.first_name, call.from_user.username)
 
     if call.data == 'duel_accept':
         if duel.get('status') != 'pending':
@@ -1065,7 +1070,6 @@ def duel_cb(call):
         )
         bot.answer_callback_query(call.id)
 
-# ===== МАФИЯ =====
 def mafia_lobby_kb(is_admin=False):
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(
@@ -1096,6 +1100,7 @@ def cmd_mafia(message):
     if message.chat.type == 'private':
         bot.send_message(message.chat.id, "🎭 Только в группах.")
         return
+    update_username(message.from_user.id, message.from_user.first_name, message.from_user.username)
     game = get_mafia(message.chat.id)
     if game and game.get('status') not in ('finished',):
         bot.send_message(message.chat.id, "🎭 Уже идёт.")
@@ -1178,6 +1183,7 @@ def mafia_lobby_cb(call):
         bot.answer_callback_query(call.id, "❌ Закрыто")
         return
     uid = str(call.from_user.id)
+    update_username(uid, call.from_user.first_name, call.from_user.username)
     is_admin = is_admin_id(uid)
 
     if call.data == 'mafia_join':
@@ -1563,11 +1569,11 @@ def cmd_stopgame(message):
     del_mafia(message.chat.id)
     bot.send_message(message.chat.id, "❌ Остановлено.")
 
-# ===== МЕНЮ =====
 @bot.callback_query_handler(func=lambda c: c.data.startswith('menu_'))
 def menu_cb(call):
     data = call.data
     uid = call.from_user.id
+    update_username(uid, call.from_user.first_name, call.from_user.username)
     if data == 'menu_profile':
         p = get_player(uid, call.from_user.first_name, call.from_user.username)
         total = p['wins'] + p['losses']
