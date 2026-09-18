@@ -27,7 +27,7 @@ MAFIA_VOTE_TIME = 45
 MAFIA_LOBBY_TIME = 230
 MAFIA_TIMER_UPDATE = 15
 
-TOKEN = '8883984473:AAF12ux76ov704A-CDbFAbBoDWp1rr3j_4k'
+TOKEN = '8883984473:AAHh0Hd9CDcbWqgvZdJShXqXvnn6S3YniHw'
 
 DISTRACT_MESSAGES = [
     "🎭 Сделал отвлекающий маневр, сбил прицел соперника!",
