@@ -1,4 +1,4 @@
-import telebot
+ import telebot
 import json
 import os
 import time
@@ -11,6 +11,7 @@ STATS_FILE = 'stats.json'
 DUELS_FILE = 'duels.json'
 MAFIA_FILE = 'mafia.json'
 BOSS_FILE = 'boss.json'
+GROUPS_FILE = 'groups.json'
 
 ADMIN_IDS = [8907438590]
 
@@ -88,6 +89,23 @@ def load_mafia(): return load_json(MAFIA_FILE, {})
 def save_mafia(d): save_json(MAFIA_FILE, d)
 def load_boss(): return load_json(BOSS_FILE, {})
 def save_boss(d): save_json(BOSS_FILE, d)
+def load_groups(): return load_json(GROUPS_FILE, {})
+def save_groups(d): save_json(GROUPS_FILE, d)
+
+def remember_group(chat):
+    """Запоминает группу/чат, где находится бот."""
+    try:
+        if chat.type in ('group', 'supergroup'):
+            groups = load_groups()
+            cid = str(chat.id)
+            if cid not in groups:
+                groups[cid] = {
+                    'title': chat.title or 'Группа',
+                    'added': int(time.time())
+                }
+                save_groups(groups)
+    except:
+        pass
 
 def is_admin_id(user_id):
     try:
@@ -232,14 +250,10 @@ def display_name(p):
     return 'Аноним'
 
 def safe_edit(chat_id, msg_id, text, reply_markup=None):
-    """Редактирует сообщение. Если не вышло — молча игнорирует."""
     try:
         bot.edit_message_text(
-            text,
-            chat_id=chat_id,
-            message_id=msg_id,
-            parse_mode='HTML',
-            reply_markup=reply_markup
+            text, chat_id=chat_id, message_id=msg_id,
+            parse_mode='HTML', reply_markup=reply_markup
         )
         return True
     except:
@@ -278,8 +292,180 @@ def main_menu():
     kb.add(types.InlineKeyboardButton(text='💬 Помощь', callback_data='menu_help'))
     return kb
 
+# ===== ПОСТЫ / РАССЫЛКА =====
+pending_posts = {}  # user_id -> {'text':..., 'media_type':..., 'file_id':..., 'caption':...}
+
+@bot.message_handler(commands=['post_new'])
+def cmd_post_new(message):
+    if not is_admin_id(message.from_user.id):
+        return
+    uid = message.from_user.id
+
+    # Если это ответ на сообщение — берём его
+    if message.reply_to_message:
+        src = message.reply_to_message
+        post = extract_post_from_message(src)
+        if post:
+            show_post_preview(message.chat.id, uid, post)
+            return
+        else:
+            bot.send_message(message.chat.id, "❌ Не могу взять это сообщение. Отправь текст/фото/видео.")
+            return
+
+    # Иначе — просим отправить пост
+    pending_posts[uid] = None
+    bot.send_message(
+        message.chat.id,
+        "📝 <b>Создание поста</b>\n\n"
+        "Отправь мне <b>текст</b> поста, или <b>фото/видео с подписью</b>.\n\n"
+        "Или ответь командой <code>/post_new</code> на любое сообщение, чтобы взять его как пост.",
+        parse_mode='HTML'
+    )
+
+def extract_post_from_message(msg):
+    """Достаёт пост из сообщения: текст, фото, видео."""
+    try:
+        post = {'text': '', 'media_type': None, 'file_id': None, 'caption': ''}
+        if msg.text:
+            post['text'] = msg.text
+            return post
+        if msg.caption:
+            post['caption'] = msg.caption
+        if msg.photo:
+            post['media_type'] = 'photo'
+            post['file_id'] = msg.photo[-1].file_id
+            return post
+        if msg.video:
+            post['media_type'] = 'video'
+            post['file_id'] = msg.video.file_id
+            return post
+        if msg.document:
+            post['media_type'] = 'document'
+            post['file_id'] = msg.document.file_id
+            return post
+        return None
+    except:
+        return None
+
+def show_post_preview(chat_id, uid, post):
+    """Показывает превью и кнопки Опубликовать/Отмена."""
+    pending_posts[uid] = post
+    preview_text = "📢 <b>ПРЕВЬЮ ПОСТА</b>\n\n"
+    if post.get('caption'):
+        preview_text += post['caption'] + "\n\n"
+    if post.get('text'):
+        preview_text += post['text'] + "\n\n"
+    if post.get('media_type'):
+        preview_text += f"📎 Медиа: {post['media_type']}"
+    preview_text += "\n\nОпубликовать?"
+
+    kb = types.InlineKeyboardMarkup(row_width=2)
+    kb.add(
+        types.InlineKeyboardButton(text='✅ Опубликовать', callback_data='post_confirm'),
+        types.InlineKeyboardButton(text='❌ Отмена', callback_data='post_cancel')
+    )
+    bot.send_message(chat_id, preview_text, parse_mode='HTML', reply_markup=kb)
+
+@bot.message_handler(content_types=['text', 'photo', 'video', 'document'], func=lambda m: m.from_user and is_admin_id(m.from_user.id) and pending_posts.get(m.from_user.id) is None and m.chat.type == 'private')
+def admin_sending_post(message):
+    """Ловим сообщение админа, если он в процессе создания поста."""
+    uid = message.from_user.id
+    if uid not in pending_posts:
+        return
+    if pending_posts.get(uid) is not None:
+        return  # уже есть пост, ждём кнопку
+    post = extract_post_from_message(message)
+    if post:
+        show_post_preview(message.chat.id, uid, post)
+
+@bot.callback_query_handler(func=lambda c: c.data == 'post_confirm' or c.data == 'post_cancel')
+def post_confirm_cb(call):
+    uid = call.from_user.id
+    if not is_admin_id(uid):
+        bot.answer_callback_query(call.id, "❌ Только админ")
+        return
+    if call.data == 'post_cancel':
+        pending_posts.pop(uid, None)
+        safe_edit(call.message.chat.id, call.message.message_id, "❌ Пост отменён.")
+        bot.answer_callback_query(call.id, "Отменено")
+        return
+
+    post = pending_posts.pop(uid, None)
+    if not post:
+        bot.answer_callback_query(call.id, "❌ Пост потерялся")
+        return
+    safe_edit(call.message.chat.id, call.message.message_id, "📢 Отправляю...")
+    bot.answer_callback_query(call.id, "Публикую!")
+    threading.Thread(target=broadcast_post, args=[post, call.message.chat.id]).start()
+
+def broadcast_post(post, admin_chat_id):
+    """Рассылает пост в группы и в личку юзерам."""
+    stats = load_stats()
+    groups = load_groups()
+    total = len(groups) + len(stats)
+    sent_groups = 0
+    sent_users = 0
+
+    # 1. В группы
+    for cid in list(groups.keys()):
+        try:
+            send_post_to_chat(int(cid), post)
+            sent_groups += 1
+            time.sleep(0.05)
+        except:
+            pass
+
+    # 2. В личку юзерам
+    for uid in list(stats.keys()):
+        try:
+            send_post_to_chat(int(uid), post)
+            sent_users += 1
+            time.sleep(0.05)
+        except:
+            pass
+
+    try:
+        bot.send_message(
+            admin_chat_id,
+            f"✅ <b>Пост опубликован!</b>\n\n"
+            f"📢 Группы: {sent_groups}/{len(groups)}\n"
+            f"👥 Игроки: {sent_users}/{len(stats)}\n"
+            f"Всего отправлено: {sent_groups + sent_users}/{total}",
+            parse_mode='HTML'
+        )
+    except:
+        pass
+
+def send_post_to_chat(chat_id, post):
+    """Отправляет пост в чат с учётом медиа."""
+    try:
+        if post.get('media_type') == 'photo':
+            bot.send_photo(chat_id, post['file_id'], caption=post.get('caption', ''), parse_mode='HTML')
+        elif post.get('media_type') == 'video':
+            bot.send_video(chat_id, post['file_id'], caption=post.get('caption', ''), parse_mode='HTML')
+        elif post.get('media_type') == 'document':
+            bot.send_document(chat_id, post['file_id'], caption=post.get('caption', ''), parse_mode='HTML')
+        else:
+            bot.send_message(chat_id, post.get('text', ''), parse_mode='HTML')
+    except:
+        pass
+
+@bot.message_handler(commands=['groups'])
+def cmd_groups(message):
+    if not is_admin_id(message.from_user.id):
+        return
+    groups = load_groups()
+    if not groups:
+        bot.send_message(message.chat.id, "📭 Групп пока нет. Добавь бота в группу.")
+        return
+    text = f"📢 <b>Группы с ботом ({len(groups)}):</b>\n\n"
+    for cid, g in groups.items():
+        text += f"• {g.get('title', 'Группа')} — <code>{cid}</code>\n"
+    bot.send_message(message.chat.id, text, parse_mode='HTML')
+
 @bot.message_handler(commands=['start'])
 def cmd_start(message):
+    remember_group(message.chat)
     uid = message.from_user.id
     update_username(uid, message.from_user.first_name, message.from_user.username)
     get_player(uid, message.from_user.first_name, message.from_user.username)
@@ -297,6 +483,8 @@ def cmd_start(message):
 
 @bot.message_handler(commands=['help'])
 def cmd_help(message):
+    remember_group(message.chat)
+    update_username(message.from_user.id, message.from_user.first_name, message.from_user.username)
     text = (
         f"💬 <b>ПОМОЩЬ</b>\n\n"
         f"⚔️ <b>Дуэли:</b> /duel в ответ на сообщение\n"
@@ -313,6 +501,7 @@ def cmd_help(message):
 
 @bot.message_handler(commands=['eggs'])
 def cmd_eggs(message):
+    remember_group(message.chat)
     uid = message.from_user.id
     update_username(uid, message.from_user.first_name, message.from_user.username)
     get_player(uid, message.from_user.first_name, message.from_user.username)
@@ -320,6 +509,7 @@ def cmd_eggs(message):
 
 @bot.message_handler(commands=['profile'])
 def cmd_profile(message):
+    remember_group(message.chat)
     uid = message.from_user.id
     update_username(uid, message.from_user.first_name, message.from_user.username)
     p = get_player(uid, message.from_user.first_name, message.from_user.username)
@@ -340,6 +530,7 @@ def cmd_profile(message):
 
 @bot.message_handler(commands=['top'])
 def cmd_top(message):
+    remember_group(message.chat)
     update_username(message.from_user.id, message.from_user.first_name, message.from_user.username)
     stats = load_stats()
     if not stats:
@@ -355,25 +546,6 @@ def cmd_top(message):
         text += f"{medal} {display_name(p)} — {p['wins']} ⚔️, {p['losses']} 💀\n"
     if placed == 0: text += "Пока никто не побеждал."
     bot.send_message(message.chat.id, text, parse_mode='HTML')
-
-@bot.message_handler(commands=['post'])
-def cmd_post(message):
-    if not is_admin_id(message.from_user.id):
-        return
-    text = message.text.replace('/post','').strip()
-    if not text:
-        bot.send_message(message.chat.id, "📢 Использование: /post Текст")
-        return
-    stats = load_stats()
-    sent = 0
-    for uid in list(stats.keys()):
-        try:
-            bot.send_message(int(uid), "📢 " + text, parse_mode='HTML')
-            sent += 1
-            time.sleep(0.05)
-        except:
-            pass
-    bot.send_message(message.chat.id, f"📢 Разослано: {sent} из {len(stats)}")
 
 def eggs_menu_text(uid):
     p = get_player(uid)
@@ -441,6 +613,7 @@ def boss_lobby_text(game):
 
 @bot.message_handler(commands=['boss'])
 def cmd_boss(message):
+    remember_group(message.chat)
     if message.chat.type == 'private':
         bot.send_message(message.chat.id, "🐉 Босс только в группах.")
         return
@@ -641,7 +814,6 @@ def start_boss_fight(chat_id):
         game['players'][uid]['aim'] = False
     game['order'] = [uid for uid in game['order'] if game['players'][uid]['alive']]
     save_boss_game(chat_id, game)
-    # Отправляем ОДНО сообщение, дальше только редактируем его
     try:
         msg = bot.send_message(
             chat_id,
@@ -767,6 +939,7 @@ def check_boss_end(chat_id, game):
 # ===== ДУЭЛИ =====
 @bot.message_handler(commands=['duel'])
 def cmd_duel(message):
+    remember_group(message.chat)
     if message.chat.type == 'private':
         bot.send_message(message.chat.id, "⚔️ Только в группах.")
         return
@@ -997,6 +1170,7 @@ def mafia_lobby_text(game):
 
 @bot.message_handler(commands=['mafia'])
 def cmd_mafia(message):
+    remember_group(message.chat)
     if message.chat.type == 'private':
         bot.send_message(message.chat.id, "🎭 Только в группах.")
         return
@@ -1145,7 +1319,6 @@ def mafia_lobby_cb(call):
         bot.answer_callback_query(call.id, "➕ Продлено 3:50")
 
 def mafia_game_text(game):
-    """Общий текст для ночи/дня — редактируется в одном сообщении."""
     players_list = []
     for uid, p in game['players'].items():
         status = "💀" if not p['alive'] else "❤️"
@@ -1153,7 +1326,6 @@ def mafia_game_text(game):
     players_text = "\n".join(players_list)
     day = game.get('day', 0)
     status = game.get('status', '')
-    stage = ""
     if status == 'night':
         stage = f"🌙 <b>НОЧЬ {day}</b>\n💤 Все засыпают... ⏱ 60 сек"
     elif status == 'vote':
@@ -1169,7 +1341,6 @@ def start_mafia_game(chat_id):
     assign_roles(game['players'])
     game['status'] = 'roles'
     save_mafia_game(chat_id, game)
-    # Одно сообщение для всей игры
     try:
         msg = bot.send_message(chat_id, mafia_game_text(game), parse_mode='HTML')
         game['game_msg_id'] = msg.message_id
@@ -1203,7 +1374,6 @@ def start_night(chat_id):
     game['votes'] = {}
     game['vote_msg_id'] = None
     save_mafia_game(chat_id, game)
-    # Обновляем главное сообщение игры
     if game.get('game_msg_id'):
         safe_edit(chat_id, game['game_msg_id'], mafia_game_text(game))
     for uid, p in game['players'].items():
@@ -1293,7 +1463,6 @@ def end_night(chat_id):
             killed_name = game['players'][kill_target]['name']
     save_mafia_game(chat_id, game)
 
-    # Обновляем главное сообщение
     if game.get('game_msg_id'):
         text = mafia_game_text(game)
         if killed_name:
@@ -1357,7 +1526,6 @@ def start_vote(chat_id):
             safe_edit(chat_id, game['game_msg_id'], "🤷 Все мертвы.")
         del_mafia(chat_id)
         return
-    # Обновляем главное сообщение и добавляем к нему кнопки
     if game.get('game_msg_id'):
         safe_edit(chat_id, game['game_msg_id'], build_vote_text(game), kb)
         game['vote_msg_id'] = game['game_msg_id']
@@ -1383,7 +1551,6 @@ def vote_cb(call):
         return
     game['votes'][uid] = target
     save_mafia_game(call.message.chat.id, game)
-    # Обновляем текст в одном сообщении
     try:
         kb = types.InlineKeyboardMarkup(row_width=2)
         for tuid, tp in game['players'].items():
@@ -1500,14 +1667,14 @@ def menu_cb(call):
     elif data == 'menu_eggs':
         bot.send_message(call.message.chat.id, eggs_menu_text(uid), parse_mode='HTML', reply_markup=eggs_menu_kb())
     elif data == 'menu_help':
-        bot.send_message(call.message.chat.id, "💬 Дуэли: /duel.\n🎭 Мафия: /mafia.\n🐉 Босс: /boss.\n🥚 Яйца: /eggs.")
+        bot.send_message(call.message.chat.id, "💬 Дуэли: /duel.\n🎭 Мафия: /mafia.\n🐉 Босс: /boss.\n🥚 Яйца: /eggs.\n\n📢 /post_new — создать пост (админ)")
     elif data == 'menu_back':
         bot.send_message(call.message.chat.id, "🎭 Меню:", reply_markup=main_menu())
     bot.answer_callback_query(call.id)
 
 def set_commands():
     try:
-        bot.set_my_commands([
+        cmds = [
             types.BotCommand('start', '🎭 Меню'),
             types.BotCommand('help', '💬 Помощь'),
             types.BotCommand('profile', '👤 Профиль'),
@@ -1516,7 +1683,11 @@ def set_commands():
             types.BotCommand('mafia', '🎭 Мафия'),
             types.BotCommand('boss', '🐉 Босс'),
             types.BotCommand('eggs', '🥚 Яйца'),
-        ])
+        ]
+        if ADMIN_IDS:
+            cmds.append(types.BotCommand('post_new', '📢 Создать пост'))
+            cmds.append(types.BotCommand('groups', '📋 Список групп'))
+        bot.set_my_commands(cmds)
     except:
         pass
 
