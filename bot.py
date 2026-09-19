@@ -207,6 +207,47 @@ def safe_edit(chat_id, msg_id, text, reply_markup=None):
     except:
         return False
 
+def send_profile(chat_id, user_id, first_name, username):
+    update_username(user_id, first_name, username)
+    p = get_player(user_id, first_name, username)
+    total = p['wins'] + p['losses']
+    wr = round(p['wins'] / total * 100) if total else 0
+    boss_total = p.get('boss_wins',0) + p.get('boss_losses',0)
+    boss_wr = round(p.get('boss_wins',0) / boss_total * 100) if boss_total else 0
+    text = (
+        f"👤 <b>ПРОФИЛЬ</b>\n"
+        f"━━━━━━━━━━━━━━━\n\n"
+        f"<b>{display_name(p)}</b>\n\n"
+        f"⚔️ <b>ДУЭЛИ</b>\n"
+        f"🏆 Побед: <b>{p['wins']}</b>\n"
+        f"💀 Поражений: <b>{p['losses']}</b>\n"
+        f"📊 Винрейт: <b>{wr}%</b>\n\n"
+        f"🐉 <b>БОССЫ</b>\n"
+        f"🏆 Побед: <b>{p.get('boss_wins',0)}</b>\n"
+        f"💀 Поражений: <b>{p.get('boss_losses',0)}</b>\n"
+        f"📊 Винрейт: <b>{boss_wr}%</b>\n\n"
+        f"━━━━━━━━━━━━━━━\n"
+        f"🥚 Яйца: <b>{p.get('eggs',0)}</b>\n"
+        f"❤️ Макс. HP: <b>{p.get('max_hp', BOSS_PLAYER_MIN_HP)}</b>"
+    )
+    bot.send_message(chat_id, text, parse_mode='HTML')
+
+def send_top(chat_id):
+    stats = load_stats()
+    if not stats:
+        bot.send_message(chat_id, "🏆 Пока пусто.")
+        return
+    sorted_stats = sorted(stats.items(), key=lambda x: x[1].get('wins', 0), reverse=True)[:20]
+    text = f"🏆 <b>ТОП ДУЭЛЯНТОВ</b>\n━━━━━━━━━━━━━━━\n\n"
+    placed = 0
+    for i, (uid, p) in enumerate(sorted_stats, 1):
+        if p.get('wins', 0) == 0: continue
+        placed += 1
+        medal = '🥇' if placed==1 else '🥈' if placed==2 else '🥉' if placed==3 else f'<b>{placed}.</b>'
+        text += f"{medal} {display_name(p)}\n     ⚔️ {p['wins']} побед · 💀 {p['losses']}\n\n"
+    if placed == 0: text += "Пока никто не побеждал."
+    bot.send_message(chat_id, text, parse_mode='HTML')
+
 bot = telebot.TeleBot(TOKEN)
 
 class Handler(BaseHTTPRequestHandler):
@@ -421,49 +462,13 @@ def cmd_help(message):
 @bot.message_handler(commands=['profile'])
 def cmd_profile(message):
     remember_group(message.chat)
-    uid = message.from_user.id
-    update_username(uid, message.from_user.first_name, message.from_user.username)
-    p = get_player(uid, message.from_user.first_name, message.from_user.username)
-    total = p['wins'] + p['losses']
-    wr = round(p['wins'] / total * 100) if total else 0
-    boss_total = p.get('boss_wins',0) + p.get('boss_losses',0)
-    boss_wr = round(p.get('boss_wins',0) / boss_total * 100) if boss_total else 0
-    text = (
-        f"👤 <b>ПРОФИЛЬ</b>\n"
-        f"━━━━━━━━━━━━━━━\n\n"
-        f"<b>{display_name(p)}</b>\n\n"
-        f"⚔️ <b>ДУЭЛИ</b>\n"
-        f"🏆 Побед: <b>{p['wins']}</b>\n"
-        f"💀 Поражений: <b>{p['losses']}</b>\n"
-        f"📊 Винрейт: <b>{wr}%</b>\n\n"
-        f"🐉 <b>БОССЫ</b>\n"
-        f"🏆 Побед: <b>{p.get('boss_wins',0)}</b>\n"
-        f"💀 Поражений: <b>{p.get('boss_losses',0)}</b>\n"
-        f"📊 Винрейт: <b>{boss_wr}%</b>\n\n"
-        f"━━━━━━━━━━━━━━━\n"
-        f"🥚 Яйца: <b>{p.get('eggs',0)}</b>\n"
-        f"❤️ Макс. HP: <b>{p.get('max_hp', BOSS_PLAYER_MIN_HP)}</b>"
-    )
-    bot.send_message(message.chat.id, text, parse_mode='HTML')
+    send_profile(message.chat.id, message.from_user.id, message.from_user.first_name, message.from_user.username)
 
 @bot.message_handler(commands=['top'])
 def cmd_top(message):
     remember_group(message.chat)
     update_username(message.from_user.id, message.from_user.first_name, message.from_user.username)
-    stats = load_stats()
-    if not stats:
-        bot.send_message(message.chat.id, "🏆 Пока пусто.")
-        return
-    sorted_stats = sorted(stats.items(), key=lambda x: x[1].get('wins', 0), reverse=True)[:20]
-    text = f"🏆 <b>ТОП ДУЭЛЯНТОВ</b>\n━━━━━━━━━━━━━━━\n\n"
-    placed = 0
-    for i, (uid, p) in enumerate(sorted_stats, 1):
-        if p.get('wins', 0) == 0: continue
-        placed += 1
-        medal = '🥇' if placed==1 else '🥈' if placed==2 else '🥉' if placed==3 else f'<b>{placed}.</b>'
-        text += f"{medal} {display_name(p)}\n     ⚔️ {p['wins']} побед · 💀 {p['losses']}\n\n"
-    if placed == 0: text += "Пока никто не побеждал."
-    bot.send_message(message.chat.id, text, parse_mode='HTML')
+    send_top(message.chat.id)
 
 # ===== ЯЙЦА =====
 def eggs_menu_text(uid):
@@ -525,16 +530,14 @@ def cmd_boss(message):
         return
     update_username(message.from_user.id, message.from_user.first_name, message.from_user.username)
 
-    # Разбираем номер босса из команды
-    cmd = message.text.split()[0].replace('/', '').replace('@', ' ').split()[0]
+    cmd = message.text.split()[0].replace('/', '')
+    if '@' in cmd: cmd = cmd.split('@')[0]
     boss_num = None
     if cmd == 'boss':
-        # Если просто /boss — показываем список
         text = f"🐉 <b>ВЫБОР БОССА</b>\n━━━━━━━━━━━━━━━\n\n"
         for num, b in BOSSES.items():
             text += f"{num}️⃣ {b['emoji']} <b>{b['name']}</b>\n     ❤️ {b['hp']} HP · 🥚 +{b['eggs']} яиц\n\n"
-        text += f"<i>Напиши команду:</i>\n"
-        text += f"<code>/boss1</code> ... <code>/boss7</code>"
+        text += f"<i>Напиши команду:</i>\n<code>/boss1</code> ... <code>/boss7</code>"
         bot.send_message(message.chat.id, text, parse_mode='HTML')
         return
     else:
@@ -616,8 +619,7 @@ def boss_lobby_text(game):
 
 def boss_lobby_tick(chat_id):
     game = get_boss(chat_id)
-    if not game or game.get('status') != 'lobby':
-        return
+    if not game or game.get('status') != 'lobby': return
     left = game.get('deadline', 0) - int(time.time())
     if left <= 0: return
     if game.get('lobby_msg_id'):
@@ -1074,26 +1076,36 @@ def duel_cb(call):
         safe_edit(chat_id, duel['msg_id'], duel_status_text(duel), duel_kb(duel))
         bot.answer_callback_query(call.id)
 
-# ===== МЕНЮ =====
+# ===== МЕНЮ (кнопки работают от имени ЮЗЕРА) =====
 @bot.callback_query_handler(func=lambda c: c.data.startswith('menu_'))
 def menu_cb(call):
     data = call.data
-    uid = call.from_user.id
-    update_username(uid, call.from_user.first_name, call.from_user.username)
+    u = call.from_user
+    uid = u.id
+    chat_id = call.message.chat.id
+    update_username(uid, u.first_name, u.username)
+
     if data == 'menu_profile':
-        cmd_profile(call.message)
+        send_profile(chat_id, uid, u.first_name, u.username)
     elif data == 'menu_top':
-        cmd_top(call.message)
+        send_top(chat_id)
     elif data == 'menu_duel':
-        bot.send_message(call.message.chat.id, "⚔️ В группе ответь на сообщение игрока и напиши /duel")
+        bot.send_message(chat_id, "⚔️ В группе ответь на сообщение игрока и напиши /duel")
     elif data == 'menu_boss':
-        bot.send_message(call.message.chat.id, "🐉 Напиши /boss1 ... /boss7 чтобы выбрать босса")
+        bot.send_message(chat_id, "🐉 Напиши /boss1 ... /boss7 чтобы выбрать босса")
     elif data == 'menu_eggs':
-        bot.send_message(call.message.chat.id, eggs_menu_text(uid), parse_mode='HTML', reply_markup=eggs_menu_kb())
+        bot.send_message(chat_id, eggs_menu_text(uid), parse_mode='HTML', reply_markup=eggs_menu_kb())
     elif data == 'menu_help':
-        cmd_help(call.message)
+        text = (
+            f"💬 <b>ПОМОЩЬ</b>\n"
+            f"━━━━━━━━━━━━━━━\n\n"
+            f"⚔️ <b>Дуэли:</b> <code>/duel</code> в ответ на сообщение\n"
+            f"🐉 <b>Боссы:</b> <code>/boss1</code> ... <code>/boss7</code>\n"
+            f"🥚 <b>Яйца:</b> <code>/eggs</code>"
+        )
+        bot.send_message(chat_id, text, parse_mode='HTML')
     elif data == 'menu_back':
-        bot.send_message(call.message.chat.id, "🎭 Меню:", reply_markup=main_menu())
+        bot.send_message(chat_id, "🎭 Меню:", reply_markup=main_menu())
     bot.answer_callback_query(call.id)
 
 def set_commands():
