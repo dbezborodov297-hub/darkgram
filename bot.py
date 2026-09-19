@@ -15,7 +15,7 @@ ADMIN_IDS = [8907438590]
 
 WEBAPP_URL = 'https://darkgram-fkc2.onrender.com/'
 
-TOKEN = '8901361348:AAGYbuQL1Lm5kfXo4Awqd5z4BX8Sn4peF4o'
+TOKEN = '8901361348:AAFt5i0FTeg4Xi6SalfzE3xFCNJzepRg2IA'
 
 def load_json(filename, default):
     if not os.path.exists(filename):
