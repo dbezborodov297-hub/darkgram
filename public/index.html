@@ -8,246 +8,121 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
---bg:#0a0e14;
---bg-2:#0f141c;
---card:#141a24;
---card-2:#1a2130;
---line:#232c3a;
---line-2:#2d3849;
---accent:#4d8fd6;
---accent-2:#6ba6e3;
---text:#ffffff;
---text-dim:#8b9aab;
---muted:#5a6b7d;
+--bg:#0a0e14;--bg-2:#0f141c;--card:#141a24;--card-2:#1a2130;
+--line:#232c3a;--line-2:#2d3849;--accent:#4d8fd6;--accent-2:#6ba6e3;
+--text:#ffffff;--text-dim:#8b9aab;--muted:#5a6b7d;--green:#4dcd5e;
+--my-bubble:#4d8fd6;--their-bubble:#1f2937;
 }
 html,body{height:100%;overflow-x:hidden}
 body{
 font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;
 background:radial-gradient(ellipse at top, #131a26 0%, #0a0e14 60%);
-background-attachment:fixed;
-color:var(--text);
+background-attachment:fixed;color:var(--text);
 -webkit-font-smoothing:antialiased;
 font-size:15px;line-height:1.45;
 padding-bottom:50px;min-height:100vh;
 }
 
-.header{
-background:rgba(20,26,36,0.7);
-backdrop-filter:blur(20px);
--webkit-backdrop-filter:blur(20px);
-border-bottom:1px solid var(--line);
-position:sticky;top:0;z-index:50;
-}
-.header-inner{
-max-width:860px;margin:0 auto;
-padding:14px 18px;
-display:flex;justify-content:space-between;align-items:center;
-}
+.header{background:rgba(20,26,36,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+.header-inner{max-width:860px;margin:0 auto;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
 .logo{font-size:20px;font-weight:700;letter-spacing:-.3px}
 .logo-sub{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:2px}
+.online-badge{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text-dim);background:var(--card-2);border:1px solid var(--line);padding:6px 12px;border-radius:10px}
+.online-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
 
-.tabs{
-display:flex;max-width:860px;margin:0 auto;
-padding:0 12px;
-background:rgba(20,26,36,0.7);
-backdrop-filter:blur(20px);
--webkit-backdrop-filter:blur(20px);
-border-bottom:1px solid var(--line);
-position:sticky;top:63px;z-index:49;
-overflow-x:auto;scrollbar-width:none;
-}
+.tabs{display:flex;max-width:860px;margin:0 auto;padding:0 12px;background:rgba(20,26,36,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--line);position:sticky;top:63px;z-index:49;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
-.tab{
-flex-shrink:0;padding:14px 18px;
-font-size:13px;font-weight:600;
-color:var(--muted);cursor:pointer;
-border-bottom:2px solid transparent;
-background:transparent;border-top:none;border-left:none;border-right:none;
-font-family:inherit;white-space:nowrap;
-transition:all .2s;
-}
+.tab{flex-shrink:0;padding:14px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:transparent;border-top:none;border-left:none;border-right:none;font-family:inherit;white-space:nowrap;transition:color .2s}
 .tab.active{color:var(--accent-2);border-bottom-color:var(--accent-2)}
 .tab.hidden{display:none}
 
 .container{max-width:860px;margin:0 auto;padding:18px}
 .page{display:none}
-.page.active{display:block;animation:fadeIn .3s}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.page.active{display:block}
 
-/* PROFILE CARD */
-.profile-card{
-background:var(--card);
-border:1px solid var(--line);
-border-radius:20px;
-padding:28px 22px;
-text-align:center;
-margin-bottom:16px;
-}
-.avatar-wrap{
-width:110px;height:110px;
-margin:0 auto 18px;
-position:relative;
-}
-.avatar{
-width:110px;height:110px;
-border-radius:50%;
-background:linear-gradient(135deg,var(--accent),var(--accent-2));
-display:flex;align-items:center;justify-content:center;
-font-size:44px;font-weight:700;color:#fff;
-overflow:hidden;
-border:3px solid var(--card-2);
-}
+/* PROFILE */
+.profile-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 22px;text-align:center;margin-bottom:14px}
+.avatar-wrap{width:110px;height:110px;margin:0 auto 16px;position:relative}
+.avatar{width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:700;color:#fff;overflow:hidden;border:3px solid var(--card-2)}
 .avatar img{width:100%;height:100%;object-fit:cover;display:block}
-.profile-name{font-size:22px;font-weight:700;letter-spacing:-.3px;margin-bottom:6px}
-.profile-username{font-size:14px;color:var(--accent-2);font-weight:600;margin-bottom:14px}
-.profile-id{
-display:inline-block;
-font-size:12px;
-color:var(--muted);
-background:var(--card-2);
-border:1px solid var(--line-2);
-padding:6px 14px;
-border-radius:10px;
-font-family:monospace;
-}
+.avatar-edit{position:absolute;bottom:0;right:0;width:34px;height:34px;border-radius:50%;background:var(--accent);border:3px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:#fff;font-weight:700}
+.profile-name{font-size:21px;font-weight:700;letter-spacing:-.3px;margin-bottom:5px}
+.profile-username{font-size:14px;color:var(--accent-2);font-weight:600;margin-bottom:12px}
+.profile-id{display:inline-block;font-size:12px;color:var(--muted);background:var(--card-2);border:1px solid var(--line-2);padding:6px 14px;border-radius:10px;font-family:monospace}
 
-/* INFO CARD */
-.info-card{
-background:var(--card);
-border:1px solid var(--line);
-border-radius:16px;
-padding:20px;
-margin-bottom:16px;
-}
-.card-title{
-font-size:13px;
-font-weight:700;
-color:var(--muted);
-text-transform:uppercase;
-letter-spacing:1.5px;
-margin-bottom:14px;
-display:flex;
-align-items:center;
-gap:8px;
-}
-.field{margin-bottom:14px}
+.info-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+.card-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px}
+.field{margin-bottom:12px}
 .field:last-child{margin-bottom:0}
-.field label{
-display:block;
-font-size:11px;
-font-weight:700;
-color:var(--muted);
-text-transform:uppercase;
-letter-spacing:1.2px;
-margin-bottom:8px;
-}
-.field input,
-.field textarea{
-width:100%;
-background:var(--bg);
-border:1px solid var(--line-2);
-border-radius:12px;
-padding:13px 15px;
-color:var(--text);
-font-size:15px;
-font-family:inherit;
-transition:border-color .15s;
-resize:none;
-}
-.field textarea{min-height:90px;line-height:1.4}
-.field input:focus,
-.field textarea:focus{outline:none;border-color:var(--accent)}
-.field input::placeholder,
-.field textarea::placeholder{color:var(--muted)}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px}
+.field input,.field textarea{width:100%;background:var(--bg);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-family:inherit;transition:border-color .15s;resize:none}
+.field textarea{min-height:80px;line-height:1.4}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--accent)}
+.field input::placeholder,.field textarea::placeholder{color:var(--muted)}
 
-/* BUTTONS — плоские, без свечения */
-.btn{
-width:100%;
-background:var(--accent);
-color:#fff;
-border:none;
-border-radius:12px;
-padding:14px;
-font-size:15px;
-font-weight:700;
-cursor:pointer;
-font-family:inherit;
-transition:background .15s;
-letter-spacing:.2px;
-margin-top:4px;
-}
+.btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s}
 .btn:hover{background:var(--accent-2)}
 .btn:active{background:#3d7bc2}
 .btn:disabled{background:var(--card-2);color:var(--muted);cursor:not-allowed}
+.btn.small{padding:10px;font-size:14px}
+
+/* SEARCH */
+.search-row{display:flex;gap:8px;margin-bottom:14px}
+.search-row input{flex:1;background:var(--bg);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-family:inherit}
+.search-row input:focus{outline:none;border-color:var(--accent)}
+.search-row button{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:0 18px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+
+/* DIALOGS */
+.dialog-item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .15s}
+.dialog-item:active{background:var(--card-2)}
+.dialog-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden}
+.dialog-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.dialog-info{flex:1;min-width:0}
+.dialog-name{font-size:15px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dialog-last{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* CHAT */
+.chat-header{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:12px}
+.chat-back{font-size:22px;color:var(--accent-2);cursor:pointer;padding:0 6px;line-height:1}
+.chat-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden}
+.chat-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.chat-name{font-size:15px;font-weight:700}
+
+.chat-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;height:55vh;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:6px;scrollbar-width:thin}
+.chat-box::-webkit-scrollbar{width:4px}
+.chat-box::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px}
+
+.msg{max-width:78%;padding:9px 13px;border-radius:14px;font-size:14px;line-height:1.4;word-wrap:break-word;animation:fadeIn .15s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.msg.me{align-self:flex-end;background:var(--my-bubble);color:#fff;border-bottom-right-radius:4px}
+.msg.them{align-self:flex-start;background:var(--their-bubble);color:var(--text);border-bottom-left-radius:4px}
+
+.chat-input-row{display:flex;gap:8px}
+.chat-input-row input{flex:1;background:var(--bg);border:1px solid var(--line-2);border-radius:12px;padding:12px 14px;color:var(--text);font-size:15px;font-family:inherit}
+.chat-input-row input:focus{outline:none;border-color:var(--accent)}
+.chat-input-row button{background:var(--accent);color:#fff;border:none;border-radius:12px;padding:0 18px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+
+/* USER CARD */
+.user-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center;margin-bottom:14px}
+.user-card .avatar-wrap{width:90px;height:90px;margin-bottom:14px}
+.user-card .avatar{width:90px;height:90px;font-size:36px}
 
 /* UPLOAD */
-.upload{
-border:2px dashed var(--line-2);
-border-radius:14px;
-padding:24px 16px;
-text-align:center;
-cursor:pointer;
-background:var(--bg);
-position:relative;
-overflow:hidden;
-transition:border-color .2s;
-}
-.upload:active{border-color:var(--accent)}
+.upload{border:2px dashed var(--line-2);border-radius:14px;padding:22px 16px;text-align:center;cursor:pointer;background:var(--bg);position:relative;overflow:hidden}
 .upload input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.upload-icon{font-size:32px;color:var(--muted);margin-bottom:8px;display:block}
+.upload-icon{font-size:30px;color:var(--muted);margin-bottom:6px;display:block}
 .upload-text{font-size:13px;color:var(--muted);font-weight:600}
-.upload-preview{
-max-width:100%;max-height:280px;
-border-radius:12px;
-display:block;
-margin:0 auto;
-}
+.upload-preview{max-width:100%;max-height:260px;border-radius:12px;display:block;margin:0 auto}
 
-.toast{
-position:fixed;bottom:24px;left:50%;
-transform:translateX(-50%) translateY(120%);
-background:var(--card-2);
-border:1px solid var(--line-2);
-color:var(--text);
-padding:14px 22px;
-border-radius:14px;
-font-size:14px;
-font-weight:600;
-z-index:99999;
-opacity:0;
-transition:all .25s;
-pointer-events:none;
-max-width:90vw;
-text-align:center;
-}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--card-2);border:1px solid var(--line-2);color:var(--text);padding:13px 20px;border-radius:12px;font-size:14px;font-weight:600;z-index:99999;opacity:0;transition:all .25s;pointer-events:none;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-.empty{
-text-align:center;
-padding:60px 24px;
-color:var(--muted);
-}
-.empty-box{
-width:72px;height:72px;
-margin:0 auto 18px;
-border:2px solid var(--line);
-border-radius:20px;
-display:flex;align-items:center;justify-content:center;
-font-size:26px;color:var(--muted);
-background:var(--card);
-}
-.empty-title{font-size:16px;font-weight:700;color:var(--text-dim);margin-bottom:6px}
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty-box{width:68px;height:68px;margin:0 auto 16px;border:2px solid var(--line);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--muted);background:var(--card)}
+.empty-title{font-size:15px;font-weight:700;color:var(--text-dim);margin-bottom:5px}
 .empty-desc{font-size:13px}
 
-.loading{
-text-align:center;
-padding:60px 20px;
-color:var(--muted);
-font-size:12px;
-font-weight:700;
-letter-spacing:2px;
-text-transform:uppercase;
-}
+.loading{text-align:center;padding:50px 20px;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
 </style>
 </head>
 <body>
@@ -258,16 +133,21 @@ text-transform:uppercase;
       <div class="logo">Darkgram</div>
       <div class="logo-sub">profile</div>
     </div>
+    <div class="online-badge"><span class="online-dot"></span><span id="onlineCount">0</span> онлайн</div>
   </div>
 </div>
 
 <div class="tabs" id="tabsBar">
   <button class="tab active" onclick="switchTab('profile', event)">Профиль</button>
-  <button class="tab hidden" id="postTab" onclick="switchTab('post', event)">Создать пост</button>
+  <button class="tab" onclick="switchTab('search', event)">Поиск</button>
+  <button class="tab" onclick="switchTab('dialogs', event)">Сообщения</button>
+  <button class="tab hidden" id="postTab" onclick="switchTab('post', event)">Пост</button>
 </div>
 
 <div class="container">
   <div class="page active" id="page-profile"><div id="profileContent"><div class="loading">Загрузка...</div></div></div>
+  <div class="page" id="page-search"><div id="searchContent"></div></div>
+  <div class="page" id="page-dialogs"><div id="dialogsContent"></div></div>
   <div class="page" id="page-post"><div id="postContent"></div></div>
 </div>
 
@@ -280,21 +160,22 @@ if (tg) { tg.ready(); tg.expand(); }
 const urlParams = new URLSearchParams(window.location.search);
 const TG_USER_ID = urlParams.get('user_id') || tg?.initDataUnsafe?.user?.id || null;
 const TG_FIRST_NAME = tg?.initDataUnsafe?.user?.first_name || 'Аноним';
+const TG_USERNAME = tg?.initDataUnsafe?.user?.username || '';
 const TG_PHOTO_URL = tg?.initDataUnsafe?.user?.photo_url || '';
 
 let isAdmin = false;
+let currentChatId = null;
+let chatPollTimer = null;
+let lastMsgTs = 0;
 let postMediaData = null;
 let postMediaType = '';
+let onlineTimer = null;
 
 async function api(url, opts = {}) {
   try {
     const c = new AbortController();
-    const t = setTimeout(() => c.abort(), 20000);
-    const r = await fetch(url, {
-      headers: {'Content-Type':'application/json'},
-      signal: c.signal,
-      ...opts
-    });
+    const t = setTimeout(() => c.abort(), 15000);
+    const r = await fetch(url, {headers:{'Content-Type':'application/json'}, signal:c.signal, ...opts});
     clearTimeout(t);
     return await r.json();
   } catch (e) { return null; }
@@ -312,20 +193,50 @@ function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function initials(name) { return (name || 'A')[0].toUpperCase(); }
+
+function avatarHTML(url, name) {
+  if (url) return `<img src="${esc(url)}" alt="">`;
+  return esc(initials(name));
+}
+
 function switchTab(name, event) {
   if (event) event.preventDefault();
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const tabs = ['profile','post'];
+  const tabs = ['profile','search','dialogs','post'];
   const idx = tabs.indexOf(name);
   const els = document.querySelectorAll('.tab');
   if (idx >= 0 && els[idx]) els[idx].classList.add('active');
   const pg = document.getElementById('page-' + name);
   if (pg) pg.classList.add('active');
   if (name === 'profile') loadProfile();
+  if (name === 'search') loadSearch();
+  if (name === 'dialogs') loadDialogs();
   if (name === 'post') loadPost();
+  if (name !== 'dialogs') stopChatPoll();
 }
 
+/* ONLINE */
+async function updateOnline() {
+  const data = await api('/api/online') || {};
+  const el = document.getElementById('onlineCount');
+  if (el) el.textContent = data.count || 0;
+}
+
+async function heartbeat() {
+  if (!TG_USER_ID) return;
+  await api('/api/heartbeat', {
+    method: 'POST',
+    body: JSON.stringify({
+      user_id: TG_USER_ID,
+      first_name: TG_FIRST_NAME,
+      username: TG_USERNAME
+    })
+  });
+}
+
+/* PROFILE */
 async function loadProfile() {
   const el = document.getElementById('profileContent');
   if (!el) return;
@@ -335,16 +246,20 @@ async function loadProfile() {
   }
   const data = await api('/api/profile/' + TG_USER_ID) || {};
 
-  const initials = (data.first_name || 'A')[0].toUpperCase();
-  const avatarHTML = TG_PHOTO_URL
-    ? `<img src="${esc(TG_PHOTO_URL)}" alt="" onerror="this.parentNode.innerHTML='${esc(initials)}'">`
-    : esc(initials);
-  const usernameText = data.username ? '@' + data.username : 'без @username';
+  const avatarSrc = data.avatar || TG_PHOTO_URL || '';
+  const initialsText = initials(data.first_name || TG_FIRST_NAME);
+  const avatarInner = avatarSrc
+    ? `<img src="${esc(avatarSrc)}" onerror="this.parentNode.innerHTML='${esc(initialsText)}'">`
+    : esc(initialsText);
+
+  const usernameText = data.username ? '@' + data.username : (TG_USERNAME ? '@' + TG_USERNAME : 'без @username');
 
   el.innerHTML = `
     <div class="profile-card">
       <div class="avatar-wrap">
-        <div class="avatar">${avatarHTML}</div>
+        <div class="avatar">${avatarInner}</div>
+        <div class="avatar-edit" onclick="document.getElementById('avatarFileInput').click()">+</div>
+        <input type="file" id="avatarFileInput" accept="image/*" style="display:none">
       </div>
       <div class="profile-name">${esc(data.first_name || TG_FIRST_NAME)}</div>
       <div class="profile-username">${esc(usernameText)}</div>
@@ -369,6 +284,57 @@ async function loadProfile() {
       <button class="btn" onclick="saveProfile()">Сохранить</button>
     </div>
   `;
+
+  // Загрузка аватарки
+  const af = document.getElementById('avatarFileInput');
+  if (af) {
+    af.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 3 * 1024 * 1024) {
+        showToast('Аватар до 3 МБ');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        // Сжимаем через canvas
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const size = 300;
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          const min = Math.min(img.width, img.height);
+          const sx = (img.width - min) / 2;
+          const sy = (img.height - min) / 2;
+          ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          saveAvatar(dataUrl);
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+}
+
+async function saveAvatar(dataUrl) {
+  const res = await api('/api/profile/save', {
+    method: 'POST',
+    body: JSON.stringify({
+      user_id: TG_USER_ID,
+      bio: document.getElementById('bioInput').value.trim(),
+      phone: document.getElementById('phoneInput').value.trim(),
+      avatar: dataUrl
+    })
+  });
+  if (res && res.ok) {
+    showToast('Аватарка обновлена!');
+    loadProfile();
+  } else {
+    showToast('Ошибка');
+  }
 }
 
 async function saveProfile() {
@@ -383,6 +349,162 @@ async function saveProfile() {
   else showToast('Ошибка');
 }
 
+/* SEARCH */
+function loadSearch() {
+  const el = document.getElementById('searchContent');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="info-card">
+      <div class="card-title">Поиск по @username</div>
+      <div class="search-row">
+        <input type="text" id="searchInput" placeholder="@username" maxlength="50">
+        <button onclick="doSearch()">Найти</button>
+      </div>
+    </div>
+    <div id="searchResult"></div>
+  `;
+}
+
+async function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) { showToast('Введи @username'); return; }
+  const res = await api('/api/find/' + encodeURIComponent(q));
+  const box = document.getElementById('searchResult');
+  if (res && res.ok) {
+    const u = res.user;
+    const isMe = String(u.id) === String(TG_USER_ID);
+    const avatarSrc = u.avatar || '';
+    const inner = avatarSrc
+      ? `<img src="${esc(avatarSrc)}" onerror="this.parentNode.innerHTML='${esc(initials(u.first_name))}'">`
+      : esc(initials(u.first_name));
+    box.innerHTML = `
+      <div class="user-card">
+        <div class="avatar-wrap"><div class="avatar">${inner}</div></div>
+        <div class="profile-name">${esc(u.first_name)}</div>
+        <div class="profile-username">@${esc(u.username || '—')}</div>
+        ${u.bio ? `<div style="margin-top:12px;font-size:14px;color:var(--text-dim)">${esc(u.bio)}</div>` : ''}
+        ${isMe ? '<div style="margin-top:14px;color:var(--muted);font-size:13px">Это ты</div>' : ''}
+      </div>
+      ${!isMe ? `<button class="btn" onclick="openChat('${u.id}')">Написать сообщение</button>` : ''}
+    `;
+  } else {
+    box.innerHTML = '<div class="empty"><div class="empty-box">?</div><div class="empty-title">Не найден</div><div class="empty-desc">Проверь @username</div></div>';
+  }
+}
+
+/* DIALOGS */
+async function loadDialogs() {
+  const el = document.getElementById('dialogsContent');
+  if (!el) return;
+  const data = await api('/api/dialogs/' + TG_USER_ID) || [];
+  if (!data.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-box">💬</div><div class="empty-title">Пока нет чатов</div><div class="empty-desc">Найди юзера во вкладке «Поиск»</div></div>';
+    return;
+  }
+  let html = '';
+  data.forEach(d => {
+    const avatarSrc = d.avatar || '';
+    const inner = avatarSrc
+      ? `<img src="${esc(avatarSrc)}" onerror="this.parentNode.innerHTML='${esc(initials(d.first_name))}'">`
+      : esc(initials(d.first_name));
+    html += `
+      <div class="dialog-item" onclick="openChat('${d.id}')">
+        <div class="dialog-avatar">${inner}</div>
+        <div class="dialog-info">
+          <div class="dialog-name">${esc(d.first_name)}</div>
+          <div class="dialog-last">${esc(d.last_text)}</div>
+        </div>
+      </div>`;
+  });
+  el.innerHTML = html;
+}
+
+/* CHAT */
+async function openChat(otherId) {
+  currentChatId = otherId;
+  lastMsgTs = 0;
+  switchTab('dialogs');
+  const el = document.getElementById('dialogsContent');
+  const other = await api('/api/profile/' + otherId) || {};
+  const avatarSrc = other.avatar || '';
+  const inner = avatarSrc
+    ? `<img src="${esc(avatarSrc)}" onerror="this.parentNode.innerHTML='${esc(initials(other.first_name))}'">`
+    : esc(initials(other.first_name));
+
+  el.innerHTML = `
+    <div class="chat-header">
+      <div class="chat-back" onclick="backToDialogs()">←</div>
+      <div class="chat-avatar">${inner}</div>
+      <div class="chat-name">${esc(other.first_name || 'Юзер')}</div>
+    </div>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Сообщение..." onkeydown="if(event.key==='Enter')sendMsg()">
+      <button onclick="sendMsg()">→</button>
+    </div>
+  `;
+  await loadChatMessages();
+  startChatPoll();
+}
+
+async function loadChatMessages() {
+  if (!currentChatId) return;
+  const msgs = await api(`/api/chat/${TG_USER_ID}/${currentChatId}/${lastMsgTs}`) || [];
+  if (!Array.isArray(msgs) || !msgs.length) return;
+  const box = document.getElementById('chatBox');
+  if (!box) return;
+  msgs.forEach(m => {
+    appendMessage(m);
+    if (m.ts > lastMsgTs) lastMsgTs = m.ts;
+  });
+  box.scrollTop = box.scrollHeight;
+}
+
+function appendMessage(m) {
+  const box = document.getElementById('chatBox');
+  if (!box) return;
+  const isMe = String(m.from) === String(TG_USER_ID);
+  const div = document.createElement('div');
+  div.className = 'msg ' + (isMe ? 'me' : 'them');
+  div.textContent = m.text;
+  box.appendChild(div);
+}
+
+async function sendMsg() {
+  const input = document.getElementById('chatInput');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  // Мгновенно показываем своё сообщение
+  const tempMsg = {from: TG_USER_ID, to: currentChatId, text, ts: Date.now()};
+  appendMessage(tempMsg);
+  const box = document.getElementById('chatBox');
+  if (box) box.scrollTop = box.scrollHeight;
+  lastMsgTs = tempMsg.ts;
+  // Отправляем на сервер
+  await api('/api/chat/send', {
+    method: 'POST',
+    body: JSON.stringify({from_id: TG_USER_ID, to_id: currentChatId, text})
+  });
+}
+
+function startChatPoll() {
+  stopChatPoll();
+  chatPollTimer = setInterval(loadChatMessages, 3000);
+}
+
+function stopChatPoll() {
+  if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
+}
+
+function backToDialogs() {
+  stopChatPoll();
+  currentChatId = null;
+  loadDialogs();
+}
+
+/* POST */
 async function loadPost() {
   const el = document.getElementById('postContent');
   if (!el) return;
@@ -405,7 +527,7 @@ async function loadPost() {
         <input type="file" id="postFileInput" accept="image/*,video/*">
         <div id="postUploadPlaceholder">
           <span class="upload-icon">+</span>
-          <div class="upload-text">Нажми, чтобы выбрать фото или видео</div>
+          <div class="upload-text">Выбери фото или видео</div>
         </div>
         <img id="postPreview" class="upload-preview" style="display:none">
         <video id="postVideoPreview" class="upload-preview" style="display:none" controls></video>
@@ -424,25 +546,16 @@ async function loadPost() {
     fi.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
-
-      // Проверка размера — Telegram принимает до 50 МБ для видео
-      if (file.size > 50 * 1024 * 1024) {
-        showToast('Файл больше 50 МБ');
-        return;
-      }
-
+      if (file.size > 50 * 1024 * 1024) { showToast('Файл до 50 МБ'); return; }
       const isVideo = file.type.startsWith('video/');
       const isImage = file.type.startsWith('image/');
-
       const reader = new FileReader();
       reader.onload = (ev) => {
         postMediaData = ev.target.result;
         postMediaType = isVideo ? 'video' : (isImage ? 'photo' : '');
-
         const imgPreview = document.getElementById('postPreview');
         const vidPreview = document.getElementById('postVideoPreview');
         const ph = document.getElementById('postUploadPlaceholder');
-
         if (isVideo) {
           imgPreview.style.display = 'none';
           vidPreview.src = postMediaData;
@@ -462,10 +575,7 @@ async function loadPost() {
 async function publishPost() {
   if (!TG_USER_ID) return;
   const text = document.getElementById('postText').value.trim();
-  if (!text && !postMediaData) {
-    showToast('Напиши текст или добавь медиа');
-    return;
-  }
+  if (!text && !postMediaData) { showToast('Напиши текст или добавь медиа'); return; }
   if (!confirm('Опубликовать во все группы и всем юзерам?')) return;
   showToast('Отправляю...');
   const res = await api('/api/post/create', {
@@ -480,8 +590,7 @@ async function publishPost() {
   if (res && res.ok) {
     showToast('Опубликовано!');
     document.getElementById('postText').value = '';
-    postMediaData = null;
-    postMediaType = '';
+    postMediaData = null; postMediaType = '';
     const imgPreview = document.getElementById('postPreview');
     const vidPreview = document.getElementById('postVideoPreview');
     const ph = document.getElementById('postUploadPlaceholder');
@@ -504,8 +613,14 @@ async function checkAdmin() {
 }
 
 async function init() {
+  await heartbeat();
   await checkAdmin();
+  await updateOnline();
   await loadProfile();
+  onlineTimer = setInterval(async () => {
+    await heartbeat();
+    await updateOnline();
+  }, 30000);
 }
 
 init();
