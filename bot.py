@@ -78,6 +78,7 @@ bot = telebot.TeleBot(TOKEN)
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, format, *args): pass
+
     def send_json(self, data, code=200):
         self.send_response(code)
         self.send_header('Content-Type', 'application/json')
@@ -111,6 +112,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/' or self.path.startswith('/index.html') or self.path.startswith('/?'):
             self.send_html(); return
+
         if self.path.startswith('/api/profile/'):
             try:
                 user_id = self.path.split('/api/profile/')[-1]
@@ -125,12 +127,14 @@ class Handler(BaseHTTPRequestHandler):
                 }); return
             except Exception as e:
                 self.send_json({'error': str(e)}, 500); return
+
         if self.path.startswith('/api/is_admin/'):
             try:
                 user_id = self.path.split('/api/is_admin/')[-1]
                 self.send_json({'is_admin': is_admin_id(user_id)}); return
             except Exception as e:
                 self.send_json({'error': str(e)}, 500); return
+
         self.send_response(200)
         self.send_header('Content-Type', 'text/plain')
         self.end_headers()
@@ -138,6 +142,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         data = self.read_body()
+
         if self.path == '/api/profile/save':
             try:
                 user_id = str(data.get('user_id', ''))
@@ -152,27 +157,36 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json({'ok': True}); return
             except Exception as e:
                 self.send_json({'error': str(e)}, 500); return
+
         if self.path == '/api/post/create':
             try:
                 admin_id = str(data.get('user_id', ''))
                 if not is_admin_id(admin_id):
                     self.send_json({'ok': False, 'error': 'not_admin'}); return
+
                 text = str(data.get('text', '')).strip()
-                image = data.get('image', '')
-                if not text and not image:
+                media = data.get('media', '')          # base64
+                media_type = data.get('media_type', '') # 'photo' или 'video'
+
+                if not text and not media:
                     self.send_json({'ok': False, 'error': 'empty'}); return
+
                 post = {
                     'id': 'p_' + str(int(time.time() * 1000)),
-                    'text': text, 'image': image,
+                    'text': text,
+                    'media': media,
+                    'media_type': media_type,
                     'created_at': int(time.time() * 1000)
                 }
                 posts = load_posts()
                 posts.append(post)
                 save_posts(posts)
+
                 threading.Thread(target=broadcast_post, args=[post]).start()
                 self.send_json({'ok': True, 'post': post}); return
             except Exception as e:
                 self.send_json({'error': str(e)}, 500); return
+
         self.send_response(404)
         self.end_headers()
 
@@ -180,22 +194,28 @@ def broadcast_post(post):
     stats = load_stats()
     groups = load_groups()
     text = post.get('text', '')
-    image = post.get('image', '')
+    media = post.get('media', '')
+    media_type = post.get('media_type', '')
+
     for cid in list(groups.keys()):
         try:
-            send_post_to_chat(int(cid), text, image)
+            send_post_to_chat(int(cid), text, media, media_type)
             time.sleep(0.05)
         except: pass
     for uid in list(stats.keys()):
         try:
-            send_post_to_chat(int(uid), text, image)
+            send_post_to_chat(int(uid), text, media, media_type)
             time.sleep(0.05)
         except: pass
 
-def send_post_to_chat(chat_id, text, image):
+def send_post_to_chat(chat_id, text, media, media_type):
     try:
-        if image:
-            bot.send_photo(chat_id, image, caption=text, parse_mode='HTML')
+        if media and media_type == 'photo':
+            bot.send_photo(chat_id, media, caption=text, parse_mode='HTML')
+        elif media and media_type == 'video':
+            bot.send_video(chat_id, media, caption=text, parse_mode='HTML')
+        elif media:
+            bot.send_document(chat_id, media, caption=text, parse_mode='HTML')
         else:
             bot.send_message(chat_id, text, parse_mode='HTML')
     except:
