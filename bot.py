@@ -14,7 +14,7 @@ ADMIN_IDS = [8907438590]
 
 WEBAPP_URL = 'https://darkgram-fkc2.onrender.com/'
 
-TOKEN = os.environ.get('BOT_TOKEN', '')
+TOKEN = os.environ.get('8901361348:AAFt5i0FTeg4Xi6SalfzE3xFCNJzepRg2IA')
 
 def load_json(filename, default):
     if not os.path.exists(filename):
