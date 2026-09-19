@@ -11,10 +11,9 @@ POSTS_FILE = 'posts_api.json'
 GROUPS_FILE = 'groups.json'
 
 ADMIN_IDS = [8907438590]
-
 WEBAPP_URL = 'https://darkgram-fkc2.onrender.com/'
 
-TOKEN = os.environ.get('8901361348:AAFH5WEtT3gJy_rd2TYTbX1nDqCzOpMJ3Kw')
+TOKEN = '8901361348:AAFH5WEtT3gJy_rd2TYTbX1nDqCzOpMJ3Kw'
 
 def load_json(filename, default):
     if not os.path.exists(filename):
@@ -60,8 +59,7 @@ def get_user(user_id, first_name='Аноним', username=''):
         stats[key] = {
             'first_name': first_name or 'Аноним',
             'username': username or '',
-            'bio': '',
-            'phone': ''
+            'bio': '', 'phone': ''
         }
     else:
         stats[key]['first_name'] = first_name or stats[key].get('first_name', 'Аноним')
@@ -80,7 +78,6 @@ bot = telebot.TeleBot(TOKEN)
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, format, *args): pass
-
     def send_json(self, data, code=200):
         self.send_response(code)
         self.send_header('Content-Type', 'application/json')
@@ -89,8 +86,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(data, ensure_ascii=False).encode())
 
     def send_html(self):
-        paths = ['public/index.html', 'index.html']
-        for path in paths:
+        for path in ['public/index.html', 'index.html']:
             try:
                 with open(path, 'rb') as f:
                     content = f.read()
@@ -115,7 +111,6 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/' or self.path.startswith('/index.html') or self.path.startswith('/?'):
             self.send_html(); return
-
         if self.path.startswith('/api/profile/'):
             try:
                 user_id = self.path.split('/api/profile/')[-1]
@@ -130,22 +125,12 @@ class Handler(BaseHTTPRequestHandler):
                 }); return
             except Exception as e:
                 self.send_json({'error': str(e)}, 500); return
-
         if self.path.startswith('/api/is_admin/'):
             try:
                 user_id = self.path.split('/api/is_admin/')[-1]
                 self.send_json({'is_admin': is_admin_id(user_id)}); return
             except Exception as e:
                 self.send_json({'error': str(e)}, 500); return
-
-        if self.path == '/api/groups':
-            self.send_json(load_groups()); return
-
-        if self.path == '/api/posts':
-            posts = load_posts()
-            posts.sort(key=lambda x: x.get('created_at', 0), reverse=True)
-            self.send_json(posts[:20]); return
-
         self.send_response(200)
         self.send_header('Content-Type', 'text/plain')
         self.end_headers()
@@ -153,7 +138,6 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         data = self.read_body()
-
         if self.path == '/api/profile/save':
             try:
                 user_id = str(data.get('user_id', ''))
@@ -168,7 +152,6 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json({'ok': True}); return
             except Exception as e:
                 self.send_json({'error': str(e)}, 500); return
-
         if self.path == '/api/post/create':
             try:
                 admin_id = str(data.get('user_id', ''))
@@ -180,8 +163,7 @@ class Handler(BaseHTTPRequestHandler):
                     self.send_json({'ok': False, 'error': 'empty'}); return
                 post = {
                     'id': 'p_' + str(int(time.time() * 1000)),
-                    'text': text,
-                    'image': image,
+                    'text': text, 'image': image,
                     'created_at': int(time.time() * 1000)
                 }
                 posts = load_posts()
@@ -191,7 +173,6 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json({'ok': True, 'post': post}); return
             except Exception as e:
                 self.send_json({'error': str(e)}, 500); return
-
         self.send_response(404)
         self.end_headers()
 
@@ -234,13 +215,11 @@ def cmd_start(message):
     remember_group(message.chat)
     uid = message.from_user.id
     get_user(uid, message.from_user.first_name, message.from_user.username)
-
     kb = types.InlineKeyboardMarkup(row_width=1)
     kb.add(types.InlineKeyboardButton(
         text='👤 Открыть профиль',
         web_app=types.WebAppInfo(url=f'{WEBAPP_URL}?user_id={uid}')
     ))
-
     text = (
         f"<b>DARKGRAM</b>\n\n"
         f"Привет, <b>{message.from_user.first_name}</b>!\n\n"
