@@ -2,7 +2,6 @@ import telebot
 import json
 import os
 import time
-import random
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from telebot import types
@@ -15,7 +14,7 @@ ADMIN_IDS = [8907438590]
 
 WEBAPP_URL = 'https://darkgram-fkc2.onrender.com/'
 
-TOKEN = '8901361348:AAFt5i0FTeg4Xi6SalfzE3xFCNJzepRg2IA'
+TOKEN = os.environ.get('BOT_TOKEN', '')
 
 def load_json(filename, default):
     if not os.path.exists(filename):
@@ -188,7 +187,6 @@ class Handler(BaseHTTPRequestHandler):
                 posts = load_posts()
                 posts.append(post)
                 save_posts(posts)
-                # Рассылка
                 threading.Thread(target=broadcast_post, args=[post]).start()
                 self.send_json({'ok': True, 'post': post}); return
             except Exception as e:
