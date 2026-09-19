@@ -19,8 +19,6 @@
 --text:#ffffff;
 --text-dim:#8b9aab;
 --muted:#5a6b7d;
---green:#4dcd5e;
---gold:#e8b64c;
 }
 html,body{height:100%;overflow-x:hidden}
 body{
@@ -78,13 +76,12 @@ transition:all .2s;
 
 /* PROFILE CARD */
 .profile-card{
-background:linear-gradient(180deg,var(--card) 0%,var(--bg-2) 100%);
+background:var(--card);
 border:1px solid var(--line);
 border-radius:20px;
 padding:28px 22px;
 text-align:center;
 margin-bottom:16px;
-box-shadow:0 10px 40px rgba(0,0,0,0.4);
 }
 .avatar-wrap{
 width:110px;height:110px;
@@ -99,7 +96,6 @@ display:flex;align-items:center;justify-content:center;
 font-size:44px;font-weight:700;color:#fff;
 overflow:hidden;
 border:3px solid var(--card-2);
-box-shadow:0 8px 30px rgba(77,143,214,0.35);
 }
 .avatar img{width:100%;height:100%;object-fit:cover;display:block}
 .profile-name{font-size:22px;font-weight:700;letter-spacing:-.3px;margin-bottom:6px}
@@ -122,7 +118,6 @@ border:1px solid var(--line);
 border-radius:16px;
 padding:20px;
 margin-bottom:16px;
-box-shadow:0 6px 25px rgba(0,0,0,0.25);
 }
 .card-title{
 font-size:13px;
@@ -164,11 +159,11 @@ resize:none;
 .field textarea:focus{outline:none;border-color:var(--accent)}
 .field input::placeholder,
 .field textarea::placeholder{color:var(--muted)}
-.field input[readonly]{color:var(--text-dim);cursor:not-allowed}
 
+/* BUTTONS — плоские, без свечения */
 .btn{
 width:100%;
-background:linear-gradient(180deg,var(--accent-2),var(--accent));
+background:var(--accent);
 color:#fff;
 border:none;
 border-radius:12px;
@@ -177,13 +172,13 @@ font-size:15px;
 font-weight:700;
 cursor:pointer;
 font-family:inherit;
-transition:all .15s;
-box-shadow:0 6px 20px rgba(77,143,214,0.4);
+transition:background .15s;
 letter-spacing:.2px;
 margin-top:4px;
 }
-.btn:active{transform:scale(.98);box-shadow:0 3px 12px rgba(77,143,214,0.35)}
-.btn:disabled{background:var(--card-2);color:var(--muted);box-shadow:none;cursor:not-allowed;transform:none}
+.btn:hover{background:var(--accent-2)}
+.btn:active{background:#3d7bc2}
+.btn:disabled{background:var(--card-2);color:var(--muted);cursor:not-allowed}
 
 /* UPLOAD */
 .upload{
@@ -202,7 +197,7 @@ transition:border-color .2s;
 .upload-icon{font-size:32px;color:var(--muted);margin-bottom:8px;display:block}
 .upload-text{font-size:13px;color:var(--muted);font-weight:600}
 .upload-preview{
-max-width:100%;max-height:260px;
+max-width:100%;max-height:280px;
 border-radius:12px;
 display:block;
 margin:0 auto;
@@ -220,11 +215,10 @@ font-size:14px;
 font-weight:600;
 z-index:99999;
 opacity:0;
-transition:all .25s cubic-bezier(.2,.8,.4,1);
+transition:all .25s;
 pointer-events:none;
 max-width:90vw;
 text-align:center;
-box-shadow:0 10px 30px rgba(0,0,0,0.5);
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
@@ -286,16 +280,16 @@ if (tg) { tg.ready(); tg.expand(); }
 const urlParams = new URLSearchParams(window.location.search);
 const TG_USER_ID = urlParams.get('user_id') || tg?.initDataUnsafe?.user?.id || null;
 const TG_FIRST_NAME = tg?.initDataUnsafe?.user?.first_name || 'Аноним';
-const TG_USERNAME = tg?.initDataUnsafe?.user?.username || '';
 const TG_PHOTO_URL = tg?.initDataUnsafe?.user?.photo_url || '';
 
 let isAdmin = false;
-let postImageData = null;
+let postMediaData = null;
+let postMediaType = '';
 
 async function api(url, opts = {}) {
   try {
     const c = new AbortController();
-    const t = setTimeout(() => c.abort(), 8000);
+    const t = setTimeout(() => c.abort(), 20000);
     const r = await fetch(url, {
       headers: {'Content-Type':'application/json'},
       signal: c.signal,
@@ -335,12 +329,10 @@ function switchTab(name, event) {
 async function loadProfile() {
   const el = document.getElementById('profileContent');
   if (!el) return;
-
   if (!TG_USER_ID) {
     el.innerHTML = '<div class="empty"><div class="empty-box">?</div><div class="empty-title">Открой из Telegram</div></div>';
     return;
   }
-
   const data = await api('/api/profile/' + TG_USER_ID) || {};
 
   const initials = (data.first_name || 'A')[0].toUpperCase();
@@ -387,11 +379,8 @@ async function saveProfile() {
     method: 'POST',
     body: JSON.stringify({ user_id: TG_USER_ID, bio, phone })
   });
-  if (res && res.ok) {
-    showToast('Сохранено!');
-  } else {
-    showToast('Ошибка');
-  }
+  if (res && res.ok) showToast('Сохранено!');
+  else showToast('Ошибка');
 }
 
 async function loadPost() {
@@ -411,14 +400,15 @@ async function loadPost() {
     </div>
 
     <div class="info-card">
-      <div class="card-title">Фото</div>
+      <div class="card-title">Фото или видео</div>
       <div class="upload" id="uploadZone">
-        <input type="file" id="postFileInput" accept="image/*">
+        <input type="file" id="postFileInput" accept="image/*,video/*">
         <div id="postUploadPlaceholder">
           <span class="upload-icon">+</span>
-          <div class="upload-text">Нажми, чтобы выбрать фото</div>
+          <div class="upload-text">Нажми, чтобы выбрать фото или видео</div>
         </div>
         <img id="postPreview" class="upload-preview" style="display:none">
+        <video id="postVideoPreview" class="upload-preview" style="display:none" controls></video>
       </div>
     </div>
 
@@ -427,18 +417,41 @@ async function loadPost() {
     </div>
   `;
 
-  postImageData = null;
+  postMediaData = null;
+  postMediaType = '';
   const fi = document.getElementById('postFileInput');
   if (fi) {
     fi.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
+
+      // Проверка размера — Telegram принимает до 50 МБ для видео
+      if (file.size > 50 * 1024 * 1024) {
+        showToast('Файл больше 50 МБ');
+        return;
+      }
+
+      const isVideo = file.type.startsWith('video/');
+      const isImage = file.type.startsWith('image/');
+
       const reader = new FileReader();
       reader.onload = (ev) => {
-        postImageData = ev.target.result;
-        const preview = document.getElementById('postPreview');
+        postMediaData = ev.target.result;
+        postMediaType = isVideo ? 'video' : (isImage ? 'photo' : '');
+
+        const imgPreview = document.getElementById('postPreview');
+        const vidPreview = document.getElementById('postVideoPreview');
         const ph = document.getElementById('postUploadPlaceholder');
-        if (preview) { preview.src = postImageData; preview.style.display = 'block'; }
+
+        if (isVideo) {
+          imgPreview.style.display = 'none';
+          vidPreview.src = postMediaData;
+          vidPreview.style.display = 'block';
+        } else if (isImage) {
+          vidPreview.style.display = 'none';
+          imgPreview.src = postMediaData;
+          imgPreview.style.display = 'block';
+        }
         if (ph) ph.style.display = 'none';
       };
       reader.readAsDataURL(file);
@@ -449,23 +462,31 @@ async function loadPost() {
 async function publishPost() {
   if (!TG_USER_ID) return;
   const text = document.getElementById('postText').value.trim();
-  if (!text && !postImageData) {
-    showToast('Напиши текст или добавь фото');
+  if (!text && !postMediaData) {
+    showToast('Напиши текст или добавь медиа');
     return;
   }
   if (!confirm('Опубликовать во все группы и всем юзерам?')) return;
   showToast('Отправляю...');
   const res = await api('/api/post/create', {
     method: 'POST',
-    body: JSON.stringify({ user_id: TG_USER_ID, text, image: postImageData || '' })
+    body: JSON.stringify({
+      user_id: TG_USER_ID,
+      text: text,
+      media: postMediaData || '',
+      media_type: postMediaType
+    })
   });
   if (res && res.ok) {
     showToast('Опубликовано!');
     document.getElementById('postText').value = '';
-    postImageData = null;
-    const preview = document.getElementById('postPreview');
+    postMediaData = null;
+    postMediaType = '';
+    const imgPreview = document.getElementById('postPreview');
+    const vidPreview = document.getElementById('postVideoPreview');
     const ph = document.getElementById('postUploadPlaceholder');
-    if (preview) { preview.style.display = 'none'; preview.src = ''; }
+    if (imgPreview) { imgPreview.style.display = 'none'; imgPreview.src = ''; }
+    if (vidPreview) { vidPreview.style.display = 'none'; vidPreview.src = ''; }
     if (ph) ph.style.display = 'block';
     const fi = document.getElementById('postFileInput');
     if (fi) fi.value = '';
