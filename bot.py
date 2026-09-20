@@ -23,6 +23,7 @@ DUEL_SHOOT_MAX = 45
 DUEL_AIM_BONUS = 0.9
 DUEL_NOAIM_CHANCE = 0.6
 DUEL_TIMEOUT = 300
+DUEL_STALE_TIMEOUT = 900
 
 BOSS_MIN_PLAYERS = 2
 BOSS_MAX_PLAYERS = 15
@@ -59,54 +60,51 @@ RANKS = [
 ]
 
 SKINS = {
-    'fire':    {'name': 'Fire',    'emoji': '🔥', 'price': 30,  'desc': 'Fire icon'},
-    'star':    {'name': 'Star',    'emoji': '🌟', 'price': 50,  'desc': 'Star icon'},
-    'diamond': {'name': 'Diamond', 'emoji': '💎', 'price': 80,  'desc': 'Diamond icon'},
-    'crown':   {'name': 'Crown',   'emoji': '👑', 'price': 150, 'desc': 'Crown icon'},
-    'dragon':  {'name': 'Dragon',  'emoji': '🐉', 'price': 250, 'desc': 'Dragon icon'},
+    'fire':    {'name': 'Fire',    'emoji': '🔥', 'price': 30},
+    'star':    {'name': 'Star',    'emoji': '🌟', 'price': 50},
+    'diamond': {'name': 'Diamond', 'emoji': '💎', 'price': 80},
+    'crown':   {'name': 'Crown',   'emoji': '👑', 'price': 150},
+    'dragon':  {'name': 'Dragon',  'emoji': '🐉', 'price': 250},
 }
-
 ARMORS = {
-    'light':  {'name': 'Light Armor',  'emoji': '🥼', 'price': 40,  'defense': 10, 'desc': '-10% damage'},
-    'medium': {'name': 'Medium Armor', 'emoji': '🦺', 'price': 90,  'defense': 25, 'desc': '-25% damage'},
-    'heavy':  {'name': 'Heavy Armor',  'emoji': '🛡', 'price': 200, 'defense': 45, 'desc': '-45% damage'},
+    'light':  {'name': 'Light Armor',  'emoji': '🥼', 'price': 40,  'defense': 10},
+    'medium': {'name': 'Medium Armor', 'emoji': '🦺', 'price': 90,  'defense': 25},
+    'heavy':  {'name': 'Heavy Armor',  'emoji': '🛡', 'price': 200, 'defense': 45},
 }
-
 WEAPONS = {
-    'bat':  {'name': 'Bat',    'emoji': '🏏', 'price': 50,  'damage': 15, 'desc': '+15 damage'},
-    'sword':{'name': 'Sword',  'emoji': '⚔️', 'price': 120, 'damage': 35, 'desc': '+35 damage'},
-    'axe':  {'name': 'Axe',    'emoji': '🪓', 'price': 200, 'damage': 60, 'desc': '+60 damage'},
-    'bow':  {'name': 'Bow',    'emoji': '🏹', 'price': 300, 'damage': 90, 'desc': '+90 damage'},
+    'bat':  {'name': 'Bat',    'emoji': '🏏', 'price': 50,  'damage': 15},
+    'sword':{'name': 'Sword',  'emoji': '⚔️', 'price': 120, 'damage': 35},
+    'axe':  {'name': 'Axe',    'emoji': '🪓', 'price': 200, 'damage': 60},
+    'bow':  {'name': 'Bow',    'emoji': '🏹', 'price': 300, 'damage': 90},
 }
-
 PETS = {
-    'cat':    {'name': 'Cat',    'emoji': '🐱', 'price': 60,  'bonus_hp': 25,  'bonus_dia': 0,  'desc': '+25 HP'},
-    'wolf':   {'name': 'Wolf',   'emoji': '🐺', 'price': 150, 'bonus_hp': 50,  'bonus_dia': 1,  'desc': '+50 HP, +1 diamond/mine'},
-    'eagle':  {'name': 'Eagle',  'emoji': '🦅', 'price': 300, 'bonus_hp': 100, 'bonus_dia': 2,  'desc': '+100 HP, +2 diamonds/mine'},
-    'dragon': {'name': 'Dragon', 'emoji': '🐉', 'price': 600, 'bonus_hp': 250, 'bonus_dia': 5,  'desc': '+250 HP, +5 diamonds/mine'},
+    'cat':    {'name': 'Cat',    'emoji': '🐱', 'price': 60,  'bonus_hp': 25,  'bonus_dia': 0},
+    'wolf':   {'name': 'Wolf',   'emoji': '🐺', 'price': 150, 'bonus_hp': 50,  'bonus_dia': 1},
+    'eagle':  {'name': 'Eagle',  'emoji': '🦅', 'price': 300, 'bonus_hp': 100, 'bonus_dia': 2},
+    'dragon': {'name': 'Dragon', 'emoji': '🐉', 'price': 600, 'bonus_hp': 250, 'bonus_dia': 5},
 }
 
 BOSSES = {
-    1: {'name': 'Hungry Wolf',   'emoji': '🐺', 'hp': 1000, 'diamonds': 2},
-    2: {'name': 'Desert Scorpion','emoji': '🦂','hp': 1500, 'diamonds': 3},
-    3: {'name': 'Bloody Lion',   'emoji': '🦁', 'hp': 2000, 'diamonds': 4},
-    4: {'name': 'Fire Demon',    'emoji': '👺', 'hp': 2500, 'diamonds': 5},
-    5: {'name': 'Dark Lord',     'emoji': '👹', 'hp': 3000, 'diamonds': 6},
-    6: {'name': 'Zombie King',   'emoji': '🧟', 'hp': 3500, 'diamonds': 7},
-    7: {'name': 'Ancient Dragon','emoji': '🐉', 'hp': 5000, 'diamonds': 10},
+    1: {'name': 'Hungry Wolf',    'emoji': '🐺', 'hp': 1000, 'diamonds': 2},
+    2: {'name': 'Desert Scorpion','emoji': '🦂', 'hp': 1500, 'diamonds': 3},
+    3: {'name': 'Bloody Lion',    'emoji': '🦁', 'hp': 2000, 'diamonds': 4},
+    4: {'name': 'Fire Demon',     'emoji': '👺', 'hp': 2500, 'diamonds': 5},
+    5: {'name': 'Dark Lord',      'emoji': '👹', 'hp': 3000, 'diamonds': 6},
+    6: {'name': 'Zombie King',    'emoji': '🧟', 'hp': 3500, 'diamonds': 7},
+    7: {'name': 'Ancient Dragon', 'emoji': '🐉', 'hp': 5000, 'diamonds': 10},
 }
 
 DISTRACT = [
-    "🎭 Faked a dodge — enemy's aim broke!",
+    "🎭 Faked a dodge — aim broke!",
     "💨 Dashed sideways!",
-    "🪞 Mirror throw — aim broken!",
+    "🪞 Mirror throw!",
     "🌫 Smoke screen!",
-    "🎪 Backflip — enemy confused!",
+    "🎪 Backflip!",
     "🦅 Soared up!",
-    "🎯 Sand in the eyes!",
+    "🎯 Sand in eyes!",
     "🌀 Sharp roll!",
     "🎺 Shouted loud!",
-    "🌟 Flash — aim broken!",
+    "🌟 Flash!",
 ]
 
 def load_json(f, d):
@@ -129,16 +127,68 @@ def load_clans(): return load_json(CLANS_FILE, {})
 def save_clans(d): save_json(CLANS_FILE, d)
 def load_history(): return load_json(HISTORY_FILE, [])
 
+def get_all_duels(cid):
+    duels = load_duels()
+    val = duels.get(str(cid), [])
+    if isinstance(val, dict):
+        return [val] if val else []
+    return val if isinstance(val, list) else []
+
+def save_all_duels(cid, lst):
+    duels = load_duels()
+    duels[str(cid)] = lst
+    save_duels(duels)
+
+def cleanup_duels(cid):
+    lst = get_all_duels(cid)
+    now = int(time.time())
+    new_lst = [d for d in lst if now - d.get('created', 0) < DUEL_STALE_TIMEOUT]
+    if len(new_lst) != len(lst):
+        save_all_duels(cid, new_lst)
+    return new_lst
+
+def find_duel_by_user(cid, uid):
+    lst = get_all_duels(cid)
+    for d in lst:
+        if uid in (d.get('p1_id'), d.get('p2_id')):
+            return d
+        if d.get('mode') == '2v2' and uid in d.get('team', []):
+            return d
+    return None
+
+def find_duel_by_id(cid, duel_id):
+    lst = get_all_duels(cid)
+    for d in lst:
+        if d.get('id') == duel_id: return d
+    return None
+
+def update_duel(cid, duel):
+    lst = get_all_duels(cid)
+    for i, d in enumerate(lst):
+        if d.get('id') == duel.get('id'):
+            lst[i] = duel
+            save_all_duels(cid, lst)
+            return True
+    return False
+
+def add_duel(cid, duel):
+    lst = get_all_duels(cid)
+    lst.append(duel)
+    save_all_duels(cid, lst)
+
+def del_duel_by_id(cid, duel_id):
+    lst = get_all_duels(cid)
+    lst = [d for d in lst if d.get('id') != duel_id]
+    save_all_duels(cid, lst)
+
 def load_season():
     season = load_json(SEASON_FILE, None)
     now = int(time.time())
     if not season or now >= season.get('end', 0):
-        if season:
-            end_season(season)
+        if season: end_season(season)
         season = {
             'number': (season['number'] + 1) if season else 1,
-            'start': now,
-            'end': now + SEASON_DURATION
+            'start': now, 'end': now + SEASON_DURATION
         }
         save_json(SEASON_FILE, season)
         stats = load_stats()
@@ -154,17 +204,13 @@ def end_season(season):
     for uid, p in top:
         if p.get('wins', 0) > 0:
             champions.append({
-                'uid': uid,
-                'name': p.get('first_name', 'Unknown'),
-                'username': p.get('username', ''),
-                'wins': p.get('wins', 0)
+                'uid': uid, 'name': p.get('first_name', 'Unknown'),
+                'username': p.get('username', ''), 'wins': p.get('wins', 0)
             })
     history = load_history()
     history.append({
-        'season': season.get('number', 1),
-        'start': season.get('start', 0),
-        'end': season.get('end', 0),
-        'champions': champions
+        'season': season.get('number', 1), 'start': season.get('start', 0),
+        'end': season.get('end', 0), 'champions': champions
     })
     save_json(HISTORY_FILE, history)
 
@@ -177,8 +223,7 @@ def get_player(uid, fname='Anonymous', uname=''):
             'wins': 0, 'losses': 0, 'boss_wins': 0, 'boss_losses': 0,
             'diamonds': 0, 'max_hp': PLAYER_MIN_HP,
             'last_daily': 0, 'daily_streak': 0, 'last_mine': 0,
-            'skin': None, 'armor': None, 'weapon': None, 'pet': None,
-            'clan': None
+            'skin': None, 'armor': None, 'weapon': None, 'pet': None, 'clan': None
         }
     else:
         stats[k]['first_name'] = fname or stats[k].get('first_name', 'Anonymous')
@@ -210,13 +255,6 @@ def add_boss_win(uid, diamonds=0):
 
 def add_boss_loss(uid):
     p = get_player(uid); p['boss_losses'] += 1; update_player(uid, p)
-
-def get_duel(cid): return load_duels().get(str(cid))
-def save_duel(cid, d):
-    ds = load_duels(); ds[str(cid)] = d; save_duels(ds)
-def del_duel(cid):
-    ds = load_duels()
-    if str(cid) in ds: del ds[str(cid)]; save_duels(ds)
 
 def get_boss(cid): return load_boss().get(str(cid))
 def save_boss_g(cid, g):
@@ -260,7 +298,6 @@ def dname(p):
     return f if f and f != 'Anonymous' else 'Anonymous'
 
 def pname(p, uid=None):
-    """Имя + скин + ранг."""
     name = dname(p)
     skin = p.get('skin')
     if skin and skin in SKINS:
@@ -331,11 +368,10 @@ def cmd_start(m):
         f"🎭 <b>DARKGRAM</b>\n━━━━━━━━━━━━━━━\n\n"
         f"👋 Hi, <b>{m.from_user.first_name}</b>!\n\n"
         f"⚔️ Duels 1v1 & 2v2\n"
-        f"🐉 Bosses (2-15 players)\n"
+        f"🐉 Bosses (2-15)\n"
         f"📅 Daily · ⛏ Mine\n"
-        f"💎 Shop (skins, armor, weapons, pets)\n"
-        f"👥 Clans\n"
-        f"🏅 Season\n\n"
+        f"💎 Shop\n"
+        f"👥 Clans · 🏅 Season\n\n"
         f"👇 <i>Choose:</i>"
     )
     bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_menu())
@@ -345,18 +381,12 @@ def cmd_help(m):
     text = (
         f"💬 <b>HELP</b>\n━━━━━━━━━━━━━━━\n\n"
         f"⚔️ <b>1v1:</b> <code>/duel</code> (reply)\n"
+        f"⚔️ <b>Cancel:</b> <code>/duel_cancel</code>\n"
         f"⚔️ <b>2v2:</b> <code>/duel2x2</code>\n"
         f"🐉 <b>Bosses:</b> <code>/boss1</code>...<code>/boss7</code>\n"
-        f"📅 <b>Daily:</b> <code>/daily</code>\n"
-        f"⛏ <b>Mine:</b> <code>/mine</code>\n"
-        f"💎 <b>Shop:</b> <code>/shop</code>\n"
-        f"🏅 <b>Season:</b> <code>/season</code>\n"
-        f"👥 <b>Clans:</b> <code>/clans</code>\n\n"
-        f"🏅 <b>RANKS (wins):</b>\n"
-        f"🥚 Newbie 0-4 · ⚔️ Warrior 5-14\n"
-        f"🛡 Veteran 15-29 · 🔥 Master 30-49\n"
-        f"💎 Legend 50-99 · 👑 Champion 100-249\n"
-        f"🌟 God of War 250+"
+        f"📅 <code>/daily</code> · ⛏ <code>/mine</code>\n"
+        f"💎 <code>/shop</code> · 🏅 <code>/season</code> · 👥 <code>/clans</code>\n\n"
+        f"<i>Multiple duels run at once in one chat!</i>"
     )
     bot.send_message(m.chat.id, text, parse_mode='HTML')
 
@@ -501,8 +531,7 @@ def shop_cb(call):
             owned = '✅ ' if p.get('skin') == sid else ''
             kb.add(btn(f"{owned}{s['emoji']} {s['name']} — {s['price']} 💎", f'buyskin_{sid}', 'primary'))
         kb.add(btn('◀️ Back', 'm_shop', 'danger'))
-        bot.edit_message_text(
-            f"🎭 <b>SKINS</b>\n━━━━━━━━━━━━━━━\n\n💰 {p.get('diamonds',0)}",
+        bot.edit_message_text(f"🎭 <b>SKINS</b>\n━━━━━━━━━━━━━━━\n\n💰 {p.get('diamonds',0)}",
             chat_id=cid, message_id=call.message.message_id, parse_mode='HTML', reply_markup=kb)
     elif cat == 'armor':
         kb = types.InlineKeyboardMarkup(row_width=1)
@@ -510,8 +539,7 @@ def shop_cb(call):
             owned = '✅ ' if p.get('armor') == aid else ''
             kb.add(btn(f"{owned}{a['emoji']} {a['name']} — {a['price']} 💎", f'buyarmor_{aid}', 'primary'))
         kb.add(btn('◀️ Back', 'm_shop', 'danger'))
-        bot.edit_message_text(
-            f"🛡 <b>ARMOR</b>\n━━━━━━━━━━━━━━━\n\n💰 {p.get('diamonds',0)}",
+        bot.edit_message_text(f"🛡 <b>ARMOR</b>\n━━━━━━━━━━━━━━━\n\n💰 {p.get('diamonds',0)}",
             chat_id=cid, message_id=call.message.message_id, parse_mode='HTML', reply_markup=kb)
     elif cat == 'weapon':
         kb = types.InlineKeyboardMarkup(row_width=1)
@@ -519,8 +547,7 @@ def shop_cb(call):
             owned = '✅ ' if p.get('weapon') == wid else ''
             kb.add(btn(f"{owned}{w['emoji']} {w['name']} — {w['price']} 💎", f'buyweapon_{wid}', 'danger'))
         kb.add(btn('◀️ Back', 'm_shop', 'danger'))
-        bot.edit_message_text(
-            f"⚔️ <b>WEAPONS</b>\n━━━━━━━━━━━━━━━\n\n💰 {p.get('diamonds',0)}",
+        bot.edit_message_text(f"⚔️ <b>WEAPONS</b>\n━━━━━━━━━━━━━━━\n\n💰 {p.get('diamonds',0)}",
             chat_id=cid, message_id=call.message.message_id, parse_mode='HTML', reply_markup=kb)
     elif cat == 'pet':
         kb = types.InlineKeyboardMarkup(row_width=1)
@@ -528,8 +555,7 @@ def shop_cb(call):
             owned = '✅ ' if p.get('pet') == pid else ''
             kb.add(btn(f"{owned}{pt['emoji']} {pt['name']} — {pt['price']} 💎", f'buypet_{pid}', 'success'))
         kb.add(btn('◀️ Back', 'm_shop', 'danger'))
-        bot.edit_message_text(
-            f"🐾 <b>PETS</b>\n━━━━━━━━━━━━━━━\n\n💰 {p.get('diamonds',0)}",
+        bot.edit_message_text(f"🐾 <b>PETS</b>\n━━━━━━━━━━━━━━━\n\n💰 {p.get('diamonds',0)}",
             chat_id=cid, message_id=call.message.message_id, parse_mode='HTML', reply_markup=kb)
     bot.answer_callback_query(call.id)
 
@@ -540,17 +566,10 @@ def buy_skin(call):
     sid = call.data.replace('buyskin_', '')
     s = SKINS.get(sid)
     if not s: bot.answer_callback_query(call.id, "Not found"); return
-    if p.get('skin') == sid:
-        bot.answer_callback_query(call.id, "✅ Already owned"); return
-    if p.get('diamonds', 0) < s['price']:
-        bot.answer_callback_query(call.id, f"❌ Need {s['price']} 💎"); return
-    p['diamonds'] -= s['price']
-    p['skin'] = sid
-    update_player(uid, p)
+    if p.get('skin') == sid: bot.answer_callback_query(call.id, "✅ Owned"); return
+    if p.get('diamonds', 0) < s['price']: bot.answer_callback_query(call.id, f"❌ Need {s['price']} 💎"); return
+    p['diamonds'] -= s['price']; p['skin'] = sid; update_player(uid, p)
     bot.answer_callback_query(call.id, f"✅ {s['name']}!")
-    try:
-        shop_cb(type('X', (), {'message': call.message, 'from_user': call.from_user, 'data': 'shop_skin', 'id': call.id})())
-    except: pass
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith('buyarmor_'))
 def buy_armor(call):
@@ -559,13 +578,9 @@ def buy_armor(call):
     aid = call.data.replace('buyarmor_', '')
     a = ARMORS.get(aid)
     if not a: bot.answer_callback_query(call.id, "Not found"); return
-    if p.get('armor') == aid:
-        bot.answer_callback_query(call.id, "✅ Already owned"); return
-    if p.get('diamonds', 0) < a['price']:
-        bot.answer_callback_query(call.id, f"❌ Need {a['price']} 💎"); return
-    p['diamonds'] -= a['price']
-    p['armor'] = aid
-    update_player(uid, p)
+    if p.get('armor') == aid: bot.answer_callback_query(call.id, "✅ Owned"); return
+    if p.get('diamonds', 0) < a['price']: bot.answer_callback_query(call.id, f"❌ Need {a['price']} 💎"); return
+    p['diamonds'] -= a['price']; p['armor'] = aid; update_player(uid, p)
     bot.answer_callback_query(call.id, f"✅ {a['name']}!")
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith('buyweapon_'))
@@ -575,13 +590,9 @@ def buy_weapon(call):
     wid = call.data.replace('buyweapon_', '')
     w = WEAPONS.get(wid)
     if not w: bot.answer_callback_query(call.id, "Not found"); return
-    if p.get('weapon') == wid:
-        bot.answer_callback_query(call.id, "✅ Already owned"); return
-    if p.get('diamonds', 0) < w['price']:
-        bot.answer_callback_query(call.id, f"❌ Need {w['price']} 💎"); return
-    p['diamonds'] -= w['price']
-    p['weapon'] = wid
-    update_player(uid, p)
+    if p.get('weapon') == wid: bot.answer_callback_query(call.id, "✅ Owned"); return
+    if p.get('diamonds', 0) < w['price']: bot.answer_callback_query(call.id, f"❌ Need {w['price']} 💎"); return
+    p['diamonds'] -= w['price']; p['weapon'] = wid; update_player(uid, p)
     bot.answer_callback_query(call.id, f"✅ {w['name']}!")
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith('buypet_'))
@@ -591,13 +602,9 @@ def buy_pet(call):
     pid = call.data.replace('buypet_', '')
     pt = PETS.get(pid)
     if not pt: bot.answer_callback_query(call.id, "Not found"); return
-    if p.get('pet') == pid:
-        bot.answer_callback_query(call.id, "✅ Already owned"); return
-    if p.get('diamonds', 0) < pt['price']:
-        bot.answer_callback_query(call.id, f"❌ Need {pt['price']} 💎"); return
-    p['diamonds'] -= pt['price']
-    p['pet'] = pid
-    update_player(uid, p)
+    if p.get('pet') == pid: bot.answer_callback_query(call.id, "✅ Owned"); return
+    if p.get('diamonds', 0) < pt['price']: bot.answer_callback_query(call.id, f"❌ Need {pt['price']} 💎"); return
+    p['diamonds'] -= pt['price']; p['pet'] = pid; update_player(uid, p)
     bot.answer_callback_query(call.id, f"✅ {pt['name']}!")
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith('buy_'))
@@ -689,21 +696,18 @@ def clan_cb(call):
     p = get_player(uid, call.from_user.first_name, call.from_user.username)
     d = call.data
     if d == 'clan_new':
-        if p.get('clan'):
-            bot.answer_callback_query(call.id, "❌ Already in clan"); return
+        if p.get('clan'): bot.answer_callback_query(call.id, "❌ Already in clan"); return
         if p.get('diamonds', 0) < CLAN_CREATE_COST:
             bot.answer_callback_query(call.id, f"❌ Need {CLAN_CREATE_COST} 💎"); return
         p['diamonds'] -= CLAN_CREATE_COST
         update_player(uid, p)
         msg = bot.send_message(cid, "✏️ Send clan name (max 20 chars):")
         bot.register_next_step_handler(msg, clan_create_step, uid, call.from_user.first_name, call.from_user.username)
-        bot.answer_callback_query(call.id)
-        return
+        bot.answer_callback_query(call.id); return
     if d == 'clan_list':
         clans = load_clans()
         if not clans:
-            bot.answer_callback_query(call.id, "❌ No clans yet")
-            return
+            bot.answer_callback_query(call.id, "❌ No clans yet"); return
         text = "📋 <b>CLAN LIST</b>\n━━━━━━━━━━━━━━━\n\n"
         kb = types.InlineKeyboardMarkup(row_width=1)
         for cid2, c in clans.items():
@@ -713,22 +717,17 @@ def clan_cb(call):
                 kb.add(btn(f'➕ Join {c.get("name")}', f'clan_join_{cid2}', 'success'))
         kb.add(btn('◀️ Back', 'm_clans', 'danger'))
         bot.edit_message_text(text, chat_id=cid, message_id=call.message.message_id, parse_mode='HTML', reply_markup=kb)
-        bot.answer_callback_query(call.id)
-        return
+        bot.answer_callback_query(call.id); return
     if d.startswith('clan_join_'):
         clan_id = d.replace('clan_join_', '')
-        if p.get('clan'):
-            bot.answer_callback_query(call.id, "❌ Already in clan"); return
+        if p.get('clan'): bot.answer_callback_query(call.id, "❌ Already in clan"); return
         clans = load_clans()
         if clan_id not in clans:
             bot.answer_callback_query(call.id, "❌ Not found"); return
         members = clans[clan_id].get('members', [])
         if uid not in members:
-            members.append(uid)
-            clans[clan_id]['members'] = members
-            save_clans(clans)
-        p['clan'] = clan_id
-        update_player(uid, p)
+            members.append(uid); clans[clan_id]['members'] = members; save_clans(clans)
+        p['clan'] = clan_id; update_player(uid, p)
         bot.answer_callback_query(call.id, f"✅ Joined!")
         send_clans(cid, uid, call.from_user.first_name, call.from_user.username)
         return
@@ -741,11 +740,9 @@ def clan_cb(call):
             members = clans[clan_id].get('members', [])
             if uid in members: members.remove(uid)
             clans[clan_id]['members'] = members
-            if not members:
-                del clans[clan_id]
+            if not members: del clans[clan_id]
             save_clans(clans)
-        p['clan'] = None
-        update_player(uid, p)
+        p['clan'] = None; update_player(uid, p)
         bot.answer_callback_query(call.id, "🚪 Left")
         send_clans(cid, uid, call.from_user.first_name, call.from_user.username)
         return
@@ -767,7 +764,7 @@ def clan_create_step(msg, uid, fname, uname):
     update_player(uid, p)
     bot.send_message(msg.chat.id, f"🏰 <b>CLAN CREATED!</b>\n\nName: <b>{name}</b>", parse_mode='HTML')
 
-# ===== DUEL 1v1 =====
+# ===== DUEL 1v1 (multiple per chat) =====
 @bot.message_handler(commands=['duel'])
 def cmd_duel(m):
     if m.chat.type == 'private':
@@ -777,31 +774,51 @@ def cmd_duel(m):
     t = m.reply_to_message.from_user
     if t.id == m.from_user.id: bot.send_message(m.chat.id, "❌ Yourself."); return
     if t.is_bot: bot.send_message(m.chat.id, "❌ Not a bot."); return
-    ex = get_duel(m.chat.id)
-    if ex and ex.get('status') in ('pending', 'active'):
-        bot.send_message(m.chat.id, "⚔️ Already running."); return
+    cid = m.chat.id
+    cleanup_duels(cid)
+    my_ex = find_duel_by_user(cid, str(m.from_user.id))
+    if my_ex:
+        bot.send_message(cid, "⚔️ You are already in a duel."); return
+    target_ex = find_duel_by_user(cid, str(t.id))
+    if target_ex:
+        bot.send_message(cid, f"⚔️ {t.first_name} is already in a duel."); return
     now = int(time.time())
     duel = {
-        'chat_id': m.chat.id, 'mode': '1v1',
+        'id': f'd_{int(time.time()*1000)}_{random.randint(100,999)}',
+        'chat_id': cid, 'mode': '1v1',
         'p1_id': str(m.from_user.id), 'p1_name': m.from_user.first_name,
         'p2_id': str(t.id), 'p2_name': t.first_name,
         'p1_hp': DUEL_HP, 'p2_hp': DUEL_HP,
         'p1_aim': False, 'p2_aim': False,
         'turn': str(m.from_user.id), 'status': 'pending',
-        'deadline': now + DUEL_TIMEOUT, 'msg_id': None, 'last_action_msg': ''
+        'created': now, 'deadline': now + DUEL_TIMEOUT,
+        'msg_id': None, 'last_action_msg': ''
     }
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(
-        btn('✅ Accept', 'd_yes', 'success'),
-        btn('❌ Decline', 'd_no', 'danger')
+        btn('✅ Accept', f'd_yes_{duel["id"]}', 'success'),
+        btn('❌ Decline', f'd_no_{duel["id"]}', 'danger')
     )
-    sent = bot.send_message(m.chat.id, duel_pending_text(duel), parse_mode='HTML', reply_markup=kb)
+    sent = bot.send_message(cid, duel_pending_text(duel), parse_mode='HTML', reply_markup=kb)
     duel['msg_id'] = sent.message_id
-    save_duel(m.chat.id, duel)
-    threading.Timer(DUEL_TIMEOUT, duel_timeout, args=[m.chat.id]).start()
+    add_duel(cid, duel)
+    threading.Timer(DUEL_TIMEOUT, duel_timeout, args=[cid, duel['id']]).start()
+
+@bot.message_handler(commands=['duel_cancel'])
+def cmd_duel_cancel(m):
+    cid = m.chat.id
+    uid = str(m.from_user.id)
+    d = find_duel_by_user(cid, uid)
+    if not d:
+        bot.send_message(cid, "❌ You have no active duel."); return
+    del_duel_by_id(cid, d['id'])
+    try:
+        bot.edit_message_text("❌ Duel cancelled.", chat_id=cid, message_id=d.get('msg_id'))
+    except: pass
+    bot.send_message(cid, "❌ Duel cancelled.")
 
 def duel_pending_text(d):
-    left = d['deadline'] - int(time.time())
+    left = d.get('deadline', 0) - int(time.time())
     if d.get('mode') == '2v2':
         players = "\n".join([f"• {p['name']}" for p in d['players'].values()])
         return (
@@ -817,18 +834,21 @@ def duel_pending_text(d):
         f"⏱ Left: <b>{fmt_t(left)}</b>"
     )
 
-def duel_timeout(cid):
-    d = get_duel(cid)
-    if not d or d.get('status') != 'pending': return
-    sedit(cid, d.get('msg_id'), "⌛ Time out.")
-    del_duel(cid)
+def duel_timeout(cid, duel_id):
+    d = find_duel_by_id(cid, duel_id)
+    if not d or d.get('status') not in ('pending',): return
+    del_duel_by_id(cid, duel_id)
+    try:
+        bot.edit_message_text("⌛ Time out.", chat_id=cid, message_id=d.get('msg_id'))
+    except: pass
 
-def duel_kb_1v1():
+def duel_kb_1v1(d):
+    did = d['id']
     kb = types.InlineKeyboardMarkup(row_width=3)
     kb.add(
-        btn('🔫 Shoot', 'd_shoot', 'danger'),
-        btn('🎯 Aim', 'd_aim', 'success'),
-        btn('🎭 Distract', 'd_dist', 'primary')
+        btn('🔫 Shoot', f'd_shoot_{did}', 'danger'),
+        btn('🎯 Aim', f'd_aim_{did}', 'success'),
+        btn('🎭 Distract', f'd_dist_{did}', 'primary')
     )
     return kb
 
@@ -852,33 +872,41 @@ def next_turn(d):
 @bot.callback_query_handler(func=lambda c: c.data.startswith('d_'))
 def duel_cb(call):
     cid = call.message.chat.id
-    d = get_duel(cid)
-    if not d:
-        bot.answer_callback_query(call.id, "Not found"); return
     uid = str(call.from_user.id)
-    if d.get('mode') == '2v2': handle_2v2(call, cid, d, uid); return
-    if call.data == 'd_yes':
+    parts = call.data.split('_')
+    if len(parts) < 3:
+        bot.answer_callback_query(call.id, "Bad data"); return
+    action = parts[1]
+    duel_id = '_'.join(parts[2:])
+    d = find_duel_by_id(cid, duel_id)
+    if not d:
+        bot.answer_callback_query(call.id, "Duel not found"); return
+    if d.get('mode') == '2v2':
+        handle_2v2(call, cid, d, uid)
+        return
+    if action == 'yes':
         if d.get('status') != 'pending': bot.answer_callback_query(call.id, "❌"); return
         if uid != d['p2_id']: bot.answer_callback_query(call.id, "❌"); return
         d['status'] = 'active'; d['last_action_msg'] = ''
-        save_duel(cid, d)
-        sedit(cid, d['msg_id'], duel_text(d), duel_kb_1v1())
+        update_duel(cid, d)
+        sedit(cid, d['msg_id'], duel_text(d), duel_kb_1v1(d))
         bot.answer_callback_query(call.id, "⚔️!"); return
-    if call.data == 'd_no':
+    if action == 'no':
         if d.get('status') != 'pending': bot.answer_callback_query(call.id, "❌"); return
         if uid != d['p2_id']: bot.answer_callback_query(call.id, "❌"); return
-        del_duel(cid); sedit(cid, d['msg_id'], "❌ Declined.")
+        del_duel_by_id(cid, duel_id)
+        sedit(cid, d['msg_id'], "❌ Declined.")
         bot.answer_callback_query(call.id, "Declined"); return
     if d.get('status') != 'active': bot.answer_callback_query(call.id, "❌"); return
     if uid != d['turn']: bot.answer_callback_query(call.id, "🎯 Not your turn"); return
-    if call.data == 'd_aim':
+    if action == 'aim':
         if uid == d['p1_id']: d['p1_aim'] = True
         else: d['p2_aim'] = True
         d['last_action_msg'] = "🎯 <i>Aiming!</i>"
-        next_turn(d); save_duel(cid, d)
-        sedit(cid, d['msg_id'], duel_text(d), duel_kb_1v1())
+        next_turn(d); update_duel(cid, d)
+        sedit(cid, d['msg_id'], duel_text(d), duel_kb_1v1(d))
         bot.answer_callback_query(call.id, "🎯"); return
-    if call.data == 'd_dist':
+    if action == 'dist':
         if uid == d['p1_id']:
             had = d['p2_aim']; d['p2_aim'] = False
         else:
@@ -886,10 +914,10 @@ def duel_cb(call):
         msg = random.choice(DISTRACT)
         msg += "\n💥 <b>Aim broken!</b>" if had else "\n🤷"
         d['last_action_msg'] = msg
-        next_turn(d); save_duel(cid, d)
-        sedit(cid, d['msg_id'], duel_text(d), duel_kb_1v1())
+        next_turn(d); update_duel(cid, d)
+        sedit(cid, d['msg_id'], duel_text(d), duel_kb_1v1(d))
         bot.answer_callback_query(call.id, "🎭"); return
-    if call.data == 'd_shoot':
+    if action == 'shoot':
         if uid == d['p1_id']:
             aim = d['p1_aim']; d['p1_aim'] = False
             ch = DUEL_AIM_BONUS if aim else DUEL_NOAIM_CHANCE
@@ -911,42 +939,47 @@ def duel_cb(call):
             wid = d['p1_id'] if d['p2_hp'] <= 0 else d['p2_id']
             lid = d['p2_id'] if wid == d['p1_id'] else d['p1_id']
             wn = d['p1_name'] if wid == d['p1_id'] else d['p2_name']
-            add_duel_win(wid); add_duel_loss(lid); del_duel(cid)
+            add_duel_win(wid); add_duel_loss(lid)
+            del_duel_by_id(cid, duel_id)
             wp = get_player(wid)
             sedit(cid, call.message.message_id,
                 f"🏆 <b>DUEL ENDED</b>\n━━━━━━━━━━━━━━━\n\n{msg}\n\n🥇 Winner: <b>{wn}</b>\n🏅 Rank: {get_rank(wp.get('wins',0))}")
             bot.answer_callback_query(call.id, "🏆"); return
-        next_turn(d); save_duel(cid, d)
-        sedit(cid, d['msg_id'], duel_text(d), duel_kb_1v1())
+        next_turn(d); update_duel(cid, d)
+        sedit(cid, d['msg_id'], duel_text(d), duel_kb_1v1(d))
         bot.answer_callback_query(call.id)
 
+# ===== DUEL 2v2 =====
 @bot.message_handler(commands=['duel2x2', 'duel2'])
 def cmd_duel2x2(m):
     if m.chat.type == 'private':
         bot.send_message(m.chat.id, "⚔️ Groups only."); return
-    ex = get_duel(m.chat.id)
-    if ex and ex.get('status') in ('pending', 'active'):
-        bot.send_message(m.chat.id, "⚔️ Already running."); return
+    cid = m.chat.id
+    cleanup_duels(cid)
+    my_ex = find_duel_by_user(cid, str(m.from_user.id))
+    if my_ex:
+        bot.send_message(cid, "⚔️ You are already in a duel."); return
     now = int(time.time())
+    duel_id = f'd_{int(time.time()*1000)}_{random.randint(100,999)}'
     d = {
-        'chat_id': m.chat.id, 'mode': '2v2',
+        'id': duel_id, 'chat_id': cid, 'mode': '2v2',
         'host_id': str(m.from_user.id),
         'team': [], 'players': {}, 'team_a': [], 'team_b': [],
-        'status': 'lobby', 'deadline': now + DUEL_TIMEOUT,
+        'status': 'lobby', 'created': now, 'deadline': now + DUEL_TIMEOUT,
         'msg_id': None, 'turn_idx': 0, 'last_action_msg': ''
     }
     d['team'].append(str(m.from_user.id))
     d['players'][str(m.from_user.id)] = {'name': m.from_user.first_name, 'hp': DUEL_HP, 'aim': False, 'team': None}
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(
-        btn('🎭 Join', 'd2_join', 'success'),
-        btn('🚪 Leave', 'd2_leave', 'danger')
+        btn('🎭 Join', f'd2_join_{duel_id}', 'success'),
+        btn('🚪 Leave', f'd2_leave_{duel_id}', 'danger')
     )
-    kb.add(btn('▶️ Start', 'd2_start', 'primary'))
-    sent = bot.send_message(m.chat.id, duel_pending_text(d), parse_mode='HTML', reply_markup=kb)
+    kb.add(btn('▶️ Start', f'd2_start_{duel_id}', 'primary'))
+    sent = bot.send_message(cid, duel_pending_text(d), parse_mode='HTML', reply_markup=kb)
     d['msg_id'] = sent.message_id
-    save_duel(m.chat.id, d)
-    threading.Timer(DUEL_TIMEOUT, duel_timeout, args=[m.chat.id]).start()
+    add_duel(cid, d)
+    threading.Timer(DUEL_TIMEOUT, duel_timeout, args=[cid, duel_id]).start()
 
 def duel_2v2_text(d):
     if d.get('status') == 'lobby': return duel_pending_text(d)
@@ -969,14 +1002,12 @@ def duel_2v2_attack_kb(d, uid):
     alive = [u for u in enemy_team if d['players'][u]['hp'] > 0]
     kb = types.InlineKeyboardMarkup(row_width=2)
     for u in alive:
-        kb.add(btn(f"🔫 {d['players'][u]['name']}", f'd2_atk_{u}', 'danger'))
-    kb.add(btn('🎯 Aim', 'd2_aim', 'success'))
-    kb.add(btn('🎭 Distract', 'd2_dist', 'primary'))
+        kb.add(btn(f"🔫 {d['players'][u]['name']}", f'd2_atk_{u}_{d["id"]}', 'danger'))
+    kb.add(btn('🎯 Aim', f'd2_aim_{d["id"]}', 'success'))
+    kb.add(btn('🎭 Distract', f'd2_dist_{d["id"]}', 'primary'))
     return kb
 
-def start_2v2(cid):
-    d = get_duel(cid)
-    if not d: return
+def start_2v2(cid, d):
     ids = d['team'][:]
     random.shuffle(ids)
     d['team_a'] = ids[:2]; d['team_b'] = ids[2:4]
@@ -984,71 +1015,73 @@ def start_2v2(cid):
     for u in d['team_b']: d['players'][u]['team'] = 'B'
     d['status'] = 'active'; d['turn_idx'] = 0
     d['last_action_msg'] = '⚔️ Battle started!'
-    save_duel(cid, d)
+    update_duel(cid, d)
     sedit(cid, d['msg_id'], duel_2v2_text(d), None)
-    send_2v2_turn(cid)
+    send_2v2_turn(cid, d)
 
-def send_2v2_turn(cid):
-    d = get_duel(cid)
-    if not d or d.get('status') != 'active': return
+def send_2v2_turn(cid, d):
     alive = [u for u in d['team'] if d['players'][u]['hp'] > 0]
-    if not alive: finish_2v2(cid); return
+    if not alive: finish_2v2(cid, d); return
     uid = alive[d['turn_idx'] % len(alive)]
     kb = duel_2v2_attack_kb(d, uid)
     try: bot.send_message(cid, duel_2v2_text(d), parse_mode='HTML', reply_markup=kb)
     except: pass
 
 def handle_2v2(call, cid, d, uid):
-    if call.data == 'd2_join':
+    parts = call.data.split('_')
+    action = parts[1]
+    duel_id = '_'.join(parts[2:]) if not call.data.startswith('d2_atk') else d['id']
+    if action == 'join':
         if d['status'] != 'lobby': bot.answer_callback_query(call.id, "❌"); return
         if uid in d['team']: bot.answer_callback_query(call.id, "✅"); return
         if len(d['team']) >= 4: bot.answer_callback_query(call.id, "❌ 4 max"); return
         d['team'].append(uid)
         d['players'][uid] = {'name': call.from_user.first_name, 'hp': DUEL_HP, 'aim': False, 'team': None}
-        save_duel(cid, d)
+        update_duel(cid, d)
         kb = types.InlineKeyboardMarkup(row_width=2)
         kb.add(
-            btn('🎭 Join', 'd2_join', 'success'),
-            btn('🚪 Leave', 'd2_leave', 'danger')
+            btn('🎭 Join', f'd2_join_{d["id"]}', 'success'),
+            btn('🚪 Leave', f'd2_leave_{d["id"]}', 'danger')
         )
-        kb.add(btn('▶️ Start', 'd2_start', 'primary'))
+        kb.add(btn('▶️ Start', f'd2_start_{d["id"]}', 'primary'))
         sedit(cid, d['msg_id'], duel_pending_text(d), kb)
         bot.answer_callback_query(call.id, "⚔️"); return
-    if call.data == 'd2_leave':
+    if action == 'leave':
         if d['status'] != 'lobby': bot.answer_callback_query(call.id, "❌"); return
         if uid not in d['team']: bot.answer_callback_query(call.id, "❌"); return
         d['team'].remove(uid); d['players'].pop(uid, None)
         if not d['team']:
-            del_duel(cid); sedit(cid, d['msg_id'], "❌ Closed.")
+            del_duel_by_id(cid, d['id'])
+            sedit(cid, d['msg_id'], "❌ Closed.")
             bot.answer_callback_query(call.id, "🚪"); return
         if uid == d['host_id']: d['host_id'] = d['team'][0]
-        save_duel(cid, d)
+        update_duel(cid, d)
         kb = types.InlineKeyboardMarkup(row_width=2)
         kb.add(
-            btn('🎭 Join', 'd2_join', 'success'),
-            btn('🚪 Leave', 'd2_leave', 'danger')
+            btn('🎭 Join', f'd2_join_{d["id"]}', 'success'),
+            btn('🚪 Leave', f'd2_leave_{d["id"]}', 'danger')
         )
-        kb.add(btn('▶️ Start', 'd2_start', 'primary'))
+        kb.add(btn('▶️ Start', f'd2_start_{d["id"]}', 'primary'))
         sedit(cid, d['msg_id'], duel_pending_text(d), kb)
         bot.answer_callback_query(call.id, "🚪"); return
-    if call.data == 'd2_start':
+    if action == 'start':
         if uid != d['host_id'] and not is_admin_id(uid):
             bot.answer_callback_query(call.id, "❌ Host only"); return
         if len(d['team']) < 4:
             bot.answer_callback_query(call.id, "❌ Need 4"); return
-        bot.answer_callback_query(call.id, "⚔️!"); start_2v2(cid); return
+        bot.answer_callback_query(call.id, "⚔️!"); start_2v2(cid, d); return
     if d['status'] != 'active': bot.answer_callback_query(call.id, "❌"); return
     alive = [u for u in d['team'] if d['players'][u]['hp'] > 0]
     if not alive: bot.answer_callback_query(call.id, "❌"); return
     if uid != alive[d['turn_idx'] % len(alive)]:
         bot.answer_callback_query(call.id, "🎯 Not your turn"); return
     p = d['players'][uid]
-    if call.data == 'd2_aim':
+    if action == 'aim':
         p['aim'] = True
         d['last_action_msg'] = f"🎯 <b>{p['name']}</b> aiming!"
-        d['turn_idx'] += 1; save_duel(cid, d)
-        send_2v2_turn(cid); bot.answer_callback_query(call.id, "🎯"); return
-    if call.data == 'd2_dist':
+        d['turn_idx'] += 1; update_duel(cid, d)
+        send_2v2_turn(cid, d); bot.answer_callback_query(call.id, "🎯"); return
+    if action == 'dist':
         enemy_team = d['team_b'] if p['team'] == 'A' else d['team_a']
         enemies_aim = [u for u in enemy_team if d['players'][u]['hp'] > 0 and d['players'][u].get('aim')]
         if enemies_aim:
@@ -1058,11 +1091,11 @@ def handle_2v2(call, cid, d, uid):
         else:
             msg = f"🎭 <b>{p['name']}</b> distracted!"
         d['last_action_msg'] = msg
-        d['turn_idx'] += 1; save_duel(cid, d)
-        send_2v2_turn(cid); bot.answer_callback_query(call.id, "🎭"); return
-    if call.data.startswith('d2_atk_'):
-        target = call.data.replace('d2_atk_', '')
-        if target not in d['players'] or d['players'][target]['hp'] <= 0:
+        d['turn_idx'] += 1; update_duel(cid, d)
+        send_2v2_turn(cid, d); bot.answer_callback_query(call.id, "🎭"); return
+    if action == 'atk':
+        target = parts[2] if len(parts) > 2 else None
+        if not target or target not in d['players'] or d['players'][target]['hp'] <= 0:
             bot.answer_callback_query(call.id, "❌"); return
         if d['players'][target]['team'] == p['team']:
             bot.answer_callback_query(call.id, "❌ Ally"); return
@@ -1076,15 +1109,14 @@ def handle_2v2(call, cid, d, uid):
             msg = f"🌫 <b>{p['name']}</b> missed!"
         p['aim'] = False
         d['last_action_msg'] = msg
-        d['turn_idx'] += 1; save_duel(cid, d)
+        d['turn_idx'] += 1; update_duel(cid, d)
         a_alive = [u for u in d['team_a'] if d['players'][u]['hp'] > 0]
         b_alive = [u for u in d['team_b'] if d['players'][u]['hp'] > 0]
-        if not a_alive or not b_alive: finish_2v2(cid); return
-        send_2v2_turn(cid); bot.answer_callback_query(call.id, f"💥 {dmg}"); return
+        if not a_alive or not b_alive:
+            finish_2v2(cid, d); return
+        send_2v2_turn(cid, d); bot.answer_callback_query(call.id, f"💥 {dmg}"); return
 
-def finish_2v2(cid):
-    d = get_duel(cid)
-    if not d: return
+def finish_2v2(cid, d):
     a_alive = [u for u in d['team_a'] if d['players'][u]['hp'] > 0]
     b_alive = [u for u in d['team_b'] if d['players'][u]['hp'] > 0]
     if a_alive and not b_alive: winners, losers = d['team_a'], d['team_b']
@@ -1096,7 +1128,7 @@ def finish_2v2(cid):
     text = f"🏆 <b>2v2 ENDED!</b>\n\n🥇 Team wins: <b>{wnames}</b>"
     try: bot.send_message(cid, text, parse_mode='HTML')
     except: pass
-    del_duel(cid)
+    del_duel_by_id(cid, d['id'])
 
 # ===== BOSSES =====
 @bot.message_handler(commands=['boss', 'boss1', 'boss2', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7'])
@@ -1370,7 +1402,7 @@ def menu_cb(call):
     elif call.data == 'm_mine': send_mine(cid, uid, u.first_name, u.username)
     elif call.data == 'm_season': send_season(cid)
     elif call.data == 'm_clans': send_clans(cid, uid, u.first_name, u.username)
-    elif call.data == 'm_duel': bot.send_message(cid, "⚔️ /duel or /duel2x2")
+    elif call.data == 'm_duel': bot.send_message(cid, "⚔️ /duel (1v1) or /duel2x2 (2v2)\n❌ /duel_cancel — cancel")
     elif call.data == 'm_boss': bot.send_message(cid, "🐉 /boss1 ... /boss7")
     elif call.data == 'm_help': cmd_help(call.message)
     elif call.data == 'm_back':
@@ -1387,6 +1419,7 @@ def set_commands():
             types.BotCommand('daily','📅 Daily'),
             types.BotCommand('mine','⛏ Mine'),
             types.BotCommand('duel','⚔️ Duel 1v1'),
+            types.BotCommand('duel_cancel','❌ Cancel duel'),
             types.BotCommand('duel2x2','⚔️ Duel 2v2'),
             types.BotCommand('shop','💎 Shop'),
             types.BotCommand('season','🏅 Season'),
