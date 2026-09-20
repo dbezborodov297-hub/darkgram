@@ -36,6 +36,12 @@ BOSS_DMG_MAX = 150
 PLAYER_MIN_HP = 250
 PLAYER_MAX_HP = 5000
 
+DAILY_REWARDS = [5, 7, 10, 15, 20, 30, 50]
+DAILY_COOLDOWN = 24 * 3600
+MINE_COOLDOWN = 15 * 60
+MINE_MIN = 5
+MINE_MAX = 10
+
 BOSSES = {
     1: {'name': 'Голодный Волк',      'emoji': '🐺', 'hp': 1000, 'diamonds': 2},
     2: {'name': 'Пустынный Скорпион', 'emoji': '🦂', 'hp': 1500, 'diamonds': 3},
@@ -88,12 +94,18 @@ def get_player(uid, fname='Аноним', uname=''):
             'username': uname or '',
             'wins': 0, 'losses': 0,
             'boss_wins': 0, 'boss_losses': 0,
-            'diamonds': 0, 'max_hp': PLAYER_MIN_HP
+            'diamonds': 0, 'max_hp': PLAYER_MIN_HP,
+            'last_daily': 0, 'daily_streak': 0,
+            'last_mine': 0
         }
     else:
         stats[k]['first_name'] = fname or stats[k].get('first_name', 'Аноним')
         stats[k]['username'] = uname or stats[k].get('username', '')
-        defaults = {'wins':0,'losses':0,'boss_wins':0,'boss_losses':0,'diamonds':0,'max_hp':PLAYER_MIN_HP}
+        defaults = {
+            'wins':0,'losses':0,'boss_wins':0,'boss_losses':0,
+            'diamonds':0,'max_hp':PLAYER_MIN_HP,
+            'last_daily':0,'daily_streak':0,'last_mine':0
+        }
         for f, v in defaults.items():
             if f not in stats[k]:
                 stats[k][f] = v
@@ -139,6 +151,15 @@ def del_boss(cid):
 def fmt_t(s):
     s = max(0, int(s)); return f"{s//60}:{s%60:02d}"
 
+def fmt_h(sec):
+    sec = max(0, int(sec))
+    h = sec // 3600
+    m = (sec % 3600) // 60
+    s = sec % 60
+    if h > 0: return f"{h}ч {m}мин"
+    if m > 0: return f"{m}мин {s}сек"
+    return f"{s}сек"
+
 def dname(p):
     if not p: return 'Аноним'
     u = (p.get('username') or '').strip()
@@ -182,6 +203,10 @@ def main_menu():
         types.InlineKeyboardButton('⚔️ Дуэль', callback_data='m_duel'),
         types.InlineKeyboardButton('🐉 Боссы', callback_data='m_boss')
     )
+    kb.add(
+        types.InlineKeyboardButton('📅 Бонус', callback_data='m_daily'),
+        types.InlineKeyboardButton('⛏ Шахта', callback_data='m_mine')
+    )
     kb.add(types.InlineKeyboardButton('💎 Алмазы → HP', callback_data='m_shop'))
     kb.add(types.InlineKeyboardButton('💬 Помощь', callback_data='m_help'))
     return kb
@@ -195,6 +220,8 @@ def cmd_start(m):
         f"👋 Привет, <b>{m.from_user.first_name}</b>!\n\n"
         f"⚔️ Дуэли 1 на 1 и 2 на 2\n"
         f"🐉 Боссы (2-15 игроков)\n"
+        f"📅 Ежедневный бонус\n"
+        f"⛏ Шахта алмазов\n"
         f"💎 Алмазы → HP\n"
         f"🏆 Топ по победам\n\n"
         f"👇 <i>Выбирай:</i>"
@@ -205,22 +232,21 @@ def cmd_start(m):
 def cmd_help(m):
     text = (
         f"💬 <b>ПОМОЩЬ</b>\n━━━━━━━━━━━━━━━\n\n"
-        f"⚔️ <b>Дуэль 1x1:</b> <code>/duel</code> в ответ на сообщение\n"
+        f"⚔️ <b>Дуэль 1x1:</b> <code>/duel</code> в ответ\n"
         f"⚔️ <b>Дуэль 2x2:</b> <code>/duel2x2</code> в группе\n"
         f"🐉 <b>Боссы:</b> <code>/boss1</code> ... <code>/boss7</code>\n"
-        f"💎 <b>Алмазы:</b> <code>/shop</code>\n\n"
-        f"🐉 <b>БОССЫ:</b>\n"
-        f"1️⃣ 🐺 1000 HP → 2 💎\n"
-        f"2️⃣ 🦂 1500 HP → 3 💎\n"
-        f"3️⃣ 🦁 2000 HP → 4 💎\n"
-        f"4️⃣ 👺 2500 HP → 5 💎\n"
-        f"5️⃣ 👹 3000 HP → 6 💎\n"
-        f"6️⃣ 🧟 3500 HP → 7 💎\n"
-        f"7️⃣ 🐉 5000 HP → 10 💎\n\n"
-        f"💎 <b>МАГАЗИН:</b>\n"
-        f"10 💎 → +20 HP\n"
-        f"25 💎 → +45 HP\n"
-        f"40 💎 → +75 HP"
+        f"📅 <b>Daily:</b> <code>/daily</code>\n"
+        f"⛏ <b>Шахта:</b> <code>/mine</code>\n"
+        f"💎 <b>Магазин:</b> <code>/shop</code>\n\n"
+        f"📅 <b>DAILY БОНУС:</b>\n"
+        f"День 1 → 5 💎\n"
+        f"День 2 → 7 💎\n"
+        f"День 3 → 10 💎\n"
+        f"День 4 → 15 💎\n"
+        f"День 5 → 20 💎\n"
+        f"День 6 → 30 💎\n"
+        f"День 7+ → 50 💎\n\n"
+        f"⛏ <b>ШАХТА:</b> раз в 15 минут → 5-10 💎"
     )
     bot.send_message(m.chat.id, text, parse_mode='HTML')
 
@@ -235,6 +261,14 @@ def cmd_top(m):
 @bot.message_handler(commands=['shop'])
 def cmd_shop(m):
     send_shop(m.chat.id, m.from_user.id, m.from_user.first_name, m.from_user.username)
+
+@bot.message_handler(commands=['daily'])
+def cmd_daily(m):
+    send_daily(m.chat.id, m.from_user.id, m.from_user.first_name, m.from_user.username)
+
+@bot.message_handler(commands=['mine'])
+def cmd_mine(m):
+    send_mine(m.chat.id, m.from_user.id, m.from_user.first_name, m.from_user.username)
 
 def send_profile(cid, uid, fname, uname):
     p = get_player(uid, fname, uname)
@@ -255,7 +289,8 @@ def send_profile(cid, uid, fname, uname):
         f"📊 Винрейт: <b>{bwr}%</b>\n\n"
         f"━━━━━━━━━━━━━━━\n"
         f"💎 Алмазы: <b>{p.get('diamonds', 0)}</b>\n"
-        f"❤️ Макс. HP: <b>{p.get('max_hp', PLAYER_MIN_HP)}</b>"
+        f"❤️ Макс. HP: <b>{p.get('max_hp', PLAYER_MIN_HP)}</b>\n"
+        f"🔥 Серия daily: <b>{p.get('daily_streak', 0)}</b>"
     )
     bot.send_message(cid, text, parse_mode='HTML')
 
@@ -309,6 +344,76 @@ def buy_hp(call):
     update_player(uid, p)
     bot.answer_callback_query(call.id, f"✅ +{hp} HP")
 
+# ===== DAILY =====
+def send_daily(cid, uid, fname, uname):
+    p = get_player(uid, fname, uname)
+    now = int(time.time())
+    last = p.get('last_daily', 0)
+    diff = now - last
+
+    if diff < DAILY_COOLDOWN:
+        left = DAILY_COOLDOWN - diff
+        bot.send_message(cid,
+            f"📅 <b>DAILY БОНУС</b>\n━━━━━━━━━━━━━━━\n\n"
+            f"⏳ Ты уже взял бонус сегодня.\n"
+            f"🔥 Серия: <b>{p.get('daily_streak', 0)}</b>\n\n"
+            f"⏰ Следующий через: <b>{fmt_h(left)}</b>",
+            parse_mode='HTML')
+        return
+
+    # Проверка серии
+    # Если последний был 24-48ч назад — серия растёт, если больше 48ч — сброс
+    if last > 0 and diff < 48 * 3600:
+        p['daily_streak'] = p.get('daily_streak', 0) + 1
+    else:
+        p['daily_streak'] = 1
+
+    streak = p['daily_streak']
+    idx = min(streak - 1, len(DAILY_REWARDS) - 1)
+    reward = DAILY_REWARDS[idx]
+
+    p['diamonds'] = p.get('diamonds', 0) + reward
+    p['last_daily'] = now
+    update_player(uid, p)
+
+    next_reward = DAILY_REWARDS[min(streak, len(DAILY_REWARDS) - 1)]
+    bot.send_message(cid,
+        f"📅 <b>DAILY БОНУС ПОЛУЧЕН!</b>\n━━━━━━━━━━━━━━━\n\n"
+        f"💰 +<b>{reward}</b> 💎\n"
+        f"🔥 Серия: <b>{streak}</b> дней\n"
+        f"💎 Всего: <b>{p['diamonds']}</b>\n\n"
+        f"📌 Завтра: <b>{next_reward}</b> 💎\n"
+        f"<i>Не пропускай — серия сбросится!</i>",
+        parse_mode='HTML')
+
+# ===== MINE =====
+def send_mine(cid, uid, fname, uname):
+    p = get_player(uid, fname, uname)
+    now = int(time.time())
+    last = p.get('last_mine', 0)
+    diff = now - last
+
+    if diff < MINE_COOLDOWN:
+        left = MINE_COOLDOWN - diff
+        bot.send_message(cid,
+            f"⛏ <b>ШАХТА</b>\n━━━━━━━━━━━━━━━\n\n"
+            f"⏳ Шахта остывает.\n\n"
+            f"⏰ Следующая добыча через: <b>{fmt_h(left)}</b>",
+            parse_mode='HTML')
+        return
+
+    reward = random.randint(MINE_MIN, MINE_MAX)
+    p['diamonds'] = p.get('diamonds', 0) + reward
+    p['last_mine'] = now
+    update_player(uid, p)
+
+    bot.send_message(cid,
+        f"⛏ <b>ДОБЫЧА АЛМАЗОВ!</b>\n━━━━━━━━━━━━━━━\n\n"
+        f"💎 +<b>{reward}</b> алмазов\n"
+        f"💰 Всего: <b>{p['diamonds']}</b>\n\n"
+        f"⏰ Следующая добыча через: <b>15 минут</b>",
+        parse_mode='HTML')
+
 # ===== ДУЭЛЬ 1x1 =====
 @bot.message_handler(commands=['duel'])
 def cmd_duel(m):
@@ -351,11 +456,12 @@ def cmd_duel(m):
 def duel_pending_text(d):
     left = d['deadline'] - int(time.time())
     if d.get('mode') == '2v2':
+        players = "\n".join([f"• {p['name']}" for p in d['players'].values()])
         return (
             f"⚔️ <b>ДУЭЛЬ 2x2 — СБОР</b>\n━━━━━━━━━━━━━━━\n\n"
-            f"👥 Игроков: <b>{len(d.get('team', []))}/4</b>\n\n"
-            f"<i>Жми «Присоединиться»</i>\n\n"
-            f"⏱ Осталось: <b>{fmt_t(left)}</b>"
+            f"👥 Игроков: <b>{len(d['team'])}/4</b>\n"
+            f"⏱ До старта: <b>{fmt_t(left)}</b>\n\n"
+            f"<b>Команда:</b>\n{players}"
         )
     return (
         f"⚔️ <b>ВЫЗОВ НА ДУЭЛЬ!</b>\n━━━━━━━━━━━━━━━\n\n"
@@ -410,21 +516,21 @@ def duel_cb(call):
         return
 
     if call.data == 'd_yes':
-        if d.get('status') != 'pending': bot.answer_callback_query(call.id, "❌ Неактуально"); return
-        if uid != d['p2_id']: bot.answer_callback_query(call.id, "❌ Не твой вызов"); return
+        if d.get('status') != 'pending': bot.answer_callback_query(call.id, "❌"); return
+        if uid != d['p2_id']: bot.answer_callback_query(call.id, "❌"); return
         d['status'] = 'active'; d['last_action_msg'] = ''
         save_duel(cid, d)
         sedit(cid, d['msg_id'], duel_text(d), duel_kb_1v1())
-        bot.answer_callback_query(call.id, "⚔️ Началась!"); return
+        bot.answer_callback_query(call.id, "⚔️"); return
 
     if call.data == 'd_no':
-        if d.get('status') != 'pending': bot.answer_callback_query(call.id, "❌ Неактуально"); return
-        if uid != d['p2_id']: bot.answer_callback_query(call.id, "❌ Не твой вызов"); return
+        if d.get('status') != 'pending': bot.answer_callback_query(call.id, "❌"); return
+        if uid != d['p2_id']: bot.answer_callback_query(call.id, "❌"); return
         del_duel(cid)
         sedit(cid, d['msg_id'], "❌ Отклонено.")
         bot.answer_callback_query(call.id, "Отклонено"); return
 
-    if d.get('status') != 'active': bot.answer_callback_query(call.id, "Не идёт"); return
+    if d.get('status') != 'active': bot.answer_callback_query(call.id, "❌"); return
     if uid != d['turn']: bot.answer_callback_query(call.id, "🎯 Не твой ход"); return
 
     if call.data == 'd_aim':
@@ -441,7 +547,7 @@ def duel_cb(call):
         else:
             had = d['p1_aim']; d['p1_aim'] = False
         msg = random.choice(DISTRACT)
-        msg += "\n💥 <b>Прицел сбит!</b>" if had else "\n🤷 <i>Прицела не было.</i>"
+        msg += "\n💥 <b>Прицел сбит!</b>" if had else "\n🤷"
         d['last_action_msg'] = msg
         next_turn(d); save_duel(cid, d)
         sedit(cid, d['msg_id'], duel_text(d), duel_kb_1v1())
@@ -484,27 +590,19 @@ def cmd_duel2x2(m):
         bot.send_message(m.chat.id, "⚔️ Только в группах."); return
     ex = get_duel(m.chat.id)
     if ex and ex.get('status') in ('pending', 'active'):
-        bot.send_message(m.chat.id, "⚔️ Уже идёт дуэль."); return
+        bot.send_message(m.chat.id, "⚔️ Уже идёт."); return
     now = int(time.time())
     d = {
-        'chat_id': m.chat.id,
-        'mode': '2v2',
+        'chat_id': m.chat.id, 'mode': '2v2',
         'host_id': str(m.from_user.id),
-        'team': [],           # id игроков
-        'status': 'lobby',
-        'deadline': now + DUEL_TIMEOUT,
-        'msg_id': None,
-        'turn_idx': 0,
-        'last_action_msg': '',
-        'team_a': [], 'team_b': [],   # заполним при старте
-        'players': {},                # id -> {name, hp, aim, team}
-        'choice': {}                  # id -> action
+        'team': [], 'players': {},
+        'team_a': [], 'team_b': [],
+        'status': 'lobby', 'deadline': now + DUEL_TIMEOUT,
+        'msg_id': None, 'turn_idx': 0, 'last_action_msg': ''
     }
-    # Автоматически добавляем хоста
     d['team'].append(str(m.from_user.id))
     d['players'][str(m.from_user.id)] = {
-        'name': m.from_user.first_name,
-        'hp': DUEL_HP, 'aim': False, 'team': None
+        'name': m.from_user.first_name, 'hp': DUEL_HP, 'aim': False, 'team': None
     }
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(
@@ -519,50 +617,28 @@ def cmd_duel2x2(m):
 
 def duel_2v2_text(d):
     if d.get('status') == 'lobby':
-        players = "\n".join([f"• {p['name']}" for p in d['players'].values()])
-        left = d.get('deadline', 0) - int(time.time())
-        return (
-            f"⚔️ <b>ДУЭЛЬ 2x2 — СБОР</b>\n━━━━━━━━━━━━━━━\n\n"
-            f"👥 Игроков: <b>{len(d['team'])}/4</b>\n"
-            f"⏱ До старта: <b>{fmt_t(left)}</b>\n\n"
-            f"<b>Команда:</b>\n{players}"
-        )
-    # Бой
-    a_team = d['team_a']
-    b_team = d['team_b']
-    def player_line(uid):
-        p = d['players'][uid]
-        alive = '💀' if p['hp'] <= 0 else f"❤️ {p['hp']}"
-        aim = ' 🎯' if p.get('aim') else ''
-        return f"• <b>{p['name']}</b>: {alive}{aim}"
-    a_text = "\n".join([player_line(u) for u in a_team])
-    b_text = "\n".join([player_line(u) for u in b_team])
-    # Чей ход
+        return duel_pending_text(d)
+    a_text = "\n".join([f"• <b>{d['players'][u]['name']}</b>: {'💀' if d['players'][u]['hp'] <= 0 else '❤️ '+str(d['players'][u]['hp'])}" for u in d['team_a']])
+    b_text = "\n".join([f"• <b>{d['players'][u]['name']}</b>: {'💀' if d['players'][u]['hp'] <= 0 else '❤️ '+str(d['players'][u]['hp'])}" for u in d['team_b']])
     alive = [u for u in d['team'] if d['players'][u]['hp'] > 0]
+    tn = '—'
     if alive:
-        idx = d['turn_idx'] % len(alive)
-        turn_uid = alive[idx]
-        turn_name = d['players'][turn_uid]['name']
-    else:
-        turn_name = '—'
+        tn = d['players'][alive[d['turn_idx'] % len(alive)]]['name']
     t = (
         f"⚔️ <b>ДУЭЛЬ 2x2</b>\n━━━━━━━━━━━━━━━\n\n"
         f"🔵 <b>Команда А</b>\n{a_text}\n\n"
         f"🔴 <b>Команда Б</b>\n{b_text}\n\n"
-        f"🎯 Ход: <b>{turn_name}</b>"
+        f"🎯 Ход: <b>{tn}</b>"
     )
     if d.get('last_action_msg'): t += f"\n\n{d['last_action_msg']}"
     return t
 
 def duel_2v2_attack_kb(d, uid):
-    """Кнопки для выбора цели (врагов)."""
     enemy_team = d['team_b'] if uid in d['team_a'] else d['team_a']
-    alive_enemies = [u for u in enemy_team if d['players'][u]['hp'] > 0]
+    alive = [u for u in enemy_team if d['players'][u]['hp'] > 0]
     kb = types.InlineKeyboardMarkup(row_width=2)
-    for u in alive_enemies:
-        kb.add(types.InlineKeyboardButton(
-            f"🔫 {d['players'][u]['name']}", callback_data=f'd2_atk_{u}'
-        ))
+    for u in alive:
+        kb.add(types.InlineKeyboardButton(f"🔫 {d['players'][u]['name']}", callback_data=f'd2_atk_{u}'))
     kb.add(types.InlineKeyboardButton('🎯 Прицел', callback_data='d2_aim'))
     kb.add(types.InlineKeyboardButton('🎭 Отвлечь', callback_data='d2_dist'))
     return kb
@@ -574,89 +650,74 @@ def start_2v2(cid):
     random.shuffle(ids)
     d['team_a'] = ids[:2]
     d['team_b'] = ids[2:4]
-    for u in d['team_a']:
-        d['players'][u]['team'] = 'A'
-    for u in d['team_b']:
-        d['players'][u]['team'] = 'B'
-    d['status'] = 'active'
-    d['turn_idx'] = 0
+    for u in d['team_a']: d['players'][u]['team'] = 'A'
+    for u in d['team_b']: d['players'][u]['team'] = 'B'
+    d['status'] = 'active'; d['turn_idx'] = 0
     d['last_action_msg'] = '⚔️ Бой начался!'
     save_duel(cid, d)
     sedit(cid, d['msg_id'], duel_2v2_text(d), None)
-    # Отправляем каждому кнопки его цели
     send_2v2_turn(cid)
 
 def send_2v2_turn(cid):
     d = get_duel(cid)
     if not d or d.get('status') != 'active': return
     alive = [u for u in d['team'] if d['players'][u]['hp'] > 0]
-    if not alive:
-        finish_2v2(cid); return
+    if not alive: finish_2v2(cid); return
     uid = alive[d['turn_idx'] % len(alive)]
     kb = duel_2v2_attack_kb(d, uid)
     try:
-        msg = bot.send_message(cid, duel_2v2_text(d), parse_mode='HTML', reply_markup=kb)
-        # Не редактируем — у каждого хода новое сообщение
+        bot.send_message(cid, duel_2v2_text(d), parse_mode='HTML', reply_markup=kb)
     except: pass
 
-@bot.callback_query_handler(func=lambda c: c.data.startswith('d2_'))
-def duel2_cb(call):
-    cid = call.message.chat.id
-    d = get_duel(cid)
-    if not d or d.get('mode') != '2v2':
-        bot.answer_callback_query(call.id, "Не найдена"); return
-    uid = str(call.from_user.id)
-
+def handle_2v2(call, cid, d, uid):
     if call.data == 'd2_join':
-        if d['status'] != 'lobby':
-            bot.answer_callback_query(call.id, "❌ Бой уже идёт"); return
-        if uid in d['team']:
-            bot.answer_callback_query(call.id, "✅ Ты уже в команде"); return
-        if len(d['team']) >= 4:
-            bot.answer_callback_query(call.id, "❌ Уже 4 игрока"); return
+        if d['status'] != 'lobby': bot.answer_callback_query(call.id, "❌"); return
+        if uid in d['team']: bot.answer_callback_query(call.id, "✅"); return
+        if len(d['team']) >= 4: bot.answer_callback_query(call.id, "❌ 4 игрока"); return
         d['team'].append(uid)
         d['players'][uid] = {'name': call.from_user.first_name, 'hp': DUEL_HP, 'aim': False, 'team': None}
         save_duel(cid, d)
-        sedit(cid, d['msg_id'], duel_pending_text(d), types.InlineKeyboardMarkup(row_width=2).add(
+        kb = types.InlineKeyboardMarkup(row_width=2)
+        kb.add(
             types.InlineKeyboardButton('🎭 Присоединиться', callback_data='d2_join'),
             types.InlineKeyboardButton('🚪 Выйти', callback_data='d2_leave')
-        ).add(types.InlineKeyboardButton('▶️ Начать (хост)', callback_data='d2_start')))
-        bot.answer_callback_query(call.id, "⚔️ Ты в команде!"); return
+        )
+        kb.add(types.InlineKeyboardButton('▶️ Начать (хост)', callback_data='d2_start'))
+        sedit(cid, d['msg_id'], duel_pending_text(d), kb)
+        bot.answer_callback_query(call.id, "⚔️"); return
 
     if call.data == 'd2_leave':
-        if d['status'] != 'lobby':
-            bot.answer_callback_query(call.id, "❌ Бой уже идёт"); return
-        if uid not in d['team']:
-            bot.answer_callback_query(call.id, "❌ Тебя нет"); return
+        if d['status'] != 'lobby': bot.answer_callback_query(call.id, "❌"); return
+        if uid not in d['team']: bot.answer_callback_query(call.id, "❌"); return
         d['team'].remove(uid)
         d['players'].pop(uid, None)
         if not d['team']:
-            del_duel(cid); sedit(cid, d['msg_id'], "❌ Лобби закрыто.")
+            del_duel(cid); sedit(cid, d['msg_id'], "❌ Закрыто.")
             bot.answer_callback_query(call.id, "🚪"); return
-        if uid == d['host_id']:
-            d['host_id'] = d['team'][0]
+        if uid == d['host_id']: d['host_id'] = d['team'][0]
         save_duel(cid, d)
-        sedit(cid, d['msg_id'], duel_pending_text(d), types.InlineKeyboardMarkup(row_width=2).add(
+        kb = types.InlineKeyboardMarkup(row_width=2)
+        kb.add(
             types.InlineKeyboardButton('🎭 Присоединиться', callback_data='d2_join'),
             types.InlineKeyboardButton('🚪 Выйти', callback_data='d2_leave')
-        ).add(types.InlineKeyboardButton('▶️ Начать (хост)', callback_data='d2_start')))
-        bot.answer_callback_query(call.id, "🚪 Вышел"); return
+        )
+        kb.add(types.InlineKeyboardButton('▶️ Начать (хост)', callback_data='d2_start'))
+        sedit(cid, d['msg_id'], duel_pending_text(d), kb)
+        bot.answer_callback_query(call.id, "🚪"); return
 
     if call.data == 'd2_start':
         if uid != d['host_id'] and not is_admin_id(uid):
             bot.answer_callback_query(call.id, "❌ Только хост"); return
         if len(d['team']) < 4:
-            bot.answer_callback_query(call.id, "❌ Нужно ровно 4 игрока"); return
-        bot.answer_callback_query(call.id, "⚔️ Начинаем!")
+            bot.answer_callback_query(call.id, "❌ Нужно 4 игрока"); return
+        bot.answer_callback_query(call.id, "⚔️!")
         start_2v2(cid); return
 
     if d['status'] != 'active':
-        bot.answer_callback_query(call.id, "❌ Не идёт"); return
+        bot.answer_callback_query(call.id, "❌"); return
 
-    # Ход
     alive = [u for u in d['team'] if d['players'][u]['hp'] > 0]
-    if not alive:
-        bot.answer_callback_query(call.id, "Бой окончен"); return
+    if not alive: bot.answer_callback_query(call.id, "❌"); return
     if uid != alive[d['turn_idx'] % len(alive)]:
         bot.answer_callback_query(call.id, "🎯 Не твой ход"); return
     p = d['players'][uid]
@@ -664,33 +725,30 @@ def duel2_cb(call):
     if call.data == 'd2_aim':
         p['aim'] = True
         d['last_action_msg'] = f"🎯 <b>{p['name']}</b> прицелился!"
-        d['turn_idx'] += 1
-        save_duel(cid, d)
+        d['turn_idx'] += 1; save_duel(cid, d)
         send_2v2_turn(cid)
         bot.answer_callback_query(call.id, "🎯"); return
 
     if call.data == 'd2_dist':
-        # Сбиваем прицел рандомному врагу
         enemy_team = d['team_b'] if p['team'] == 'A' else d['team_a']
-        enemies_with_aim = [u for u in enemy_team if d['players'][u]['hp'] > 0 and d['players'][u].get('aim')]
-        if enemies_with_aim:
-            target = random.choice(enemies_with_aim)
+        enemies_aim = [u for u in enemy_team if d['players'][u]['hp'] > 0 and d['players'][u].get('aim')]
+        if enemies_aim:
+            target = random.choice(enemies_aim)
             d['players'][target]['aim'] = False
             msg = f"🎭 <b>{p['name']}</b> сбил прицел у <b>{d['players'][target]['name']}</b>!"
         else:
             msg = f"🎭 <b>{p['name']}</b> сделал отвлекающий маневр!"
         d['last_action_msg'] = msg
-        d['turn_idx'] += 1
-        save_duel(cid, d)
+        d['turn_idx'] += 1; save_duel(cid, d)
         send_2v2_turn(cid)
         bot.answer_callback_query(call.id, "🎭"); return
 
     if call.data.startswith('d2_atk_'):
         target = call.data.replace('d2_atk_', '')
         if target not in d['players'] or d['players'][target]['hp'] <= 0:
-            bot.answer_callback_query(call.id, "❌ Цель мертва"); return
+            bot.answer_callback_query(call.id, "❌"); return
         if d['players'][target]['team'] == p['team']:
-            bot.answer_callback_query(call.id, "❌ Это твой союзник"); return
+            bot.answer_callback_query(call.id, "❌ Союзник"); return
         aim = p.get('aim', False)
         ch = DUEL_AIM_BONUS if aim else DUEL_NOAIM_CHANCE
         if random.random() < ch:
@@ -701,9 +759,7 @@ def duel2_cb(call):
             msg = f"🌫 <b>{p['name']}</b> промахнулся!"
         p['aim'] = False
         d['last_action_msg'] = msg
-        d['turn_idx'] += 1
-        save_duel(cid, d)
-        # Проверка победы
+        d['turn_idx'] += 1; save_duel(cid, d)
         a_alive = [u for u in d['team_a'] if d['players'][u]['hp'] > 0]
         b_alive = [u for u in d['team_b'] if d['players'][u]['hp'] > 0]
         if not a_alive or not b_alive:
@@ -717,21 +773,20 @@ def finish_2v2(cid):
     a_alive = [u for u in d['team_a'] if d['players'][u]['hp'] > 0]
     b_alive = [u for u in d['team_b'] if d['players'][u]['hp'] > 0]
     if a_alive and not b_alive:
-        winners = d['team_a']; losers = d['team_b']
+        winners, losers = d['team_a'], d['team_b']
     elif b_alive and not a_alive:
-        winners = d['team_b']; losers = d['team_a']
+        winners, losers = d['team_b'], d['team_a']
     else:
-        winners = []; losers = []
+        winners, losers = [], []
     for u in winners: add_duel_win(u)
     for u in losers: add_duel_loss(u)
     wnames = ", ".join([d['players'][u]['name'] for u in winners])
     text = (
         f"🏆 <b>ДУЭЛЬ 2x2 ОКОНЧЕНА!</b>\n━━━━━━━━━━━━━━━\n\n"
-        f"🥇 Победила команда: <b>{wnames}</b>\n\n"
+        f"🥇 Победила: <b>{wnames}</b>\n\n"
         f"{d.get('last_action_msg','')}"
     )
-    try:
-        bot.send_message(cid, text, parse_mode='HTML')
+    try: bot.send_message(cid, text, parse_mode='HTML')
     except: pass
     del_duel(cid)
 
@@ -739,7 +794,7 @@ def finish_2v2(cid):
 @bot.message_handler(commands=['boss', 'boss1', 'boss2', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7'])
 def cmd_boss(m):
     if m.chat.type == 'private':
-        bot.send_message(m.chat.id, "🐉 Боссы только в группах."); return
+        bot.send_message(m.chat.id, "🐉 Только в группах."); return
     cmd = m.text.split()[0].replace('/', '')
     if '@' in cmd: cmd = cmd.split('@')[0]
     if cmd == 'boss':
@@ -755,7 +810,7 @@ def cmd_boss(m):
     b = BOSSES[bn]
     g = get_boss(m.chat.id)
     if g and g.get('status') not in ('finished',):
-        bot.send_message(m.chat.id, "🐉 Уже идёт бой."); return
+        bot.send_message(m.chat.id, "🐉 Уже идёт."); return
     now = int(time.time())
     p = get_player(m.from_user.id, m.from_user.first_name, m.from_user.username)
     g = {
@@ -817,8 +872,7 @@ def boss_lobby_tick(cid):
 def boss_lobby_timeout(cid):
     g = get_boss(cid)
     if not g or g.get('status') != 'lobby': return
-    if len(g['players']) >= BOSS_MIN_PLAYERS:
-        start_boss_fight(cid)
+    if len(g['players']) >= BOSS_MIN_PLAYERS: start_boss_fight(cid)
     else:
         try: bot.send_message(cid, "⏱ Мало игроков. Отмена.", parse_mode='HTML')
         except: pass
@@ -829,12 +883,12 @@ def boss_lobby_cb(call):
     cid = call.message.chat.id
     g = get_boss(cid)
     if not g or g.get('status') != 'lobby':
-        bot.answer_callback_query(call.id, "❌ Закрыто"); return
+        bot.answer_callback_query(call.id, "❌"); return
     uid = str(call.from_user.id); is_admin = is_admin_id(uid)
     mid = g.get('lobby_msg_id') or call.message.message_id
 
     if call.data == 'b_join':
-        if uid in g['players']: bot.answer_callback_query(call.id, "✅ Уже в команде"); return
+        if uid in g['players']: bot.answer_callback_query(call.id, "✅"); return
         if len(g['players']) >= BOSS_MAX_PLAYERS: bot.answer_callback_query(call.id, f"❌ Макс {BOSS_MAX_PLAYERS}"); return
         p = get_player(uid, call.from_user.first_name, call.from_user.username)
         order = max([pl.get('order',0) for pl in g['players'].values()] + [0]) + 1
@@ -844,39 +898,38 @@ def boss_lobby_cb(call):
             'alive': True, 'aim': False, 'dmg_done': 0, 'order': order
         }
         save_boss_g(cid, g); sedit(cid, mid, boss_lobby_text(g), boss_lobby_kb(is_admin))
-        bot.answer_callback_query(call.id, "⚔️ В команде!"); return
+        bot.answer_callback_query(call.id, "⚔️"); return
 
     if call.data == 'b_leave':
-        if uid not in g['players']: bot.answer_callback_query(call.id, "❌ Не в команде"); return
+        if uid not in g['players']: bot.answer_callback_query(call.id, "❌"); return
         was_host = (uid == g['host_id'])
         del g['players'][uid]
         if was_host and g['players']:
             g['host_id'] = sorted(g['players'].keys(), key=lambda u: g['players'][u].get('order',0))[0]
         elif not g['players']:
-            del_boss(cid); sedit(cid, mid, "❌ Лобби закрыто.")
+            del_boss(cid); sedit(cid, mid, "❌ Закрыто.")
             bot.answer_callback_query(call.id, "🚪"); return
         save_boss_g(cid, g); sedit(cid, mid, boss_lobby_text(g), boss_lobby_kb(is_admin))
-        bot.answer_callback_query(call.id, "🚪 Вышел"); return
+        bot.answer_callback_query(call.id, "🚪"); return
 
     if call.data == 'b_start':
         if uid != g['host_id'] and not is_admin:
-            bot.answer_callback_query(call.id, "❌ Только хост"); return
+            bot.answer_callback_query(call.id, "❌ Хост"); return
         if len(g['players']) < BOSS_MIN_PLAYERS:
             bot.answer_callback_query(call.id, f"❌ Минимум {BOSS_MIN_PLAYERS}"); return
-        bot.answer_callback_query(call.id, "🐉 Начинаем!"); start_boss_fight(cid); return
+        bot.answer_callback_query(call.id, "🐉!"); start_boss_fight(cid); return
 
     if call.data == 'b_cancel':
         if uid != g['host_id'] and not is_admin:
-            bot.answer_callback_query(call.id, "❌ Только хост"); return
+            bot.answer_callback_query(call.id, "❌"); return
         del_boss(cid); sedit(cid, mid, "❌ Отменено.")
         bot.answer_callback_query(call.id, "Отменено"); return
 
     if call.data == 'b_ext':
-        if not is_admin:
-            bot.answer_callback_query(call.id, "❌ Только админ"); return
+        if not is_admin: bot.answer_callback_query(call.id, "❌"); return
         g['deadline'] = int(time.time()) + BOSS_LOBBY_TIME
         save_boss_g(cid, g); sedit(cid, mid, boss_lobby_text(g), boss_lobby_kb(is_admin))
-        bot.answer_callback_query(call.id, "➕ Продлено")
+        bot.answer_callback_query(call.id, "➕"); return
 
 def boss_fight_kb():
     kb = types.InlineKeyboardMarkup(row_width=3)
@@ -897,8 +950,7 @@ def boss_fight_text(g):
     pt = "\n".join([f"• <b>{p['name']}</b> — ❤️ {p['hp']}/{p['max_hp']} HP{' 🎯' if p.get('aim') else ''}" for _, p in ap])
     if not pt: pt = "💀 Все погибли"
     tn = '?'
-    if ap:
-        tn = ap[g.get('turn_idx',0) % len(ap)][1]['name']
+    if ap: tn = ap[g.get('turn_idx',0) % len(ap)][1]['name']
     pct = int((g['boss_hp'] / g['boss_max_hp']) * 100) if g['boss_max_hp'] else 0
     bar = '█' * (pct//10) + '░' * (10 - pct//10)
     t = (
@@ -914,7 +966,7 @@ def boss_fight_text(g):
 def start_boss_fight(cid):
     g = get_boss(cid)
     if not g: return
-    g['status'] = 'fight'; g['turn_idx'] = 0; g['last_msg'] = '⚔️ Бой начался!'
+    g['status'] = 'fight'; g['turn_idx'] = 0; g['last_msg'] = '⚔️ Началось!'
     for u in g['players']: g['players'][u]['aim'] = False
     save_boss_g(cid, g)
     try:
@@ -943,10 +995,10 @@ def boss_attack(g):
 def boss_fight_cb(call):
     cid = call.message.chat.id
     g = get_boss(cid)
-    if not g or g['status'] != 'fight': bot.answer_callback_query(call.id, "❌ Не идёт"); return
+    if not g or g['status'] != 'fight': bot.answer_callback_query(call.id, "❌"); return
     uid = str(call.from_user.id)
     if uid not in g['players'] or not g['players'][uid]['alive']:
-        bot.answer_callback_query(call.id, "💀 Не можешь"); return
+        bot.answer_callback_query(call.id, "💀"); return
     ap = alive_sorted(g)
     if not ap: bot.answer_callback_query(call.id, "Ошибка"); return
     if uid != ap[g['turn_idx'] % len(ap)][0]:
@@ -966,7 +1018,7 @@ def boss_fight_cb(call):
         if p.get('aim'): dmg = int(dmg * BOSS_AIM_BONUS); p['aim'] = False
         g['boss_hp'] = max(0, g['boss_hp'] - dmg)
         p['dmg_done'] = p.get('dmg_done',0) + dmg
-        g['last_msg'] = f"🔫 <b>{p['name']}</b> бьёт на <b>{dmg}</b>!"
+        g['last_msg'] = f"🔫 <b>{p['name']}</b> на <b>{dmg}</b>!"
         next_boss_turn(g); save_boss_g(cid, g)
         if check_boss_end(cid, g): return
         sedit(cid, g.get('fight_msg_id'), boss_fight_text(g), boss_fight_kb())
@@ -978,7 +1030,7 @@ def boss_fight_cb(call):
             if p.get('aim'): dmg = int(dmg * BOSS_AIM_BONUS); p['aim'] = False
             g['boss_hp'] = max(0, g['boss_hp'] - dmg)
             p['dmg_done'] = p.get('dmg_done',0) + dmg
-            g['last_msg'] = f"🏏 <b>{p['name']}</b> бьёт битой на <b>{dmg}</b>!"
+            g['last_msg'] = f"🏏 <b>{p['name']}</b> на <b>{dmg}</b>!"
         else:
             if p.get('aim'): p['aim'] = False
             g['last_msg'] = f"🏏 <b>{p['name']}</b> промахнулся!"
@@ -1009,8 +1061,10 @@ def menu_cb(call):
     if call.data == 'm_prof': send_profile(cid, uid, u.first_name, u.username)
     elif call.data == 'm_top': send_top(cid)
     elif call.data == 'm_shop': send_shop(cid, uid, u.first_name, u.username)
+    elif call.data == 'm_daily': send_daily(cid, uid, u.first_name, u.username)
+    elif call.data == 'm_mine': send_mine(cid, uid, u.first_name, u.username)
     elif call.data == 'm_duel': bot.send_message(cid, "⚔️ /duel (1x1) или /duel2x2 (2x2)")
-    elif call.data == 'm_boss': bot.send_message(cid, "🐉 Напиши /boss1 ... /boss7")
+    elif call.data == 'm_boss': bot.send_message(cid, "🐉 /boss1 ... /boss7")
     elif call.data == 'm_help': cmd_help(call.message)
     elif call.data == 'm_back':
         bot.send_message(cid, "🎭 Меню:", reply_markup=main_menu())
@@ -1023,6 +1077,8 @@ def set_commands():
             types.BotCommand('help','💬 Помощь'),
             types.BotCommand('profile','👤 Профиль'),
             types.BotCommand('top','🏆 Топ'),
+            types.BotCommand('daily','📅 Бонус'),
+            types.BotCommand('mine','⛏ Шахта'),
             types.BotCommand('duel','⚔️ Дуэль 1x1'),
             types.BotCommand('duel2x2','⚔️ Дуэль 2x2'),
             types.BotCommand('shop','💎 Магазин'),
