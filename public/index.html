@@ -3,126 +3,303 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Darkgram</title>
+<title>Darkgram Verify</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
---bg:#0a0e14;--bg-2:#0f141c;--card:#141a24;--card-2:#1a2130;
---line:#232c3a;--line-2:#2d3849;--accent:#4d8fd6;--accent-2:#6ba6e3;
---text:#ffffff;--text-dim:#8b9aab;--muted:#5a6b7d;--green:#4dcd5e;
---my-bubble:#4d8fd6;--their-bubble:#1f2937;
+--bg:#0a0e14;
+--bg-2:#0f141c;
+--card:#141a24;
+--card-2:#1a2130;
+--line:#232c3a;
+--line-2:#2d3849;
+--accent:#4d8fd6;
+--accent-2:#6ba6e3;
+--text:#ffffff;
+--text-dim:#8b9aab;
+--muted:#5a6b7d;
+--green:#4dcd5e;
+--gold:#e8b64c;
+--red:#e0455a;
 }
 html,body{height:100%;overflow-x:hidden}
 body{
 font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;
 background:radial-gradient(ellipse at top, #131a26 0%, #0a0e14 60%);
-background-attachment:fixed;color:var(--text);
+background-attachment:fixed;
+color:var(--text);
 -webkit-font-smoothing:antialiased;
 font-size:15px;line-height:1.45;
-padding-bottom:50px;min-height:100vh;
+padding-bottom:60px;min-height:100vh;
 }
-
-.header{background:rgba(20,26,36,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
-.header-inner{max-width:860px;margin:0 auto;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+.header{
+background:rgba(20,26,36,0.9);
+backdrop-filter:blur(20px);
+-webkit-backdrop-filter:blur(20px);
+border-bottom:1px solid var(--line);
+position:sticky;top:0;z-index:50;
+}
+.header-inner{
+max-width:860px;margin:0 auto;
+padding:14px 18px;
+display:flex;justify-content:space-between;align-items:center;
+}
 .logo{font-size:20px;font-weight:700;letter-spacing:-.3px}
 .logo-sub{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:2px}
-.online-badge{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text-dim);background:var(--card-2);border:1px solid var(--line);padding:6px 12px;border-radius:10px}
-.online-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
-
-.tabs{display:flex;max-width:860px;margin:0 auto;padding:0 12px;background:rgba(20,26,36,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--line);position:sticky;top:63px;z-index:49;overflow-x:auto;scrollbar-width:none}
+.balance-badge{
+display:flex;align-items:center;gap:6px;
+font-size:15px;font-weight:700;
+color:var(--gold);
+background:rgba(232,182,76,0.1);
+border:1px solid rgba(232,182,76,0.25);
+padding:7px 14px;border-radius:10px;
+}
+.tabs{
+display:flex;max-width:860px;margin:0 auto;
+padding:0 12px;
+background:rgba(20,26,36,0.9);
+backdrop-filter:blur(20px);
+-webkit-backdrop-filter:blur(20px);
+border-bottom:1px solid var(--line);
+position:sticky;top:63px;z-index:49;
+overflow-x:auto;scrollbar-width:none;
+}
 .tabs::-webkit-scrollbar{display:none}
-.tab{flex-shrink:0;padding:14px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:transparent;border-top:none;border-left:none;border-right:none;font-family:inherit;white-space:nowrap;transition:color .2s}
+.tab{
+flex-shrink:0;padding:14px 18px;
+font-size:13px;font-weight:600;
+color:var(--muted);cursor:pointer;
+border-bottom:2px solid transparent;
+background:transparent;border-top:none;border-left:none;border-right:none;
+font-family:inherit;white-space:nowrap;
+transition:all .2s;
+}
 .tab.active{color:var(--accent-2);border-bottom-color:var(--accent-2)}
-.tab.hidden{display:none}
-
 .container{max-width:860px;margin:0 auto;padding:18px}
 .page{display:none}
-.page.active{display:block}
-
-/* PROFILE */
-.profile-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 22px;text-align:center;margin-bottom:14px}
-.avatar-wrap{width:110px;height:110px;margin:0 auto 16px;position:relative}
-.avatar{width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:700;color:#fff;overflow:hidden;border:3px solid var(--card-2)}
-.avatar img{width:100%;height:100%;object-fit:cover;display:block}
-.avatar-edit{position:absolute;bottom:0;right:0;width:34px;height:34px;border-radius:50%;background:var(--accent);border:3px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:#fff;font-weight:700}
-.profile-name{font-size:21px;font-weight:700;letter-spacing:-.3px;margin-bottom:5px}
-.profile-username{font-size:14px;color:var(--accent-2);font-weight:600;margin-bottom:12px}
-.profile-id{display:inline-block;font-size:12px;color:var(--muted);background:var(--card-2);border:1px solid var(--line-2);padding:6px 14px;border-radius:10px;font-family:monospace}
-
-.info-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
-.card-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px}
-.field{margin-bottom:12px}
-.field:last-child{margin-bottom:0}
-.field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px}
-.field input,.field textarea{width:100%;background:var(--bg);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-family:inherit;transition:border-color .15s;resize:none}
-.field textarea{min-height:80px;line-height:1.4}
-.field input:focus,.field textarea:focus{outline:none;border-color:var(--accent)}
-.field input::placeholder,.field textarea::placeholder{color:var(--muted)}
-
-.btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s}
-.btn:hover{background:var(--accent-2)}
-.btn:active{background:#3d7bc2}
-.btn:disabled{background:var(--card-2);color:var(--muted);cursor:not-allowed}
-.btn.small{padding:10px;font-size:14px}
-
-/* SEARCH */
-.search-row{display:flex;gap:8px;margin-bottom:14px}
-.search-row input{flex:1;background:var(--bg);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-family:inherit}
-.search-row input:focus{outline:none;border-color:var(--accent)}
-.search-row button{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:0 18px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
-
-/* DIALOGS */
-.dialog-item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .15s}
-.dialog-item:active{background:var(--card-2)}
-.dialog-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden}
-.dialog-avatar img{width:100%;height:100%;object-fit:cover;display:block}
-.dialog-info{flex:1;min-width:0}
-.dialog-name{font-size:15px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dialog-last{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-/* CHAT */
-.chat-header{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:12px}
-.chat-back{font-size:22px;color:var(--accent-2);cursor:pointer;padding:0 6px;line-height:1}
-.chat-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden}
-.chat-avatar img{width:100%;height:100%;object-fit:cover;display:block}
-.chat-name{font-size:15px;font-weight:700}
-
-.chat-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;height:55vh;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:6px;scrollbar-width:thin}
-.chat-box::-webkit-scrollbar{width:4px}
-.chat-box::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px}
-
-.msg{max-width:78%;padding:9px 13px;border-radius:14px;font-size:14px;line-height:1.4;word-wrap:break-word;animation:fadeIn .15s}
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.msg.me{align-self:flex-end;background:var(--my-bubble);color:#fff;border-bottom-right-radius:4px}
-.msg.them{align-self:flex-start;background:var(--their-bubble);color:var(--text);border-bottom-left-radius:4px}
-
-.chat-input-row{display:flex;gap:8px}
-.chat-input-row input{flex:1;background:var(--bg);border:1px solid var(--line-2);border-radius:12px;padding:12px 14px;color:var(--text);font-size:15px;font-family:inherit}
-.chat-input-row input:focus{outline:none;border-color:var(--accent)}
-.chat-input-row button{background:var(--accent);color:#fff;border:none;border-radius:12px;padding:0 18px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
-
-/* USER CARD */
-.user-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center;margin-bottom:14px}
-.user-card .avatar-wrap{width:90px;height:90px;margin-bottom:14px}
-.user-card .avatar{width:90px;height:90px;font-size:36px}
-
-/* UPLOAD */
-.upload{border:2px dashed var(--line-2);border-radius:14px;padding:22px 16px;text-align:center;cursor:pointer;background:var(--bg);position:relative;overflow:hidden}
-.upload input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.upload-icon{font-size:30px;color:var(--muted);margin-bottom:6px;display:block}
-.upload-text{font-size:13px;color:var(--muted);font-weight:600}
-.upload-preview{max-width:100%;max-height:260px;border-radius:12px;display:block;margin:0 auto}
-
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--card-2);border:1px solid var(--line-2);color:var(--text);padding:13px 20px;border-radius:12px;font-size:14px;font-weight:600;z-index:99999;opacity:0;transition:all .25s;pointer-events:none;max-width:90vw;text-align:center}
+.page.active{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.big-card{
+background:var(--card);
+border:1px solid var(--line);
+border-radius:16px;
+padding:24px;
+margin-bottom:14px;
+}
+.big-title{
+font-size:22px;font-weight:700;
+letter-spacing:-.4px;
+margin-bottom:8px;
+text-align:center;
+}
+.big-sub{
+font-size:14px;color:var(--text-dim);
+text-align:center;
+margin-bottom:20px;
+line-height:1.5;
+}
+.verify-icon{
+font-size:72px;
+text-align:center;
+margin-bottom:16px;
+}
+.verify-info{
+background:var(--bg-2);
+border:1px solid var(--line);
+border-radius:12px;
+padding:14px;
+margin-bottom:16px;
+}
+.info-row{
+display:flex;justify-content:space-between;
+align-items:center;
+padding:10px 0;
+font-size:14px;
+}
+.info-row:not(:last-child){border-bottom:1px solid var(--line)}
+.info-lbl{color:var(--text-dim)}
+.info-val{
+font-weight:700;
+color:var(--accent-2);
+font-family:monospace;
+letter-spacing:1px;
+}
+.info-val.gold{color:var(--gold)}
+.info-val.green{color:var(--green)}
+.progress-wrap{
+text-align:center;
+padding:30px 0;
+}
+.progress-circle{
+width:130px;height:130px;
+margin:0 auto 20px;
+position:relative;
+}
+.progress-svg{
+transform:rotate(-90deg);
+}
+.progress-bg{
+stroke:var(--card-2);
+}
+.progress-fg{
+stroke:var(--accent);
+transition:stroke-dashoffset .3s linear;
+}
+.progress-pct{
+position:absolute;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+font-size:24px;font-weight:800;
+color:var(--accent-2);
+}
+.progress-status{
+font-size:14px;color:var(--text-dim);
+letter-spacing:.3px;
+}
+.btn{
+width:100%;
+background:var(--accent);
+color:#fff;
+border:none;
+border-radius:12px;
+padding:15px;
+font-size:15px;
+font-weight:700;
+cursor:pointer;
+font-family:inherit;
+transition:all .15s;
+letter-spacing:.2px;
+}
+.btn:active{opacity:.85;transform:scale(.98)}
+.btn:disabled{background:var(--card-2);color:var(--muted);cursor:not-allowed;transform:none}
+.btn.gold{background:var(--gold);color:#1a1408}
+.btn.green{background:var(--green);color:#fff}
+.field{margin-bottom:14px}
+.field label{
+display:block;
+font-size:11px;font-weight:700;
+color:var(--muted);
+text-transform:uppercase;
+letter-spacing:1.2px;
+margin-bottom:8px;
+}
+.field input{
+width:100%;
+background:var(--bg);
+border:1px solid var(--line-2);
+border-radius:12px;
+padding:14px 16px;
+color:var(--text);
+font-size:16px;
+font-family:monospace;
+letter-spacing:2px;
+text-align:center;
+font-weight:700;
+transition:border-color .15s;
+}
+.field input:focus{outline:none;border-color:var(--accent)}
+.field input::placeholder{color:var(--muted);font-weight:400;letter-spacing:1px}
+.shop-item{
+background:var(--card);
+border:1px solid var(--line);
+border-radius:14px;
+padding:16px;
+margin-bottom:10px;
+display:flex;
+align-items:center;
+gap:14px;
+transition:border-color .2s;
+}
+.shop-item.legendary{
+border-color:var(--gold);
+background:linear-gradient(135deg,var(--card) 0%, rgba(232,182,76,0.05) 100%);
+}
+.shop-item.owned{
+border-color:var(--green);
+background:linear-gradient(135deg,var(--card) 0%, rgba(77,205,94,0.05) 100%);
+}
+.shop-item.active{
+border-color:var(--accent);
+background:linear-gradient(135deg,var(--card) 0%, rgba(77,143,214,0.08) 100%);
+}
+.shop-id{
+font-family:monospace;
+font-size:20px;
+font-weight:800;
+letter-spacing:2px;
+color:var(--text);
+flex:1;
+min-width:0;
+}
+.shop-item.legendary .shop-id{color:var(--gold)}
+.shop-price{
+font-size:14px;
+font-weight:700;
+color:var(--gold);
+white-space:nowrap;
+}
+.shop-btn{
+background:var(--accent);
+color:#fff;
+border:none;
+border-radius:10px;
+padding:10px 16px;
+font-size:13px;
+font-weight:700;
+cursor:pointer;
+font-family:inherit;
+white-space:nowrap;
+flex-shrink:0;
+}
+.shop-btn:active{opacity:.85}
+.shop-btn.buy{background:var(--accent)}
+.shop-btn.owned-btn{background:var(--green)}
+.shop-btn.active-btn{background:var(--gold);color:#1a1408}
+.shop-btn:disabled{background:var(--card-2);color:var(--muted);cursor:not-allowed}
+.toast{
+position:fixed;
+bottom:24px;left:50%;
+transform:translateX(-50%) translateY(120%);
+background:var(--card-2);
+border:1px solid var(--line-2);
+color:var(--text);
+padding:14px 22px;
+border-radius:12px;
+font-size:14px;
+font-weight:600;
+z-index:99999;
+opacity:0;
+transition:all .25s;
+pointer-events:none;
+max-width:90vw;
+text-align:center;
+}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-.empty{text-align:center;padding:50px 20px;color:var(--muted)}
-.empty-box{width:68px;height:68px;margin:0 auto 16px;border:2px solid var(--line);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--muted);background:var(--card)}
-.empty-title{font-size:15px;font-weight:700;color:var(--text-dim);margin-bottom:5px}
+.empty{
+text-align:center;
+padding:60px 24px;
+color:var(--muted);
+}
+.empty-box{
+width:72px;height:72px;
+margin:0 auto 18px;
+border:2px solid var(--line);
+border-radius:20px;
+display:flex;align-items:center;justify-content:center;
+font-size:28px;color:var(--muted);
+background:var(--card);
+}
+.empty-title{font-size:16px;font-weight:700;color:var(--text-dim);margin-bottom:6px}
 .empty-desc{font-size:13px}
-
-.loading{text-align:center;padding:50px 20px;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.loading{
+text-align:center;
+padding:60px 20px;
+color:var(--muted);
+font-size:12px;font-weight:700;
+letter-spacing:2px;
+text-transform:uppercase;
+}
 </style>
 </head>
 <body>
@@ -131,24 +308,32 @@ padding-bottom:50px;min-height:100vh;
   <div class="header-inner">
     <div>
       <div class="logo">Darkgram</div>
-      <div class="logo-sub">profile</div>
+      <div class="logo-sub">verify</div>
     </div>
-    <div class="online-badge"><span class="online-dot"></span><span id="onlineCount">0</span> онлайн</div>
+    <div class="balance-badge">💎 <span id="headerIrises">0</span></div>
   </div>
 </div>
 
-<div class="tabs" id="tabsBar">
-  <button class="tab active" onclick="switchTab('profile', event)">Профиль</button>
-  <button class="tab" onclick="switchTab('search', event)">Поиск</button>
-  <button class="tab" onclick="switchTab('dialogs', event)">Сообщения</button>
-  <button class="tab hidden" id="postTab" onclick="switchTab('post', event)">Пост</button>
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('verify', event)">🆔 Verify</button>
+  <button class="tab" onclick="switchTab('promo', event)">🎫 Промокод</button>
+  <button class="tab" onclick="switchTab('shop', event)">🛒 Магазин</button>
+  <button class="tab" onclick="switchTab('profile', event)">👤 Профиль</button>
 </div>
 
 <div class="container">
-  <div class="page active" id="page-profile"><div id="profileContent"><div class="loading">Загрузка...</div></div></div>
-  <div class="page" id="page-search"><div id="searchContent"></div></div>
-  <div class="page" id="page-dialogs"><div id="dialogsContent"></div></div>
-  <div class="page" id="page-post"><div id="postContent"></div></div>
+  <div class="page active" id="page-verify">
+    <div id="verifyContent"><div class="loading">Загрузка...</div></div>
+  </div>
+  <div class="page" id="page-promo">
+    <div id="promoContent"><div class="loading">Загрузка...</div></div>
+  </div>
+  <div class="page" id="page-shop">
+    <div id="shopContent"><div class="loading">Загрузка...</div></div>
+  </div>
+  <div class="page" id="page-profile">
+    <div id="profileContent"><div class="loading">Загрузка...</div></div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -159,23 +344,32 @@ if (tg) { tg.ready(); tg.expand(); }
 
 const urlParams = new URLSearchParams(window.location.search);
 const TG_USER_ID = urlParams.get('user_id') || tg?.initDataUnsafe?.user?.id || null;
-const TG_FIRST_NAME = tg?.initDataUnsafe?.user?.first_name || 'Аноним';
-const TG_USERNAME = tg?.initDataUnsafe?.user?.username || '';
-const TG_PHOTO_URL = tg?.initDataUnsafe?.user?.photo_url || '';
+const TG_FIRST_NAME = tg?.initDataUnsafe?.user?.first_name || 'Anonymous';
 
-let isAdmin = false;
-let currentChatId = null;
-let chatPollTimer = null;
-let lastMsgTs = 0;
-let postMediaData = null;
-let postMediaType = '';
-let onlineTimer = null;
+let userData = {
+  irises: 0,
+  ai_id: null,
+  orcode: null,
+  promo_code: null,
+  promo_used: false,
+  owned_ids: [],
+  active_id: null,
+  verified: false
+};
+
+let shopItems = [];
+let verifyInProgress = false;
+let verifyTimer = null;
 
 async function api(url, opts = {}) {
   try {
     const c = new AbortController();
     const t = setTimeout(() => c.abort(), 15000);
-    const r = await fetch(url, {headers:{'Content-Type':'application/json'}, signal:c.signal, ...opts});
+    const r = await fetch(url, {
+      headers: {'Content-Type':'application/json'},
+      signal: c.signal,
+      ...opts
+    });
     clearTimeout(t);
     return await r.json();
   } catch (e) { return null; }
@@ -193,434 +387,386 @@ function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function initials(name) { return (name || 'A')[0].toUpperCase(); }
-
-function avatarHTML(url, name) {
-  if (url) return `<img src="${esc(url)}" alt="">`;
-  return esc(initials(name));
+function updateBalance() {
+  const el = document.getElementById('headerIrises');
+  if (el) el.textContent = userData.irises || 0;
 }
 
 function switchTab(name, event) {
   if (event) event.preventDefault();
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const tabs = ['profile','search','dialogs','post'];
+  const tabs = ['verify','promo','shop','profile'];
   const idx = tabs.indexOf(name);
-  const els = document.querySelectorAll('.tab');
-  if (idx >= 0 && els[idx]) els[idx].classList.add('active');
-  const pg = document.getElementById('page-' + name);
-  if (pg) pg.classList.add('active');
+  const tabEls = document.querySelectorAll('.tab');
+  if (idx >= 0 && tabEls[idx]) tabEls[idx].classList.add('active');
+  const page = document.getElementById('page-' + name);
+  if (page) page.classList.add('active');
+
+  if (name === 'verify') loadVerify();
+  if (name === 'promo') loadPromo();
+  if (name === 'shop') loadShop();
   if (name === 'profile') loadProfile();
-  if (name === 'search') loadSearch();
-  if (name === 'dialogs') loadDialogs();
-  if (name === 'post') loadPost();
-  if (name !== 'dialogs') stopChatPoll();
 }
 
-/* ONLINE */
-async function updateOnline() {
-  const data = await api('/api/online') || {};
-  const el = document.getElementById('onlineCount');
-  if (el) el.textContent = data.count || 0;
-}
-
-async function heartbeat() {
+async function loadUserData() {
   if (!TG_USER_ID) return;
-  await api('/api/heartbeat', {
-    method: 'POST',
-    body: JSON.stringify({
-      user_id: TG_USER_ID,
-      first_name: TG_FIRST_NAME,
-      username: TG_USERNAME
-    })
-  });
+  const data = await api('/api/profile/' + TG_USER_ID);
+  if (data && data.ok) {
+    userData = data;
+    updateBalance();
+  }
 }
 
-/* PROFILE */
-async function loadProfile() {
-  const el = document.getElementById('profileContent');
+function loadVerify() {
+  const el = document.getElementById('verifyContent');
   if (!el) return;
+
   if (!TG_USER_ID) {
     el.innerHTML = '<div class="empty"><div class="empty-box">?</div><div class="empty-title">Открой из Telegram</div></div>';
     return;
   }
-  const data = await api('/api/profile/' + TG_USER_ID) || {};
 
-  const avatarSrc = data.avatar || TG_PHOTO_URL || '';
-  const initialsText = initials(data.first_name || TG_FIRST_NAME);
-  const avatarInner = avatarSrc
-    ? `<img src="${esc(avatarSrc)}" onerror="this.parentNode.innerHTML='${esc(initialsText)}'">`
-    : esc(initialsText);
+  if (verifyInProgress) {
+    renderProgress();
+    return;
+  }
 
-  const usernameText = data.username ? '@' + data.username : (TG_USERNAME ? '@' + TG_USERNAME : 'без @username');
+  if (userData.verified && userData.ai_id) {
+    renderVerifyResult();
+    return;
+  }
 
   el.innerHTML = `
-    <div class="profile-card">
-      <div class="avatar-wrap">
-        <div class="avatar">${avatarInner}</div>
-        <div class="avatar-edit" onclick="document.getElementById('avatarFileInput').click()">+</div>
-        <input type="file" id="avatarFileInput" accept="image/*" style="display:none">
-      </div>
-      <div class="profile-name">${esc(data.first_name || TG_FIRST_NAME)}</div>
-      <div class="profile-username">${esc(usernameText)}</div>
-      <div class="profile-id">ID: ${esc(TG_USER_ID)}</div>
-    </div>
-
-    <div class="info-card">
-      <div class="card-title">О себе</div>
-      <div class="field">
-        <textarea id="bioInput" placeholder="Расскажи о себе..." maxlength="500">${esc(data.bio || '')}</textarea>
-      </div>
-    </div>
-
-    <div class="info-card">
-      <div class="card-title">Номер телефона</div>
-      <div class="field">
-        <input type="tel" id="phoneInput" placeholder="+7 (900) 000-00-00" value="${esc(data.phone || '')}" maxlength="30">
-      </div>
-    </div>
-
-    <div class="info-card">
-      <button class="btn" onclick="saveProfile()">Сохранить</button>
+    <div class="big-card">
+      <div class="verify-icon">🆔</div>
+      <div class="big-title">Verify Your ID</div>
+      <div class="big-sub">Получи свой уникальный ID, ORCODE и промокод</div>
+      <button class="btn" onclick="startVerify()">Начать верификацию</button>
     </div>
   `;
-
-  // Загрузка аватарки
-  const af = document.getElementById('avatarFileInput');
-  if (af) {
-    af.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 3 * 1024 * 1024) {
-        showToast('Аватар до 3 МБ');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        // Сжимаем через canvas
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const size = 300;
-          canvas.width = size;
-          canvas.height = size;
-          const ctx = canvas.getContext('2d');
-          const min = Math.min(img.width, img.height);
-          const sx = (img.width - min) / 2;
-          const sy = (img.height - min) / 2;
-          ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-          saveAvatar(dataUrl);
-        };
-        img.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-  }
 }
 
-async function saveAvatar(dataUrl) {
-  const res = await api('/api/profile/save', {
+function renderProgress() {
+  const el = document.getElementById('verifyContent');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="big-card">
+      <div class="progress-wrap">
+        <div class="progress-circle">
+          <svg class="progress-svg" width="130" height="130">
+            <circle class="progress-bg" cx="65" cy="65" r="58" fill="none" stroke-width="8"/>
+            <circle class="progress-fg" id="progressCircle" cx="65" cy="65" r="58" fill="none" stroke-width="8"
+              stroke-dasharray="364" stroke-dashoffset="364"/>
+          </svg>
+          <div class="progress-pct" id="progressPct">0%</div>
+        </div>
+        <div class="progress-status" id="progressStatus">Инициализация...</div>
+      </div>
+    </div>
+  `;
+}
+
+async function startVerify() {
+  if (verifyInProgress) return;
+  verifyInProgress = true;
+  renderProgress();
+
+  const totalMs = 60000;
+  const startTime = Date.now();
+  const statuses = [
+    'Подключение к серверу...',
+    'Генерация ORCODE...',
+    'Создание ID...',
+    'Проверка уникальности...',
+    'Финальная валидация...',
+    'Почти готово...'
+  ];
+
+  const circle = document.getElementById('progressCircle');
+  const pctEl = document.getElementById('progressPct');
+  const statusEl = document.getElementById('progressStatus');
+
+  const apiPromise = api('/api/verify/start', {
     method: 'POST',
-    body: JSON.stringify({
-      user_id: TG_USER_ID,
-      bio: document.getElementById('bioInput').value.trim(),
-      phone: document.getElementById('phoneInput').value.trim(),
-      avatar: dataUrl
-    })
+    body: JSON.stringify({ user_id: TG_USER_ID })
+  });
+
+  clearInterval(verifyTimer);
+  verifyTimer = setInterval(() => {
+    const elapsed = Date.now() - startTime;
+    const pct = Math.min(99, Math.floor((elapsed / totalMs) * 100));
+    if (pctEl) pctEl.textContent = pct + '%';
+    if (circle) circle.setAttribute('stroke-dashoffset', String(364 - (364 * pct / 100)));
+    if (statusEl) {
+      const idx = Math.min(statuses.length - 1, Math.floor(pct / 18));
+      statusEl.textContent = statuses[idx];
+    }
+  }, 100);
+
+  const res = await apiPromise;
+
+  setTimeout(() => {
+    clearInterval(verifyTimer);
+    if (pctEl) pctEl.textContent = '100%';
+    if (circle) circle.setAttribute('stroke-dashoffset', '0');
+    if (statusEl) statusEl.textContent = 'Готово!';
+
+    if (res && res.ok) {
+      userData.ai_id = res.ai_id;
+      userData.orcode = res.orcode;
+      userData.promo_code = res.promo_code;
+      userData.promo_used = res.promo_used || false;
+      userData.verified = true;
+      verifyInProgress = false;
+      setTimeout(() => {
+        renderVerifyResult();
+        showToast('Верификация пройдена!');
+      }, 500);
+    } else {
+      verifyInProgress = false;
+      showToast('Ошибка верификации');
+      loadVerify();
+    }
+  }, Math.max(0, totalMs - (Date.now() - startTime)));
+}
+
+function renderVerifyResult() {
+  const el = document.getElementById('verifyContent');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="big-card">
+      <div class="verify-icon">✅</div>
+      <div class="big-title">Verified</div>
+      <div class="big-sub">Твои данные получены</div>
+
+      <div class="verify-info">
+        <div class="info-row">
+          <span class="info-lbl">🆔 ID</span>
+          <span class="info-val">${esc(userData.ai_id || '—')}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-lbl">🎫 ORCODE</span>
+          <span class="info-val gold">${esc(userData.orcode || '—')}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-lbl">🔑 CODE</span>
+          <span class="info-val green">${esc(userData.promo_code || '—')}</span>
+        </div>
+      </div>
+
+      <div style="font-size:13px;color:var(--text-dim);text-align:center;margin-bottom:14px">
+        ${userData.promo_used
+          ? '✅ Промокод использован'
+          : '⚠️ Введи этот код во вкладке «Промокод»'}
+      </div>
+
+      ${!userData.promo_used ? '<button class="btn gold" onclick="switchTab(\'promo\', event)">Ввести код</button>' : ''}
+    </div>
+  `;
+}
+
+function loadPromo() {
+  const el = document.getElementById('promoContent');
+  if (!el) return;
+
+  if (!TG_USER_ID) {
+    el.innerHTML = '<div class="empty"><div class="empty-box">?</div><div class="empty-title">Открой из Telegram</div></div>';
+    return;
+  }
+
+  if (!userData.verified) {
+    el.innerHTML = `
+      <div class="big-card">
+        <div class="verify-icon">🔒</div>
+        <div class="big-title">Сначала верификация</div>
+        <div class="big-sub">Пройди верификацию, чтобы получить код</div>
+        <button class="btn" onclick="switchTab('verify', event)">Перейти к верификации</button>
+      </div>
+    `;
+    return;
+  }
+
+  if (userData.promo_used) {
+    el.innerHTML = `
+      <div class="big-card">
+        <div class="verify-icon">✅</div>
+        <div class="big-title">Промокод использован</div>
+        <div class="big-sub">Ты уже активировал свой промокод</div>
+      </div>
+    `;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="big-card">
+      <div class="verify-icon">🎫</div>
+      <div class="big-title">Активировать промокод</div>
+      <div class="big-sub">Введи свой код и получи от 30 до 130 ирисок</div>
+
+      <div class="field">
+        <label>Промокод</label>
+        <input type="text" id="promoInput" placeholder="0000" maxlength="4" inputmode="numeric">
+      </div>
+
+      <button class="btn green" onclick="activatePromo()">Активировать</button>
+    </div>
+  `;
+}
+
+async function activatePromo() {
+  const input = document.getElementById('promoInput');
+  if (!input) return;
+  const code = input.value.trim();
+  if (!code || code.length !== 4) {
+    showToast('Введи 4-значный код');
+    return;
+  }
+  const res = await api('/api/verify/promo', {
+    method: 'POST',
+    body: JSON.stringify({ user_id: TG_USER_ID, code: code })
   });
   if (res && res.ok) {
-    showToast('Аватарка обновлена!');
-    loadProfile();
+    showToast('+' + res.reward + ' ирисок!');
+    userData.irises = res.irises;
+    userData.promo_used = true;
+    updateBalance();
+    setTimeout(() => loadPromo(), 800);
+  } else if (res && res.error === 'wrong_code') {
+    showToast('Неверный код');
+  } else if (res && res.error === 'already_used') {
+    showToast('Уже использован');
+    userData.promo_used = true;
+    loadPromo();
   } else {
     showToast('Ошибка');
   }
 }
 
-async function saveProfile() {
-  if (!TG_USER_ID) return;
-  const bio = document.getElementById('bioInput').value.trim();
-  const phone = document.getElementById('phoneInput').value.trim();
-  const res = await api('/api/profile/save', {
-    method: 'POST',
-    body: JSON.stringify({ user_id: TG_USER_ID, bio, phone })
-  });
-  if (res && res.ok) showToast('Сохранено!');
-  else showToast('Ошибка');
-}
-
-/* SEARCH */
-function loadSearch() {
-  const el = document.getElementById('searchContent');
+async function loadShop() {
+  const el = document.getElementById('shopContent');
   if (!el) return;
-  el.innerHTML = `
-    <div class="info-card">
-      <div class="card-title">Поиск по @username</div>
-      <div class="search-row">
-        <input type="text" id="searchInput" placeholder="@username" maxlength="50">
-        <button onclick="doSearch()">Найти</button>
-      </div>
-    </div>
-    <div id="searchResult"></div>
-  `;
-}
 
-async function doSearch() {
-  const q = document.getElementById('searchInput').value.trim();
-  if (!q) { showToast('Введи @username'); return; }
-  const res = await api('/api/find/' + encodeURIComponent(q));
-  const box = document.getElementById('searchResult');
-  if (res && res.ok) {
-    const u = res.user;
-    const isMe = String(u.id) === String(TG_USER_ID);
-    const avatarSrc = u.avatar || '';
-    const inner = avatarSrc
-      ? `<img src="${esc(avatarSrc)}" onerror="this.parentNode.innerHTML='${esc(initials(u.first_name))}'">`
-      : esc(initials(u.first_name));
-    box.innerHTML = `
-      <div class="user-card">
-        <div class="avatar-wrap"><div class="avatar">${inner}</div></div>
-        <div class="profile-name">${esc(u.first_name)}</div>
-        <div class="profile-username">@${esc(u.username || '—')}</div>
-        ${u.bio ? `<div style="margin-top:12px;font-size:14px;color:var(--text-dim)">${esc(u.bio)}</div>` : ''}
-        ${isMe ? '<div style="margin-top:14px;color:var(--muted);font-size:13px">Это ты</div>' : ''}
-      </div>
-      ${!isMe ? `<button class="btn" onclick="openChat('${u.id}')">Написать сообщение</button>` : ''}
-    `;
-  } else {
-    box.innerHTML = '<div class="empty"><div class="empty-box">?</div><div class="empty-title">Не найден</div><div class="empty-desc">Проверь @username</div></div>';
-  }
-}
-
-/* DIALOGS */
-async function loadDialogs() {
-  const el = document.getElementById('dialogsContent');
-  if (!el) return;
-  const data = await api('/api/dialogs/' + TG_USER_ID) || [];
-  if (!data.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-box">💬</div><div class="empty-title">Пока нет чатов</div><div class="empty-desc">Найди юзера во вкладке «Поиск»</div></div>';
+  if (!TG_USER_ID) {
+    el.innerHTML = '<div class="empty"><div class="empty-box">?</div><div class="empty-title">Открой из Telegram</div></div>';
     return;
   }
-  let html = '';
-  data.forEach(d => {
-    const avatarSrc = d.avatar || '';
-    const inner = avatarSrc
-      ? `<img src="${esc(avatarSrc)}" onerror="this.parentNode.innerHTML='${esc(initials(d.first_name))}'">`
-      : esc(initials(d.first_name));
-    html += `
-      <div class="dialog-item" onclick="openChat('${d.id}')">
-        <div class="dialog-avatar">${inner}</div>
-        <div class="dialog-info">
-          <div class="dialog-name">${esc(d.first_name)}</div>
-          <div class="dialog-last">${esc(d.last_text)}</div>
-        </div>
-      </div>`;
+
+  const items = await api('/api/shop');
+  shopItems = Array.isArray(items) ? items : [];
+
+  await loadUserData();
+
+  if (!shopItems.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-box">🛒</div><div class="empty-title">Магазин пуст</div></div>';
+    return;
+  }
+
+  let html = '<div class="big-card"><div class="big-title">🛒 Магазин ID</div><div class="big-sub">Купи себе уникальный ID</div></div>';
+
+  shopItems.forEach(item => {
+    const owned = (userData.owned_ids || []).includes(item.value);
+    const active = userData.active_id === item.value;
+    const cls = 'shop-item' + (item.legendary ? ' legendary' : '') +
+                (active ? ' active' : (owned ? ' owned' : ''));
+
+    let btn = '';
+    if (active) {
+      btn = '<button class="shop-btn active-btn" disabled>Активен</button>';
+    } else if (owned) {
+      btn = '<button class="shop-btn owned-btn" onclick="activateId(\'' + item.value + '\')">Активировать</button>';
+    } else {
+      btn = '<button class="shop-btn buy" onclick="buyId(\'' + item.id + '\')">Купить</button>';
+    }
+
+    html += '<div class="' + cls + '">' +
+      '<div class="shop-id">' + esc(item.value) + '</div>' +
+      '<div class="shop-price">' + item.price + ' 💎</div>' +
+      btn +
+    '</div>';
   });
+
   el.innerHTML = html;
 }
 
-/* CHAT */
-async function openChat(otherId) {
-  currentChatId = otherId;
-  lastMsgTs = 0;
-  switchTab('dialogs');
-  const el = document.getElementById('dialogsContent');
-  const other = await api('/api/profile/' + otherId) || {};
-  const avatarSrc = other.avatar || '';
-  const inner = avatarSrc
-    ? `<img src="${esc(avatarSrc)}" onerror="this.parentNode.innerHTML='${esc(initials(other.first_name))}'">`
-    : esc(initials(other.first_name));
-
-  el.innerHTML = `
-    <div class="chat-header">
-      <div class="chat-back" onclick="backToDialogs()">←</div>
-      <div class="chat-avatar">${inner}</div>
-      <div class="chat-name">${esc(other.first_name || 'Юзер')}</div>
-    </div>
-    <div class="chat-box" id="chatBox"></div>
-    <div class="chat-input-row">
-      <input type="text" id="chatInput" placeholder="Сообщение..." onkeydown="if(event.key==='Enter')sendMsg()">
-      <button onclick="sendMsg()">→</button>
-    </div>
-  `;
-  await loadChatMessages();
-  startChatPoll();
-}
-
-async function loadChatMessages() {
-  if (!currentChatId) return;
-  const msgs = await api(`/api/chat/${TG_USER_ID}/${currentChatId}/${lastMsgTs}`) || [];
-  if (!Array.isArray(msgs) || !msgs.length) return;
-  const box = document.getElementById('chatBox');
-  if (!box) return;
-  msgs.forEach(m => {
-    appendMessage(m);
-    if (m.ts > lastMsgTs) lastMsgTs = m.ts;
-  });
-  box.scrollTop = box.scrollHeight;
-}
-
-function appendMessage(m) {
-  const box = document.getElementById('chatBox');
-  if (!box) return;
-  const isMe = String(m.from) === String(TG_USER_ID);
-  const div = document.createElement('div');
-  div.className = 'msg ' + (isMe ? 'me' : 'them');
-  div.textContent = m.text;
-  box.appendChild(div);
-}
-
-async function sendMsg() {
-  const input = document.getElementById('chatInput');
-  if (!input) return;
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = '';
-  // Мгновенно показываем своё сообщение
-  const tempMsg = {from: TG_USER_ID, to: currentChatId, text, ts: Date.now()};
-  appendMessage(tempMsg);
-  const box = document.getElementById('chatBox');
-  if (box) box.scrollTop = box.scrollHeight;
-  lastMsgTs = tempMsg.ts;
-  // Отправляем на сервер
-  await api('/api/chat/send', {
+async function buyId(itemId) {
+  const res = await api('/api/shop/buy', {
     method: 'POST',
-    body: JSON.stringify({from_id: TG_USER_ID, to_id: currentChatId, text})
-  });
-}
-
-function startChatPoll() {
-  stopChatPoll();
-  chatPollTimer = setInterval(loadChatMessages, 3000);
-}
-
-function stopChatPoll() {
-  if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
-}
-
-function backToDialogs() {
-  stopChatPoll();
-  currentChatId = null;
-  loadDialogs();
-}
-
-/* POST */
-async function loadPost() {
-  const el = document.getElementById('postContent');
-  if (!el) return;
-  if (!isAdmin) {
-    el.innerHTML = '<div class="empty"><div class="empty-box">🔒</div><div class="empty-title">Только для админа</div></div>';
-    return;
-  }
-
-  el.innerHTML = `
-    <div class="info-card">
-      <div class="card-title">Текст поста</div>
-      <div class="field">
-        <textarea id="postText" placeholder="Напиши текст поста..." maxlength="1000"></textarea>
-      </div>
-    </div>
-
-    <div class="info-card">
-      <div class="card-title">Фото или видео</div>
-      <div class="upload" id="uploadZone">
-        <input type="file" id="postFileInput" accept="image/*,video/*">
-        <div id="postUploadPlaceholder">
-          <span class="upload-icon">+</span>
-          <div class="upload-text">Выбери фото или видео</div>
-        </div>
-        <img id="postPreview" class="upload-preview" style="display:none">
-        <video id="postVideoPreview" class="upload-preview" style="display:none" controls></video>
-      </div>
-    </div>
-
-    <div class="info-card">
-      <button class="btn" onclick="publishPost()">Опубликовать во все чаты</button>
-    </div>
-  `;
-
-  postMediaData = null;
-  postMediaType = '';
-  const fi = document.getElementById('postFileInput');
-  if (fi) {
-    fi.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 50 * 1024 * 1024) { showToast('Файл до 50 МБ'); return; }
-      const isVideo = file.type.startsWith('video/');
-      const isImage = file.type.startsWith('image/');
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        postMediaData = ev.target.result;
-        postMediaType = isVideo ? 'video' : (isImage ? 'photo' : '');
-        const imgPreview = document.getElementById('postPreview');
-        const vidPreview = document.getElementById('postVideoPreview');
-        const ph = document.getElementById('postUploadPlaceholder');
-        if (isVideo) {
-          imgPreview.style.display = 'none';
-          vidPreview.src = postMediaData;
-          vidPreview.style.display = 'block';
-        } else if (isImage) {
-          vidPreview.style.display = 'none';
-          imgPreview.src = postMediaData;
-          imgPreview.style.display = 'block';
-        }
-        if (ph) ph.style.display = 'none';
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-}
-
-async function publishPost() {
-  if (!TG_USER_ID) return;
-  const text = document.getElementById('postText').value.trim();
-  if (!text && !postMediaData) { showToast('Напиши текст или добавь медиа'); return; }
-  if (!confirm('Опубликовать во все группы и всем юзерам?')) return;
-  showToast('Отправляю...');
-  const res = await api('/api/post/create', {
-    method: 'POST',
-    body: JSON.stringify({
-      user_id: TG_USER_ID,
-      text: text,
-      media: postMediaData || '',
-      media_type: postMediaType
-    })
+    body: JSON.stringify({ user_id: TG_USER_ID, item_id: itemId })
   });
   if (res && res.ok) {
-    showToast('Опубликовано!');
-    document.getElementById('postText').value = '';
-    postMediaData = null; postMediaType = '';
-    const imgPreview = document.getElementById('postPreview');
-    const vidPreview = document.getElementById('postVideoPreview');
-    const ph = document.getElementById('postUploadPlaceholder');
-    if (imgPreview) { imgPreview.style.display = 'none'; imgPreview.src = ''; }
-    if (vidPreview) { vidPreview.style.display = 'none'; vidPreview.src = ''; }
-    if (ph) ph.style.display = 'block';
-    const fi = document.getElementById('postFileInput');
-    if (fi) fi.value = '';
+    showToast('ID куплен!');
+    userData.irises = res.irises;
+    userData.active_id = res.active_id;
+    userData.owned_ids = res.owned_ids;
+    updateBalance();
+    loadShop();
+  } else if (res && res.error === 'not_enough') {
+    showToast('Недостаточно ирисок');
+  } else if (res && res.error === 'already_owned') {
+    showToast('Уже куплен');
   } else {
     showToast('Ошибка');
   }
 }
 
-async function checkAdmin() {
-  if (!TG_USER_ID) return;
-  const res = await api('/api/is_admin/' + TG_USER_ID) || {};
-  isAdmin = !!res.is_admin;
-  const tab = document.getElementById('postTab');
-  if (isAdmin && tab) tab.classList.remove('hidden');
+async function activateId(value) {
+  const res = await api('/api/shop/activate', {
+    method: 'POST',
+    body: JSON.stringify({ user_id: TG_USER_ID, value: value })
+  });
+  if (res && res.ok) {
+    showToast('ID активирован!');
+    userData.active_id = value;
+    loadShop();
+  } else {
+    showToast('Ошибка');
+  }
+}
+
+async function loadProfile() {
+  const el = document.getElementById('profileContent');
+  if (!el) return;
+
+  if (!TG_USER_ID) {
+    el.innerHTML = '<div class="empty"><div class="empty-box">?</div><div class="empty-title">Открой из Telegram</div></div>';
+    return;
+  }
+
+  await loadUserData();
+
+  const displayId = userData.active_id || userData.ai_id || '—';
+
+  el.innerHTML = `
+    <div class="big-card">
+      <div class="big-title">👤 ${esc(TG_FIRST_NAME)}</div>
+      <div class="big-sub">Профиль</div>
+
+      <div class="verify-info">
+        <div class="info-row">
+          <span class="info-lbl">🆔 Текущий ID</span>
+          <span class="info-val">${esc(displayId)}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-lbl">🎫 ORCODE</span>
+          <span class="info-val gold">${esc(userData.orcode || '—')}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-lbl">💎 Ириски</span>
+          <span class="info-val green">${userData.irises || 0}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-lbl">✅ Верификация</span>
+          <span class="info-val ${userData.verified ? 'green' : ''}">${userData.verified ? 'Пройдена' : 'Нет'}</span>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 async function init() {
-  await heartbeat();
-  await checkAdmin();
-  await updateOnline();
-  await loadProfile();
-  onlineTimer = setInterval(async () => {
-    await heartbeat();
-    await updateOnline();
-  }, 30000);
+  await loadUserData();
+  loadVerify();
 }
 
 init();
