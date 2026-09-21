@@ -6,11 +6,11 @@ import time
 import os
 from datetime import datetime
 
-TOKEN = '8872773404:AAGhg3m0aVlr7cTbifHKlcQH_y120rYo9Gs'
+TOKEN = '8872773404:AAGFGRK2Kv4B1ldWgruxFiEUgpTfARkEcRM'
 bot = telebot.TeleBot(TOKEN)
 
 DB = 'database.db'
-COOLDOWN = 3600  # 1 час
+COOLDOWN = 3600
 
 # ================= БАЗА =================
 def init_db():
