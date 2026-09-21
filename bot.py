@@ -89,7 +89,16 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(data, ensure_ascii=False).encode())
 
     def send_html(self):
-        paths = ['public/index.html', 'index.html']
+        base = os.path.dirname(os.path.abspath(__file__))
+        cwd = os.getcwd()
+        paths = [
+            'public/index.html',
+            'index.html',
+            os.path.join(base, 'public', 'index.html'),
+            os.path.join(base, 'index.html'),
+            os.path.join(cwd, 'public', 'index.html'),
+            os.path.join(cwd, 'index.html'),
+        ]
         for path in paths:
             try:
                 with open(path, 'rb') as f:
@@ -98,8 +107,19 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_header('Content-Type', 'text/html; charset=utf-8')
                 self.end_headers()
                 self.wfile.write(content)
+                print('HTML served from:', path)
                 return
-            except: continue
+            except:
+                continue
+        print('HTML not found in:', paths)
+        print('CWD:', cwd)
+        print('BASE:', base)
+        try:
+            print('Files in CWD:', os.listdir(cwd))
+            if os.path.exists(os.path.join(cwd, 'public')):
+                print('Files in public:', os.listdir(os.path.join(cwd, 'public')))
+        except Exception as e:
+            print('List err:', e)
         self.send_response(404)
         self.end_headers()
 
