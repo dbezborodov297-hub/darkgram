@@ -69,6 +69,9 @@ SPEED_PACKS = [
     {'speed': 1000,'price': 5000000},
 ]
 
+ADMIN_STATE = {}  # uid -> {'action': 'broadcast'}
+
+# ---------------- JSON helpers ----------------
 def load_json(f, d):
     if not os.path.exists(f): return d
     try:
@@ -83,6 +86,7 @@ def load_stats(): return load_json(STATS_FILE, {})
 def save_stats(d): save_json(STATS_FILE, d)
 def load_top_cache(): return load_json(TOP_CACHE_FILE, [])
 
+# ---------------- Players ----------------
 def get_player(uid, fname='Anonymous', uname=''):
     stats = load_stats()
     k = str(uid)
@@ -139,6 +143,21 @@ def apply_income(p):
     p['last_update'] = now
     return p
 
+def is_admin(uid):
+    return uid in ADMIN_IDS
+
+def find_uid_by_username(uname):
+    uname = uname.lstrip('@').lower()
+    stats = load_stats()
+    for uid, p in stats.items():
+        if (p.get('username') or '').lower() == uname:
+            return uid
+    return None
+
+def get_all_uids():
+    return list(load_stats().keys())
+
+# ---------------- Formatting ----------------
 def fmt_num(n):
     n = float(n)
     if n >= 1_000_000_000_000:
@@ -172,6 +191,7 @@ def btn(text, data, style=None):
             return types.InlineKeyboardButton(text=text, callback_data=data)
     return types.InlineKeyboardButton(text=text, callback_data=data)
 
+# ---------------- Bot init ----------------
 bot = telebot.TeleBot(TOKEN)
 
 class Handler(BaseHTTPRequestHandler):
@@ -188,6 +208,7 @@ def run_http():
 
 threading.Thread(target=run_http, daemon=True).start()
 
+# ---------------- Background loops ----------------
 def update_loop():
     while True:
         try:
@@ -234,6 +255,7 @@ def top_loop():
 threading.Thread(target=update_loop, daemon=True).start()
 threading.Thread(target=top_loop, daemon=True).start()
 
+# ---------------- Menus ----------------
 def main_menu():
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(btn('🖥 Мой ИИ', 'ai_main', 'primary'))
@@ -246,8 +268,26 @@ def main_menu():
         btn('📊 Статистика', 'ai_stats', 'primary')
     )
     kb.add(btn('🏆 Топ', 'ai_top', 'success'))
+    kb.add(btn('💸 Перевести токены', 'ai_pay', 'success'))
     return kb
 
+def ai_main_kb():
+    kb = types.InlineKeyboardMarkup(row_width=2)
+    kb.add(
+        btn('🛒 Память', 'ai_mem_0', 'success'),
+        btn('💻 Компьютеры', 'ai_comp_0', 'primary')
+    )
+    kb.add(
+        btn('⚡ Ускорители', 'ai_speed_0', 'success'),
+        btn('📊 Статистика', 'ai_stats', 'primary')
+    )
+    kb.add(btn('🏆 Топ', 'ai_top', 'success'))
+    kb.add(btn('💸 Перевести токены', 'ai_pay', 'success'))
+    kb.add(btn('🔄 Обновить', 'ai_main', 'primary'))
+    kb.add(btn('◀️ Меню', 'menu_main', 'danger'))
+    return kb
+
+# ---------------- Commands ----------------
 @bot.message_handler(commands=['start'])
 def cmd_start(m):
     uid = m.from_user.id
@@ -284,6 +324,7 @@ def cmd_help(m):
         f"3️⃣ Компьютеры дают токены/сек\n"
         f"4️⃣ Токены — на ускорители памяти\n"
         f"5️⃣ Больше памяти → топ → круче!\n\n"
+        f"💸 <b>Перевод:</b> /pay &lt;uid|@username&gt; &lt;кол-во&gt;\n\n"
         f"🏆 /top — топ по памяти\n"
         f"⏱ Топ обновляется раз в 5 минут\n"
         f"🌙 Офлайн — до 8 часов."
@@ -305,6 +346,62 @@ def cmd_top(m):
         text += "\n⏱ <i>Обновляется каждые 5 минут</i>"
     bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_menu())
 
+# ---------------- /pay ----------------
+@bot.message_handler(commands=['pay'])
+def cmd_pay(m):
+    parts = m.text.split()
+    if len(parts) < 3:
+        bot.reply_to(m, "Использование: /pay &lt;uid|@username&gt; &lt;кол-во&gt;", parse_mode='HTML')
+        return
+    target_raw, amount_raw = parts[1], parts[2]
+
+    try:
+        amount = float(amount_raw)
+        if amount <= 0: raise ValueError
+    except ValueError:
+        bot.reply_to(m, "❌ Кол-во должно быть положительным числом.")
+        return
+
+    if target_raw.startswith('@'):
+        target_uid = find_uid_by_username(target_raw)
+        if not target_uid:
+            bot.reply_to(m, "❌ Игрок с таким @username не найден.")
+            return
+    else:
+        if not target_raw.isdigit():
+            bot.reply_to(m, "❌ Укажи uid или @username.")
+            return
+        target_uid = target_raw
+
+    if target_uid == str(m.from_user.id):
+        bot.reply_to(m, "❌ Нельзя перевести самому себе.")
+        return
+
+    sender = get_player(m.from_user.id, m.from_user.first_name, m.from_user.username)
+    sender = apply_income(sender)
+    if sender.get('tokens', 0) < amount:
+        bot.reply_to(m, f"❌ Недостаточно токенов. У тебя: {fmt_num(sender['tokens'])}")
+        return
+
+    receiver = get_player(target_uid)
+    receiver = apply_income(receiver)
+
+    sender['tokens'] -= amount
+    receiver['tokens'] = receiver.get('tokens', 0) + amount
+
+    update_player(m.from_user.id, sender)
+    update_player(target_uid, receiver)
+
+    bot.reply_to(m, f"✅ Переведено <b>{fmt_num(amount)}</b> 🪙 игроку <code>{target_uid}</code>",
+                 parse_mode='HTML')
+    try:
+        bot.send_message(int(target_uid),
+                         f"🎁 Тебе перевели <b>{fmt_num(amount)}</b> 🪙!",
+                         parse_mode='HTML')
+    except:
+        pass
+
+# ---------------- Main AI screens ----------------
 def ai_main_text(p):
     mem = fmt_memory(p.get('memory', START_MEMORY))
     tokens = fmt_num(p.get('tokens', 0))
@@ -323,21 +420,6 @@ def ai_main_text(p):
         f"💻 Компьютеров: <b>{comp_count}</b>\n"
         f"📈 Всего заработано: <b>{total}</b>"
     )
-
-def ai_main_kb():
-    kb = types.InlineKeyboardMarkup(row_width=2)
-    kb.add(
-        btn('🛒 Память', 'ai_mem_0', 'success'),
-        btn('💻 Компьютеры', 'ai_comp_0', 'primary')
-    )
-    kb.add(
-        btn('⚡ Ускорители', 'ai_speed_0', 'success'),
-        btn('📊 Статистика', 'ai_stats', 'primary')
-    )
-    kb.add(btn('🏆 Топ', 'ai_top', 'success'))
-    kb.add(btn('🔄 Обновить', 'ai_main', 'primary'))
-    kb.add(btn('◀️ Меню', 'menu_main', 'danger'))
-    return kb
 
 @bot.callback_query_handler(func=lambda c: c.data == 'ai_main')
 def cb_ai_main(call):
@@ -375,6 +457,47 @@ def cb_menu_main(call):
     except: pass
     bot.answer_callback_query(call.id)
 
+@bot.callback_query_handler(func=lambda c: c.data == 'ai_pay')
+def cb_pay(call):
+    bot.answer_callback_query(call.id)
+    bot.send_message(
+        call.message.chat.id,
+        "💸 Чтобы перевести токены, напиши:\n"
+        "<code>/pay &lt;uid или @username&gt; &lt;кол-во&gt;</code>\n\n"
+        "Пример: <code>/pay @vasya 500</code>",
+        parse_mode='HTML'
+    )
+
+@bot.callback_query_handler(func=lambda c: c.data == 'ai_stats')
+def cb_stats(call):
+    uid = str(call.from_user.id)
+    p = get_player(uid, call.from_user.first_name, call.from_user.username)
+    p = apply_income(p); update_player(uid, p)
+    comps = p.get('computers', {})
+    lines = []
+    for c in COMPUTERS:
+        cnt = comps.get(c['id'], 0)
+        if cnt > 0:
+            lines.append(f"{c['emoji']} {c['name']}: <b>x{cnt}</b> ({fmt_num(cnt*c['income'])}/сек)")
+    comp_text = "\n".join(lines) if lines else "<i>Пока ничего не куплено</i>"
+    text = (
+        f"📊 <b>СТАТИСТИКА</b>\n"
+        f"━━━━━━━━━━━━━━━\n\n"
+        f"🧠 Память: <b>{fmt_memory(p.get('memory', START_MEMORY))}</b>\n"
+        f"⚡ Скорость: <b>{p.get('speed', START_SPEED)} KB/сек</b>\n"
+        f"🪙 Токены: <b>{fmt_num(p.get('tokens', 0))}</b>\n"
+        f"💰 Доход: <b>{fmt_num(income_per_sec(p))}/сек</b>\n"
+        f"📈 Всего заработано: <b>{fmt_num(p.get('total_earned', 0))}</b>\n\n"
+        f"💻 <b>Компьютеры:</b>\n{comp_text}"
+    )
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    kb.add(btn('◀️ Назад', 'ai_main', 'danger'))
+    try:
+        bot.edit_message_text(text, chat_id=call.message.chat.id,
+            message_id=call.message.message_id, parse_mode='HTML', reply_markup=kb)
+    except: pass
+    bot.answer_callback_query(call.id)
+
 @bot.callback_query_handler(func=lambda c: c.data == 'ai_top')
 def cb_top(call):
     arr = load_top_cache()
@@ -396,6 +519,11 @@ def cb_top(call):
     except: pass
     bot.answer_callback_query(call.id)
 
+@bot.callback_query_handler(func=lambda c: c.data == 'ai_none')
+def cb_none(call):
+    bot.answer_callback_query(call.id)
+
+# ---------------- Memory packs ----------------
 PAGE_SIZE = 5
 
 def mem_page(page, p):
@@ -461,6 +589,7 @@ def cb_mem_buy(call):
             message_id=call.message.message_id, parse_mode='HTML', reply_markup=kb)
     except: pass
 
+# ---------------- Computers ----------------
 def comp_page(page, p):
     start = page * PAGE_SIZE
     end = start + PAGE_SIZE
@@ -529,6 +658,7 @@ def cb_comp_buy(call):
             message_id=call.message.message_id, parse_mode='HTML', reply_markup=kb)
     except: pass
 
+# ---------------- Speed packs ----------------
 def speed_page(page, p):
     start = page * PAGE_SIZE
     end = start + PAGE_SIZE
@@ -592,55 +722,158 @@ def cb_speed_buy(call):
             message_id=call.message.message_id, parse_mode='HTML', reply_markup=kb)
     except: pass
 
-@bot.callback_query_handler(func=lambda c: c.data == 'ai_stats')
-def cb_stats(call):
-    uid = str(call.from_user.id)
-    p = get_player(uid, call.from_user.first_name, call.from_user.username)
-    p = apply_income(p)
-    update_player(uid, p)
-    mem = fmt_memory(p.get('memory', START_MEMORY))
-    tokens = fmt_num(p.get('tokens', 0))
-    inc = income_per_sec(p)
-    total = fmt_num(p.get('total_earned', 0))
-    speed = p.get('speed', START_SPEED)
-    comps = p.get('computers', {})
-    lines = []
-    for c in COMPUTERS:
-        cnt = comps.get(c['id'], 0)
-        if cnt > 0:
-            lines.append(f"{c['emoji']} {c['name']}: x{cnt} ({fmt_num(cnt*c['income'])}/сек)")
-    comps_text = "\n".join(lines) if lines else "Нет компьютеров"
+# ---------------- Admin commands ----------------
+@bot.message_handler(commands=['admin'])
+def cmd_admin(m):
+    if not is_admin(m.from_user.id):
+        bot.reply_to(m, "⛔ Нет доступа.")
+        return
     text = (
-        f"📊 <b>СТАТИСТИКА</b>\n"
-        f"━━━━━━━━━━━━━━━\n\n"
-        f"🧠 Память: <b>{mem}</b>\n"
-        f"⚡ Скорость: <b>{speed} KB/сек</b>\n"
-        f"🪙 Токены: <b>{tokens}</b>\n"
-        f"💰 Доход: <b>{fmt_num(inc)}/сек</b>\n"
-        f"📈 Всего заработано: <b>{total}</b>\n\n"
-        f"<b>Компьютеры:</b>\n{comps_text}"
+        "🛠 <b>АДМИН-ПАНЕЛЬ</b>\n"
+        "━━━━━━━━━━━━━━━\n\n"
+        "📢 /post — рассылка (текст / фото / видео / документ)\n"
+        "🪙 /give &lt;uid|@username&gt; &lt;кол-во&gt; — выдать токены\n"
+        "🧠 /givemem &lt;uid|@username&gt; &lt;KB&gt; — выдать память\n"
+        "📊 /users — кол-во игроков\n"
+        "❌ /cancel — отменить режим рассылки"
     )
-    kb = types.InlineKeyboardMarkup(row_width=1)
-    kb.add(btn('◀️ Назад', 'ai_main', 'danger'))
+    bot.send_message(m.chat.id, text, parse_mode='HTML')
+
+@bot.message_handler(commands=['post'])
+def cmd_post(m):
+    if not is_admin(m.from_user.id):
+        return
+    ADMIN_STATE[m.from_user.id] = {'action': 'broadcast'}
+    bot.send_message(
+        m.chat.id,
+        "📢 Отправь <b>пост</b> (текст / фото / видео / документ с подписью).\n"
+        "Он уйдёт всем игрокам.\n\n"
+        "❌ /cancel — отменить.",
+        parse_mode='HTML'
+    )
+
+@bot.message_handler(commands=['cancel'])
+def cmd_cancel(m):
+    if ADMIN_STATE.pop(m.from_user.id, None):
+        bot.reply_to(m, "✅ Отменено.")
+
+@bot.message_handler(commands=['users'])
+def cmd_users(m):
+    if not is_admin(m.from_user.id):
+        return
+    stats = load_stats()
+    bot.send_message(m.chat.id, f"👥 Игроков: <b>{len(stats)}</b>", parse_mode='HTML')
+
+@bot.message_handler(commands=['give'])
+def cmd_give(m):
+    if not is_admin(m.from_user.id):
+        return
+    parts = m.text.split()
+    if len(parts) < 3:
+        bot.reply_to(m, "Использование: /give &lt;uid|@username&gt; &lt;кол-во&gt;", parse_mode='HTML')
+        return
+    target_raw, amount_raw = parts[1], parts[2]
     try:
-        bot.edit_message_text(text, chat_id=call.message.chat.id,
-            message_id=call.message.message_id, parse_mode='HTML', reply_markup=kb)
-    except: pass
-    bot.answer_callback_query(call.id)
+        amount = float(amount_raw)
+    except ValueError:
+        bot.reply_to(m, "❌ Кол-во числом.")
+        return
 
-@bot.callback_query_handler(func=lambda c: c.data == 'ai_none')
-def cb_none(call):
-    bot.answer_callback_query(call.id)
+    if target_raw.startswith('@'):
+        target_uid = find_uid_by_username(target_raw)
+        if not target_uid:
+            bot.reply_to(m, "❌ Не найден.")
+            return
+    else:
+        target_uid = target_raw
 
-def set_commands():
+    receiver = get_player(target_uid)
+    receiver = apply_income(receiver)
+    receiver['tokens'] = receiver.get('tokens', 0) + amount
+    update_player(target_uid, receiver)
+
+    bot.reply_to(m, f"✅ Выдано <b>{fmt_num(amount)}</b> 🪙 → <code>{target_uid}</code>",
+                 parse_mode='HTML')
     try:
-        bot.set_my_commands([
-            types.BotCommand('start','🖥 Игра'),
-            types.BotCommand('help','💬 Помощь'),
-            types.BotCommand('top','🏆 Топ'),
-        ])
-    except: pass
+        bot.send_message(int(target_uid),
+                         f"🎁 Админ выдал тебе <b>{fmt_num(amount)}</b> 🪙!",
+                         parse_mode='HTML')
+    except:
+        pass
 
-set_commands()
-print('Bot started')
-bot.infinity_polling()
+@bot.message_handler(commands=['givemem'])
+def cmd_givemem(m):
+    if not is_admin(m.from_user.id):
+        return
+    parts = m.text.split()
+    if len(parts) < 3:
+        bot.reply_to(m, "Использование: /givemem &lt;uid|@username&gt; &lt;KB&gt;", parse_mode='HTML')
+        return
+    target_raw, amount_raw = parts[1], parts[2]
+    try:
+        amount = float(amount_raw)
+    except ValueError:
+        bot.reply_to(m, "❌ Кол-во числом.")
+        return
+
+    if target_raw.startswith('@'):
+        target_uid = find_uid_by_username(target_raw)
+        if not target_uid:
+            bot.reply_to(m, "❌ Не найден.")
+            return
+    else:
+        target_uid = target_raw
+
+    receiver = get_player(target_uid)
+    receiver = apply_income(receiver)
+    receiver['memory'] = receiver.get('memory', START_MEMORY) + amount
+    update_player(target_uid, receiver)
+
+    bot.reply_to(m, f"✅ Выдано <b>{fmt_memory(amount)}</b> → <code>{target_uid}</code>",
+                 parse_mode='HTML')
+    try:
+        bot.send_message(int(target_uid),
+                         f"🎁 Админ выдал тебе <b>{fmt_memory(amount)}</b>!",
+                         parse_mode='HTML')
+    except:
+        pass
+
+# ---------- Обработчик рассылки (ДОЛЖЕН быть последним) ----------
+@bot.message_handler(
+    content_types=['text', 'photo', 'video', 'document', 'animation'],
+    func=lambda m: ADMIN_STATE.get(m.from_user.id, {}).get('action') == 'broadcast'
+)
+def do_broadcast(m):
+    ADMIN_STATE.pop(m.from_user.id, None)
+    uids = get_all_uids()
+    bot.reply_to(m, f"⏳ Рассылаю {len(uids)} игрокам...")
+
+    ok, fail = 0, 0
+    for uid in uids:
+        try:
+            if m.content_type == 'text':
+                bot.send_message(int(uid), m.text, parse_mode='HTML')
+            elif m.content_type == 'photo':
+                bot.send_photo(int(uid), m.photo[-1].file_id,
+                               caption=m.caption, parse_mode='HTML')
+            elif m.content_type == 'video':
+                bot.send_video(int(uid), m.video.file_id,
+                               caption=m.caption, parse_mode='HTML')
+            elif m.content_type == 'animation':
+                bot.send_animation(int(uid), m.animation.file_id,
+                                   caption=m.caption, parse_mode='HTML')
+            elif m.content_type == 'document':
+                bot.send_document(int(uid), m.document.file_id,
+                                  caption=m.caption, parse_mode='HTML')
+            ok += 1
+            time.sleep(0.05)
+        except Exception as e:
+            fail += 1
+            print(f'broadcast fail {uid}:', e)
+
+    bot.send_message(m.chat.id, f"✅ Готово.\nДоставлено: {ok}\nОшибок: {fail}")
+
+# ---------------- Start polling ----------------
+if __name__ == '__main__':
+    print("Bot started")
+    bot.infinity_polling(timeout=30, long_polling_timeout=30)
