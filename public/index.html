@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Darkgram Verify</title>
+<title>Hacker AI</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -31,7 +31,7 @@ background-attachment:fixed;
 color:var(--text);
 -webkit-font-smoothing:antialiased;
 font-size:15px;line-height:1.45;
-padding-bottom:60px;min-height:100vh;
+padding-bottom:70px;min-height:100vh;
 }
 .header{
 background:rgba(20,26,36,0.9);
@@ -47,17 +47,17 @@ display:flex;justify-content:space-between;align-items:center;
 }
 .logo{font-size:20px;font-weight:700;letter-spacing:-.3px}
 .logo-sub{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:2px}
-.balance-badge{
+.badge{
 display:flex;align-items:center;gap:6px;
-font-size:15px;font-weight:700;
+font-size:14px;font-weight:700;
 color:var(--gold);
 background:rgba(232,182,76,0.1);
 border:1px solid rgba(232,182,76,0.25);
-padding:7px 14px;border-radius:10px;
+padding:7px 12px;border-radius:10px;
 }
 .tabs{
 display:flex;max-width:860px;margin:0 auto;
-padding:0 12px;
+padding:0 8px;
 background:rgba(20,26,36,0.9);
 backdrop-filter:blur(20px);
 -webkit-backdrop-filter:blur(20px);
@@ -67,196 +67,155 @@ overflow-x:auto;scrollbar-width:none;
 }
 .tabs::-webkit-scrollbar{display:none}
 .tab{
-flex-shrink:0;padding:14px 18px;
+flex-shrink:0;padding:14px 14px;
 font-size:13px;font-weight:600;
 color:var(--muted);cursor:pointer;
+border:none;background:transparent;
 border-bottom:2px solid transparent;
-background:transparent;border-top:none;border-left:none;border-right:none;
 font-family:inherit;white-space:nowrap;
 transition:all .2s;
 }
 .tab.active{color:var(--accent-2);border-bottom-color:var(--accent-2)}
 .container{max-width:860px;margin:0 auto;padding:18px}
 .page{display:none}
-.page.active{display:block;animation:fadeIn .3s}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.big-card{
+.page.active{display:block;animation:fadeIn .25s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.card{
 background:var(--card);
 border:1px solid var(--line);
 border-radius:16px;
-padding:24px;
+padding:20px;
 margin-bottom:14px;
 }
-.big-title{
-font-size:22px;font-weight:700;
-letter-spacing:-.4px;
-margin-bottom:8px;
-text-align:center;
-}
-.big-sub{
-font-size:14px;color:var(--text-dim);
-text-align:center;
-margin-bottom:20px;
-line-height:1.5;
-}
-.verify-icon{
-font-size:72px;
-text-align:center;
-margin-bottom:16px;
-}
-.verify-info{
-background:var(--bg-2);
+.title{font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:6px}
+.sub{font-size:13px;color:var(--text-dim);line-height:1.5}
+.balance-box{text-align:center;padding:26px 16px}
+.balance-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px}
+.balance-val{font-size:36px;font-weight:800;letter-spacing:-1px}
+.balance-inc{font-size:14px;color:var(--green);font-weight:600;margin-top:6px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat{
+background:var(--card);
 border:1px solid var(--line);
-border-radius:12px;
+border-radius:14px;
 padding:14px;
-margin-bottom:16px;
 }
-.info-row{
-display:flex;justify-content:space-between;
-align-items:center;
-padding:10px 0;
-font-size:14px;
-}
-.info-row:not(:last-child){border-bottom:1px solid var(--line)}
-.info-lbl{color:var(--text-dim)}
-.info-val{
-font-weight:700;
-color:var(--accent-2);
-font-family:monospace;
-letter-spacing:1px;
-}
-.info-val.gold{color:var(--gold)}
-.info-val.green{color:var(--green)}
-.progress-wrap{
-text-align:center;
-padding:30px 0;
-}
-.progress-circle{
-width:130px;height:130px;
-margin:0 auto 20px;
-position:relative;
-}
-.progress-svg{
-transform:rotate(-90deg);
-}
-.progress-bg{
-stroke:var(--card-2);
-}
-.progress-fg{
-stroke:var(--accent);
-transition:stroke-dashoffset .3s linear;
-}
-.progress-pct{
-position:absolute;
-top:50%;left:50%;
-transform:translate(-50%,-50%);
-font-size:24px;font-weight:800;
-color:var(--accent-2);
-}
-.progress-status{
-font-size:14px;color:var(--text-dim);
-letter-spacing:.3px;
-}
-.btn{
+.stat-k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:5px}
+.stat-v{font-size:20px;font-weight:700}
+.tap-btn{
 width:100%;
-background:var(--accent);
-color:#fff;
-border:none;
-border-radius:12px;
-padding:15px;
-font-size:15px;
-font-weight:700;
+background:linear-gradient(135deg,var(--accent),#3a6ea5);
+color:#fff;border:none;
+border-radius:18px;
+padding:30px;
+font-size:20px;font-weight:800;
+letter-spacing:2px;
 cursor:pointer;
 font-family:inherit;
-transition:all .15s;
-letter-spacing:.2px;
+transition:transform .1s;
+box-shadow:0 8px 24px rgba(77,143,214,0.3);
+margin-bottom:14px;
 }
-.btn:active{opacity:.85;transform:scale(.98)}
-.btn:disabled{background:var(--card-2);color:var(--muted);cursor:not-allowed;transform:none}
+.tap-btn:active{transform:scale(.97);box-shadow:0 4px 12px rgba(77,143,214,0.5)}
+.item{
+background:var(--card);
+border:1px solid var(--line);
+border-radius:14px;
+padding:14px;
+margin-bottom:10px;
+display:flex;align-items:center;gap:12px;
+}
+.item.owned{border-color:var(--green)}
+.item-info{flex:1;min-width:0}
+.item-name{font-size:15px;font-weight:700;margin-bottom:3px}
+.item-sub{font-size:12px;color:var(--text-dim)}
+.item-price{font-size:13px;color:var(--gold);font-weight:700;margin-top:4px}
+.btn{
+background:var(--accent);
+color:#fff;border:none;
+border-radius:10px;
+padding:11px 16px;
+font-size:13px;font-weight:700;
+cursor:pointer;font-family:inherit;
+white-space:nowrap;flex-shrink:0;
+transition:opacity .15s;
+}
+.btn:active{opacity:.85}
+.btn:disabled{background:var(--card-2);color:var(--muted);cursor:not-allowed}
+.btn.green{background:var(--green)}
 .btn.gold{background:var(--gold);color:#1a1408}
-.btn.green{background:var(--green);color:#fff}
-.field{margin-bottom:14px}
-.field label{
-display:block;
-font-size:11px;font-weight:700;
-color:var(--muted);
-text-transform:uppercase;
-letter-spacing:1.2px;
+.btn.red{background:var(--red)}
+.sub-tabs{display:flex;gap:6px;margin-bottom:14px;background:var(--card);padding:5px;border-radius:12px;border:1px solid var(--line)}
+.sub-tab{
+flex:1;text-align:center;padding:10px;
+font-size:13px;font-weight:600;
+color:var(--muted);cursor:pointer;
+border-radius:8px;transition:.2s;
+user-select:none;
+}
+.sub-tab.active{background:var(--bg);color:var(--text)}
+.top-row{
+display:flex;align-items:center;gap:12px;
+padding:12px 14px;
+background:var(--card);
+border:1px solid var(--line);
+border-radius:12px;
 margin-bottom:8px;
+}
+.rank{font-size:16px;font-weight:800;width:30px;text-align:center;color:var(--muted)}
+.rank.r1{color:#ffd700}
+.rank.r2{color:#c0c0c0}
+.rank.r3{color:#cd7f32}
+.who{flex:1;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.val{font-size:13px;font-weight:700;color:var(--accent-2);white-space:nowrap}
+.field{margin-bottom:12px}
+.field label{
+display:block;font-size:11px;font-weight:700;
+color:var(--muted);text-transform:uppercase;
+letter-spacing:1.2px;margin-bottom:7px;
 }
 .field input{
 width:100%;
 background:var(--bg);
 border:1px solid var(--line-2);
 border-radius:12px;
-padding:14px 16px;
+padding:13px 15px;
 color:var(--text);
-font-size:16px;
-font-family:monospace;
-letter-spacing:2px;
-text-align:center;
-font-weight:700;
+font-size:15px;
+font-family:inherit;
 transition:border-color .15s;
 }
 .field input:focus{outline:none;border-color:var(--accent)}
-.field input::placeholder{color:var(--muted);font-weight:400;letter-spacing:1px}
-.shop-item{
+.progress-bar{
+background:var(--bg);
+border-radius:10px;
+height:10px;
+overflow:hidden;
+margin:10px 0;
+border:1px solid var(--line);
+}
+.progress-fill{
+height:100%;
+background:linear-gradient(90deg,var(--accent),var(--accent-2));
+transition:width .4s;
+border-radius:10px;
+}
+.lvl-row{
+display:flex;align-items:center;gap:10px;
+padding:10px 12px;
 background:var(--card);
 border:1px solid var(--line);
-border-radius:14px;
-padding:16px;
-margin-bottom:10px;
-display:flex;
-align-items:center;
-gap:14px;
-transition:border-color .2s;
-}
-.shop-item.legendary{
-border-color:var(--gold);
-background:linear-gradient(135deg,var(--card) 0%, rgba(232,182,76,0.05) 100%);
-}
-.shop-item.owned{
-border-color:var(--green);
-background:linear-gradient(135deg,var(--card) 0%, rgba(77,205,94,0.05) 100%);
-}
-.shop-item.active{
-border-color:var(--accent);
-background:linear-gradient(135deg,var(--card) 0%, rgba(77,143,214,0.08) 100%);
-}
-.shop-id{
-font-family:monospace;
-font-size:20px;
-font-weight:800;
-letter-spacing:2px;
-color:var(--text);
-flex:1;
-min-width:0;
-}
-.shop-item.legendary .shop-id{color:var(--gold)}
-.shop-price{
-font-size:14px;
-font-weight:700;
-color:var(--gold);
-white-space:nowrap;
-}
-.shop-btn{
-background:var(--accent);
-color:#fff;
-border:none;
 border-radius:10px;
-padding:10px 16px;
+margin-bottom:6px;
 font-size:13px;
-font-weight:700;
-cursor:pointer;
-font-family:inherit;
-white-space:nowrap;
-flex-shrink:0;
 }
-.shop-btn:active{opacity:.85}
-.shop-btn.buy{background:var(--accent)}
-.shop-btn.owned-btn{background:var(--green)}
-.shop-btn.active-btn{background:var(--gold);color:#1a1408}
-.shop-btn:disabled{background:var(--card-2);color:var(--muted);cursor:not-allowed}
+.lvl-row.done{border-color:var(--green)}
+.lvl-row.locked{opacity:.55}
+.lvl-n{font-weight:800;width:26px;color:var(--muted)}
+.lvl-n.done{color:var(--green)}
+.lvl-reward{flex:1;color:var(--text-dim)}
+.lvl-reward.done{color:var(--text)}
+.lvl-mark{font-size:14px;font-weight:800}
 .toast{
 position:fixed;
 bottom:24px;left:50%;
@@ -264,42 +223,22 @@ transform:translateX(-50%) translateY(120%);
 background:var(--card-2);
 border:1px solid var(--line-2);
 color:var(--text);
-padding:14px 22px;
+padding:13px 20px;
 border-radius:12px;
-font-size:14px;
-font-weight:600;
+font-size:14px;font-weight:600;
 z-index:99999;
 opacity:0;
 transition:all .25s;
 pointer-events:none;
-max-width:90vw;
-text-align:center;
+max-width:90vw;text-align:center;
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.empty{
-text-align:center;
-padding:60px 24px;
-color:var(--muted);
-}
-.empty-box{
-width:72px;height:72px;
-margin:0 auto 18px;
-border:2px solid var(--line);
-border-radius:20px;
-display:flex;align-items:center;justify-content:center;
-font-size:28px;color:var(--muted);
-background:var(--card);
-}
-.empty-title{font-size:16px;font-weight:700;color:var(--text-dim);margin-bottom:6px}
-.empty-desc{font-size:13px}
 .loading{
-text-align:center;
-padding:60px 20px;
-color:var(--muted);
-font-size:12px;font-weight:700;
-letter-spacing:2px;
-text-transform:uppercase;
+text-align:center;padding:60px 20px;
+color:var(--muted);font-size:12px;
+font-weight:700;letter-spacing:2px;text-transform:uppercase;
 }
+.empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px}
 </style>
 </head>
 <body>
@@ -307,32 +246,64 @@ text-transform:uppercase;
 <div class="header">
   <div class="header-inner">
     <div>
-      <div class="logo">Darkgram</div>
-      <div class="logo-sub">verify</div>
+      <div class="logo">Hacker AI</div>
+      <div class="logo-sub" id="userName">player</div>
     </div>
-    <div class="balance-badge">💎 <span id="headerIrises">0</span></div>
+    <div class="badge"><span id="headerTokens">0</span></div>
   </div>
 </div>
 
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('verify', event)">🆔 Verify</button>
-  <button class="tab" onclick="switchTab('promo', event)">🎫 Промокод</button>
-  <button class="tab" onclick="switchTab('shop', event)">🛒 Магазин</button>
-  <button class="tab" onclick="switchTab('profile', event)">👤 Профиль</button>
+  <button class="tab active" data-tab="game">Игра</button>
+  <button class="tab" data-tab="upgrades">Улучшения</button>
+  <button class="tab" data-tab="season">Сезон</button>
+  <button class="tab" data-tab="top">Топ</button>
+  <button class="tab" data-tab="profile">Профиль</button>
 </div>
 
 <div class="container">
-  <div class="page active" id="page-verify">
-    <div id="verifyContent"><div class="loading">Загрузка...</div></div>
+  <div class="page active" id="page-game">
+    <div class="card balance-box">
+      <div class="balance-lbl">Память</div>
+      <div class="balance-val" id="memory">0 KB</div>
+      <div class="balance-inc" id="income">+0 / сек</div>
+    </div>
+    <div class="grid-2">
+      <div class="stat">
+        <div class="stat-k">Токены</div>
+        <div class="stat-v" id="tokens">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-k">Скорость</div>
+        <div class="stat-v" id="speed">0</div>
+      </div>
+    </div>
+    <button class="tap-btn" id="tapBtn">ХАКНУТЬ</button>
   </div>
-  <div class="page" id="page-promo">
-    <div id="promoContent"><div class="loading">Загрузка...</div></div>
+
+  <div class="page" id="page-upgrades">
+    <div class="sub-tabs">
+      <div class="sub-tab active" data-sub="comps">Компьютеры</div>
+      <div class="sub-tab" data-sub="speeds">Скорость</div>
+    </div>
+    <div id="compsList"><div class="loading">Загрузка</div></div>
+    <div id="speedsList" style="display:none"><div class="loading">Загрузка</div></div>
   </div>
-  <div class="page" id="page-shop">
-    <div id="shopContent"><div class="loading">Загрузка...</div></div>
+
+  <div class="page" id="page-season">
+    <div id="seasonContent"><div class="loading">Загрузка</div></div>
   </div>
+
+  <div class="page" id="page-top">
+    <div class="sub-tabs">
+      <div class="sub-tab active" data-top="all">Общий</div>
+      <div class="sub-tab" data-top="season">Сезон</div>
+    </div>
+    <div id="topList"><div class="loading">Загрузка</div></div>
+  </div>
+
   <div class="page" id="page-profile">
-    <div id="profileContent"><div class="loading">Загрузка...</div></div>
+    <div id="profileContent"><div class="loading">Загрузка</div></div>
   </div>
 </div>
 
@@ -342,434 +313,310 @@ text-transform:uppercase;
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
-const urlParams = new URLSearchParams(window.location.search);
-const TG_USER_ID = urlParams.get('user_id') || tg?.initDataUnsafe?.user?.id || null;
-const TG_FIRST_NAME = tg?.initDataUnsafe?.user?.first_name || 'Anonymous';
+const user = tg?.initDataUnsafe?.user || { id: 0, first_name: 'Player' };
+const UID = user.id;
 
-let userData = {
-  irises: 0,
-  ai_id: null,
-  orcode: null,
-  promo_code: null,
-  promo_used: false,
-  owned_ids: [],
-  active_id: null,
-  verified: false
-};
+let player = {};
+let upgrades = { computers: [], speed: [] };
+let season = { active: false };
+let currentTab = 'game';
 
-let shopItems = [];
-let verifyInProgress = false;
-let verifyTimer = null;
+function fmt(n) {
+  n = Number(n);
+  if (n >= 1e12) return (n/1e12).toFixed(1) + 'T';
+  if (n >= 1e9) return (n/1e9).toFixed(1) + 'B';
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+  return Math.floor(n).toString();
+}
 
-async function api(url, opts = {}) {
+function fmtMem(kb) {
+  kb = Number(kb);
+  if (kb >= 1e9) return (kb/1e9).toFixed(2) + ' TB';
+  if (kb >= 1e6) return (kb/1e6).toFixed(2) + ' GB';
+  if (kb >= 1e3) return (kb/1e3).toFixed(2) + ' MB';
+  return kb.toFixed(1) + ' KB';
+}
+
+function fmtTime(sec) {
+  sec = Math.floor(sec);
+  const d = Math.floor(sec / 86400);
+  const h = Math.floor((sec % 86400) / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  if (d > 0) return d + 'д ' + h + 'ч';
+  if (h > 0) return h + 'ч ' + m + 'м';
+  return m + 'м';
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+async function api(path, body) {
   try {
-    const c = new AbortController();
-    const t = setTimeout(() => c.abort(), 15000);
-    const r = await fetch(url, {
-      headers: {'Content-Type':'application/json'},
-      signal: c.signal,
-      ...opts
+    const r = await fetch(path, {
+      method: body ? 'POST' : 'GET',
+      headers: {'Content-Type': 'application/json'},
+      body: body ? JSON.stringify({ uid: UID, name: user.first_name, ...body }) : undefined
     });
-    clearTimeout(t);
     return await r.json();
   } catch (e) { return null; }
 }
 
-function showToast(text) {
-  const t = document.getElementById('toast');
-  t.textContent = text;
-  t.classList.add('show');
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('show'), 2200);
+function renderHeader() {
+  document.getElementById('headerTokens').textContent = fmt(player.tokens || 0);
+  document.getElementById('userName').textContent = user.first_name || 'player';
 }
 
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function renderGame() {
+  document.getElementById('memory').textContent = fmtMem(player.memory || 0);
+  document.getElementById('tokens').textContent = fmt(player.tokens || 0);
+  document.getElementById('speed').textContent = (player.speed || 0) + ' KB/с';
+  document.getElementById('income').textContent = '+' + fmt(player.income || 0) + ' / сек';
+  renderHeader();
 }
 
-function updateBalance() {
-  const el = document.getElementById('headerIrises');
-  if (el) el.textContent = userData.irises || 0;
-}
-
-function switchTab(name, event) {
-  if (event) event.preventDefault();
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const tabs = ['verify','promo','shop','profile'];
-  const idx = tabs.indexOf(name);
-  const tabEls = document.querySelectorAll('.tab');
-  if (idx >= 0 && tabEls[idx]) tabEls[idx].classList.add('active');
-  const page = document.getElementById('page-' + name);
-  if (page) page.classList.add('active');
-
-  if (name === 'verify') loadVerify();
-  if (name === 'promo') loadPromo();
-  if (name === 'shop') loadShop();
-  if (name === 'profile') loadProfile();
-}
-
-async function loadUserData() {
-  if (!TG_USER_ID) return;
-  const data = await api('/api/profile/' + TG_USER_ID);
-  if (data && data.ok) {
-    userData = data;
-    updateBalance();
-  }
-}
-
-function loadVerify() {
-  const el = document.getElementById('verifyContent');
-  if (!el) return;
-
-  if (!TG_USER_ID) {
-    el.innerHTML = '<div class="empty"><div class="empty-box">?</div><div class="empty-title">Открой из Telegram</div></div>';
-    return;
-  }
-
-  if (verifyInProgress) {
-    renderProgress();
-    return;
-  }
-
-  if (userData.verified && userData.ai_id) {
-    renderVerifyResult();
-    return;
-  }
-
-  el.innerHTML = `
-    <div class="big-card">
-      <div class="verify-icon">🆔</div>
-      <div class="big-title">Verify Your ID</div>
-      <div class="big-sub">Получи свой уникальный ID, ORCODE и промокод</div>
-      <button class="btn" onclick="startVerify()">Начать верификацию</button>
-    </div>
-  `;
-}
-
-function renderProgress() {
-  const el = document.getElementById('verifyContent');
-  if (!el) return;
-  el.innerHTML = `
-    <div class="big-card">
-      <div class="progress-wrap">
-        <div class="progress-circle">
-          <svg class="progress-svg" width="130" height="130">
-            <circle class="progress-bg" cx="65" cy="65" r="58" fill="none" stroke-width="8"/>
-            <circle class="progress-fg" id="progressCircle" cx="65" cy="65" r="58" fill="none" stroke-width="8"
-              stroke-dasharray="364" stroke-dashoffset="364"/>
-          </svg>
-          <div class="progress-pct" id="progressPct">0%</div>
-        </div>
-        <div class="progress-status" id="progressStatus">Инициализация...</div>
-      </div>
-    </div>
-  `;
-}
-
-async function startVerify() {
-  if (verifyInProgress) return;
-  verifyInProgress = true;
-  renderProgress();
-
-  const totalMs = 60000;
-  const startTime = Date.now();
-  const statuses = [
-    'Подключение к серверу...',
-    'Генерация ORCODE...',
-    'Создание ID...',
-    'Проверка уникальности...',
-    'Финальная валидация...',
-    'Почти готово...'
-  ];
-
-  const circle = document.getElementById('progressCircle');
-  const pctEl = document.getElementById('progressPct');
-  const statusEl = document.getElementById('progressStatus');
-
-  const apiPromise = api('/api/verify/start', {
-    method: 'POST',
-    body: JSON.stringify({ user_id: TG_USER_ID })
-  });
-
-  clearInterval(verifyTimer);
-  verifyTimer = setInterval(() => {
-    const elapsed = Date.now() - startTime;
-    const pct = Math.min(99, Math.floor((elapsed / totalMs) * 100));
-    if (pctEl) pctEl.textContent = pct + '%';
-    if (circle) circle.setAttribute('stroke-dashoffset', String(364 - (364 * pct / 100)));
-    if (statusEl) {
-      const idx = Math.min(statuses.length - 1, Math.floor(pct / 18));
-      statusEl.textContent = statuses[idx];
-    }
-  }, 100);
-
-  const res = await apiPromise;
-
-  setTimeout(() => {
-    clearInterval(verifyTimer);
-    if (pctEl) pctEl.textContent = '100%';
-    if (circle) circle.setAttribute('stroke-dashoffset', '0');
-    if (statusEl) statusEl.textContent = 'Готово!';
-
-    if (res && res.ok) {
-      userData.ai_id = res.ai_id;
-      userData.orcode = res.orcode;
-      userData.promo_code = res.promo_code;
-      userData.promo_used = res.promo_used || false;
-      userData.verified = true;
-      verifyInProgress = false;
-      setTimeout(() => {
-        renderVerifyResult();
-        showToast('Верификация пройдена!');
-      }, 500);
-    } else {
-      verifyInProgress = false;
-      showToast('Ошибка верификации');
-      loadVerify();
-    }
-  }, Math.max(0, totalMs - (Date.now() - startTime)));
-}
-
-function renderVerifyResult() {
-  const el = document.getElementById('verifyContent');
-  if (!el) return;
-  el.innerHTML = `
-    <div class="big-card">
-      <div class="verify-icon">✅</div>
-      <div class="big-title">Verified</div>
-      <div class="big-sub">Твои данные получены</div>
-
-      <div class="verify-info">
-        <div class="info-row">
-          <span class="info-lbl">🆔 ID</span>
-          <span class="info-val">${esc(userData.ai_id || '—')}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-lbl">🎫 ORCODE</span>
-          <span class="info-val gold">${esc(userData.orcode || '—')}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-lbl">🔑 CODE</span>
-          <span class="info-val green">${esc(userData.promo_code || '—')}</span>
-        </div>
-      </div>
-
-      <div style="font-size:13px;color:var(--text-dim);text-align:center;margin-bottom:14px">
-        ${userData.promo_used
-          ? '✅ Промокод использован'
-          : '⚠️ Введи этот код во вкладке «Промокод»'}
-      </div>
-
-      ${!userData.promo_used ? '<button class="btn gold" onclick="switchTab(\'promo\', event)">Ввести код</button>' : ''}
-    </div>
-  `;
-}
-
-function loadPromo() {
-  const el = document.getElementById('promoContent');
-  if (!el) return;
-
-  if (!TG_USER_ID) {
-    el.innerHTML = '<div class="empty"><div class="empty-box">?</div><div class="empty-title">Открой из Telegram</div></div>';
-    return;
-  }
-
-  if (!userData.verified) {
-    el.innerHTML = `
-      <div class="big-card">
-        <div class="verify-icon">🔒</div>
-        <div class="big-title">Сначала верификация</div>
-        <div class="big-sub">Пройди верификацию, чтобы получить код</div>
-        <button class="btn" onclick="switchTab('verify', event)">Перейти к верификации</button>
-      </div>
-    `;
-    return;
-  }
-
-  if (userData.promo_used) {
-    el.innerHTML = `
-      <div class="big-card">
-        <div class="verify-icon">✅</div>
-        <div class="big-title">Промокод использован</div>
-        <div class="big-sub">Ты уже активировал свой промокод</div>
-      </div>
-    `;
-    return;
-  }
-
-  el.innerHTML = `
-    <div class="big-card">
-      <div class="verify-icon">🎫</div>
-      <div class="big-title">Активировать промокод</div>
-      <div class="big-sub">Введи свой код и получи от 30 до 130 ирисок</div>
-
-      <div class="field">
-        <label>Промокод</label>
-        <input type="text" id="promoInput" placeholder="0000" maxlength="4" inputmode="numeric">
-      </div>
-
-      <button class="btn green" onclick="activatePromo()">Активировать</button>
-    </div>
-  `;
-}
-
-async function activatePromo() {
-  const input = document.getElementById('promoInput');
-  if (!input) return;
-  const code = input.value.trim();
-  if (!code || code.length !== 4) {
-    showToast('Введи 4-значный код');
-    return;
-  }
-  const res = await api('/api/verify/promo', {
-    method: 'POST',
-    body: JSON.stringify({ user_id: TG_USER_ID, code: code })
-  });
-  if (res && res.ok) {
-    showToast('+' + res.reward + ' ирисок!');
-    userData.irises = res.irises;
-    userData.promo_used = true;
-    updateBalance();
-    setTimeout(() => loadPromo(), 800);
-  } else if (res && res.error === 'wrong_code') {
-    showToast('Неверный код');
-  } else if (res && res.error === 'already_used') {
-    showToast('Уже использован');
-    userData.promo_used = true;
-    loadPromo();
-  } else {
-    showToast('Ошибка');
-  }
-}
-
-async function loadShop() {
-  const el = document.getElementById('shopContent');
-  if (!el) return;
-
-  if (!TG_USER_ID) {
-    el.innerHTML = '<div class="empty"><div class="empty-box">?</div><div class="empty-title">Открой из Telegram</div></div>';
-    return;
-  }
-
-  const items = await api('/api/shop');
-  shopItems = Array.isArray(items) ? items : [];
-
-  await loadUserData();
-
-  if (!shopItems.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-box">🛒</div><div class="empty-title">Магазин пуст</div></div>';
-    return;
-  }
-
-  let html = '<div class="big-card"><div class="big-title">🛒 Магазин ID</div><div class="big-sub">Купи себе уникальный ID</div></div>';
-
-  shopItems.forEach(item => {
-    const owned = (userData.owned_ids || []).includes(item.value);
-    const active = userData.active_id === item.value;
-    const cls = 'shop-item' + (item.legendary ? ' legendary' : '') +
-                (active ? ' active' : (owned ? ' owned' : ''));
-
-    let btn = '';
-    if (active) {
-      btn = '<button class="shop-btn active-btn" disabled>Активен</button>';
-    } else if (owned) {
-      btn = '<button class="shop-btn owned-btn" onclick="activateId(\'' + item.value + '\')">Активировать</button>';
-    } else {
-      btn = '<button class="shop-btn buy" onclick="buyId(\'' + item.id + '\')">Купить</button>';
-    }
-
-    html += '<div class="' + cls + '">' +
-      '<div class="shop-id">' + esc(item.value) + '</div>' +
-      '<div class="shop-price">' + item.price + ' 💎</div>' +
-      btn +
+function renderUpgrades() {
+  const compsEl = document.getElementById('compsList');
+  compsEl.innerHTML = (upgrades.computers || []).map(c => {
+    const owned = (player.computers || {})[c.id] || 0;
+    const can = (player.memory || 0) >= c.price;
+    return '<div class="item' + (owned > 0 ? ' owned' : '') + '">' +
+      '<div class="item-info">' +
+        '<div class="item-name">' + c.name + (owned > 0 ? ' ×' + owned : '') + '</div>' +
+        '<div class="item-sub">+' + c.income + ' / сек</div>' +
+        '<div class="item-price">' + fmtMem(c.price) + '</div>' +
+      '</div>' +
+      '<button class="btn" ' + (can ? '' : 'disabled') +
+        ' onclick="buyComp(\'' + c.id + '\')">' + (can ? 'Купить' : 'Мало') + '</button>' +
     '</div>';
-  });
+  }).join('');
 
+  const speedsEl = document.getElementById('speedsList');
+  speedsEl.innerHTML = (upgrades.speed || []).map((s, i) => {
+    const can = (player.tokens || 0) >= s.price;
+    return '<div class="item">' +
+      '<div class="item-info">' +
+        '<div class="item-name">+' + s.speed + ' KB/сек</div>' +
+        '<div class="item-price">' + fmt(s.price) + ' токенов</div>' +
+      '</div>' +
+      '<button class="btn green" ' + (can ? '' : 'disabled') +
+        ' onclick="buySpeed(' + i + ')">' + (can ? 'Купить' : 'Мало') + '</button>' +
+    '</div>';
+  }).join('');
+}
+
+function renderSeason() {
+  const el = document.getElementById('seasonContent');
+  if (!season.active) {
+    el.innerHTML = '<div class="card">' +
+      '<div class="title">Сезон неактивен</div>' +
+      '<div class="sub">Жди анонса нового сезона</div>' +
+    '</div>';
+    return;
+  }
+  const sm = player.season_memory || 0;
+  const lvl = player.season_level || 0;
+  const prem = player.season_premium || false;
+  const nextThr = lvl < 15 ? season.thresholds[lvl] : null;
+  const pct = nextThr ? Math.min(100, (sm / nextThr) * 100) : 100;
+
+  let html = '<div class="card">' +
+    '<div class="title">' + season.name + '</div>' +
+    '<div class="sub">Осталось: ' + fmtTime(season.left) + '</div>' +
+    '<div style="margin-top:14px;font-size:13px;color:var(--text-dim)">Сезонная память: <b style="color:var(--text)">' + fmtMem(sm) + '</b></div>' +
+    '<div style="font-size:13px;color:var(--text-dim);margin-top:4px">Уровень: <b style="color:var(--text)">' + lvl + '/15</b> — ' + (prem ? 'Premium' : 'Free') + '</div>' +
+    '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>';
+
+  if (!prem) {
+    html += '<button class="btn gold" style="width:100%;margin-top:10px" onclick="buySeason()">Купить Premium — ' + fmt(season.price) + ' токенов</button>';
+  }
+  html += '<button class="btn green" style="width:100%;margin-top:10px" onclick="claimSeason()">Забрать награды</button>';
+  html += '</div>';
+
+  html += '<div class="card"><div class="title" style="font-size:16px;margin-bottom:12px">Уровни</div>';
+  for (let i = 0; i < 15; i++) {
+    const n = i + 1;
+    const done = lvl >= n;
+    const src = prem ? season.levels[i].prem : season.levels[i].free;
+    let reward = [];
+    if (src.tokens) reward.push('+' + fmt(src.tokens) + ' токенов');
+    if (src.speed) reward.push('+' + src.speed + ' KB/сек');
+    html += '<div class="lvl-row ' + (done ? 'done' : 'locked') + '">' +
+      '<div class="lvl-n ' + (done ? 'done' : '') + '">' + n + '</div>' +
+      '<div class="lvl-reward ' + (done ? 'done' : '') + '">' + (reward.join(', ') || '—') + '</div>' +
+      '<div class="lvl-mark">' + (done ? '✓' : '—') + '</div>' +
+    '</div>';
+  }
+  html += '</div>';
   el.innerHTML = html;
 }
 
-async function buyId(itemId) {
-  const res = await api('/api/shop/buy', {
-    method: 'POST',
-    body: JSON.stringify({ user_id: TG_USER_ID, item_id: itemId })
-  });
-  if (res && res.ok) {
-    showToast('ID куплен!');
-    userData.irises = res.irises;
-    userData.active_id = res.active_id;
-    userData.owned_ids = res.owned_ids;
-    updateBalance();
-    loadShop();
-  } else if (res && res.error === 'not_enough') {
-    showToast('Недостаточно ирисок');
-  } else if (res && res.error === 'already_owned') {
-    showToast('Уже куплен');
-  } else {
-    showToast('Ошибка');
-  }
+async function loadTop(mode) {
+  const el = document.getElementById('topList');
+  el.innerHTML = '<div class="loading">Загрузка</div>';
+  const path = mode === 'season' ? '/api/season/leaderboard' : '/api/leaderboard';
+  const r = await fetch(path);
+  const arr = await r.json();
+  if (!arr.length) { el.innerHTML = '<div class="empty">Пока пусто</div>'; return; }
+  el.innerHTML = arr.map((u, i) => {
+    const rk = i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
+    const val = mode === 'season' ? u.season_memory : u.memory;
+    return '<div class="top-row">' +
+      '<div class="rank ' + rk + '">' + (i+1) + '</div>' +
+      '<div class="who">' + u.name + '</div>' +
+      '<div class="val">' + fmtMem(val) + '</div>' +
+    '</div>';
+  }).join('');
 }
 
-async function activateId(value) {
-  const res = await api('/api/shop/activate', {
-    method: 'POST',
-    body: JSON.stringify({ user_id: TG_USER_ID, value: value })
-  });
-  if (res && res.ok) {
-    showToast('ID активирован!');
-    userData.active_id = value;
-    loadShop();
-  } else {
-    showToast('Ошибка');
-  }
-}
-
-async function loadProfile() {
+function renderProfile() {
   const el = document.getElementById('profileContent');
-  if (!el) return;
+  el.innerHTML = '<div class="card">' +
+    '<div class="title">Профиль</div>' +
+    '<div class="sub" style="margin-top:10px">Имя: <b style="color:var(--text)">' + (user.first_name || 'player') + '</b></div>' +
+    '<div class="sub">ID: <b style="color:var(--text)">' + UID + '</b></div>' +
+    '<div class="sub">Всего заработано: <b style="color:var(--text)">' + fmt(player.total_earned || 0) + '</b></div>' +
+    '</div>' +
+    '<div class="card">' +
+    '<div class="title" style="font-size:16px">Перевести токены</div>' +
+    '<div class="field" style="margin-top:12px"><label>Кому (ID или @username)</label>' +
+    '<input id="payTarget" placeholder="@username или 123456"></div>' +
+    '<div class="field"><label>Сколько</label>' +
+    '<input id="payAmount" type="number" placeholder="100"></div>' +
+    '<button class="btn" style="width:100%" onclick="doPay()">Перевести</button>' +
+    '</div>';
+}
 
-  if (!TG_USER_ID) {
-    el.innerHTML = '<div class="empty"><div class="empty-box">?</div><div class="empty-title">Открой из Telegram</div></div>';
-    return;
+async function buyComp(id) {
+  const r = await api('/api/buy_computer', { id });
+  if (r.error) return toast('Недостаточно памяти');
+  player = r;
+  renderGame(); renderUpgrades();
+  toast('Куплено');
+  if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+}
+
+async function buySpeed(idx) {
+  const r = await api('/api/buy_speed', { idx });
+  if (r.error) return toast('Недостаточно токенов');
+  player = r;
+  renderGame(); renderUpgrades();
+  toast('Скорость +');
+  if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+}
+
+async function buySeason() {
+  const r = await api('/api/season/buy', {});
+  if (r.error === 'already') return toast('Уже куплено');
+  if (r.error === 'not enough tokens') return toast('Мало токенов');
+  if (r.error) return toast('Ошибка');
+  player = r;
+  renderGame(); renderSeason();
+  toast('Premium активирован');
+}
+
+async function claimSeason() {
+  const r = await api('/api/season/claim', {});
+  if (r.error === 'nothing') return toast('Нечего забирать');
+  if (r.error) return toast('Ошибка');
+  player = r.player;
+  renderGame(); renderSeason();
+  toast('+' + fmt(r.got_tokens) + ' токенов, +' + r.got_speed + ' скорости');
+}
+
+async function doPay() {
+  const target = document.getElementById('payTarget').value.trim();
+  const amount = document.getElementById('payAmount').value.trim();
+  if (!target || !amount) return toast('Заполни поля');
+  const r = await api('/api/pay', { target, amount });
+  if (r.error === 'not found') return toast('Получатель не найден');
+  if (r.error === 'self') return toast('Нельзя себе');
+  if (r.error === 'not enough tokens') return toast('Мало токенов');
+  if (r.error) return toast('Ошибка');
+  player.tokens = r.tokens;
+  renderGame();
+  toast('Переведено');
+  document.getElementById('payTarget').value = '';
+  document.getElementById('payAmount').value = '';
+}
+
+async function loadPlayer() {
+  const r = await api('/api/player', {});
+  if (!r || r.error) return;
+  player = r;
+  renderGame();
+}
+
+async function loadUpgrades() {
+  const r = await fetch('/api/upgrades');
+  upgrades = await r.json();
+  renderUpgrades();
+}
+
+async function loadSeason() {
+  const r = await fetch('/api/season');
+  season = await r.json();
+  if (currentTab === 'season') renderSeason();
+}
+
+document.getElementById('tapBtn').onclick = async () => {
+  const r = await api('/api/tap', {});
+  if (r && r.memory !== undefined) {
+    player.memory = r.memory;
+    if (r.season_memory !== undefined) {
+      player.season_memory = r.season_memory;
+      player.season_level = r.season_level;
+    }
+    renderGame();
+    if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
   }
+};
 
-  await loadUserData();
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => {
+    const name = t.dataset.tab;
+    currentTab = name;
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('page-' + name).classList.add('active');
+    if (name === 'top') loadTop('all');
+    if (name === 'season') { loadSeason().then(renderSeason); }
+    if (name === 'upgrades') renderUpgrades();
+    if (name === 'profile') renderProfile();
+  };
+});
 
-  const displayId = userData.active_id || userData.ai_id || '—';
+document.querySelectorAll('.sub-tab[data-sub]').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.sub-tab[data-sub]').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('compsList').style.display = t.dataset.sub === 'comps' ? 'block' : 'none';
+    document.getElementById('speedsList').style.display = t.dataset.sub === 'speeds' ? 'block' : 'none';
+  };
+});
 
-  el.innerHTML = `
-    <div class="big-card">
-      <div class="big-title">👤 ${esc(TG_FIRST_NAME)}</div>
-      <div class="big-sub">Профиль</div>
+document.querySelectorAll('.sub-tab[data-top]').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.sub-tab[data-top]').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    loadTop(t.dataset.top);
+  };
+});
 
-      <div class="verify-info">
-        <div class="info-row">
-          <span class="info-lbl">🆔 Текущий ID</span>
-          <span class="info-val">${esc(displayId)}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-lbl">🎫 ORCODE</span>
-          <span class="info-val gold">${esc(userData.orcode || '—')}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-lbl">💎 Ириски</span>
-          <span class="info-val green">${userData.irises || 0}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-lbl">✅ Верификация</span>
-          <span class="info-val ${userData.verified ? 'green' : ''}">${userData.verified ? 'Пройдена' : 'Нет'}</span>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-async function init() {
-  await loadUserData();
-  loadVerify();
-}
-
-init();
+(async () => {
+  await loadPlayer();
+  await loadUpgrades();
+  await loadSeason();
+  setInterval(loadPlayer, 5000);
+  setInterval(() => { if (currentTab === 'season') loadSeason().then(renderSeason); }, 30000);
+})();
 </script>
+
 </body>
 </html>
