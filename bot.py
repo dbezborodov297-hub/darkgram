@@ -11,7 +11,7 @@ STATS_FILE = 'stats.json'
 SEASON_FILE = 'season.json'
 
 ADMIN_IDS = [8907438590]              # сюда свой Telegram ID
-TOKEN = 'ВСТАВЬ_СВОЙ_ТОКЕН'           # токен от @BotFather
+TOKEN = '8747895563:AAHj7kyzKGJjyOEIySTy60n6tYZe1UP7kiI'          # токен от @BotFather
 WEBAPP_URL = 'https://твой-адрес.com' # HTTPS-адрес, где лежит index.html
 
 START_MEMORY = 5.0
