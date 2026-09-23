@@ -4,7 +4,7 @@ import os
 import requests
 from telebot import types
 
-TOKEN = '8747895563:AAHj7kyzKGJjyOEIySTy60n6tYZe1UP7kiI'
+TOKEN = '8747895563:AAGrxrG2y491FEM6acCtpnGk0YuH6e31VGA'
 DATA_FILE = 'quotes.json'
 
 bot = telebot.TeleBot(TOKEN)
