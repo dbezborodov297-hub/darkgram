@@ -7,7 +7,7 @@ from telebot import types
 TOKEN = '8747895563:AAHj7kyzKGJjyOEIySTy60n6tYZe1UP7kiI'
 DATA_FILE = 'quotes.json'
 
-bot = telebot.TeleBot('8747895563:AAHj7kyzKGJjyOEIySTy60n6tYZe1UP7kiI')
+bot = telebot.TeleBot(TOKEN)
 
 
 # ---------- Хранилище ----------
