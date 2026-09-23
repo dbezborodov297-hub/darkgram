@@ -10,7 +10,6 @@ DATA_FILE = 'quotes.json'
 bot = telebot.TeleBot(TOKEN)
 
 
-# ---------- Хранилище ----------
 def load_data():
     if not os.path.exists(DATA_FILE):
         return {}
@@ -26,16 +25,13 @@ def save_data(data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
-# ---------- QuotLy API ----------
 def make_quote(messages):
-    """Отправляет список сообщений в QuotLy, возвращает file_id или None."""
     payload = {
         'type': 'quote',
         'format': 'png',
         'backgroundColor': '#1a1a2e',
         'messages': messages
     }
-
     try:
         r = requests.post(
             'https://quotly.vercel.app/generate',
@@ -49,7 +45,6 @@ def make_quote(messages):
     return None
 
 
-# ---------- Команда /q ----------
 @bot.message_handler(commands=['q'])
 def cmd_quote(m):
     if not m.reply_to_message:
@@ -90,20 +85,17 @@ def cmd_quote(m):
         )
         return
 
-    # Отправляем картинку и добавляем кнопки
     sent = bot.send_photo(
         m.chat.id,
         image_bytes,
         reply_to_message_id=replied.message_id
     )
 
-    # Сохраняем ID цитаты
     data = load_data()
     qid = str(sent.message_id)
     data[qid] = {'likes': 0, 'dislikes': 0, 'chat_id': m.chat.id}
     save_data(data)
 
-    # Кнопки лайк/дизлайк
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(
         types.InlineKeyboardButton('👍 0', callback_data=f'like_{qid}'),
@@ -121,11 +113,9 @@ def cmd_quote(m):
         pass
 
 
-# ---------- Лайки и дизлайки ----------
 @bot.callback_query_handler(func=lambda c: c.data.startswith('like_') or c.data.startswith('dislike_'))
 def cb_vote(call):
     action, qid = call.data.split('_', 1)
-
     data = load_data()
     if qid not in data:
         bot.answer_callback_query(call.id, 'Цитата не найдена')
@@ -137,13 +127,11 @@ def cb_vote(call):
     if 'voted' not in q:
         q['voted'] = {}
 
-    # Один голос на пользователя
     if user_id in q['voted']:
         prev = q['voted'][user_id]
         if prev == action:
             bot.answer_callback_query(call.id, 'Ты уже голосовал')
             return
-        # Меняем голос
         if prev == 'like':
             q['likes'] -= 1
         else:
@@ -172,29 +160,23 @@ def cb_vote(call):
     bot.answer_callback_query(call.id, 'Голос учтён')
 
 
-# ---------- Топ цитат ----------
 @bot.message_handler(commands=['qtop'])
 def cmd_qtop(m):
     data = load_data()
     if not data:
         bot.reply_to(m, 'Пока нет цитат')
         return
-
     arr = []
     for qid, q in data.items():
         score = q.get('likes', 0) - q.get('dislikes', 0)
         arr.append((score, q.get('likes', 0), q.get('dislikes', 0), qid))
-
     arr.sort(reverse=True)
-
     text = 'ТОП ЦИТАТ\n\n'
     for i, (score, likes, dislikes, qid) in enumerate(arr[:10], 1):
         text += f'{i}. 👍 {likes} / 👎 {dislikes} (счёт: {score})\n'
-
     bot.reply_to(m, text)
 
 
-# ---------- Запуск ----------
 if __name__ == '__main__':
     print('Quote bot started')
     bot.infinity_polling(timeout=30, long_polling_timeout=30)
