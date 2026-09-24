@@ -7,7 +7,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from telebot import types
 
 # ==================== НАСТРОЙКИ ====================
-TOKEN = '8747895563:AAGrxrG2y491FEM6acCtpnGk0YuH6e31VGA'
+TOKEN = '8514412667:AAHCXH-QZ6dAI44Q5zUw68qfIQghLtbFxe4'
 
 MIN_PLAYERS = 4
 MAX_PLAYERS = 15
