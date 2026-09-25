@@ -123,14 +123,143 @@ def count_civils(game):
     return sum(1 for p in game.players.values() if p['alive'] and p['role'] not in (ROLE_MAFIA, ROLE_DON, ROLE_MANIAC))
 
 
+# ==================== КОМАНДЫ ====================
 @bot.message_handler(commands=['start'])
 def cmd_start(m):
-    bot.send_message(m.chat.id,
-        '🎭 Бот Мафия\n\n'
-        'Добавь меня в группу и напиши /mafia — начнём игру.\n\n'
-        'Нужно 4–15 игроков.')
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    kb.add(types.InlineKeyboardButton(
+        'Вся информация о Мафии Darkgram',
+        callback_data='mafia_info'
+    ))
+
+    text = (
+        '🎭 МАФИЯ DARKGRAM\n'
+        '━━━━━━━━━━━━━━━\n\n'
+        'Добро пожаловать в игру!\n\n'
+        '📖 КАК ИГРАТЬ:\n\n'
+        '1. Добавь бота в группу\n'
+        '2. Напиши /mafia — начнётся набор\n'
+        '3. Жми «Участвовать» (нужно 4–15 человек)\n'
+        '4. Роли придут каждому в личку\n'
+        '5. Ночью роли действуют в личке\n'
+        '6. Днём все голосуют в группе, кого казнить\n'
+        '7. Игра идёт, пока одна сторона не победит\n\n'
+        '⚙️ ПРАВИЛА:\n\n'
+        '🌙 НОЧЬ\n'
+        '• Мафия выбирает жертву\n'
+        '• Комиссар проверяет игрока\n'
+        '• Доктор лечит игрока\n'
+        '• Маньяк убивает\n'
+        '• Мирные спят\n\n'
+        '☀️ ДЕНЬ\n'
+        '• Все обсуждают, кто мафия\n'
+        '• Голосуют кнопками, кого казнить\n'
+        '• Большинство — казнён\n\n'
+        '🎯 ПОБЕДА:\n'
+        '• Мафия — если её ≥ остальных\n'
+        '• Город — если вся мафия мертва\n'
+        '• Маньяк — если остался один\n\n'
+        '👇 Подробнее:'
+    )
+    bot.send_message(m.chat.id, text, reply_markup=kb)
 
 
+@bot.message_handler(commands=['mafia_info'])
+def cmd_mafia_info(m):
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    kb.add(types.InlineKeyboardButton(
+        'Вся информация о Мафии Darkgram',
+        callback_data='mafia_info'
+    ))
+    bot.send_message(m.chat.id, '👇 Нажми кнопку:', reply_markup=kb)
+
+
+@bot.callback_query_handler(func=lambda c: c.data == 'mafia_info')
+def cb_mafia_info(call):
+    text = (
+        '🎭 МАФИЯ DARKGRAM\n'
+        '━━━━━━━━━━━━━━━\n\n'
+        '🎯 ЦЕЛЬ ИГРЫ\n\n'
+        'В городе спряталась мафия. Мирные жители должны её найти '
+        'и казнить днём. Мафия должна убить всех мирных ночью.\n\n'
+        '━━━━━━━━━━━━━━━\n'
+        '🎭 РОЛИ\n\n'
+        '🔫 МАФИЯ\n'
+        'Ночью вместе с другими мафиози выбирает жертву. '
+        'Знает своих. Цель — убить всех мирных.\n\n'
+        '👑 ДОН\n'
+        'Главный мафии. Если комиссар проверит — увидит как мирного.\n\n'
+        '🕵️ КОМИССАР\n'
+        'Ночью проверяет одного игрока. Узнаёт — мафия он или нет.\n\n'
+        '💊 ДОКТОР\n'
+        'Ночью лечит одного игрока. Если мафия выбрала его — выживет.\n\n'
+        '🔪 МАНЬЯК\n'
+        'Нейтрал. Ночью убивает всех подряд. Побеждает, если останется один.\n\n'
+        '👤 МИРНЫЙ\n'
+        'Ночью спит. Днём ищет мафию и голосует.\n\n'
+        '━━━━━━━━━━━━━━━\n'
+        '⚙️ ПРАВИЛА ПО ФАЗАМ\n\n'
+        '🌙 НОЧЬ (60 сек)\n'
+        '• Мафия выбирает жертву в личке\n'
+        '• Комиссар проверяет игрока\n'
+        '• Доктор лечит игрока\n'
+        '• Маньяк убивает\n'
+        '• Мирные ждут утра\n\n'
+        '☀️ ДЕНЬ (90 сек обсуждение + 60 сек голосование)\n'
+        '• Все обсуждают, кто мог быть мафией\n'
+        '• Голосуют кнопками — кого казнить\n'
+        '• Большинство голосов = казнь\n'
+        '• Ничья = никто не казнён\n\n'
+        '━━━━━━━━━━━━━━━\n'
+        '🎯 УСЛОВИЯ ПОБЕДЫ\n\n'
+        '• 🎉 МАФИЯ — если мафии ≥ остальных живых\n'
+        '• 🏆 ГОРОД — если вся мафия и маньяк мертвы\n'
+        '• 🔪 МАНЬЯК — если остался один против всех\n\n'
+        '━━━━━━━━━━━━━━━\n'
+        '📌 КОМАНДЫ\n\n'
+        '/start — меню и правила\n'
+        '/mafia — начать игру в группе\n'
+        '/mafia_info — эти правила\n\n'
+        '━━━━━━━━━━━━━━━\n'
+        '⚠️ ВАЖНО\n\n'
+        '• Игра только в группе\n'
+        '• Нужно 4–15 игроков\n'
+        '• Роли приходят в личку — не показывай никому\n'
+        '• Бот должен быть без Group Privacy\n'
+    )
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('Назад', callback_data='mafia_back'))
+    try:
+        bot.edit_message_text(text, chat_id=call.message.chat.id,
+                              message_id=call.message.message_id, reply_markup=kb)
+    except:
+        bot.send_message(call.message.chat.id, text, reply_markup=kb)
+    bot.answer_callback_query(call.id)
+
+
+@bot.callback_query_handler(func=lambda c: c.data == 'mafia_back')
+def cb_mafia_back(call):
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    kb.add(types.InlineKeyboardButton(
+        'Вся информация о Мафии Darkgram',
+        callback_data='mafia_info'
+    ))
+    text = (
+        '🎭 МАФИЯ DARKGRAM\n'
+        '━━━━━━━━━━━━━━━\n\n'
+        'Добро пожаловать в игру!\n\n'
+        '📖 Напиши /mafia в группе, чтобы начать.\n\n'
+        '👇 Подробнее:'
+    )
+    try:
+        bot.edit_message_text(text, chat_id=call.message.chat.id,
+                              message_id=call.message.message_id, reply_markup=kb)
+    except:
+        bot.send_message(call.message.chat.id, text, reply_markup=kb)
+    bot.answer_callback_query(call.id)
+
+
+# ==================== ИГРА ====================
 @bot.message_handler(commands=['mafia'])
 def cmd_mafia(m):
     chat_id = m.chat.id
