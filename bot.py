@@ -4,60 +4,107 @@ import threading
 import random
 import json
 import os
+from datetime import datetime, timedelta
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from telebot import types
 
 # ==================== НАСТРОЙКИ ====================
 TOKEN = '8514412667:AAHvjk1LlwTsozk2ijnUZS96_yDkbIg9Fco'
 
-SPAM_LIMIT = 30          # команд за окно
-SPAM_WINDOW = 120        # окно в секундах (2 минуты)
-AUTO_MUTE_MINUTES = 5    # автомут на 5 минут
+SPAM_LIMIT = 30
+SPAM_WINDOW = 120
+AUTO_MUTE_MINUTES = 5
+
 MUTES_FILE = 'mutes.json'
+MESSAGES_FILE = 'messages.json'
+STORE_DAYS = 90
 
 # ==================== БОТ ====================
 bot = telebot.TeleBot(TOKEN)
 
-# Антиспам: uid -> [timestamps]
 SPAM_TRACKER = {}
-
-# Муты: chat_id -> {user_id: {'until': ts, 'by': name, 'reason': str}}
 MUTES = {}
 MUTES_LOCK = threading.Lock()
 
+MESSAGES = {}
+MESSAGES_LOCK = threading.Lock()
 
-# ==================== ХРАНИЛИЩЕ ====================
+
+# ==================== ХРАНИЛИЩА ====================
+def load_json_file(path, default):
+    if not os.path.exists(path):
+        return default
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except:
+        return default
+
+
+def save_json_file(path, data):
+    try:
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f'save {path} err:', e)
+
+
 def load_mutes():
     global MUTES
-    if not os.path.exists(MUTES_FILE):
-        MUTES = {}
-        return
-    try:
-        with open(MUTES_FILE, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            MUTES = {}
-            for chat_id, users in data.items():
-                MUTES[int(chat_id)] = {}
-                for uid, info in users.items():
-                    MUTES[int(chat_id)][int(uid)] = info
-    except:
-        MUTES = {}
+    raw = load_json_file(MUTES_FILE, {})
+    MUTES = {}
+    for chat_id, users in raw.items():
+        MUTES[int(chat_id)] = {}
+        for uid, info in users.items():
+            MUTES[int(chat_id)][int(uid)] = info
 
 
 def save_mutes():
-    try:
-        data = {}
-        for chat_id, users in MUTES.items():
-            data[str(chat_id)] = {}
-            for uid, info in users.items():
-                data[str(chat_id)][str(uid)] = info
-        with open(MUTES_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-    except Exception as e:
-        print('save_mutes err:', e)
+    data = {}
+    for chat_id, users in MUTES.items():
+        data[str(chat_id)] = {}
+        for uid, info in users.items():
+            data[str(chat_id)][str(uid)] = info
+    save_json_file(MUTES_FILE, data)
+
+
+def load_messages():
+    global MESSAGES
+    raw = load_json_file(MESSAGES_FILE, {})
+    MESSAGES = {}
+    for chat_id, data in raw.items():
+        MESSAGES[int(chat_id)] = {}
+        for uid, days in data.items():
+            MESSAGES[int(chat_id)][int(uid)] = days
+
+
+def save_messages():
+    data = {}
+    for chat_id, users in MESSAGES.items():
+        data[str(chat_id)] = {}
+        for uid, days in users.items():
+            data[str(chat_id)][str(uid)] = days
+    save_json_file(MESSAGES_FILE, data)
+
+
+def today_str():
+    return datetime.now().strftime('%Y-%m-%d')
+
+
+def cleanup_old_messages():
+    """Удаляет записи старше STORE_DAYS дней."""
+    cutoff = (datetime.now() - timedelta(days=STORE_DAYS)).strftime('%Y-%m-%d')
+    with MESSAGES_LOCK:
+        for chat_id in list(MESSAGES.keys()):
+            for uid in list(MESSAGES[chat_id].keys()):
+                days = MESSAGES[chat_id][uid]
+                MESSAGES[chat_id][uid] = {d: c for d, c in days.items() if d >= cutoff}
+    save_messages()
 
 
 load_mutes()
+load_messages()
+cleanup_old_messages()
 
 
 # ==================== HTTP ДЛЯ RENDER ====================
@@ -76,6 +123,190 @@ def run_http():
 
 
 threading.Thread(target=run_http, daemon=True).start()
+
+
+# ==================== СЧЁТЧИК СООБЩЕНИЙ ====================
+def add_message(chat_id, uid):
+    today = today_str()
+    with MESSAGES_LOCK:
+        if chat_id not in MESSAGES:
+            MESSAGES[chat_id] = {}
+        if uid not in MESSAGES[chat_id]:
+            MESSAGES[chat_id][uid] = {}
+        MESSAGES[chat_id][uid][today] = MESSAGES[chat_id][uid].get(today, 0) + 1
+
+
+def count_for_period(chat_id, uid, days):
+    """days=None — всё время, days=N — последние N дней."""
+    with MESSAGES_LOCK:
+        user_days = MESSAGES.get(chat_id, {}).get(uid, {})
+        if not user_days:
+            return 0
+        if days is None:
+            return sum(user_days.values())
+        cutoff = (datetime.now() - timedelta(days=days - 1)).strftime('%Y-%m-%d')
+        return sum(c for d, c in user_days.items() if d >= cutoff)
+
+
+def get_top(chat_id, days, limit=30):
+    with MESSAGES_LOCK:
+        users = MESSAGES.get(chat_id, {})
+        result = []
+        for uid, days_data in users.items():
+            if days is None:
+                total = sum(days_data.values())
+            else:
+                cutoff = (datetime.now() - timedelta(days=days - 1)).strftime('%Y-%m-%d')
+                total = sum(c for d, c in days_data.items() if d >= cutoff)
+            if total > 0:
+                result.append((uid, total))
+    result.sort(key=lambda x: x[1], reverse=True)
+    return result[:limit]
+
+
+def get_user_rank(chat_id, uid, days):
+    top = get_top(chat_id, days, limit=999999)
+    for i, (u, _) in enumerate(top, 1):
+        if u == uid:
+            return i
+    return None
+
+
+def get_username(chat_id, uid):
+    try:
+        member = bot.get_chat_member(chat_id, uid)
+        return member.user.first_name or f'ID {uid}'
+    except:
+        return f'ID {uid}'
+
+
+# ==================== МУТ ====================
+def is_muted(chat_id, uid):
+    with MUTES_LOCK:
+        chat = MUTES.get(chat_id, {})
+        info = chat.get(uid)
+        if not info:
+            return False
+        if info.get('until', 0) <= time.time():
+            del chat[uid]
+            save_mutes()
+            return False
+        return True
+
+
+def get_mute_left(chat_id, uid):
+    with MUTES_LOCK:
+        info = MUTES.get(chat_id, {}).get(uid)
+        if not info:
+            return 0
+        return max(0, int(info.get('until', 0) - time.time()))
+
+
+def add_mute(chat_id, uid, minutes, by_name, reason):
+    until = time.time() + minutes * 60
+    with MUTES_LOCK:
+        if chat_id not in MUTES:
+            MUTES[chat_id] = {}
+        MUTES[chat_id][uid] = {
+            'until': until,
+            'minutes': minutes,
+            'by': by_name,
+            'reason': reason,
+        }
+    save_mutes()
+    return until
+
+
+def remove_mute(chat_id, uid):
+    with MUTES_LOCK:
+        if chat_id in MUTES and uid in MUTES[chat_id]:
+            del MUTES[chat_id][uid]
+            save_mutes()
+            return True
+    return False
+
+
+def apply_telegram_mute(chat_id, uid, minutes):
+    try:
+        until = int(time.time()) + minutes * 60
+        bot.restrict_chat_member(
+            chat_id, uid,
+            permissions=types.ChatPermissions(
+                can_send_messages=False,
+                can_send_media_messages=False,
+                can_send_other_messages=False,
+                can_add_web_page_previews=False,
+            ),
+            until_date=until
+        )
+        return True
+    except Exception as e:
+        print('restrict err:', e)
+        return False
+
+
+def remove_telegram_mute(chat_id, uid):
+    try:
+        bot.restrict_chat_member(
+            chat_id, uid,
+            permissions=types.ChatPermissions(
+                can_send_messages=True,
+                can_send_media_messages=True,
+                can_send_other_messages=True,
+                can_add_web_page_previews=True,
+            )
+        )
+        return True
+    except Exception as e:
+        print('unrestrict err:', e)
+        return False
+
+
+def is_group_admin(chat_id, uid):
+    try:
+        member = bot.get_chat_member(chat_id, uid)
+        return member.status in ('administrator', 'creator')
+    except:
+        return False
+
+
+# ==================== АВТО-РАЗМУТ ====================
+def auto_unmute_loop():
+    while True:
+        try:
+            now = time.time()
+            to_unmute = []
+            with MUTES_LOCK:
+                for chat_id, users in list(MUTES.items()):
+                    for uid, info in list(users.items()):
+                        if info.get('until', 0) <= now:
+                            to_unmute.append((chat_id, uid))
+                            del users[uid]
+            for chat_id, uid in to_unmute:
+                remove_telegram_mute(chat_id, uid)
+                try:
+                    bot.send_message(chat_id, '✅ Мут снят автоматически.')
+                except:
+                    pass
+            if to_unmute:
+                save_mutes()
+        except Exception as e:
+            print('auto_unmute err:', e)
+        time.sleep(30)
+
+
+threading.Thread(target=auto_unmute_loop, daemon=True).start()
+
+
+# ==================== СЧЁТЧИК — ОБРАБОТЧИК ВСЕХ СООБЩЕНИЙ ====================
+@bot.message_handler(
+    content_types=['text', 'photo', 'video', 'document', 'audio', 'voice',
+                   'sticker', 'animation', 'video_note', 'location', 'contact'],
+    func=lambda m: m.chat.type in ('group', 'supergroup')
+)
+def count_all_messages(m):
+    if m.from_user and not m.from_user.is_bot:
+        add_message(m.chat.id, m.from_user.id)
 
 
 # ==================== РП КОМАНДЫ ====================
@@ -126,135 +357,6 @@ def get_action_text(action, a, b):
     return random.choice(variants).format(a=a, b=b)
 
 
-# ==================== МУТ ====================
-def is_muted(chat_id, uid):
-    with MUTES_LOCK:
-        chat = MUTES.get(chat_id, {})
-        info = chat.get(uid)
-        if not info:
-            return False
-        if info.get('until', 0) <= time.time():
-            del chat[uid]
-            save_mutes()
-            return False
-        return True
-
-
-def get_mute_left(chat_id, uid):
-    with MUTES_LOCK:
-        info = MUTES.get(chat_id, {}).get(uid)
-        if not info:
-            return 0
-        left = int(info.get('until', 0) - time.time())
-        return max(0, left)
-
-
-def add_mute(chat_id, uid, minutes, by_name, reason):
-    until = time.time() + minutes * 60
-    with MUTES_LOCK:
-        if chat_id not in MUTES:
-            MUTES[chat_id] = {}
-        MUTES[chat_id][uid] = {
-            'until': until,
-            'minutes': minutes,
-            'by': by_name,
-            'reason': reason,
-            'started': time.time(),
-        }
-        save_mutes()
-    return until
-
-
-def remove_mute(chat_id, uid):
-    with MUTES_LOCK:
-        if chat_id in MUTES and uid in MUTES[chat_id]:
-            del MUTES[chat_id][uid]
-            save_mutes()
-            return True
-    return False
-
-
-def apply_telegram_mute(chat_id, uid, minutes):
-    """Официальный мут через права Telegram."""
-    try:
-        until = int(time.time()) + minutes * 60
-        bot.restrict_chat_member(
-            chat_id, uid,
-            permissions=types.ChatPermissions(
-                can_send_messages=False,
-                can_send_media_messages=False,
-                can_send_other_messages=False,
-                can_add_web_page_previews=False,
-            ),
-            until_date=until
-        )
-        return True
-    except Exception as e:
-        print('restrict err:', e)
-        return False
-
-
-def remove_telegram_mute(chat_id, uid):
-    try:
-        bot.restrict_chat_member(
-            chat_id, uid,
-            permissions=types.ChatPermissions(
-                can_send_messages=True,
-                can_send_media_messages=True,
-                can_send_other_messages=True,
-                can_add_web_page_previews=True,
-            )
-        )
-        return True
-    except Exception as e:
-        print('unrestrict err:', e)
-        return False
-
-
-def is_group_admin(chat_id, uid):
-    try:
-        member = bot.get_chat_member(chat_id, uid)
-        return member.status in ('administrator', 'creator')
-    except:
-        return False
-
-
-def is_bot_admin(chat_id):
-    try:
-        me = bot.get_chat_member(chat_id, bot.get_me().id)
-        return me.status == 'administrator'
-    except:
-        return False
-
-
-# ==================== АВТО-РАЗМУТ ====================
-def auto_unmute_loop():
-    while True:
-        try:
-            now = time.time()
-            to_unmute = []
-            with MUTES_LOCK:
-                for chat_id, users in list(MUTES.items()):
-                    for uid, info in list(users.items()):
-                        if info.get('until', 0) <= now:
-                            to_unmute.append((chat_id, uid))
-                            del users[uid]
-            for chat_id, uid in to_unmute:
-                remove_telegram_mute(chat_id, uid)
-                try:
-                    bot.send_message(chat_id, f'✅ Мут снят автоматически.')
-                except:
-                    pass
-            if to_unmute:
-                save_mutes()
-        except Exception as e:
-            print('auto_unmute err:', e)
-        time.sleep(30)
-
-
-threading.Thread(target=auto_unmute_loop, daemon=True).start()
-
-
 # ==================== /start ====================
 @bot.message_handler(commands=['start'])
 def cmd_start(m):
@@ -265,7 +367,6 @@ def cmd_start(m):
         types.InlineKeyboardButton('Конфиденциальность', callback_data='rp_privacy'),
         types.InlineKeyboardButton('Список команд', callback_data='rp_cmds'),
     )
-
     text = (
         '💞 РП БОТ\n'
         '━━━━━━━━━━━━━━━\n\n'
@@ -289,15 +390,16 @@ def cb_how(call):
         '📖 КАК ИГРАТЬ\n'
         '━━━━━━━━━━━━━━━\n\n'
         '1️⃣ Добавь бота в группу\n\n'
-        '2️⃣ Ответь (свайпом) на сообщение человека\n\n'
+        '2️⃣ Ответь на сообщение человека\n\n'
         '3️⃣ Напиши команду, например /обнять\n\n'
         '4️⃣ Бот пришлёт красивое сообщение.\n\n'
         '━━━━━━━━━━━━━━━\n'
-        '💡 Примеры:\n'
-        '• /обнять — обнять человека\n'
-        '• /поцеловать — поцеловать\n'
-        '• /ударить — ударить\n'
-        '• /жениться — жениться\n\n'
+        '📊 СТАТИСТИКА\n\n'
+        '/stats — твоя статистика\n'
+        '/top — топ за неделю\n'
+        '/top день — за сегодня\n'
+        '/top всё — за всё время\n'
+        '/top месяц — за месяц\n\n'
         '━━━━━━━━━━━━━━━\n'
         '🚫 АНТИСПАМ\n\n'
         f'Если отправить {SPAM_LIMIT} команд за '
@@ -355,12 +457,13 @@ def cb_privacy(call):
         '❌ Бот НЕ:\n'
         '• Не читает личные сообщения\n'
         '• Не собирает данные\n'
-        '• Не сохраняет переписку\n'
+        '• Не сохраняет текст сообщений\n'
         '• Не передаёт третьим лицам\n\n'
-        '✅ Бот использует:\n'
-        '• Имя (для отображения)\n'
-        '• ID (для мута и антиспама)\n\n'
-        'Данные хранятся в файле бота.'
+        '✅ Бот хранит:\n'
+        '• Имя и ID (для мута/статистики)\n'
+        '• Количество сообщений (не текст)\n'
+        '• Активные муты\n\n'
+        'Данные хранятся в файлах бота.'
     )
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton('Назад', callback_data='rp_back'))
@@ -394,10 +497,16 @@ def cb_cmds(call):
         '/кинуть снежок /облить водой\n'
         '/загипнотизировать /телепортировать\n'
         '/превратить в жабу /укусить за ухо\n\n'
-        '━━━━━━━━━━━━━━━\n'
+        '📊 СТАТИСТИКА:\n'
+        '/stats — моя статистика\n'
+        '/stats @ник — статистика игрока\n'
+        '/top — топ-30 за неделю\n'
+        '/top день — за сегодня\n'
+        '/top всё — за всё время\n'
+        '/top месяц — за месяц\n\n'
         '🛡 МОДЕРАЦИЯ (админы):\n'
-        '/mute N — замутить на N минут\n'
-        '/unmute — размутить\n'
+        '/mute N — мут на N минут (1–1000)\n'
+        '/unmute — снять мут\n'
         '/mutelist — список замученных\n'
         '/ban — забанить\n'
         '/unban ID — разбанить\n'
@@ -421,17 +530,110 @@ def cb_back(call):
         types.InlineKeyboardButton('Конфиденциальность', callback_data='rp_privacy'),
         types.InlineKeyboardButton('Список команд', callback_data='rp_cmds'),
     )
-    text = (
-        '💞 РП БОТ\n'
-        '━━━━━━━━━━━━━━━\n\n'
-        '👇 Выбери раздел:'
-    )
+    text = '💞 РП БОТ\n━━━━━━━━━━━━━━━\n\n👇 Выбери раздел:'
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
                               message_id=call.message.message_id, reply_markup=kb)
     except:
         bot.send_message(call.message.chat.id, text, reply_markup=kb)
     bot.answer_callback_query(call.id)
+
+
+# ==================== СТАТИСТИКА ====================
+@bot.message_handler(commands=['stats'])
+def cmd_stats(m):
+    if m.chat.type == 'private':
+        bot.reply_to(m, 'Только в группе.')
+        return
+
+    parts = m.text.split()
+    if len(parts) >= 2 and parts[1].startswith('@'):
+        target_uname = parts[1][1:].lower()
+        target_uid = None
+        target_name = None
+        try:
+            with MESSAGES_LOCK:
+                for uid in MESSAGES.get(m.chat.id, {}).keys():
+                    try:
+                        member = bot.get_chat_member(m.chat.id, uid)
+                        if member.user.username and member.user.username.lower() == target_uname:
+                            target_uid = uid
+                            target_name = member.user.first_name
+                            break
+                    except:
+                        continue
+        except:
+            pass
+        if not target_uid:
+            bot.reply_to(m, 'Игрок не найден в статистике.')
+            return
+        uid = target_uid
+        name = target_name
+    else:
+        uid = m.from_user.id
+        name = m.from_user.first_name
+
+    total = count_for_period(m.chat.id, uid, None)
+    today = count_for_period(m.chat.id, uid, 1)
+    week = count_for_period(m.chat.id, uid, 7)
+    month = count_for_period(m.chat.id, uid, 30)
+
+    rank_week = get_user_rank(m.chat.id, uid, 7)
+    rank_all = get_user_rank(m.chat.id, uid, None)
+
+    text = (
+        f'📊 СТАТИСТИКА: {name}\n'
+        f'━━━━━━━━━━━━━━━\n\n'
+        f'📅 Сегодня: {today}\n'
+        f'📆 За неделю: {week}\n'
+        f'🗓 За месяц: {month}\n'
+        f'📈 Всего: {total}\n\n'
+        f'🏆 Место за неделю: {rank_week or "—"}\n'
+        f'🏆 Место за всё время: {rank_all or "—"}'
+    )
+    bot.reply_to(m, text)
+
+
+@bot.message_handler(commands=['top'])
+def cmd_top(m):
+    if m.chat.type == 'private':
+        bot.reply_to(m, 'Только в группе.')
+        return
+
+    parts = m.text.split(maxsplit=1)
+    arg = parts[1].lower() if len(parts) > 1 else ''
+
+    if arg in ('день', 'day', 'today'):
+        days = 1
+        title = 'ЗА СЕГОДНЯ'
+    elif arg in ('неделя', 'week', '7'):
+        days = 7
+        title = 'ЗА НЕДЕЛЮ'
+    elif arg in ('месяц', 'month', '30'):
+        days = 30
+        title = 'ЗА МЕСЯЦ'
+    elif arg in ('всё', 'все', 'all', 'всего'):
+        days = None
+        title = 'ЗА ВСЁ ВРЕМЯ'
+    else:
+        days = 7
+        title = 'ЗА НЕДЕЛЮ'
+
+    top = get_top(m.chat.id, days, limit=30)
+
+    if not top:
+        bot.reply_to(m, 'Пока нет данных.')
+        return
+
+    text = f'🏆 ТОП-30 {title}\n━━━━━━━━━━━━━━━\n\n'
+    medals = {1: '🥇', 2: '🥈', 3: '🥉'}
+    for i, (uid, count) in enumerate(top, 1):
+        name = get_username(m.chat.id, uid)
+        prefix = medals.get(i, f'{i}.')
+        text += f'{prefix} {name} — {count}\n'
+
+    text += f'\n📊 Показаны топ-30'
+    bot.reply_to(m, text)
 
 
 # ==================== АНТИСПАМ ====================
@@ -444,7 +646,7 @@ def check_spam(uid):
     return len(SPAM_TRACKER[uid]) >= SPAM_LIMIT
 
 
-# ==================== ОБРАБОТЧИК РП КОМАНД ====================
+# ==================== ОБРАБОТЧИК КОМАНД ====================
 @bot.message_handler(func=lambda m: m.text and m.text.startswith('/'))
 def handle_command(m):
     text = m.text.strip()
@@ -453,10 +655,9 @@ def handle_command(m):
 
     action = text[1:].split()[0].lower()
 
-    if action in ('start', 'help'):
+    if action in ('start', 'help', 'stats', 'top'):
         return
 
-    # модерация — отдельно
     if action in ('mute', 'unmute', 'mutelist', 'ban', 'unban'):
         handle_moderation(m, action)
         return
@@ -468,7 +669,6 @@ def handle_command(m):
         bot.reply_to(m, 'Эта команда работает только в группе.')
         return
 
-    # проверка мута
     if is_muted(m.chat.id, m.from_user.id):
         left = get_mute_left(m.chat.id, m.from_user.id)
         try:
@@ -494,7 +694,6 @@ def handle_command(m):
         bot.reply_to(m, '🤖 Нельзя это сделать с ботом.')
         return
 
-    # антиспам
     if check_spam(sender.id):
         SPAM_TRACKER[sender.id] = []
         add_mute(m.chat.id, sender.id, AUTO_MUTE_MINUTES,
@@ -520,7 +719,7 @@ def handle_command(m):
 # ==================== МОДЕРАЦИЯ ====================
 def handle_moderation(m, action):
     if m.chat.type == 'private':
-        bot.reply_to(m, 'Модерация работает только в группах.')
+        bot.reply_to(m, 'Модерация только в группах.')
         return
 
     if not is_group_admin(m.chat.id, m.from_user.id):
@@ -543,14 +742,14 @@ def handle_moderation(m, action):
             return
         try:
             bot.unban_chat_member(m.chat.id, target_id)
-            bot.reply_to(m, f'✅ Пользователь {target_id} разбанен.')
+            bot.reply_to(m, f'✅ {target_id} разбанен.')
         except Exception as e:
             bot.reply_to(m, f'Ошибка: {e}')
         return
 
     if action == 'unmute':
         if not m.reply_to_message:
-            bot.reply_to(m, 'Ответь на сообщение человека.')
+            bot.reply_to(m, 'Ответь на сообщение.')
             return
         target = m.reply_to_message.from_user
         remove_mute(m.chat.id, target.id)
@@ -562,7 +761,7 @@ def handle_moderation(m, action):
 
     if action == 'ban':
         if not m.reply_to_message:
-            bot.reply_to(m, 'Ответь на сообщение человека.')
+            bot.reply_to(m, 'Ответь на сообщение.')
             return
         target = m.reply_to_message.from_user
         if is_group_admin(m.chat.id, target.id):
@@ -580,7 +779,7 @@ def handle_moderation(m, action):
     if action == 'mute':
         parts = m.text.split()
         if len(parts) < 2:
-            bot.reply_to(m, 'Использование: /mute 10 (ответом на сообщение)')
+            bot.reply_to(m, 'Использование: /mute 10 (ответом)')
             return
         try:
             minutes = int(parts[1])
@@ -593,7 +792,7 @@ def handle_moderation(m, action):
             return
 
         if not m.reply_to_message:
-            bot.reply_to(m, 'Ответь на сообщение человека.')
+            bot.reply_to(m, 'Ответь на сообщение.')
             return
 
         target = m.reply_to_message.from_user
@@ -628,7 +827,6 @@ def show_mutelist(m):
                     'left': left,
                     'by': info.get('by', '—'),
                     'reason': info.get('reason', '—'),
-                    'minutes': info.get('minutes', 0),
                 })
 
     if not active:
@@ -639,12 +837,7 @@ def show_mutelist(m):
 
     text = f'📋 ЗАМУЧЕННЫЕ ({len(active)})\n━━━━━━━━━━━━━━━\n\n'
     for i, u in enumerate(active, 1):
-        try:
-            user = bot.get_chat_member(chat_id, u['uid']).user
-            name = user.first_name or 'Игрок'
-        except:
-            name = f'ID {u["uid"]}'
-
+        name = get_username(chat_id, u['uid'])
         left_min = u['left'] // 60
         left_sec = u['left'] % 60
         text += (
@@ -653,6 +846,9 @@ def show_mutelist(m):
             f'   Кем: {u["by"]}\n'
             f'   Причина: {u["reason"]}\n\n'
         )
+
+    if len(text) > 4000:
+        text = text[:4000] + '\n...'
 
     bot.send_message(chat_id, text)
 
