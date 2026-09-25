@@ -25,6 +25,13 @@ PROFILES_FILE = 'profiles.json'
 
 # ==================== БОТ ====================
 bot = telebot.TeleBot(TOKEN)
+
+try:
+    bot.delete_webhook(drop_pending_updates=True)
+    print('Webhook deleted')
+except Exception as e:
+    print('webhook err:', e)
+
 GAMES = {}
 PROFILES = {}
 PROFILES_LOCK = threading.Lock()
@@ -261,8 +268,7 @@ def cb_how(call):
         '🎯 ПОБЕДА:\n'
         '• Мафия — если её ≥ остальных\n'
         '• Город — если вся мафия мертва\n'
-        '• Маньяк — если остался один\n'
-        '• Зеленский — выжить до конца\n\n'
+        '• Маньяк — если остался один\n\n'
         '━━━━━━━━━━━━━━━\n'
         '💎 АЛМАЗЫ:\n'
         f'• +{WIN_REWARD} за победу\n'
@@ -316,7 +322,6 @@ def cb_roles(call):
         '• 🎉 Мафия — если мафии ≥ остальных\n'
         '• 🏆 Город — если вся мафия и маньяк мертвы\n'
         '• 🔪 Маньяк — если остался один\n'
-        '• 🇺🇦 Зеленский — если дожил до конца'
     )
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton('Назад', callback_data='mm_back'))
