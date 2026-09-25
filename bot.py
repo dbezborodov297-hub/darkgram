@@ -4,108 +4,30 @@ import threading
 import random
 import json
 import os
-from datetime import datetime, timedelta
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from telebot import types
 
 # ==================== НАСТРОЙКИ ====================
 TOKEN = '8514412667:AAGtzSPDoy1s63kEaqhlfRYaF-NNdeTU3bo'
 
-SPAM_LIMIT = 30
-SPAM_WINDOW = 120
-AUTO_MUTE_MINUTES = 5
+MIN_PLAYERS = 4
+MAX_PLAYERS = 20
+LOBBY_TIME = 5 * 60
+NIGHT_TIME = 60
+DAY_DISCUSS = 90
+DAY_VOTE = 60
 
-MUTES_FILE = 'mutes.json'
-MESSAGES_FILE = 'messages.json'
-STORE_DAYS = 90
+SHIELD_PRICE = 100
+LUCKY_PRICE = 65
+WIN_REWARD = 10
+
+PROFILES_FILE = 'profiles.json'
 
 # ==================== БОТ ====================
 bot = telebot.TeleBot(TOKEN)
-
-SPAM_TRACKER = {}
-MUTES = {}
-MUTES_LOCK = threading.Lock()
-
-MESSAGES = {}
-MESSAGES_LOCK = threading.Lock()
-
-
-# ==================== ХРАНИЛИЩА ====================
-def load_json_file(path, default):
-    if not os.path.exists(path):
-        return default
-    try:
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except:
-        return default
-
-
-def save_json_file(path, data):
-    try:
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-    except Exception as e:
-        print(f'save {path} err:', e)
-
-
-def load_mutes():
-    global MUTES
-    raw = load_json_file(MUTES_FILE, {})
-    MUTES = {}
-    for chat_id, users in raw.items():
-        MUTES[int(chat_id)] = {}
-        for uid, info in users.items():
-            MUTES[int(chat_id)][int(uid)] = info
-
-
-def save_mutes():
-    data = {}
-    for chat_id, users in MUTES.items():
-        data[str(chat_id)] = {}
-        for uid, info in users.items():
-            data[str(chat_id)][str(uid)] = info
-    save_json_file(MUTES_FILE, data)
-
-
-def load_messages():
-    global MESSAGES
-    raw = load_json_file(MESSAGES_FILE, {})
-    MESSAGES = {}
-    for chat_id, data in raw.items():
-        MESSAGES[int(chat_id)] = {}
-        for uid, days in data.items():
-            MESSAGES[int(chat_id)][int(uid)] = days
-
-
-def save_messages():
-    data = {}
-    for chat_id, users in MESSAGES.items():
-        data[str(chat_id)] = {}
-        for uid, days in users.items():
-            data[str(chat_id)][str(uid)] = days
-    save_json_file(MESSAGES_FILE, data)
-
-
-def today_str():
-    return datetime.now().strftime('%Y-%m-%d')
-
-
-def cleanup_old_messages():
-    """Удаляет записи старше STORE_DAYS дней."""
-    cutoff = (datetime.now() - timedelta(days=STORE_DAYS)).strftime('%Y-%m-%d')
-    with MESSAGES_LOCK:
-        for chat_id in list(MESSAGES.keys()):
-            for uid in list(MESSAGES[chat_id].keys()):
-                days = MESSAGES[chat_id][uid]
-                MESSAGES[chat_id][uid] = {d: c for d, c in days.items() if d >= cutoff}
-    save_messages()
-
-
-load_mutes()
-load_messages()
-cleanup_old_messages()
-
+GAMES = {}
+PROFILES = {}
+PROFILES_LOCK = threading.Lock()
 
 # ==================== HTTP ДЛЯ RENDER ====================
 class Handler(BaseHTTPRequestHandler):
@@ -116,245 +38,182 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b'Bot running')
 
-
 def run_http():
     port = int(os.environ.get('PORT', 10000))
     HTTPServer(('0.0.0.0', port), Handler).serve_forever()
 
-
 threading.Thread(target=run_http, daemon=True).start()
 
+# ==================== РОЛИ ====================
+ROLE_MAFIA = 'Мафия'
+ROLE_DON = 'Дон'
+ROLE_COMISSAR = 'Комиссар'
+ROLE_DOCTOR = 'Доктор'
+ROLE_MANIAC = 'Маньяк'
+ROLE_ZELENSKY = 'Зеленский'
+ROLE_CIVIL = 'Мирный'
 
-# ==================== СЧЁТЧИК СООБЩЕНИЙ ====================
-def add_message(chat_id, uid):
-    today = today_str()
-    with MESSAGES_LOCK:
-        if chat_id not in MESSAGES:
-            MESSAGES[chat_id] = {}
-        if uid not in MESSAGES[chat_id]:
-            MESSAGES[chat_id][uid] = {}
-        MESSAGES[chat_id][uid][today] = MESSAGES[chat_id][uid].get(today, 0) + 1
+ROLE_EMOJI = {
+    ROLE_MAFIA: '🔫', ROLE_DON: '👑', ROLE_COMISSAR: '🕵️',
+    ROLE_DOCTOR: '💊', ROLE_MANIAC: '🔪', ROLE_ZELENSKY: '🇺🇦',
+    ROLE_CIVIL: '👤',
+}
 
-
-def count_for_period(chat_id, uid, days):
-    """days=None — всё время, days=N — последние N дней."""
-    with MESSAGES_LOCK:
-        user_days = MESSAGES.get(chat_id, {}).get(uid, {})
-        if not user_days:
-            return 0
-        if days is None:
-            return sum(user_days.values())
-        cutoff = (datetime.now() - timedelta(days=days - 1)).strftime('%Y-%m-%d')
-        return sum(c for d, c in user_days.items() if d >= cutoff)
-
-
-def get_top(chat_id, days, limit=30):
-    with MESSAGES_LOCK:
-        users = MESSAGES.get(chat_id, {})
-        result = []
-        for uid, days_data in users.items():
-            if days is None:
-                total = sum(days_data.values())
-            else:
-                cutoff = (datetime.now() - timedelta(days=days - 1)).strftime('%Y-%m-%d')
-                total = sum(c for d, c in days_data.items() if d >= cutoff)
-            if total > 0:
-                result.append((uid, total))
-    result.sort(key=lambda x: x[1], reverse=True)
-    return result[:limit]
-
-
-def get_user_rank(chat_id, uid, days):
-    top = get_top(chat_id, days, limit=999999)
-    for i, (u, _) in enumerate(top, 1):
-        if u == uid:
-            return i
-    return None
-
-
-def get_username(chat_id, uid):
-    try:
-        member = bot.get_chat_member(chat_id, uid)
-        return member.user.first_name or f'ID {uid}'
-    except:
-        return f'ID {uid}'
-
-
-# ==================== МУТ ====================
-def is_muted(chat_id, uid):
-    with MUTES_LOCK:
-        chat = MUTES.get(chat_id, {})
-        info = chat.get(uid)
-        if not info:
-            return False
-        if info.get('until', 0) <= time.time():
-            del chat[uid]
-            save_mutes()
-            return False
-        return True
-
-
-def get_mute_left(chat_id, uid):
-    with MUTES_LOCK:
-        info = MUTES.get(chat_id, {}).get(uid)
-        if not info:
-            return 0
-        return max(0, int(info.get('until', 0) - time.time()))
-
-
-def add_mute(chat_id, uid, minutes, by_name, reason):
-    until = time.time() + minutes * 60
-    with MUTES_LOCK:
-        if chat_id not in MUTES:
-            MUTES[chat_id] = {}
-        MUTES[chat_id][uid] = {
-            'until': until,
-            'minutes': minutes,
-            'by': by_name,
-            'reason': reason,
-        }
-    save_mutes()
-    return until
-
-
-def remove_mute(chat_id, uid):
-    with MUTES_LOCK:
-        if chat_id in MUTES and uid in MUTES[chat_id]:
-            del MUTES[chat_id][uid]
-            save_mutes()
-            return True
-    return False
-
-
-def apply_telegram_mute(chat_id, uid, minutes):
-    try:
-        until = int(time.time()) + minutes * 60
-        bot.restrict_chat_member(
-            chat_id, uid,
-            permissions=types.ChatPermissions(
-                can_send_messages=False,
-                can_send_media_messages=False,
-                can_send_other_messages=False,
-                can_add_web_page_previews=False,
-            ),
-            until_date=until
-        )
-        return True
-    except Exception as e:
-        print('restrict err:', e)
-        return False
-
-
-def remove_telegram_mute(chat_id, uid):
-    try:
-        bot.restrict_chat_member(
-            chat_id, uid,
-            permissions=types.ChatPermissions(
-                can_send_messages=True,
-                can_send_media_messages=True,
-                can_send_other_messages=True,
-                can_add_web_page_previews=True,
-            )
-        )
-        return True
-    except Exception as e:
-        print('unrestrict err:', e)
-        return False
-
-
-def is_group_admin(chat_id, uid):
-    try:
-        member = bot.get_chat_member(chat_id, uid)
-        return member.status in ('administrator', 'creator')
-    except:
-        return False
-
-
-# ==================== АВТО-РАЗМУТ ====================
-def auto_unmute_loop():
-    while True:
-        try:
-            now = time.time()
-            to_unmute = []
-            with MUTES_LOCK:
-                for chat_id, users in list(MUTES.items()):
-                    for uid, info in list(users.items()):
-                        if info.get('until', 0) <= now:
-                            to_unmute.append((chat_id, uid))
-                            del users[uid]
-            for chat_id, uid in to_unmute:
-                remove_telegram_mute(chat_id, uid)
-                try:
-                    bot.send_message(chat_id, '✅ Мут снят автоматически.')
-                except:
-                    pass
-            if to_unmute:
-                save_mutes()
-        except Exception as e:
-            print('auto_unmute err:', e)
-        time.sleep(30)
-
-
-threading.Thread(target=auto_unmute_loop, daemon=True).start()
-
-
-# ==================== СЧЁТЧИК — ОБРАБОТЧИК ВСЕХ СООБЩЕНИЙ ====================
-@bot.message_handler(
-    content_types=['text', 'photo', 'video', 'document', 'audio', 'voice',
-                   'sticker', 'animation', 'video_note', 'location', 'contact'],
-    func=lambda m: m.chat.type in ('group', 'supergroup')
-)
-def count_all_messages(m):
-    if m.from_user and not m.from_user.is_bot:
-        add_message(m.chat.id, m.from_user.id)
-
-
-# ==================== РП КОМАНДЫ ====================
-ACTIONS = {
-    'обнять': ['🤗 {a} обнял {b}', '💞 {a} крепко обнял {b}', '🫂 {a} заключил {b} в объятия'],
-    'погладить': ['✋ {a} погладил {b}', '🤲 {a} нежно погладил {b}', '😊 {a} потрепал по голове {b}'],
-    'поцеловать': ['💋 {a} поцеловал {b}', '😘 {a} чмокнул {b}', '💞 {a} страстно поцеловал {b}'],
-    'поблагодарить': ['🙏 {a} поблагодарил {b}', '💐 {a} сказал спасибо {b}', '😌 {a} искренне поблагодарил {b}'],
-    'улыбнуться': ['😊 {a} улыбнулся {b}', '😁 {a} широко улыбнулся {b}', '🙂 {a} мило улыбнулся {b}'],
-    'подмигнуть': ['😉 {a} подмигнул {b}', '😏 {a} игриво подмигнул {b}'],
-    'ударить': ['👊 {a} ударил {b}', '💥 {a} врезал {b}', '🥊 {a} заехал {b}'],
-    'убить': ['🔪 {a} убил {b}', '💀 {a} прикончил {b}', '⚰️ {a} отправил {b} на тот свет'],
-    'укусить': ['🦷 {a} укусил {b}', '😬 {a} больно укусил {b}', '🧛 {a} впился в {b}'],
-    'пнуть': ['🦵 {a} пнул {b}', '👟 {a} дал пинка {b}', '💢 {a} со всей силы пнул {b}'],
-    'шлёпнуть': ['✋ {a} шлёпнул {b}', '👋 {a} дал шлепок {b}'],
-    'кинуть тапок': ['🥿 {a} кинул тапок в {b}', '👟 {a} запустил тапок в {b}'],
-    'обозвать': ['😠 {a} обозвал {b}', '🤬 {a} наорал на {b}'],
-    'отсосать': ['👅 {a} отсосал у {b}', '😮 {a} сделал минет {b}'],
-    'трахнуть': ['🍆 {a} трахнул {b}', '🔥 {a} жёстко трахнул {b}', '💦 {a} отымел {b}'],
-    'выебать': ['🔥 {a} выебал {b}', '💥 {a} жёстко выебал {b}'],
-    'лизнуть': ['👅 {a} лизнул {b}', '😋 {a} облизал {b}'],
-    'ласкать': ['💆 {a} ласкает {b}', '🤲 {a} нежно ласкает {b}'],
-    'соблазнить': ['😏 {a} соблазнил {b}', '💋 {a} пытается соблазнить {b}'],
-    'раздеть': ['👕 {a} раздел {b}', '🔥 {a} сорвал одежду с {b}'],
-    'флиртовать': ['😉 {a} флиртует с {b}', '💞 {a} заигрывает с {b}'],
-    'жениться': ['💍 {a} женился на {b}', '💒 {a} сделал предложение {b}'],
-    'развестись': ['💔 {a} развёлся с {b}', '📄 {a} подал на развод с {b}'],
-    'дать пять': ['✋ {a} дал пять {b}', '🙌 {a} дал краба {b}'],
-    'дружить': ['🤝 {a} предложил дружбу {b}', '👬 {a} стал другом {b}'],
-    'поддержать': ['💪 {a} поддержал {b}', '🤗 {a} утешил {b}'],
-    'поздравить': ['🎉 {a} поздравил {b}', '🥳 {a} пожелал всего лучшего {b}'],
-    'накормить': ['🍕 {a} накормил {b}', '🍔 {a} угостил {b}'],
-    'напоить': ['🍺 {a} напоил {b}', '🥤 {a} дал выпить {b}'],
-    'украсть': ['🕵️ {a} украл что-то у {b}', '💰 {a} обокрал {b}'],
-    'кинуть снежок': ['❄️ {a} кинул снежок в {b}', '⛄ {a} закидал снегом {b}'],
-    'облить водой': ['💧 {a} облил водой {b}', '🌊 {a} окатил {b}'],
-    'загипнотизировать': ['🌀 {a} загипнотизировал {b}', '👁️ {a} вводит {b} в транс'],
-    'телепортировать': ['✨ {a} телепортировал {b}', '🌌 {a} переместил {b}'],
-    'превратить в жабу': ['🐸 {a} превратил {b} в жабу', '🪄 {a} заколдовал {b}'],
-    'укусить за ухо': ['👂 {a} укусил за ухо {b}', '😬 {a} прикусил ушко {b}'],
+ROLE_DESC = {
+    ROLE_MAFIA: 'Ночью вместе с мафией выбираешь жертву.',
+    ROLE_DON: 'Главный мафии. Комиссар видит тебя как мирного.',
+    ROLE_COMISSAR: 'Ночью проверяешь одного игрока — мафия или нет.',
+    ROLE_DOCTOR: 'Ночью лечишь одного игрока.',
+    ROLE_MANIAC: 'Ночью убиваешь. Побеждаешь, если остаёшься один.',
+    ROLE_ZELENSKY: 'Нейтрал. Ночью глушишь игрока — он пропустит следующую ночь. Одноразово — граната глушит третьего.',
+    ROLE_CIVIL: 'Ночью спишь. Днём ищешь мафию.',
 }
 
 
-def get_action_text(action, a, b):
-    variants = ACTIONS.get(action)
-    if not variants:
-        return None
-    return random.choice(variants).format(a=a, b=b)
+def get_roles_for_count(n):
+    if n == 4:
+        return [ROLE_MAFIA, ROLE_COMISSAR, ROLE_CIVIL, ROLE_CIVIL]
+    if n == 5:
+        return [ROLE_DON, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_CIVIL, ROLE_CIVIL]
+    if n == 6:
+        return [ROLE_DON, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_CIVIL]
+    if n == 7:
+        return [ROLE_DON, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_CIVIL, ROLE_CIVIL]
+    if n == 8:
+        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_CIVIL, ROLE_CIVIL]
+    if n == 9:
+        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_ZELENSKY] + [ROLE_CIVIL] * 2
+    if n == 10:
+        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_ZELENSKY] + [ROLE_CIVIL] * 3
+    if n == 11:
+        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_ZELENSKY] + [ROLE_CIVIL] * 3
+    if n == 12:
+        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_ZELENSKY] + [ROLE_CIVIL] * 4
+    if n == 13:
+        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_ZELENSKY] + [ROLE_CIVIL] * 5
+    if n == 14:
+        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_ZELENSKY] + [ROLE_CIVIL] * 5
+    if n == 15:
+        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_ZELENSKY] + [ROLE_CIVIL] * 6
+    if n == 16:
+        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_ZELENSKY] + [ROLE_CIVIL] * 7
+    if n == 17:
+        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_ZELENSKY] + [ROLE_CIVIL] * 8
+    if n == 18:
+        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_ZELENSKY] + [ROLE_CIVIL] * 8
+    if n == 19:
+        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_ZELENSKY] + [ROLE_CIVIL] * 9
+    return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_ZELENSKY] + [ROLE_CIVIL] * 10
+
+
+# ==================== ПРОФИЛИ ====================
+def load_profiles():
+    global PROFILES
+    if not os.path.exists(PROFILES_FILE):
+        PROFILES = {}
+        return
+    try:
+        with open(PROFILES_FILE, 'r', encoding='utf-8') as f:
+            PROFILES = json.load(f)
+    except:
+        PROFILES = {}
+
+
+def save_profiles():
+    try:
+        with open(PROFILES_FILE, 'w', encoding='utf-8') as f:
+            json.dump(PROFILES, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print('save_profiles err:', e)
+
+
+def get_profile(uid):
+    key = str(uid)
+    if key not in PROFILES:
+        PROFILES[key] = {
+            'diamonds': 0,
+            'shield': False,
+            'lucky': False,
+            'wins': 0,
+        }
+    return PROFILES[key]
+
+
+def add_diamonds(uid, amount):
+    with PROFILES_LOCK:
+        p = get_profile(uid)
+        p['diamonds'] = p.get('diamonds', 0) + amount
+        save_profiles()
+
+
+def buy_item(uid, item):
+    with PROFILES_LOCK:
+        p = get_profile(uid)
+        if item == 'shield':
+            if p.get('shield'):
+                return 'already'
+            if p.get('diamonds', 0) < SHIELD_PRICE:
+                return 'no_money'
+            p['diamonds'] -= SHIELD_PRICE
+            p['shield'] = True
+            save_profiles()
+            return 'ok'
+        if item == 'lucky':
+            if p.get('lucky'):
+                return 'already'
+            if p.get('diamonds', 0) < LUCKY_PRICE:
+                return 'no_money'
+            p['diamonds'] -= LUCKY_PRICE
+            p['lucky'] = True
+            save_profiles()
+            return 'ok'
+    return 'error'
+
+
+load_profiles()
+
+
+# ==================== ИГРА ====================
+class Game:
+    def __init__(self, chat_id, host_id):
+        self.chat_id = chat_id
+        self.host_id = host_id
+        self.players = {}
+        self.order = []
+        self.phase = 'lobby'
+        self.lobby_end = time.time() + LOBBY_TIME
+        self.night_killed_by_mafia = None
+        self.night_killed_by_maniac = None
+        self.night_saved = None
+        self.night_muted = {}
+        self.zelensky_used_grenade = False
+        self.votes = {}
+        self.msg_id = None
+
+
+def get_game(chat_id):
+    return GAMES.get(chat_id)
+
+
+def alive_players(game):
+    return [uid for uid, p in game.players.items() if p['alive']]
+
+
+def alive_by_role(game, role):
+    return [uid for uid, p in game.players.items() if p['alive'] and p['role'] == role]
+
+
+def count_mafia(game):
+    return sum(1 for p in game.players.values() if p['alive'] and p['role'] in (ROLE_MAFIA, ROLE_DON))
+
+
+def count_maniac(game):
+    return sum(1 for p in game.players.values() if p['alive'] and p['role'] == ROLE_MANIAC)
+
+
+def count_civils(game):
+    return sum(1 for p in game.players.values()
+               if p['alive'] and p['role'] not in (ROLE_MAFIA, ROLE_DON, ROLE_MANIAC, ROLE_ZELENSKY))
 
 
 # ==================== /start ====================
@@ -362,17 +221,19 @@ def get_action_text(action, a, b):
 def cmd_start(m):
     kb = types.InlineKeyboardMarkup(row_width=1)
     kb.add(
-        types.InlineKeyboardButton('Как играть', callback_data='rp_how'),
-        types.InlineKeyboardButton('Правила РП', callback_data='rp_rules'),
-        types.InlineKeyboardButton('Конфиденциальность', callback_data='rp_privacy'),
-        types.InlineKeyboardButton('Список команд', callback_data='rp_cmds'),
+        types.InlineKeyboardButton('Как играть', callback_data='mm_how'),
+        types.InlineKeyboardButton('Все роли и способности', callback_data='mm_roles'),
+        types.InlineKeyboardButton('Правила', callback_data='mm_rules'),
+        types.InlineKeyboardButton('Конфиденциальность', callback_data='mm_privacy'),
+        types.InlineKeyboardButton('Магазин', callback_data='mm_shop'),
+        types.InlineKeyboardButton('Мои алмазы', callback_data='mm_balance'),
     )
     text = (
-        '💞 РП БОТ\n'
+        '🎭 МАФИЯ DARKGRAM\n'
         '━━━━━━━━━━━━━━━\n\n'
-        'Добро пожаловать!\n\n'
-        'Это бот для ролевых действий в чате.\n'
-        'Отвечай на сообщение и пиши команду.\n\n'
+        'Добро пожаловать в игру!\n\n'
+        'Это бот для игры в мафию в группах.\n'
+        'Побеждай — получай алмазы — покупай предметы.\n\n'
         '👇 Выбери раздел:'
     )
     bot.send_message(m.chat.id, text, reply_markup=kb)
@@ -384,29 +245,31 @@ def cmd_help(m):
 
 
 # ==================== РАЗДЕЛЫ ====================
-@bot.callback_query_handler(func=lambda c: c.data == 'rp_how')
+@bot.callback_query_handler(func=lambda c: c.data == 'mm_how')
 def cb_how(call):
     text = (
         '📖 КАК ИГРАТЬ\n'
         '━━━━━━━━━━━━━━━\n\n'
         '1️⃣ Добавь бота в группу\n\n'
-        '2️⃣ Ответь на сообщение человека\n\n'
-        '3️⃣ Напиши команду, например /обнять\n\n'
-        '4️⃣ Бот пришлёт красивое сообщение.\n\n'
+        '2️⃣ Напиши /mafia — начнётся набор (5 минут)\n\n'
+        f'3️⃣ Жми «Участвовать» (нужно {MIN_PLAYERS}–{MAX_PLAYERS} игроков)\n\n'
+        '4️⃣ Роли придут каждому в личку\n\n'
+        '5️⃣ Ночью роли действуют в личке\n\n'
+        '6️⃣ Днём все голосуют в группе\n\n'
+        '7️⃣ Игра идёт, пока одна сторона не победит\n\n'
         '━━━━━━━━━━━━━━━\n'
-        '📊 СТАТИСТИКА\n\n'
-        '/stats — твоя статистика\n'
-        '/top — топ за неделю\n'
-        '/top день — за сегодня\n'
-        '/top всё — за всё время\n'
-        '/top месяц — за месяц\n\n'
+        '🎯 ПОБЕДА:\n'
+        '• Мафия — если её ≥ остальных\n'
+        '• Город — если вся мафия мертва\n'
+        '• Маньяк — если остался один\n'
+        '• Зеленский — выжить до конца\n\n'
         '━━━━━━━━━━━━━━━\n'
-        '🚫 АНТИСПАМ\n\n'
-        f'Если отправить {SPAM_LIMIT} команд за '
-        f'{SPAM_WINDOW // 60} мин — автомут на {AUTO_MUTE_MINUTES} мин.'
+        '💎 АЛМАЗЫ:\n'
+        f'• +{WIN_REWARD} за победу\n'
+        '• Тратятся в магазине'
     )
     kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton('Назад', callback_data='rp_back'))
+    kb.add(types.InlineKeyboardButton('Назад', callback_data='mm_back'))
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
                               message_id=call.message.message_id, reply_markup=kb)
@@ -415,32 +278,91 @@ def cb_how(call):
     bot.answer_callback_query(call.id)
 
 
-@bot.callback_query_handler(func=lambda c: c.data == 'rp_rules')
+@bot.callback_query_handler(func=lambda c: c.data == 'mm_roles')
+def cb_roles(call):
+    text = (
+        '🎭 ВСЕ РОЛИ И СПОСОБНОСТИ\n'
+        '━━━━━━━━━━━━━━━\n\n'
+        '🔫 МАФИЯ\n'
+        'Ночью вместе с другими мафиози выбирает жертву. '
+        'Знает своих. Цель — убить всех мирных.\n\n'
+        '👑 ДОН\n'
+        'Главный мафии. Если комиссар проверит — увидит как мирного. '
+        'Ночью выбирает жертву вместе с мафией.\n\n'
+        '🕵️ КОМИССАР\n'
+        'Ночью проверяет одного игрока. '
+        'Узнаёт — мафия он или нет.\n\n'
+        '💊 ДОКТОР\n'
+        'Ночью лечит одного игрока. '
+        'Если мафия выбрала его — выживет.\n\n'
+        '🔪 МАНЬЯК\n'
+        'Нейтрал. Ночью убивает всех подряд. '
+        'Побеждает, если останется один.\n\n'
+        '🇺🇦 ЗЕЛЕНСКИЙ\n'
+        'Нейтрал. Ночью выбирает игрока и глушит его — '
+        'он пропускает следующую ночь (не может действовать).\n'
+        '⚠️ Одноразово: граната — глушит третьего игрока.\n\n'
+        '👤 МИРНЫЙ\n'
+        'Ночью спит. Днём ищет мафию и голосует.\n\n'
+        '━━━━━━━━━━━━━━━\n'
+        '🛒 ПРЕДМЕТЫ В МАГАЗИНЕ\n\n'
+        '🛡 ЩИТ — 100 💎\n'
+        'Спасает от убийства ночью. На 1 игру.\n\n'
+        '🍀 ВЕЗУНЧИК — 65 💎\n'
+        'Двойной голос днём (твой голос = 2).\n'
+        'После смерти (убили или казнили) — забираешь игрока с собой. На 1 игру.\n\n'
+        '━━━━━━━━━━━━━━━\n'
+        '🎯 УСЛОВИЯ ПОБЕДЫ\n'
+        '• 🎉 Мафия — если мафии ≥ остальных\n'
+        '• 🏆 Город — если вся мафия и маньяк мертвы\n'
+        '• 🔪 Маньяк — если остался один\n'
+        '• 🇺🇦 Зеленский — если дожил до конца'
+    )
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('Назад', callback_data='mm_back'))
+    try:
+        bot.edit_message_text(text, chat_id=call.message.chat.id,
+                              message_id=call.message.message_id, reply_markup=kb)
+    except:
+        bot.send_message(call.message.chat.id, text, reply_markup=kb)
+    bot.answer_callback_query(call.id)
+
+
+@bot.callback_query_handler(func=lambda c: c.data == 'mm_rules')
 def cb_rules(call):
     text = (
-        '📜 ПРАВИЛА РП\n'
+        '📜 ПРАВИЛА ИГРЫ\n'
         '━━━━━━━━━━━━━━━\n\n'
         '✅ МОЖНО:\n'
-        '• Делать действия по согласию\n'
-        '• Использовать любые команды\n'
-        '• Отвечать взаимно\n\n'
+        '• Играть честно\n'
+        '• Обсуждать в чате днём\n'
+        '• Использовать все роли\n\n'
         '❌ НЕЛЬЗЯ:\n'
+        '• Раскрывать свою роль\n'
         '• Спамить командами\n'
-        '• Использовать 18+ без согласия\n'
         '• Оскорблять всерьёз\n'
-        '• Преследовать человека\n\n'
+        '• Играть с нескольких аккаунтов\n\n'
         '━━━━━━━━━━━━━━━\n'
-        '⚠️ 18+\n'
-        '• Только по обоюдному согласию\n'
-        '• Запрещено с несовершеннолетними\n\n'
+        '⚙️ ПО ФАЗАМ:\n\n'
+        '🌙 НОЧЬ (60 сек)\n'
+        '• Мафия выбирает жертву\n'
+        '• Комиссар проверяет\n'
+        '• Доктор лечит\n'
+        '• Маньяк убивает\n'
+        '• Зеленский глушит\n\n'
+        '☀️ ДЕНЬ (90 сек + 60 сек голосование)\n'
+        '• Обсуждаете\n'
+        '• Голосуете кнопками\n'
+        '• Большинство = казнь\n\n'
         '━━━━━━━━━━━━━━━\n'
-        '🚫 СПАМ\n'
-        f'• {SPAM_LIMIT} команд за {SPAM_WINDOW // 60} мин = '
-        f'автомут {AUTO_MUTE_MINUTES} мин\n'
-        '• Размут автоматический'
+        '⚠️ ВАЖНО:\n'
+        '• Игра только в группе\n'
+        f'• Нужно {MIN_PLAYERS}–{MAX_PLAYERS} игроков\n'
+        '• Набор 5 минут\n'
+        '• Если меньше 4 — отмена'
     )
     kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton('Назад', callback_data='rp_back'))
+    kb.add(types.InlineKeyboardButton('Назад', callback_data='mm_back'))
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
                               message_id=call.message.message_id, reply_markup=kb)
@@ -449,24 +371,35 @@ def cb_rules(call):
     bot.answer_callback_query(call.id)
 
 
-@bot.callback_query_handler(func=lambda c: c.data == 'rp_privacy')
+@bot.callback_query_handler(func=lambda c: c.data == 'mm_privacy')
 def cb_privacy(call):
     text = (
         '🔒 КОНФИДЕНЦИАЛЬНОСТЬ\n'
         '━━━━━━━━━━━━━━━\n\n'
         '❌ Бот НЕ:\n'
         '• Не читает личные сообщения\n'
-        '• Не собирает данные\n'
-        '• Не сохраняет текст сообщений\n'
-        '• Не передаёт третьим лицам\n\n'
+        '• Не собирает личные данные\n'
+        '• Не сохраняет переписку\n'
+        '• Не передаёт данные третьим лицам\n'
+        '• Не рекламирует\n\n'
         '✅ Бот хранит:\n'
-        '• Имя и ID (для мута/статистики)\n'
-        '• Количество сообщений (не текст)\n'
-        '• Активные муты\n\n'
-        'Данные хранятся в файлах бота.'
+        '• Имя и ID (для отображения)\n'
+        '• Алмазы (игровая валюта)\n'
+        '• Купленные предметы (щит, везунчик)\n'
+        '• Количество побед\n\n'
+        '━━━━━━━━━━━━━━━\n'
+        '⚠️ Бот НЕ видит:\n'
+        '• Твои личные переписки\n'
+        '• Сообщения в других чатах\n'
+        '• Голосовые, фото, видео\n\n'
+        'Бот реагирует ТОЛЬКО на команды, '
+        'которые ты пишешь сам.\n\n'
+        '━━━━━━━━━━━━━━━\n'
+        '📁 Данные хранятся в файле бота.\n'
+        'В любой момент можно запросить удаление.'
     )
     kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton('Назад', callback_data='rp_back'))
+    kb.add(types.InlineKeyboardButton('Назад', callback_data='mm_back'))
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
                               message_id=call.message.message_id, reply_markup=kb)
@@ -475,44 +408,26 @@ def cb_privacy(call):
     bot.answer_callback_query(call.id)
 
 
-@bot.callback_query_handler(func=lambda c: c.data == 'rp_cmds')
-def cb_cmds(call):
+@bot.callback_query_handler(func=lambda c: c.data == 'mm_shop')
+def cb_shop_btn(call):
+    uid = call.from_user.id
+    p = get_profile(uid)
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    kb.add(types.InlineKeyboardButton(f'🛡 Щит — {SHIELD_PRICE} 💎', callback_data='shop_shield'))
+    kb.add(types.InlineKeyboardButton(f'🍀 Везунчик — {LUCKY_PRICE} 💎', callback_data='shop_lucky'))
+    kb.add(types.InlineKeyboardButton('Назад', callback_data='mm_back'))
     text = (
-        '📋 СПИСОК КОМАНД\n'
-        '━━━━━━━━━━━━━━━\n\n'
-        '💞 РОМАНТИКА:\n'
-        '/обнять /погладить /поцеловать\n'
-        '/флиртовать /жениться /развестись\n\n'
-        '🤝 ДРУЖБА:\n'
-        '/поблагодарить /дать пять /дружить\n'
-        '/поддержать /поздравить\n\n'
-        '😈 АГРЕССИЯ:\n'
-        '/ударить /убить /укусить /пнуть\n'
-        '/шлёпнуть /кинуть тапок /обозвать\n\n'
-        '🔥 18+:\n'
-        '/отсосать /трахнуть /выебать\n'
-        '/лизнуть /ласкать /соблазнить /раздеть\n\n'
-        '🎲 ЗАБАВНЫЕ:\n'
-        '/накормить /напоить /украсть\n'
-        '/кинуть снежок /облить водой\n'
-        '/загипнотизировать /телепортировать\n'
-        '/превратить в жабу /укусить за ухо\n\n'
-        '📊 СТАТИСТИКА:\n'
-        '/stats — моя статистика\n'
-        '/stats @ник — статистика игрока\n'
-        '/top — топ-30 за неделю\n'
-        '/top день — за сегодня\n'
-        '/top всё — за всё время\n'
-        '/top месяц — за месяц\n\n'
-        '🛡 МОДЕРАЦИЯ (админы):\n'
-        '/mute N — мут на N минут (1–1000)\n'
-        '/unmute — снять мут\n'
-        '/mutelist — список замученных\n'
-        '/ban — забанить\n'
-        '/unban ID — разбанить\n'
+        '🛒 МАГАЗИН\n━━━━━━━━━━━━━━━\n\n'
+        f'💎 Твои алмазы: {p.get("diamonds", 0)}\n\n'
+        f'🛡 Щит — {SHIELD_PRICE} 💎\n'
+        'Спасает от убийства. На 1 игру.\n\n'
+        f'🍀 Везунчик — {LUCKY_PRICE} 💎\n'
+        'Двойной голос + забираешь игрока после смерти. На 1 игру.\n\n'
+        f'Статус:\n'
+        f'Щит: {"✅" if p.get("shield") else "❌"}\n'
+        f'Везунчик: {"✅" if p.get("lucky") else "❌"}\n'
+        f'Побед: {p.get("wins", 0)}'
     )
-    kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton('Назад', callback_data='rp_back'))
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
                               message_id=call.message.message_id, reply_markup=kb)
@@ -521,16 +436,38 @@ def cb_cmds(call):
     bot.answer_callback_query(call.id)
 
 
-@bot.callback_query_handler(func=lambda c: c.data == 'rp_back')
+@bot.callback_query_handler(func=lambda c: c.data == 'mm_balance')
+def cb_balance_btn(call):
+    p = get_profile(call.from_user.id)
+    text = (
+        '💎 МОИ АЛМАЗЫ\n━━━━━━━━━━━━━━━\n\n'
+        f'💎 Алмазов: {p.get("diamonds", 0)}\n'
+        f'🛡 Щит: {"✅" if p.get("shield") else "❌"}\n'
+        f'🍀 Везунчик: {"✅" if p.get("lucky") else "❌"}\n'
+        f'🏆 Побед: {p.get("wins", 0)}'
+    )
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('Назад', callback_data='mm_back'))
+    try:
+        bot.edit_message_text(text, chat_id=call.message.chat.id,
+                              message_id=call.message.message_id, reply_markup=kb)
+    except:
+        bot.send_message(call.message.chat.id, text, reply_markup=kb)
+    bot.answer_callback_query(call.id)
+
+
+@bot.callback_query_handler(func=lambda c: c.data == 'mm_back')
 def cb_back(call):
     kb = types.InlineKeyboardMarkup(row_width=1)
     kb.add(
-        types.InlineKeyboardButton('Как играть', callback_data='rp_how'),
-        types.InlineKeyboardButton('Правила РП', callback_data='rp_rules'),
-        types.InlineKeyboardButton('Конфиденциальность', callback_data='rp_privacy'),
-        types.InlineKeyboardButton('Список команд', callback_data='rp_cmds'),
+        types.InlineKeyboardButton('Как играть', callback_data='mm_how'),
+        types.InlineKeyboardButton('Все роли и способности', callback_data='mm_roles'),
+        types.InlineKeyboardButton('Правила', callback_data='mm_rules'),
+        types.InlineKeyboardButton('Конфиденциальность', callback_data='mm_privacy'),
+        types.InlineKeyboardButton('Магазин', callback_data='mm_shop'),
+        types.InlineKeyboardButton('Мои алмазы', callback_data='mm_balance'),
     )
-    text = '💞 РП БОТ\n━━━━━━━━━━━━━━━\n\n👇 Выбери раздел:'
+    text = '🎭 МАФИЯ DARKGRAM\n━━━━━━━━━━━━━━━\n\n👇 Выбери раздел:'
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
                               message_id=call.message.message_id, reply_markup=kb)
@@ -539,321 +476,664 @@ def cb_back(call):
     bot.answer_callback_query(call.id)
 
 
-# ==================== СТАТИСТИКА ====================
-@bot.message_handler(commands=['stats'])
-def cmd_stats(m):
+# ==================== ЛОББИ ====================
+@bot.message_handler(commands=['mafia'])
+def cmd_mafia(m):
+    chat_id = m.chat.id
     if m.chat.type == 'private':
         bot.reply_to(m, 'Только в группе.')
         return
+    if chat_id in GAMES:
+        bot.reply_to(m, 'Игра уже идёт.')
+        return
 
-    parts = m.text.split()
-    if len(parts) >= 2 and parts[1].startswith('@'):
-        target_uname = parts[1][1:].lower()
-        target_uid = None
-        target_name = None
-        try:
-            with MESSAGES_LOCK:
-                for uid in MESSAGES.get(m.chat.id, {}).keys():
-                    try:
-                        member = bot.get_chat_member(m.chat.id, uid)
-                        if member.user.username and member.user.username.lower() == target_uname:
-                            target_uid = uid
-                            target_name = member.user.first_name
-                            break
-                    except:
-                        continue
-        except:
-            pass
-        if not target_uid:
-            bot.reply_to(m, 'Игрок не найден в статистике.')
-            return
-        uid = target_uid
-        name = target_name
-    else:
-        uid = m.from_user.id
-        name = m.from_user.first_name
+    game = Game(chat_id, m.from_user.id)
+    GAMES[chat_id] = game
 
-    total = count_for_period(m.chat.id, uid, None)
-    today = count_for_period(m.chat.id, uid, 1)
-    week = count_for_period(m.chat.id, uid, 7)
-    month = count_for_period(m.chat.id, uid, 30)
-
-    rank_week = get_user_rank(m.chat.id, uid, 7)
-    rank_all = get_user_rank(m.chat.id, uid, None)
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('Участвовать', callback_data='mafia_join'))
 
     text = (
-        f'📊 СТАТИСТИКА: {name}\n'
-        f'━━━━━━━━━━━━━━━\n\n'
-        f'📅 Сегодня: {today}\n'
-        f'📆 За неделю: {week}\n'
-        f'🗓 За месяц: {month}\n'
-        f'📈 Всего: {total}\n\n'
-        f'🏆 Место за неделю: {rank_week or "—"}\n'
-        f'🏆 Место за всё время: {rank_all or "—"}'
+        '🎭 МАФИЯ\n━━━━━━━━━━━━━━━\n\n'
+        f'Для начала игры {MIN_PLAYERS} игрока\n'
+        f'Макс {MAX_PLAYERS} игроков\n\n'
+        f'Время на сбор: 5 минут\n\n'
+        f'Сейчас: 0/{MAX_PLAYERS}'
     )
-    bot.reply_to(m, text)
+    msg = bot.send_message(chat_id, text, reply_markup=kb)
+    game.msg_id = msg.message_id
+
+    def lobby_watch():
+        while chat_id in GAMES:
+            g = GAMES.get(chat_id)
+            if not g or g.phase != 'lobby':
+                return
+            if time.time() >= g.lobby_end:
+                start_game(chat_id)
+                return
+            time.sleep(2)
+
+    threading.Thread(target=lobby_watch, daemon=True).start()
 
 
-@bot.message_handler(commands=['top'])
-def cmd_top(m):
-    if m.chat.type == 'private':
-        bot.reply_to(m, 'Только в группе.')
+@bot.callback_query_handler(func=lambda c: c.data == 'mafia_join')
+def cb_join(call):
+    chat_id = call.message.chat.id
+    game = get_game(chat_id)
+    if not game or game.phase != 'lobby':
+        bot.answer_callback_query(call.id, 'Набор закрыт')
+        return
+    uid = call.from_user.id
+    if uid in game.players:
+        bot.answer_callback_query(call.id, 'Ты уже в игре')
+        return
+    if len(game.players) >= MAX_PLAYERS:
+        bot.answer_callback_query(call.id, 'Мест нет')
         return
 
-    parts = m.text.split(maxsplit=1)
-    arg = parts[1].lower() if len(parts) > 1 else ''
+    name = call.from_user.first_name or 'Игрок'
+    game.players[uid] = {'name': name, 'role': None, 'alive': True}
+    game.order.append(uid)
 
-    if arg in ('день', 'day', 'today'):
-        days = 1
-        title = 'ЗА СЕГОДНЯ'
-    elif arg in ('неделя', 'week', '7'):
-        days = 7
-        title = 'ЗА НЕДЕЛЮ'
-    elif arg in ('месяц', 'month', '30'):
-        days = 30
-        title = 'ЗА МЕСЯЦ'
-    elif arg in ('всё', 'все', 'all', 'всего'):
-        days = None
-        title = 'ЗА ВСЁ ВРЕМЯ'
-    else:
-        days = 7
-        title = 'ЗА НЕДЕЛЮ'
+    text = (
+        '🎭 МАФИЯ\n━━━━━━━━━━━━━━━\n\n'
+        f'Для начала игры {MIN_PLAYERS} игрока\n'
+        f'Макс {MAX_PLAYERS} игроков\n\n'
+        f'Время на сбор: 5 минут\n\n'
+        f'Сейчас: {len(game.players)}/{MAX_PLAYERS}'
+    )
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('Участвовать', callback_data='mafia_join'))
+    try:
+        bot.edit_message_text(text, chat_id=chat_id, message_id=game.msg_id, reply_markup=kb)
+    except:
+        pass
+    bot.answer_callback_query(call.id, 'Ты в игре')
 
-    top = get_top(m.chat.id, days, limit=30)
+    if len(game.players) >= MAX_PLAYERS:
+        start_game(chat_id)
 
-    if not top:
-        bot.reply_to(m, 'Пока нет данных.')
+
+def start_game(chat_id):
+    game = get_game(chat_id)
+    if not game or game.phase != 'lobby':
+        return
+    n = len(game.players)
+    if n == 0:
+        bot.send_message(chat_id, '❌ Никто не зашёл. Игра отменена.')
+        GAMES.pop(chat_id, None)
+        return
+    if n < MIN_PLAYERS:
+        bot.send_message(chat_id, f'❌ Мало игроков ({n}/{MIN_PLAYERS}). Игра отменена.')
+        GAMES.pop(chat_id, None)
         return
 
-    text = f'🏆 ТОП-30 {title}\n━━━━━━━━━━━━━━━\n\n'
-    medals = {1: '🥇', 2: '🥈', 3: '🥉'}
-    for i, (uid, count) in enumerate(top, 1):
-        name = get_username(m.chat.id, uid)
-        prefix = medals.get(i, f'{i}.')
-        text += f'{prefix} {name} — {count}\n'
+    roles = get_roles_for_count(n)
+    random.shuffle(roles)
+    for i, uid in enumerate(game.order):
+        game.players[uid]['role'] = roles[i]
 
-    text += f'\n📊 Показаны топ-30'
-    bot.reply_to(m, text)
+    game.phase = 'night'
+    bot.send_message(chat_id,
+        f'🎭 Игра началась!\nИгроков: {n}\n\n🌙 НОЧЬ. {NIGHT_TIME} секунд.')
 
-
-# ==================== АНТИСПАМ ====================
-def check_spam(uid):
-    now = time.time()
-    if uid not in SPAM_TRACKER:
-        SPAM_TRACKER[uid] = []
-    SPAM_TRACKER[uid] = [t for t in SPAM_TRACKER[uid] if now - t < SPAM_WINDOW]
-    SPAM_TRACKER[uid].append(now)
-    return len(SPAM_TRACKER[uid]) >= SPAM_LIMIT
-
-
-# ==================== ОБРАБОТЧИК КОМАНД ====================
-@bot.message_handler(func=lambda m: m.text and m.text.startswith('/'))
-def handle_command(m):
-    text = m.text.strip()
-    if not text or len(text) < 2:
-        return
-
-    action = text[1:].split()[0].lower()
-
-    if action in ('start', 'help', 'stats', 'top'):
-        return
-
-    if action in ('mute', 'unmute', 'mutelist', 'ban', 'unban'):
-        handle_moderation(m, action)
-        return
-
-    if action not in ACTIONS:
-        return
-
-    if m.chat.type == 'private':
-        bot.reply_to(m, 'Эта команда работает только в группе.')
-        return
-
-    if is_muted(m.chat.id, m.from_user.id):
-        left = get_mute_left(m.chat.id, m.from_user.id)
+    for uid, p in game.players.items():
         try:
-            bot.delete_message(m.chat.id, m.message_id)
+            prof = get_profile(uid)
+            extras = []
+            if prof.get('shield'):
+                extras.append('🛡 Щит активен')
+            if prof.get('lucky'):
+                extras.append('🍀 Везунчик активен')
+
+            text = f'{ROLE_EMOJI[p["role"]]} Твоя роль: {p["role"]}\n\n{ROLE_DESC[p["role"]]}\n\n'
+            if extras:
+                text += '\n'.join(extras) + '\n\n'
+            text += 'Игроки:\n'
+            for o, other in game.players.items():
+                if o != uid:
+                    text += f'• {other["name"]}\n'
+            bot.send_message(uid, text)
         except:
             pass
-        bot.send_message(m.chat.id,
-            f'🚫 {m.from_user.first_name} в муте. Осталось {left // 60} мин {left % 60} сек.')
+
+    start_night(chat_id)
+
+
+# ==================== НОЧЬ ====================
+def start_night(chat_id):
+    game = get_game(chat_id)
+    if not game:
         return
+    game.phase = 'night'
+    game.night_killed_by_mafia = None
+    game.night_killed_by_maniac = None
+    game.night_saved = None
+    game.votes = {}
 
-    if not m.reply_to_message:
-        bot.reply_to(m, '⚠️ Ответь на сообщение человека и напиши команду.')
-        return
+    muted_now = set(game.night_muted.keys())
 
-    target = m.reply_to_message.from_user
-    sender = m.from_user
+    for uid in alive_by_role(game, ROLE_MAFIA) + alive_by_role(game, ROLE_DON):
+        if uid not in muted_now:
+            send_night_action(uid, game, 'mafia')
+    for uid in alive_by_role(game, ROLE_COMISSAR):
+        if uid not in muted_now:
+            send_night_action(uid, game, 'comissar')
+    for uid in alive_by_role(game, ROLE_DOCTOR):
+        if uid not in muted_now:
+            send_night_action(uid, game, 'doctor')
+    for uid in alive_by_role(game, ROLE_MANIAC):
+        if uid not in muted_now:
+            send_night_action(uid, game, 'maniac')
+    for uid in alive_by_role(game, ROLE_ZELENSKY):
+        if uid not in muted_now:
+            send_zelensky_action(uid, game)
 
-    if target.id == sender.id:
-        bot.reply_to(m, '🤡 Нельзя это сделать с самим собой.')
-        return
+    for uid in muted_now:
+        if uid in game.players and game.players[uid]['alive']:
+            try:
+                bot.send_message(uid, '⚡ Ты оглушён и пропускаешь эту ночь.')
+            except:
+                pass
 
-    if target.id == bot.get_me().id:
-        bot.reply_to(m, '🤖 Нельзя это сделать с ботом.')
-        return
+    game.night_muted = {}
 
-    if check_spam(sender.id):
-        SPAM_TRACKER[sender.id] = []
-        add_mute(m.chat.id, sender.id, AUTO_MUTE_MINUTES,
-                 'Автомодерация', 'спам командами')
-        apply_telegram_mute(m.chat.id, sender.id, AUTO_MUTE_MINUTES)
-        bot.send_message(m.chat.id,
-            f'🚫 {sender.first_name} замучен на {AUTO_MUTE_MINUTES} минут.\n'
-            f'Причина: спам командами ({SPAM_LIMIT} за {SPAM_WINDOW // 60} мин)')
-        return
+    def night_watch():
+        time.sleep(NIGHT_TIME)
+        g = get_game(chat_id)
+        if g and g.phase == 'night':
+            resolve_night(chat_id)
 
-    a_name = sender.first_name or 'Кто-то'
-    b_name = target.first_name or 'Кто-то'
-    result = get_action_text(action, a_name, b_name)
-    if not result:
-        return
+    threading.Thread(target=night_watch, daemon=True).start()
 
+
+def send_night_action(uid, game, action):
     try:
-        bot.reply_to(m, result, reply_to_message_id=m.reply_to_message.message_id)
+        targets = []
+        if action == 'mafia':
+            for o, p in game.players.items():
+                if p['alive'] and p['role'] not in (ROLE_MAFIA, ROLE_DON):
+                    targets.append(o)
+            title = '🔫 Кого убить?'
+        elif action == 'comissar':
+            for o, p in game.players.items():
+                if p['alive'] and o != uid:
+                    targets.append(o)
+            title = '🕵️ Кого проверить?'
+        elif action == 'doctor':
+            for o, p in game.players.items():
+                if p['alive']:
+                    targets.append(o)
+            title = '💊 Кого лечить?'
+        elif action == 'maniac':
+            for o, p in game.players.items():
+                if p['alive'] and o != uid:
+                    targets.append(o)
+            title = '🔪 Кого убить?'
+        else:
+            return
+        if not targets:
+            return
+
+        kb = types.InlineKeyboardMarkup(row_width=2)
+        btns = [types.InlineKeyboardButton(game.players[t]['name'], callback_data=f'night_{action}_{t}') for t in targets]
+        kb.add(*btns)
+        bot.send_message(uid, f'{title}\n\n{NIGHT_TIME} секунд.', reply_markup=kb)
+    except Exception as e:
+        print('night err:', e)
+
+
+def send_zelensky_action(uid, game):
+    try:
+        targets = [o for o, p in game.players.items() if p['alive'] and o != uid]
+        if not targets:
+            return
+        kb = types.InlineKeyboardMarkup(row_width=2)
+        btns = [types.InlineKeyboardButton(game.players[t]['name'], callback_data=f'night_mute_{t}') for t in targets]
+        kb.add(*btns)
+        if not game.zelensky_used_grenade:
+            kb.add(types.InlineKeyboardButton('💣 Кинуть гранату (1 раз)', callback_data='zelensky_grenade'))
+        bot.send_message(uid,
+            f'🇺🇦 Зеленский: кого глушить?\nОн пропустит следующую ночь.\n\n{NIGHT_TIME} секунд.',
+            reply_markup=kb)
+    except Exception as e:
+        print('zelensky err:', e)
+
+
+@bot.callback_query_handler(func=lambda c: c.data == 'zelensky_grenade')
+def cb_zelensky_grenade(call):
+    uid = call.from_user.id
+    game = None
+    for cid, g in GAMES.items():
+        if uid in g.players:
+            game = g
+            break
+    if not game or game.phase != 'night':
+        bot.answer_callback_query(call.id, 'Сейчас не ночь')
+        return
+    if game.zelensky_used_grenade:
+        bot.answer_callback_query(call.id, 'Граната использована')
+        return
+    targets = [o for o, p in game.players.items() if p['alive'] and o != uid]
+    kb = types.InlineKeyboardMarkup(row_width=2)
+    btns = [types.InlineKeyboardButton(game.players[t]['name'], callback_data=f'night_grenade_{t}') for t in targets]
+    kb.add(*btns)
+    bot.answer_callback_query(call.id)
+    bot.send_message(uid, '💣 Кого оглушить гранатой?', reply_markup=kb)
+
+
+@bot.callback_query_handler(func=lambda c: c.data.startswith('night_'))
+def cb_night(call):
+    parts = call.data.split('_')
+    if len(parts) != 3:
+        return
+    action = parts[1]
+    target_id = int(parts[2])
+    uid = call.from_user.id
+
+    game = None
+    for cid, g in GAMES.items():
+        if uid in g.players:
+            game = g
+            break
+    if not game or game.phase != 'night':
+        bot.answer_callback_query(call.id, 'Сейчас не ночь')
+        return
+    if target_id not in game.players or not game.players[target_id]['alive']:
+        bot.answer_callback_query(call.id, 'Недоступно')
+        return
+
+    p = game.players[uid]
+    if action == 'mafia' and p['role'] not in (ROLE_MAFIA, ROLE_DON):
+        bot.answer_callback_query(call.id, 'Не твоя роль')
+        return
+    if action == 'comissar' and p['role'] != ROLE_COMISSAR:
+        bot.answer_callback_query(call.id, 'Не твоя роль')
+        return
+    if action == 'doctor' and p['role'] != ROLE_DOCTOR:
+        bot.answer_callback_query(call.id, 'Не твоя роль')
+        return
+    if action == 'maniac' and p['role'] != ROLE_MANIAC:
+        bot.answer_callback_query(call.id, 'Не твоя роль')
+        return
+    if action == 'mute' and p['role'] != ROLE_ZELENSKY:
+        bot.answer_callback_query(call.id, 'Не твоя роль')
+        return
+    if action == 'grenade' and p['role'] != ROLE_ZELENSKY:
+        bot.answer_callback_query(call.id, 'Не твоя роль')
+        return
+
+    if action == 'mafia':
+        game.night_killed_by_mafia = target_id
+    elif action == 'maniac':
+        game.night_killed_by_maniac = target_id
+    elif action == 'doctor':
+        game.night_saved = target_id
+    elif action == 'mute':
+        game.night_muted[target_id] = True
+        bot.answer_callback_query(call.id, f'Заглушён: {game.players[target_id]["name"]}')
+        try:
+            bot.edit_message_text(f'⚡ Заглушён: {game.players[target_id]["name"]}',
+                                  chat_id=uid, message_id=call.message.message_id)
+        except:
+            pass
+        return
+    elif action == 'grenade':
+        game.night_muted[target_id] = True
+        game.zelensky_used_grenade = True
+        bot.answer_callback_query(call.id, f'💣 Граната: {game.players[target_id]["name"]}')
+        try:
+            bot.edit_message_text(f'💣 Оглушён: {game.players[target_id]["name"]}',
+                                  chat_id=uid, message_id=call.message.message_id)
+        except:
+            pass
+        return
+    elif action == 'comissar':
+        tr = game.players[target_id]['role']
+        is_mafia = tr in (ROLE_MAFIA, ROLE_DON)
+        if tr == ROLE_DON:
+            is_mafia = False
+        answer = '🔫 Мафия!' if is_mafia else '👤 Мирный'
+        bot.answer_callback_query(call.id, answer, show_alert=True)
+        try:
+            bot.edit_message_text(f'🕵️ {game.players[target_id]["name"]} — {answer}',
+                                  chat_id=uid, message_id=call.message.message_id)
+        except:
+            pass
+        return
+
+    bot.answer_callback_query(call.id, f'Выбрано: {game.players[target_id]["name"]}')
+    try:
+        bot.edit_message_text(f'Выбор: {game.players[target_id]["name"]}',
+                              chat_id=uid, message_id=call.message.message_id)
     except:
-        bot.send_message(m.chat.id, result)
+        pass
 
 
-# ==================== МОДЕРАЦИЯ ====================
-def handle_moderation(m, action):
-    if m.chat.type == 'private':
-        bot.reply_to(m, 'Модерация только в группах.')
+# ==================== УТРО ====================
+def resolve_night(chat_id):
+    game = get_game(chat_id)
+    if not game or game.phase != 'night':
         return
 
-    if not is_group_admin(m.chat.id, m.from_user.id):
-        bot.reply_to(m, '⛔ Только админы группы.')
-        return
+    killed = set()
+    if game.night_killed_by_mafia and game.night_killed_by_mafia != game.night_saved:
+        killed.add(game.night_killed_by_mafia)
+    if game.night_killed_by_maniac and game.night_killed_by_maniac != game.night_saved:
+        killed.add(game.night_killed_by_maniac)
 
-    if action == 'mutelist':
-        show_mutelist(m)
-        return
+    for uid in list(killed):
+        prof = get_profile(uid)
+        if prof.get('shield'):
+            prof['shield'] = False
+            with PROFILES_LOCK:
+                save_profiles()
+            killed.discard(uid)
+            try:
+                bot.send_message(uid, '🛡 Щит спас тебя от смерти!')
+            except:
+                pass
 
-    if action == 'unban':
-        parts = m.text.split()
-        if len(parts) < 2:
-            bot.reply_to(m, 'Использование: /unban ID')
-            return
+    for uid in killed:
+        if uid in game.players and game.players[uid]['alive']:
+            game.players[uid]['alive'] = False
+
+    if killed:
+        names = ', '.join(game.players[u]['name'] for u in killed if u in game.players)
+        bot.send_message(chat_id, f'☀️ Утро. Погибли: {names}')
+    else:
+        bot.send_message(chat_id, '☀️ Утро. Никто не погиб.')
+
+    for uid in killed:
+        prof = get_profile(uid)
+        if prof.get('lucky') and uid in game.players:
+            prof['lucky'] = False
+            with PROFILES_LOCK:
+                save_profiles()
+            ask_lucky_revenge(uid, game)
+
+    winner = check_win(game)
+    if winner:
+        end_game(chat_id, winner)
+        return
+    start_day(chat_id)
+
+
+def ask_lucky_revenge(uid, game):
+    targets = [o for o, p in game.players.items() if p['alive'] and o != uid]
+    if not targets:
+        return
+    kb = types.InlineKeyboardMarkup(row_width=2)
+    btns = [types.InlineKeyboardButton(game.players[t]['name'], callback_data=f'lucky_kill_{t}') for t in targets]
+    kb.add(*btns)
+    try:
+        bot.send_message(uid, '🍀 Ты погиб. Забрать кого-то с собой?', reply_markup=kb)
+    except:
+        pass
+
+
+@bot.callback_query_handler(func=lambda c: c.data.startswith('lucky_kill_'))
+def cb_lucky_kill(call):
+    uid = call.from_user.id
+    target_id = int(call.data.replace('lucky_kill_', ''))
+    game = None
+    for cid, g in GAMES.items():
+        if uid in g.players:
+            game = g
+            break
+    if not game:
+        return
+    if target_id not in game.players or not game.players[target_id]['alive']:
+        bot.answer_callback_query(call.id, 'Недоступно')
+        return
+    game.players[target_id]['alive'] = False
+    bot.answer_callback_query(call.id, 'Забрал с собой')
+    bot.send_message(game.chat_id,
+        f'💀 {game.players[uid]["name"]} забрал с собой {game.players[target_id]["name"]}!')
+    try:
+        bot.edit_message_text(f'Ты забрал {game.players[target_id]["name"]}',
+                              chat_id=uid, message_id=call.message.message_id)
+    except:
+        pass
+    winner = check_win(game)
+    if winner:
+        end_game(game.chat_id, winner)
+
+
+# ==================== ДЕНЬ ====================
+def start_day(chat_id):
+    game = get_game(chat_id)
+    if not game:
+        return
+    game.phase = 'day'
+    game.votes = {}
+    alive = alive_players(game)
+    bot.send_message(chat_id, f'🗣 ДЕНЬ. Живых: {len(alive)}\nОбсуждение {DAY_DISCUSS} сек.')
+
+    def day_watch():
+        time.sleep(DAY_DISCUSS)
+        g = get_game(chat_id)
+        if g and g.phase == 'day':
+            start_vote(chat_id)
+
+    threading.Thread(target=day_watch, daemon=True).start()
+
+
+def start_vote(chat_id):
+    game = get_game(chat_id)
+    if not game or game.phase != 'day':
+        return
+    game.votes = {}
+    alive = alive_players(game)
+    if not alive:
+        return
+    kb = types.InlineKeyboardMarkup(row_width=2)
+    btns = [types.InlineKeyboardButton(game.players[uid]['name'], callback_data=f'vote_{uid}') for uid in alive]
+    kb.add(*btns)
+    kb.add(types.InlineKeyboardButton('Пропустить', callback_data='vote_skip'))
+    bot.send_message(chat_id, f'🗳 ГОЛОСОВАНИЕ. {DAY_VOTE} секунд.', reply_markup=kb)
+
+    def vote_watch():
+        time.sleep(DAY_VOTE)
+        g = get_game(chat_id)
+        if g and g.phase == 'day':
+            resolve_vote(chat_id)
+
+    threading.Thread(target=vote_watch, daemon=True).start()
+
+
+@bot.callback_query_handler(func=lambda c: c.data.startswith('vote_'))
+def cb_vote(call):
+    uid = call.from_user.id
+    game = None
+    for cid, g in GAMES.items():
+        if uid in g.players and g.players[uid]['alive']:
+            game = g
+            break
+    if not game or game.phase != 'day':
+        bot.answer_callback_query(call.id, 'Сейчас не день')
+        return
+    if uid in game.votes:
+        bot.answer_callback_query(call.id, 'Уже голосовал')
+        return
+    val = call.data.replace('vote_', '')
+    if val == 'skip':
+        game.votes[uid] = 'skip'
+        bot.answer_callback_query(call.id, 'Пропущено')
+    else:
         try:
-            target_id = int(parts[1])
+            target = int(val)
         except:
-            bot.reply_to(m, 'ID должен быть числом.')
             return
-        try:
-            bot.unban_chat_member(m.chat.id, target_id)
-            bot.reply_to(m, f'✅ {target_id} разбанен.')
-        except Exception as e:
-            bot.reply_to(m, f'Ошибка: {e}')
+        if target not in game.players or not game.players[target]['alive']:
+            bot.answer_callback_query(call.id, 'Недоступно')
+            return
+        game.votes[uid] = target
+        bot.answer_callback_query(call.id, f'Голос за {game.players[target]["name"]}')
+
+
+def resolve_vote(chat_id):
+    game = get_game(chat_id)
+    if not game or game.phase != 'day':
         return
+    counts = {}
+    for v, t in game.votes.items():
+        if t == 'skip':
+            continue
+        prof = get_profile(v)
+        weight = 2 if prof.get('lucky') else 1
+        counts[t] = counts.get(t, 0) + weight
 
-    if action == 'unmute':
-        if not m.reply_to_message:
-            bot.reply_to(m, 'Ответь на сообщение.')
-            return
-        target = m.reply_to_message.from_user
-        remove_mute(m.chat.id, target.id)
-        remove_telegram_mute(m.chat.id, target.id)
-        bot.reply_to(m,
-            f'✅ {target.first_name} размучен.\n'
-            f'Админ: {m.from_user.first_name}')
+    if not counts:
+        bot.send_message(chat_id, 'Никто не голосовал. Ночь.')
+        start_night(chat_id)
         return
-
-    if action == 'ban':
-        if not m.reply_to_message:
-            bot.reply_to(m, 'Ответь на сообщение.')
-            return
-        target = m.reply_to_message.from_user
-        if is_group_admin(m.chat.id, target.id):
-            bot.reply_to(m, '⛔ Нельзя банить админов.')
-            return
-        try:
-            bot.ban_chat_member(m.chat.id, target.id)
-            bot.send_message(m.chat.id,
-                f'🚫 {target.first_name} забанен.\n'
-                f'Кем: {m.from_user.first_name}')
-        except Exception as e:
-            bot.reply_to(m, f'Ошибка: {e}')
+    max_v = max(counts.values())
+    leaders = [t for t, v in counts.items() if v == max_v]
+    if len(leaders) > 1:
+        names = ', '.join(game.players[u]['name'] for u in leaders)
+        bot.send_message(chat_id, f'Ничья: {names}. Ночь.')
+        start_night(chat_id)
         return
+    victim = leaders[0]
+    game.players[victim]['alive'] = False
+    bot.send_message(chat_id, f'⚖️ Казнён: {game.players[victim]["name"]}\nРоль: {game.players[victim]["role"]}')
 
-    if action == 'mute':
-        parts = m.text.split()
-        if len(parts) < 2:
-            bot.reply_to(m, 'Использование: /mute 10 (ответом)')
-            return
-        try:
-            minutes = int(parts[1])
-        except:
-            bot.reply_to(m, 'Число минут: /mute 10')
-            return
+    prof = get_profile(victim)
+    if prof.get('lucky'):
+        prof['lucky'] = False
+        with PROFILES_LOCK:
+            save_profiles()
+        ask_lucky_revenge(victim, game)
 
-        if minutes < 1 or minutes > 1000:
-            bot.reply_to(m, '⛔ Мут от 1 до 1000 минут.')
-            return
-
-        if not m.reply_to_message:
-            bot.reply_to(m, 'Ответь на сообщение.')
-            return
-
-        target = m.reply_to_message.from_user
-        if is_group_admin(m.chat.id, target.id):
-            bot.reply_to(m, '⛔ Нельзя мутить админов.')
-            return
-
-        reason = ' '.join(parts[2:]) if len(parts) > 2 else 'не указана'
-
-        add_mute(m.chat.id, target.id, minutes,
-                 m.from_user.first_name, reason)
-        apply_telegram_mute(m.chat.id, target.id, minutes)
-
-        bot.send_message(m.chat.id,
-            f'🚫 {target.first_name} замучен.\n'
-            f'Кем: {m.from_user.first_name}\n'
-            f'Срок: {minutes} мин\n'
-            f'Причина: {reason}')
-
-
-def show_mutelist(m):
-    chat_id = m.chat.id
-    now = time.time()
-    with MUTES_LOCK:
-        users = MUTES.get(chat_id, {})
-        active = []
-        for uid, info in users.items():
-            if info.get('until', 0) > now:
-                left = int(info['until'] - now)
-                active.append({
-                    'uid': uid,
-                    'left': left,
-                    'by': info.get('by', '—'),
-                    'reason': info.get('reason', '—'),
-                })
-
-    if not active:
-        bot.send_message(chat_id, '📋 Список замученных пуст.')
+    winner = check_win(game)
+    if winner:
+        end_game(chat_id, winner)
         return
+    start_night(chat_id)
 
-    active.sort(key=lambda x: x['left'], reverse=True)
 
-    text = f'📋 ЗАМУЧЕННЫЕ ({len(active)})\n━━━━━━━━━━━━━━━\n\n'
-    for i, u in enumerate(active, 1):
-        name = get_username(chat_id, u['uid'])
-        left_min = u['left'] // 60
-        left_sec = u['left'] % 60
-        text += (
-            f'{i}. {name}\n'
-            f'   Осталось: {left_min} мин {left_sec} сек\n'
-            f'   Кем: {u["by"]}\n'
-            f'   Причина: {u["reason"]}\n\n'
-        )
+# ==================== ПОБЕДА ====================
+def check_win(game):
+    mafia = count_mafia(game)
+    maniac = count_maniac(game)
+    civils = count_civils(game)
+    alive = len(alive_players(game))
 
-    if len(text) > 4000:
-        text = text[:4000] + '\n...'
+    if maniac >= 1 and alive == 1 and maniac == alive:
+        return 'maniac'
+    if mafia >= 1 and mafia >= civils + maniac:
+        return 'mafia'
+    if mafia == 0 and maniac == 0:
+        return 'city'
+    return None
+
+
+def end_game(chat_id, winner):
+    game = get_game(chat_id)
+    if not game:
+        return
+    game.phase = 'end'
+
+    if winner == 'mafia':
+        text = '🎉 ПОБЕДА МАФИИ!'
+        winners = [u for u, p in game.players.items() if p['role'] in (ROLE_MAFIA, ROLE_DON)]
+    elif winner == 'maniac':
+        text = '🔪 ПОБЕДА МАНЬЯКА!'
+        winners = [u for u, p in game.players.items() if p['role'] == ROLE_MANIAC]
+    else:
+        text = '🏆 ПОБЕДА ГОРОДА!'
+        winners = [u for u, p in game.players.items()
+                   if p['role'] not in (ROLE_MAFIA, ROLE_DON, ROLE_MANIAC)]
+
+    text += f'\n\n💎 +{WIN_REWARD} алмазов победителям.\n\nРоли:\n'
+    for uid, p in game.players.items():
+        status = 'жив' if p['alive'] else 'мёртв'
+        text += f'{ROLE_EMOJI[p["role"]]} {p["name"]} — {p["role"]} ({status})\n'
 
     bot.send_message(chat_id, text)
+
+    for uid in winners:
+        add_diamonds(uid, WIN_REWARD)
+        with PROFILES_LOCK:
+            p = get_profile(uid)
+            p['wins'] = p.get('wins', 0) + 1
+            save_profiles()
+        try:
+            bot.send_message(uid, f'💎 +{WIN_REWARD} алмазов за победу!')
+        except:
+            pass
+
+    GAMES.pop(chat_id, None)
+
+
+# ==================== МАГАЗИН ====================
+@bot.message_handler(commands=['shop'])
+def cmd_shop(m):
+    uid = m.from_user.id
+    p = get_profile(uid)
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    kb.add(types.InlineKeyboardButton(f'🛡 Щит — {SHIELD_PRICE} 💎', callback_data='shop_shield'))
+    kb.add(types.InlineKeyboardButton(f'🍀 Везунчик — {LUCKY_PRICE} 💎', callback_data='shop_lucky'))
+    text = (
+        '🛒 МАГАЗИН\n━━━━━━━━━━━━━━━\n\n'
+        f'💎 Твои алмазы: {p.get("diamonds", 0)}\n\n'
+        f'🛡 Щит — {SHIELD_PRICE} 💎\n'
+        'Спасает от убийства. На 1 игру.\n\n'
+        f'🍀 Везунчик — {LUCKY_PRICE} 💎\n'
+        'Двойной голос + забираешь игрока после смерти. На 1 игру.\n\n'
+        f'Статус:\n'
+        f'Щит: {"✅" if p.get("shield") else "❌"}\n'
+        f'Везунчик: {"✅" if p.get("lucky") else "❌"}\n'
+        f'Побед: {p.get("wins", 0)}'
+    )
+    bot.send_message(m.chat.id, text, reply_markup=kb)
+
+
+@bot.callback_query_handler(func=lambda c: c.data.startswith('shop_'))
+def cb_shop(call):
+    uid = call.from_user.id
+    item = call.data.replace('shop_', '')
+    result = buy_item(uid, item)
+
+    if result == 'ok':
+        names = {'shield': 'Щит', 'lucky': 'Везунчик'}
+        bot.answer_callback_query(call.id, f'✅ Куплено: {names.get(item)}')
+        p = get_profile(uid)
+        kb = types.InlineKeyboardMarkup(row_width=1)
+        kb.add(types.InlineKeyboardButton(f'🛡 Щит — {SHIELD_PRICE} 💎', callback_data='shop_shield'))
+        kb.add(types.InlineKeyboardButton(f'🍀 Везунчик — {LUCKY_PRICE} 💎', callback_data='shop_lucky'))
+        text = (
+            '🛒 МАГАЗИН\n━━━━━━━━━━━━━━━\n\n'
+            f'💎 Алмазы: {p.get("diamonds", 0)}\n\n'
+            f'Щит: {"✅" if p.get("shield") else "❌"}\n'
+            f'Везунчик: {"✅" if p.get("lucky") else "❌"}\n'
+            f'Побед: {p.get("wins", 0)}'
+        )
+        try:
+            bot.edit_message_text(text, chat_id=call.message.chat.id,
+                                  message_id=call.message.message_id, reply_markup=kb)
+        except:
+            pass
+    elif result == 'already':
+        bot.answer_callback_query(call.id, 'Уже куплено')
+    elif result == 'no_money':
+        bot.answer_callback_query(call.id, 'Недостаточно алмазов')
+    else:
+        bot.answer_callback_query(call.id, 'Ошибка')
+
+
+@bot.message_handler(commands=['balance'])
+def cmd_balance(m):
+    p = get_profile(m.from_user.id)
+    bot.send_message(m.chat.id,
+        f'💎 Алмазов: {p.get("diamonds", 0)}\n'
+        f'🛡 Щит: {"✅" if p.get("shield") else "❌"}\n'
+        f'🍀 Везунчик: {"✅" if p.get("lucky") else "❌"}\n'
+        f'🏆 Побед: {p.get("wins", 0)}')
 
 
 # ==================== ЗАПУСК ====================
 if __name__ == '__main__':
-    print('RP bot started')
+    print('Mafia bot started')
     bot.infinity_polling(timeout=30, long_polling_timeout=30)
