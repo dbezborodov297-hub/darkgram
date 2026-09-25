@@ -2,6 +2,7 @@ import telebot
 import time
 import threading
 import random
+import json
 import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from telebot import types
@@ -9,16 +10,55 @@ from telebot import types
 # ==================== НАСТРОЙКИ ====================
 TOKEN = '8514412667:AAHvjk1LlwTsozk2ijnUZS96_yDkbIg9Fco'
 
-MIN_PLAYERS = 4
-MAX_PLAYERS = 15
-LOBBY_TIME = 5 * 60
-NIGHT_TIME = 60
-DAY_DISCUSS = 90
-DAY_VOTE = 60
+SPAM_LIMIT = 30          # команд за окно
+SPAM_WINDOW = 120        # окно в секундах (2 минуты)
+AUTO_MUTE_MINUTES = 5    # автомут на 5 минут
+MUTES_FILE = 'mutes.json'
 
 # ==================== БОТ ====================
 bot = telebot.TeleBot(TOKEN)
-GAMES = {}
+
+# Антиспам: uid -> [timestamps]
+SPAM_TRACKER = {}
+
+# Муты: chat_id -> {user_id: {'until': ts, 'by': name, 'reason': str}}
+MUTES = {}
+MUTES_LOCK = threading.Lock()
+
+
+# ==================== ХРАНИЛИЩЕ ====================
+def load_mutes():
+    global MUTES
+    if not os.path.exists(MUTES_FILE):
+        MUTES = {}
+        return
+    try:
+        with open(MUTES_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            MUTES = {}
+            for chat_id, users in data.items():
+                MUTES[int(chat_id)] = {}
+                for uid, info in users.items():
+                    MUTES[int(chat_id)][int(uid)] = info
+    except:
+        MUTES = {}
+
+
+def save_mutes():
+    try:
+        data = {}
+        for chat_id, users in MUTES.items():
+            data[str(chat_id)] = {}
+            for uid, info in users.items():
+                data[str(chat_id)][str(uid)] = info
+        with open(MUTES_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print('save_mutes err:', e)
+
+
+load_mutes()
+
 
 # ==================== HTTP ДЛЯ RENDER ====================
 class Handler(BaseHTTPRequestHandler):
@@ -29,206 +69,242 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b'Bot running')
 
+
 def run_http():
     port = int(os.environ.get('PORT', 10000))
     HTTPServer(('0.0.0.0', port), Handler).serve_forever()
 
+
 threading.Thread(target=run_http, daemon=True).start()
 
-# ==================== РОЛИ ====================
-ROLE_MAFIA = 'Мафия'
-ROLE_DON = 'Дон'
-ROLE_COMISSAR = 'Комиссар'
-ROLE_DOCTOR = 'Доктор'
-ROLE_MANIAC = 'Маньяк'
-ROLE_CIVIL = 'Мирный'
 
-ROLE_EMOJI = {
-    ROLE_MAFIA: '🔫', ROLE_DON: '👑', ROLE_COMISSAR: '🕵️',
-    ROLE_DOCTOR: '💊', ROLE_MANIAC: '🔪', ROLE_CIVIL: '👤',
+# ==================== РП КОМАНДЫ ====================
+ACTIONS = {
+    'обнять': ['🤗 {a} обнял {b}', '💞 {a} крепко обнял {b}', '🫂 {a} заключил {b} в объятия'],
+    'погладить': ['✋ {a} погладил {b}', '🤲 {a} нежно погладил {b}', '😊 {a} потрепал по голове {b}'],
+    'поцеловать': ['💋 {a} поцеловал {b}', '😘 {a} чмокнул {b}', '💞 {a} страстно поцеловал {b}'],
+    'поблагодарить': ['🙏 {a} поблагодарил {b}', '💐 {a} сказал спасибо {b}', '😌 {a} искренне поблагодарил {b}'],
+    'улыбнуться': ['😊 {a} улыбнулся {b}', '😁 {a} широко улыбнулся {b}', '🙂 {a} мило улыбнулся {b}'],
+    'подмигнуть': ['😉 {a} подмигнул {b}', '😏 {a} игриво подмигнул {b}'],
+    'ударить': ['👊 {a} ударил {b}', '💥 {a} врезал {b}', '🥊 {a} заехал {b}'],
+    'убить': ['🔪 {a} убил {b}', '💀 {a} прикончил {b}', '⚰️ {a} отправил {b} на тот свет'],
+    'укусить': ['🦷 {a} укусил {b}', '😬 {a} больно укусил {b}', '🧛 {a} впился в {b}'],
+    'пнуть': ['🦵 {a} пнул {b}', '👟 {a} дал пинка {b}', '💢 {a} со всей силы пнул {b}'],
+    'шлёпнуть': ['✋ {a} шлёпнул {b}', '👋 {a} дал шлепок {b}'],
+    'кинуть тапок': ['🥿 {a} кинул тапок в {b}', '👟 {a} запустил тапок в {b}'],
+    'обозвать': ['😠 {a} обозвал {b}', '🤬 {a} наорал на {b}'],
+    'отсосать': ['👅 {a} отсосал у {b}', '😮 {a} сделал минет {b}'],
+    'трахнуть': ['🍆 {a} трахнул {b}', '🔥 {a} жёстко трахнул {b}', '💦 {a} отымел {b}'],
+    'выебать': ['🔥 {a} выебал {b}', '💥 {a} жёстко выебал {b}'],
+    'лизнуть': ['👅 {a} лизнул {b}', '😋 {a} облизал {b}'],
+    'ласкать': ['💆 {a} ласкает {b}', '🤲 {a} нежно ласкает {b}'],
+    'соблазнить': ['😏 {a} соблазнил {b}', '💋 {a} пытается соблазнить {b}'],
+    'раздеть': ['👕 {a} раздел {b}', '🔥 {a} сорвал одежду с {b}'],
+    'флиртовать': ['😉 {a} флиртует с {b}', '💞 {a} заигрывает с {b}'],
+    'жениться': ['💍 {a} женился на {b}', '💒 {a} сделал предложение {b}'],
+    'развестись': ['💔 {a} развёлся с {b}', '📄 {a} подал на развод с {b}'],
+    'дать пять': ['✋ {a} дал пять {b}', '🙌 {a} дал краба {b}'],
+    'дружить': ['🤝 {a} предложил дружбу {b}', '👬 {a} стал другом {b}'],
+    'поддержать': ['💪 {a} поддержал {b}', '🤗 {a} утешил {b}'],
+    'поздравить': ['🎉 {a} поздравил {b}', '🥳 {a} пожелал всего лучшего {b}'],
+    'накормить': ['🍕 {a} накормил {b}', '🍔 {a} угостил {b}'],
+    'напоить': ['🍺 {a} напоил {b}', '🥤 {a} дал выпить {b}'],
+    'украсть': ['🕵️ {a} украл что-то у {b}', '💰 {a} обокрал {b}'],
+    'кинуть снежок': ['❄️ {a} кинул снежок в {b}', '⛄ {a} закидал снегом {b}'],
+    'облить водой': ['💧 {a} облил водой {b}', '🌊 {a} окатил {b}'],
+    'загипнотизировать': ['🌀 {a} загипнотизировал {b}', '👁️ {a} вводит {b} в транс'],
+    'телепортировать': ['✨ {a} телепортировал {b}', '🌌 {a} переместил {b}'],
+    'превратить в жабу': ['🐸 {a} превратил {b} в жабу', '🪄 {a} заколдовал {b}'],
+    'укусить за ухо': ['👂 {a} укусил за ухо {b}', '😬 {a} прикусил ушко {b}'],
 }
 
-ROLE_DESC = {
-    ROLE_MAFIA: 'Ночью вместе с мафией выбираешь жертву.',
-    ROLE_DON: 'Главный мафии. Комиссар видит тебя как мирного.',
-    ROLE_COMISSAR: 'Ночью проверяешь одного игрока — мафия он или нет.',
-    ROLE_DOCTOR: 'Ночью лечишь одного. Если его выбрала мафия — выживет.',
-    ROLE_MANIAC: 'Ночью убиваешь. Побеждаешь, если остаёшься один.',
-    ROLE_CIVIL: 'Ночью спишь. Днём ищешь мафию.',
-}
+
+def get_action_text(action, a, b):
+    variants = ACTIONS.get(action)
+    if not variants:
+        return None
+    return random.choice(variants).format(a=a, b=b)
 
 
-def get_roles_for_count(n):
-    if n == 4:
-        return [ROLE_MAFIA, ROLE_COMISSAR, ROLE_CIVIL, ROLE_CIVIL]
-    if n == 5:
-        return [ROLE_DON, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_CIVIL, ROLE_CIVIL]
-    if n == 6:
-        return [ROLE_DON, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_CIVIL]
-    if n == 7:
-        return [ROLE_DON, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_CIVIL, ROLE_CIVIL]
-    if n == 8:
-        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC, ROLE_CIVIL, ROLE_CIVIL]
-    if n == 9:
-        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC] + [ROLE_CIVIL] * 3
-    if n == 10:
-        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC] + [ROLE_CIVIL] * 4
-    if n == 11:
-        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC] + [ROLE_CIVIL] * 4
-    if n == 12:
-        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC] + [ROLE_CIVIL] * 5
-    if n == 13:
-        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC] + [ROLE_CIVIL] * 6
-    if n == 14:
-        return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC] + [ROLE_CIVIL] * 6
-    return [ROLE_DON, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_MAFIA, ROLE_COMISSAR, ROLE_DOCTOR, ROLE_MANIAC] + [ROLE_CIVIL] * 7
+# ==================== МУТ ====================
+def is_muted(chat_id, uid):
+    with MUTES_LOCK:
+        chat = MUTES.get(chat_id, {})
+        info = chat.get(uid)
+        if not info:
+            return False
+        if info.get('until', 0) <= time.time():
+            del chat[uid]
+            save_mutes()
+            return False
+        return True
 
 
-class Game:
-    def __init__(self, chat_id, host_id):
-        self.chat_id = chat_id
-        self.host_id = host_id
-        self.players = {}
-        self.order = []
-        self.phase = 'lobby'
-        self.lobby_end = time.time() + LOBBY_TIME
-        self.night_killed_by_mafia = None
-        self.night_killed_by_maniac = None
-        self.night_saved = None
-        self.votes = {}
-        self.msg_id = None
+def get_mute_left(chat_id, uid):
+    with MUTES_LOCK:
+        info = MUTES.get(chat_id, {}).get(uid)
+        if not info:
+            return 0
+        left = int(info.get('until', 0) - time.time())
+        return max(0, left)
 
 
-def get_game(chat_id):
-    return GAMES.get(chat_id)
+def add_mute(chat_id, uid, minutes, by_name, reason):
+    until = time.time() + minutes * 60
+    with MUTES_LOCK:
+        if chat_id not in MUTES:
+            MUTES[chat_id] = {}
+        MUTES[chat_id][uid] = {
+            'until': until,
+            'minutes': minutes,
+            'by': by_name,
+            'reason': reason,
+            'started': time.time(),
+        }
+        save_mutes()
+    return until
 
 
-def alive_players(game):
-    return [uid for uid, p in game.players.items() if p['alive']]
+def remove_mute(chat_id, uid):
+    with MUTES_LOCK:
+        if chat_id in MUTES and uid in MUTES[chat_id]:
+            del MUTES[chat_id][uid]
+            save_mutes()
+            return True
+    return False
 
 
-def alive_by_role(game, role):
-    return [uid for uid, p in game.players.items() if p['alive'] and p['role'] == role]
+def apply_telegram_mute(chat_id, uid, minutes):
+    """Официальный мут через права Telegram."""
+    try:
+        until = int(time.time()) + minutes * 60
+        bot.restrict_chat_member(
+            chat_id, uid,
+            permissions=types.ChatPermissions(
+                can_send_messages=False,
+                can_send_media_messages=False,
+                can_send_other_messages=False,
+                can_add_web_page_previews=False,
+            ),
+            until_date=until
+        )
+        return True
+    except Exception as e:
+        print('restrict err:', e)
+        return False
 
 
-def count_mafia(game):
-    return sum(1 for p in game.players.values() if p['alive'] and p['role'] in (ROLE_MAFIA, ROLE_DON))
+def remove_telegram_mute(chat_id, uid):
+    try:
+        bot.restrict_chat_member(
+            chat_id, uid,
+            permissions=types.ChatPermissions(
+                can_send_messages=True,
+                can_send_media_messages=True,
+                can_send_other_messages=True,
+                can_add_web_page_previews=True,
+            )
+        )
+        return True
+    except Exception as e:
+        print('unrestrict err:', e)
+        return False
 
 
-def count_maniac(game):
-    return sum(1 for p in game.players.values() if p['alive'] and p['role'] == ROLE_MANIAC)
+def is_group_admin(chat_id, uid):
+    try:
+        member = bot.get_chat_member(chat_id, uid)
+        return member.status in ('administrator', 'creator')
+    except:
+        return False
 
 
-def count_civils(game):
-    return sum(1 for p in game.players.values() if p['alive'] and p['role'] not in (ROLE_MAFIA, ROLE_DON, ROLE_MANIAC))
+def is_bot_admin(chat_id):
+    try:
+        me = bot.get_chat_member(chat_id, bot.get_me().id)
+        return me.status == 'administrator'
+    except:
+        return False
 
 
-# ==================== КОМАНДЫ ====================
+# ==================== АВТО-РАЗМУТ ====================
+def auto_unmute_loop():
+    while True:
+        try:
+            now = time.time()
+            to_unmute = []
+            with MUTES_LOCK:
+                for chat_id, users in list(MUTES.items()):
+                    for uid, info in list(users.items()):
+                        if info.get('until', 0) <= now:
+                            to_unmute.append((chat_id, uid))
+                            del users[uid]
+            for chat_id, uid in to_unmute:
+                remove_telegram_mute(chat_id, uid)
+                try:
+                    bot.send_message(chat_id, f'✅ Мут снят автоматически.')
+                except:
+                    pass
+            if to_unmute:
+                save_mutes()
+        except Exception as e:
+            print('auto_unmute err:', e)
+        time.sleep(30)
+
+
+threading.Thread(target=auto_unmute_loop, daemon=True).start()
+
+
+# ==================== /start ====================
 @bot.message_handler(commands=['start'])
 def cmd_start(m):
     kb = types.InlineKeyboardMarkup(row_width=1)
-    kb.add(types.InlineKeyboardButton(
-        'Вся информация о Мафии Darkgram',
-        callback_data='mafia_info'
-    ))
+    kb.add(
+        types.InlineKeyboardButton('Как играть', callback_data='rp_how'),
+        types.InlineKeyboardButton('Правила РП', callback_data='rp_rules'),
+        types.InlineKeyboardButton('Конфиденциальность', callback_data='rp_privacy'),
+        types.InlineKeyboardButton('Список команд', callback_data='rp_cmds'),
+    )
 
     text = (
-        '🎭 МАФИЯ DARKGRAM\n'
+        '💞 РП БОТ\n'
         '━━━━━━━━━━━━━━━\n\n'
-        'Добро пожаловать в игру!\n\n'
-        '📖 КАК ИГРАТЬ:\n\n'
-        '1. Добавь бота в группу\n'
-        '2. Напиши /mafia — начнётся набор\n'
-        '3. Жми «Участвовать» (нужно 4–15 человек)\n'
-        '4. Роли придут каждому в личку\n'
-        '5. Ночью роли действуют в личке\n'
-        '6. Днём все голосуют в группе, кого казнить\n'
-        '7. Игра идёт, пока одна сторона не победит\n\n'
-        '⚙️ ПРАВИЛА:\n\n'
-        '🌙 НОЧЬ\n'
-        '• Мафия выбирает жертву\n'
-        '• Комиссар проверяет игрока\n'
-        '• Доктор лечит игрока\n'
-        '• Маньяк убивает\n'
-        '• Мирные спят\n\n'
-        '☀️ ДЕНЬ\n'
-        '• Все обсуждают, кто мафия\n'
-        '• Голосуют кнопками, кого казнить\n'
-        '• Большинство — казнён\n\n'
-        '🎯 ПОБЕДА:\n'
-        '• Мафия — если её ≥ остальных\n'
-        '• Город — если вся мафия мертва\n'
-        '• Маньяк — если остался один\n\n'
-        '👇 Подробнее:'
+        'Добро пожаловать!\n\n'
+        'Это бот для ролевых действий в чате.\n'
+        'Отвечай на сообщение и пиши команду.\n\n'
+        '👇 Выбери раздел:'
     )
     bot.send_message(m.chat.id, text, reply_markup=kb)
 
 
-@bot.message_handler(commands=['mafia_info'])
-def cmd_mafia_info(m):
-    kb = types.InlineKeyboardMarkup(row_width=1)
-    kb.add(types.InlineKeyboardButton(
-        'Вся информация о Мафии Darkgram',
-        callback_data='mafia_info'
-    ))
-    bot.send_message(m.chat.id, '👇 Нажми кнопку:', reply_markup=kb)
+@bot.message_handler(commands=['help'])
+def cmd_help(m):
+    cmd_start(m)
 
 
-@bot.callback_query_handler(func=lambda c: c.data == 'mafia_info')
-def cb_mafia_info(call):
+# ==================== РАЗДЕЛЫ ====================
+@bot.callback_query_handler(func=lambda c: c.data == 'rp_how')
+def cb_how(call):
     text = (
-        '🎭 МАФИЯ DARKGRAM\n'
+        '📖 КАК ИГРАТЬ\n'
         '━━━━━━━━━━━━━━━\n\n'
-        '🎯 ЦЕЛЬ ИГРЫ\n\n'
-        'В городе спряталась мафия. Мирные жители должны её найти '
-        'и казнить днём. Мафия должна убить всех мирных ночью.\n\n'
+        '1️⃣ Добавь бота в группу\n\n'
+        '2️⃣ Ответь (свайпом) на сообщение человека\n\n'
+        '3️⃣ Напиши команду, например /обнять\n\n'
+        '4️⃣ Бот пришлёт красивое сообщение.\n\n'
         '━━━━━━━━━━━━━━━\n'
-        '🎭 РОЛИ\n\n'
-        '🔫 МАФИЯ\n'
-        'Ночью вместе с другими мафиози выбирает жертву. '
-        'Знает своих. Цель — убить всех мирных.\n\n'
-        '👑 ДОН\n'
-        'Главный мафии. Если комиссар проверит — увидит как мирного.\n\n'
-        '🕵️ КОМИССАР\n'
-        'Ночью проверяет одного игрока. Узнаёт — мафия он или нет.\n\n'
-        '💊 ДОКТОР\n'
-        'Ночью лечит одного игрока. Если мафия выбрала его — выживет.\n\n'
-        '🔪 МАНЬЯК\n'
-        'Нейтрал. Ночью убивает всех подряд. Побеждает, если останется один.\n\n'
-        '👤 МИРНЫЙ\n'
-        'Ночью спит. Днём ищет мафию и голосует.\n\n'
+        '💡 Примеры:\n'
+        '• /обнять — обнять человека\n'
+        '• /поцеловать — поцеловать\n'
+        '• /ударить — ударить\n'
+        '• /жениться — жениться\n\n'
         '━━━━━━━━━━━━━━━\n'
-        '⚙️ ПРАВИЛА ПО ФАЗАМ\n\n'
-        '🌙 НОЧЬ (60 сек)\n'
-        '• Мафия выбирает жертву в личке\n'
-        '• Комиссар проверяет игрока\n'
-        '• Доктор лечит игрока\n'
-        '• Маньяк убивает\n'
-        '• Мирные ждут утра\n\n'
-        '☀️ ДЕНЬ (90 сек обсуждение + 60 сек голосование)\n'
-        '• Все обсуждают, кто мог быть мафией\n'
-        '• Голосуют кнопками — кого казнить\n'
-        '• Большинство голосов = казнь\n'
-        '• Ничья = никто не казнён\n\n'
-        '━━━━━━━━━━━━━━━\n'
-        '🎯 УСЛОВИЯ ПОБЕДЫ\n\n'
-        '• 🎉 МАФИЯ — если мафии ≥ остальных живых\n'
-        '• 🏆 ГОРОД — если вся мафия и маньяк мертвы\n'
-        '• 🔪 МАНЬЯК — если остался один против всех\n\n'
-        '━━━━━━━━━━━━━━━\n'
-        '📌 КОМАНДЫ\n\n'
-        '/start — меню и правила\n'
-        '/mafia — начать игру в группе\n'
-        '/mafia_info — эти правила\n\n'
-        '━━━━━━━━━━━━━━━\n'
-        '⚠️ ВАЖНО\n\n'
-        '• Игра только в группе\n'
-        '• Нужно 4–15 игроков\n'
-        '• Роли приходят в личку — не показывай никому\n'
-        '• Бот должен быть без Group Privacy\n'
+        '🚫 АНТИСПАМ\n\n'
+        f'Если отправить {SPAM_LIMIT} команд за '
+        f'{SPAM_WINDOW // 60} мин — автомут на {AUTO_MUTE_MINUTES} мин.'
     )
     kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton('Назад', callback_data='mafia_back'))
+    kb.add(types.InlineKeyboardButton('Назад', callback_data='rp_back'))
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
                               message_id=call.message.message_id, reply_markup=kb)
@@ -237,19 +313,118 @@ def cb_mafia_info(call):
     bot.answer_callback_query(call.id)
 
 
-@bot.callback_query_handler(func=lambda c: c.data == 'mafia_back')
-def cb_mafia_back(call):
-    kb = types.InlineKeyboardMarkup(row_width=1)
-    kb.add(types.InlineKeyboardButton(
-        'Вся информация о Мафии Darkgram',
-        callback_data='mafia_info'
-    ))
+@bot.callback_query_handler(func=lambda c: c.data == 'rp_rules')
+def cb_rules(call):
     text = (
-        '🎭 МАФИЯ DARKGRAM\n'
+        '📜 ПРАВИЛА РП\n'
         '━━━━━━━━━━━━━━━\n\n'
-        'Добро пожаловать в игру!\n\n'
-        '📖 Напиши /mafia в группе, чтобы начать.\n\n'
-        '👇 Подробнее:'
+        '✅ МОЖНО:\n'
+        '• Делать действия по согласию\n'
+        '• Использовать любые команды\n'
+        '• Отвечать взаимно\n\n'
+        '❌ НЕЛЬЗЯ:\n'
+        '• Спамить командами\n'
+        '• Использовать 18+ без согласия\n'
+        '• Оскорблять всерьёз\n'
+        '• Преследовать человека\n\n'
+        '━━━━━━━━━━━━━━━\n'
+        '⚠️ 18+\n'
+        '• Только по обоюдному согласию\n'
+        '• Запрещено с несовершеннолетними\n\n'
+        '━━━━━━━━━━━━━━━\n'
+        '🚫 СПАМ\n'
+        f'• {SPAM_LIMIT} команд за {SPAM_WINDOW // 60} мин = '
+        f'автомут {AUTO_MUTE_MINUTES} мин\n'
+        '• Размут автоматический'
+    )
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('Назад', callback_data='rp_back'))
+    try:
+        bot.edit_message_text(text, chat_id=call.message.chat.id,
+                              message_id=call.message.message_id, reply_markup=kb)
+    except:
+        bot.send_message(call.message.chat.id, text, reply_markup=kb)
+    bot.answer_callback_query(call.id)
+
+
+@bot.callback_query_handler(func=lambda c: c.data == 'rp_privacy')
+def cb_privacy(call):
+    text = (
+        '🔒 КОНФИДЕНЦИАЛЬНОСТЬ\n'
+        '━━━━━━━━━━━━━━━\n\n'
+        '❌ Бот НЕ:\n'
+        '• Не читает личные сообщения\n'
+        '• Не собирает данные\n'
+        '• Не сохраняет переписку\n'
+        '• Не передаёт третьим лицам\n\n'
+        '✅ Бот использует:\n'
+        '• Имя (для отображения)\n'
+        '• ID (для мута и антиспама)\n\n'
+        'Данные хранятся в файле бота.'
+    )
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('Назад', callback_data='rp_back'))
+    try:
+        bot.edit_message_text(text, chat_id=call.message.chat.id,
+                              message_id=call.message.message_id, reply_markup=kb)
+    except:
+        bot.send_message(call.message.chat.id, text, reply_markup=kb)
+    bot.answer_callback_query(call.id)
+
+
+@bot.callback_query_handler(func=lambda c: c.data == 'rp_cmds')
+def cb_cmds(call):
+    text = (
+        '📋 СПИСОК КОМАНД\n'
+        '━━━━━━━━━━━━━━━\n\n'
+        '💞 РОМАНТИКА:\n'
+        '/обнять /погладить /поцеловать\n'
+        '/флиртовать /жениться /развестись\n\n'
+        '🤝 ДРУЖБА:\n'
+        '/поблагодарить /дать пять /дружить\n'
+        '/поддержать /поздравить\n\n'
+        '😈 АГРЕССИЯ:\n'
+        '/ударить /убить /укусить /пнуть\n'
+        '/шлёпнуть /кинуть тапок /обозвать\n\n'
+        '🔥 18+:\n'
+        '/отсосать /трахнуть /выебать\n'
+        '/лизнуть /ласкать /соблазнить /раздеть\n\n'
+        '🎲 ЗАБАВНЫЕ:\n'
+        '/накормить /напоить /украсть\n'
+        '/кинуть снежок /облить водой\n'
+        '/загипнотизировать /телепортировать\n'
+        '/превратить в жабу /укусить за ухо\n\n'
+        '━━━━━━━━━━━━━━━\n'
+        '🛡 МОДЕРАЦИЯ (админы):\n'
+        '/mute N — замутить на N минут\n'
+        '/unmute — размутить\n'
+        '/mutelist — список замученных\n'
+        '/ban — забанить\n'
+        '/unban ID — разбанить\n'
+    )
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('Назад', callback_data='rp_back'))
+    try:
+        bot.edit_message_text(text, chat_id=call.message.chat.id,
+                              message_id=call.message.message_id, reply_markup=kb)
+    except:
+        bot.send_message(call.message.chat.id, text, reply_markup=kb)
+    bot.answer_callback_query(call.id)
+
+
+@bot.callback_query_handler(func=lambda c: c.data == 'rp_back')
+def cb_back(call):
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    kb.add(
+        types.InlineKeyboardButton('Как играть', callback_data='rp_how'),
+        types.InlineKeyboardButton('Правила РП', callback_data='rp_rules'),
+        types.InlineKeyboardButton('Конфиденциальность', callback_data='rp_privacy'),
+        types.InlineKeyboardButton('Список команд', callback_data='rp_cmds'),
+    )
+    text = (
+        '💞 РП БОТ\n'
+        '━━━━━━━━━━━━━━━\n\n'
+        '👇 Выбери раздел:'
     )
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
@@ -259,402 +434,230 @@ def cb_mafia_back(call):
     bot.answer_callback_query(call.id)
 
 
-# ==================== ИГРА ====================
-@bot.message_handler(commands=['mafia'])
-def cmd_mafia(m):
-    chat_id = m.chat.id
+# ==================== АНТИСПАМ ====================
+def check_spam(uid):
+    now = time.time()
+    if uid not in SPAM_TRACKER:
+        SPAM_TRACKER[uid] = []
+    SPAM_TRACKER[uid] = [t for t in SPAM_TRACKER[uid] if now - t < SPAM_WINDOW]
+    SPAM_TRACKER[uid].append(now)
+    return len(SPAM_TRACKER[uid]) >= SPAM_LIMIT
+
+
+# ==================== ОБРАБОТЧИК РП КОМАНД ====================
+@bot.message_handler(func=lambda m: m.text and m.text.startswith('/'))
+def handle_command(m):
+    text = m.text.strip()
+    if not text or len(text) < 2:
+        return
+
+    action = text[1:].split()[0].lower()
+
+    if action in ('start', 'help'):
+        return
+
+    # модерация — отдельно
+    if action in ('mute', 'unmute', 'mutelist', 'ban', 'unban'):
+        handle_moderation(m, action)
+        return
+
+    if action not in ACTIONS:
+        return
+
     if m.chat.type == 'private':
         bot.reply_to(m, 'Эта команда работает только в группе.')
         return
-    if chat_id in GAMES:
-        bot.reply_to(m, 'Игра уже идёт.')
-        return
 
-    game = Game(chat_id, m.from_user.id)
-    GAMES[chat_id] = game
-
-    kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton('Участвовать', callback_data='mafia_join'))
-
-    text = (
-        '🎭 МАФИЯ\n━━━━━━━━━━━━━━━\n\n'
-        f'Набор: {MIN_PLAYERS}–{MAX_PLAYERS}\n'
-        'Время: 5 минут\n\n'
-        f'Сейчас: 0/{MAX_PLAYERS}'
-    )
-    msg = bot.send_message(chat_id, text, reply_markup=kb)
-    game.msg_id = msg.message_id
-
-    def lobby_watch():
-        while chat_id in GAMES:
-            g = GAMES.get(chat_id)
-            if not g or g.phase != 'lobby':
-                return
-            if time.time() >= g.lobby_end:
-                start_game(chat_id)
-                return
-            time.sleep(2)
-
-    threading.Thread(target=lobby_watch, daemon=True).start()
-
-
-@bot.callback_query_handler(func=lambda c: c.data == 'mafia_join')
-def cb_join(call):
-    chat_id = call.message.chat.id
-    game = get_game(chat_id)
-    if not game or game.phase != 'lobby':
-        bot.answer_callback_query(call.id, 'Набор закрыт')
-        return
-    uid = call.from_user.id
-    if uid in game.players:
-        bot.answer_callback_query(call.id, 'Ты уже в игре')
-        return
-    if len(game.players) >= MAX_PLAYERS:
-        bot.answer_callback_query(call.id, 'Мест нет')
-        return
-
-    name = call.from_user.first_name or 'Игрок'
-    game.players[uid] = {'name': name, 'role': None, 'alive': True}
-    game.order.append(uid)
-
-    text = (
-        '🎭 МАФИЯ\n━━━━━━━━━━━━━━━\n\n'
-        f'Набор: {MIN_PLAYERS}–{MAX_PLAYERS}\n'
-        'Время: 5 минут\n\n'
-        f'Сейчас: {len(game.players)}/{MAX_PLAYERS}'
-    )
-    kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton('Участвовать', callback_data='mafia_join'))
-    try:
-        bot.edit_message_text(text, chat_id=chat_id, message_id=game.msg_id, reply_markup=kb)
-    except:
-        pass
-    bot.answer_callback_query(call.id, 'Ты в игре')
-
-    if len(game.players) >= MAX_PLAYERS:
-        start_game(chat_id)
-
-
-def start_game(chat_id):
-    game = get_game(chat_id)
-    if not game or game.phase != 'lobby':
-        return
-    n = len(game.players)
-    if n < MIN_PLAYERS:
-        bot.send_message(chat_id, f'❌ Мало игроков ({n}/{MIN_PLAYERS}). Отмена.')
-        GAMES.pop(chat_id, None)
-        return
-
-    roles = get_roles_for_count(n)
-    random.shuffle(roles)
-    for i, uid in enumerate(game.order):
-        game.players[uid]['role'] = roles[i]
-
-    game.phase = 'night'
-    bot.send_message(chat_id,
-        f'🎭 Игра началась!\nИгроков: {n}\n\n🌙 НОЧЬ. {NIGHT_TIME} секунд.')
-
-    for uid, p in game.players.items():
+    # проверка мута
+    if is_muted(m.chat.id, m.from_user.id):
+        left = get_mute_left(m.chat.id, m.from_user.id)
         try:
-            text = f'{ROLE_EMOJI[p["role"]]} Твоя роль: {p["role"]}\n\n{ROLE_DESC[p["role"]]}\n\nИгроки:\n'
-            for other_uid, other in game.players.items():
-                if other_uid != uid:
-                    text += f'• {other["name"]}\n'
-            bot.send_message(uid, text)
+            bot.delete_message(m.chat.id, m.message_id)
         except:
             pass
-
-    start_night(chat_id)
-
-
-def start_night(chat_id):
-    game = get_game(chat_id)
-    if not game:
+        bot.send_message(m.chat.id,
+            f'🚫 {m.from_user.first_name} в муте. Осталось {left // 60} мин {left % 60} сек.')
         return
-    game.phase = 'night'
-    game.night_killed_by_mafia = None
-    game.night_killed_by_maniac = None
-    game.night_saved = None
-    game.votes = {}
 
-    for uid in alive_by_role(game, ROLE_MAFIA) + alive_by_role(game, ROLE_DON):
-        send_night_action(uid, game, 'mafia')
-    for uid in alive_by_role(game, ROLE_COMISSAR):
-        send_night_action(uid, game, 'comissar')
-    for uid in alive_by_role(game, ROLE_DOCTOR):
-        send_night_action(uid, game, 'doctor')
-    for uid in alive_by_role(game, ROLE_MANIAC):
-        send_night_action(uid, game, 'maniac')
+    if not m.reply_to_message:
+        bot.reply_to(m, '⚠️ Ответь на сообщение человека и напиши команду.')
+        return
 
-    def night_watch():
-        time.sleep(NIGHT_TIME)
-        g = get_game(chat_id)
-        if g and g.phase == 'night':
-            resolve_night(chat_id)
+    target = m.reply_to_message.from_user
+    sender = m.from_user
 
-    threading.Thread(target=night_watch, daemon=True).start()
+    if target.id == sender.id:
+        bot.reply_to(m, '🤡 Нельзя это сделать с самим собой.')
+        return
 
+    if target.id == bot.get_me().id:
+        bot.reply_to(m, '🤖 Нельзя это сделать с ботом.')
+        return
 
-def send_night_action(uid, game, action):
+    # антиспам
+    if check_spam(sender.id):
+        SPAM_TRACKER[sender.id] = []
+        add_mute(m.chat.id, sender.id, AUTO_MUTE_MINUTES,
+                 'Автомодерация', 'спам командами')
+        apply_telegram_mute(m.chat.id, sender.id, AUTO_MUTE_MINUTES)
+        bot.send_message(m.chat.id,
+            f'🚫 {sender.first_name} замучен на {AUTO_MUTE_MINUTES} минут.\n'
+            f'Причина: спам командами ({SPAM_LIMIT} за {SPAM_WINDOW // 60} мин)')
+        return
+
+    a_name = sender.first_name or 'Кто-то'
+    b_name = target.first_name or 'Кто-то'
+    result = get_action_text(action, a_name, b_name)
+    if not result:
+        return
+
     try:
-        targets = []
-        if action == 'mafia':
-            for other_uid, p in game.players.items():
-                if p['alive'] and p['role'] not in (ROLE_MAFIA, ROLE_DON):
-                    targets.append(other_uid)
-            title = '🔫 Кого убить?'
-        elif action == 'comissar':
-            for other_uid, p in game.players.items():
-                if p['alive'] and other_uid != uid:
-                    targets.append(other_uid)
-            title = '🕵️ Кого проверить?'
-        elif action == 'doctor':
-            for other_uid, p in game.players.items():
-                if p['alive']:
-                    targets.append(other_uid)
-            title = '💊 Кого лечить?'
-        elif action == 'maniac':
-            for other_uid, p in game.players.items():
-                if p['alive'] and other_uid != uid:
-                    targets.append(other_uid)
-            title = '🔪 Кого убить?'
-        else:
-            return
-        if not targets:
-            return
-
-        kb = types.InlineKeyboardMarkup(row_width=2)
-        btns = [types.InlineKeyboardButton(game.players[t]['name'], callback_data=f'night_{action}_{t}') for t in targets]
-        kb.add(*btns)
-        bot.send_message(uid, f'{title}\n\n{NIGHT_TIME} секунд.', reply_markup=kb)
-    except Exception as e:
-        print('night err:', e)
-
-
-@bot.callback_query_handler(func=lambda c: c.data.startswith('night_'))
-def cb_night(call):
-    parts = call.data.split('_')
-    if len(parts) != 3:
-        return
-    action = parts[1]
-    target_id = int(parts[2])
-    uid = call.from_user.id
-
-    game = None
-    for cid, g in GAMES.items():
-        if uid in g.players:
-            game = g
-            break
-    if not game or game.phase != 'night':
-        bot.answer_callback_query(call.id, 'Сейчас не ночь')
-        return
-    if target_id not in game.players or not game.players[target_id]['alive']:
-        bot.answer_callback_query(call.id, 'Недоступно')
-        return
-
-    p = game.players[uid]
-    if action == 'mafia' and p['role'] not in (ROLE_MAFIA, ROLE_DON):
-        bot.answer_callback_query(call.id, 'Ты не мафия')
-        return
-    if action == 'comissar' and p['role'] != ROLE_COMISSAR:
-        bot.answer_callback_query(call.id, 'Ты не комиссар')
-        return
-    if action == 'doctor' and p['role'] != ROLE_DOCTOR:
-        bot.answer_callback_query(call.id, 'Ты не доктор')
-        return
-    if action == 'maniac' and p['role'] != ROLE_MANIAC:
-        bot.answer_callback_query(call.id, 'Ты не маньяк')
-        return
-
-    if action == 'mafia':
-        game.night_killed_by_mafia = target_id
-    elif action == 'maniac':
-        game.night_killed_by_maniac = target_id
-    elif action == 'doctor':
-        game.night_saved = target_id
-    elif action == 'comissar':
-        target_role = game.players[target_id]['role']
-        is_mafia = target_role in (ROLE_MAFIA, ROLE_DON)
-        if target_role == ROLE_DON:
-            is_mafia = False
-        answer = '🔫 Мафия!' if is_mafia else '👤 Мирный'
-        bot.answer_callback_query(call.id, answer, show_alert=True)
-        try:
-            bot.edit_message_text(f'🕵️ {game.players[target_id]["name"]} — {answer}',
-                                  chat_id=uid, message_id=call.message.message_id)
-        except:
-            pass
-        return
-
-    bot.answer_callback_query(call.id, f'Выбрано: {game.players[target_id]["name"]}')
-    try:
-        bot.edit_message_text(f'Выбор: {game.players[target_id]["name"]}',
-                              chat_id=uid, message_id=call.message.message_id)
+        bot.reply_to(m, result, reply_to_message_id=m.reply_to_message.message_id)
     except:
-        pass
+        bot.send_message(m.chat.id, result)
 
 
-def resolve_night(chat_id):
-    game = get_game(chat_id)
-    if not game or game.phase != 'night':
+# ==================== МОДЕРАЦИЯ ====================
+def handle_moderation(m, action):
+    if m.chat.type == 'private':
+        bot.reply_to(m, 'Модерация работает только в группах.')
         return
-    killed = set()
-    if game.night_killed_by_mafia and game.night_killed_by_mafia != game.night_saved:
-        killed.add(game.night_killed_by_mafia)
-    if game.night_killed_by_maniac and game.night_killed_by_maniac != game.night_saved:
-        killed.add(game.night_killed_by_maniac)
 
-    for uid in killed:
-        if uid in game.players and game.players[uid]['alive']:
-            game.players[uid]['alive'] = False
-
-    if killed:
-        names = ', '.join(game.players[u]['name'] for u in killed if u in game.players)
-        bot.send_message(chat_id, f'☀️ Утро. Погибли: {names}')
-    else:
-        bot.send_message(chat_id, '☀️ Утро. Никто не погиб.')
-
-    winner = check_win(game)
-    if winner:
-        end_game(chat_id, winner)
+    if not is_group_admin(m.chat.id, m.from_user.id):
+        bot.reply_to(m, '⛔ Только админы группы.')
         return
-    start_day(chat_id)
 
-
-def start_day(chat_id):
-    game = get_game(chat_id)
-    if not game:
+    if action == 'mutelist':
+        show_mutelist(m)
         return
-    game.phase = 'day'
-    game.votes = {}
-    alive = alive_players(game)
-    bot.send_message(chat_id, f'🗣 ДЕНЬ. Живых: {len(alive)}\nОбсуждение {DAY_DISCUSS} сек.')
 
-    def day_watch():
-        time.sleep(DAY_DISCUSS)
-        g = get_game(chat_id)
-        if g and g.phase == 'day':
-            start_vote(chat_id)
-
-    threading.Thread(target=day_watch, daemon=True).start()
-
-
-def start_vote(chat_id):
-    game = get_game(chat_id)
-    if not game or game.phase != 'day':
-        return
-    game.votes = {}
-    alive = alive_players(game)
-    if not alive:
-        return
-    kb = types.InlineKeyboardMarkup(row_width=2)
-    btns = [types.InlineKeyboardButton(game.players[uid]['name'], callback_data=f'vote_{uid}') for uid in alive]
-    kb.add(*btns)
-    kb.add(types.InlineKeyboardButton('Пропустить', callback_data='vote_skip'))
-    bot.send_message(chat_id, f'🗳 ГОЛОСОВАНИЕ. {DAY_VOTE} секунд.', reply_markup=kb)
-
-    def vote_watch():
-        time.sleep(DAY_VOTE)
-        g = get_game(chat_id)
-        if g and g.phase == 'day':
-            resolve_vote(chat_id)
-
-    threading.Thread(target=vote_watch, daemon=True).start()
-
-
-@bot.callback_query_handler(func=lambda c: c.data.startswith('vote_'))
-def cb_vote(call):
-    uid = call.from_user.id
-    game = None
-    for cid, g in GAMES.items():
-        if uid in g.players and g.players[uid]['alive']:
-            game = g
-            break
-    if not game or game.phase != 'day':
-        bot.answer_callback_query(call.id, 'Сейчас не день')
-        return
-    if uid in game.votes:
-        bot.answer_callback_query(call.id, 'Уже голосовал')
-        return
-    val = call.data.replace('vote_', '')
-    if val == 'skip':
-        game.votes[uid] = 'skip'
-        bot.answer_callback_query(call.id, 'Пропущено')
-    else:
+    if action == 'unban':
+        parts = m.text.split()
+        if len(parts) < 2:
+            bot.reply_to(m, 'Использование: /unban ID')
+            return
         try:
-            target = int(val)
+            target_id = int(parts[1])
         except:
+            bot.reply_to(m, 'ID должен быть числом.')
             return
-        if target not in game.players or not game.players[target]['alive']:
-            bot.answer_callback_query(call.id, 'Недоступно')
+        try:
+            bot.unban_chat_member(m.chat.id, target_id)
+            bot.reply_to(m, f'✅ Пользователь {target_id} разбанен.')
+        except Exception as e:
+            bot.reply_to(m, f'Ошибка: {e}')
+        return
+
+    if action == 'unmute':
+        if not m.reply_to_message:
+            bot.reply_to(m, 'Ответь на сообщение человека.')
             return
-        game.votes[uid] = target
-        bot.answer_callback_query(call.id, f'Голос за {game.players[target]["name"]}')
-
-
-def resolve_vote(chat_id):
-    game = get_game(chat_id)
-    if not game or game.phase != 'day':
+        target = m.reply_to_message.from_user
+        remove_mute(m.chat.id, target.id)
+        remove_telegram_mute(m.chat.id, target.id)
+        bot.reply_to(m,
+            f'✅ {target.first_name} размучен.\n'
+            f'Админ: {m.from_user.first_name}')
         return
-    counts = {}
-    for v, t in game.votes.items():
-        if t == 'skip':
-            continue
-        counts[t] = counts.get(t, 0) + 1
-    if not counts:
-        bot.send_message(chat_id, 'Никто не голосовал. Ночь.')
-        start_night(chat_id)
+
+    if action == 'ban':
+        if not m.reply_to_message:
+            bot.reply_to(m, 'Ответь на сообщение человека.')
+            return
+        target = m.reply_to_message.from_user
+        if is_group_admin(m.chat.id, target.id):
+            bot.reply_to(m, '⛔ Нельзя банить админов.')
+            return
+        try:
+            bot.ban_chat_member(m.chat.id, target.id)
+            bot.send_message(m.chat.id,
+                f'🚫 {target.first_name} забанен.\n'
+                f'Кем: {m.from_user.first_name}')
+        except Exception as e:
+            bot.reply_to(m, f'Ошибка: {e}')
         return
-    max_v = max(counts.values())
-    leaders = [t for t, v in counts.items() if v == max_v]
-    if len(leaders) > 1:
-        names = ', '.join(game.players[u]['name'] for u in leaders)
-        bot.send_message(chat_id, f'Ничья: {names}. Ночь.')
-        start_night(chat_id)
-        return
-    victim = leaders[0]
-    game.players[victim]['alive'] = False
-    bot.send_message(chat_id, f'⚖️ Казнён: {game.players[victim]["name"]}\nРоль: {game.players[victim]["role"]}')
-    winner = check_win(game)
-    if winner:
-        end_game(chat_id, winner)
-        return
-    start_night(chat_id)
+
+    if action == 'mute':
+        parts = m.text.split()
+        if len(parts) < 2:
+            bot.reply_to(m, 'Использование: /mute 10 (ответом на сообщение)')
+            return
+        try:
+            minutes = int(parts[1])
+        except:
+            bot.reply_to(m, 'Число минут: /mute 10')
+            return
+
+        if minutes < 1 or minutes > 1000:
+            bot.reply_to(m, '⛔ Мут от 1 до 1000 минут.')
+            return
+
+        if not m.reply_to_message:
+            bot.reply_to(m, 'Ответь на сообщение человека.')
+            return
+
+        target = m.reply_to_message.from_user
+        if is_group_admin(m.chat.id, target.id):
+            bot.reply_to(m, '⛔ Нельзя мутить админов.')
+            return
+
+        reason = ' '.join(parts[2:]) if len(parts) > 2 else 'не указана'
+
+        add_mute(m.chat.id, target.id, minutes,
+                 m.from_user.first_name, reason)
+        apply_telegram_mute(m.chat.id, target.id, minutes)
+
+        bot.send_message(m.chat.id,
+            f'🚫 {target.first_name} замучен.\n'
+            f'Кем: {m.from_user.first_name}\n'
+            f'Срок: {minutes} мин\n'
+            f'Причина: {reason}')
 
 
-def check_win(game):
-    mafia = count_mafia(game)
-    maniac = count_maniac(game)
-    civils = count_civils(game)
-    alive = len(alive_players(game))
-    if maniac >= 1 and alive == 1 and maniac == alive:
-        return 'maniac'
-    if mafia >= 1 and mafia >= civils + maniac:
-        return 'mafia'
-    if mafia == 0 and maniac == 0:
-        return 'city'
-    return None
+def show_mutelist(m):
+    chat_id = m.chat.id
+    now = time.time()
+    with MUTES_LOCK:
+        users = MUTES.get(chat_id, {})
+        active = []
+        for uid, info in users.items():
+            if info.get('until', 0) > now:
+                left = int(info['until'] - now)
+                active.append({
+                    'uid': uid,
+                    'left': left,
+                    'by': info.get('by', '—'),
+                    'reason': info.get('reason', '—'),
+                    'minutes': info.get('minutes', 0),
+                })
 
-
-def end_game(chat_id, winner):
-    game = get_game(chat_id)
-    if not game:
+    if not active:
+        bot.send_message(chat_id, '📋 Список замученных пуст.')
         return
-    game.phase = 'end'
-    if winner == 'mafia':
-        text = '🎉 ПОБЕДА МАФИИ!'
-    elif winner == 'maniac':
-        text = '🔪 ПОБЕДА МАНЬЯКА!'
-    else:
-        text = '🏆 ПОБЕДА ГОРОДА!'
-    text += '\n\nРоли:\n'
-    for uid, p in game.players.items():
-        status = 'жив' if p['alive'] else 'мёртв'
-        text += f'{ROLE_EMOJI[p["role"]]} {p["name"]} — {p["role"]} ({status})\n'
+
+    active.sort(key=lambda x: x['left'], reverse=True)
+
+    text = f'📋 ЗАМУЧЕННЫЕ ({len(active)})\n━━━━━━━━━━━━━━━\n\n'
+    for i, u in enumerate(active, 1):
+        try:
+            user = bot.get_chat_member(chat_id, u['uid']).user
+            name = user.first_name or 'Игрок'
+        except:
+            name = f'ID {u["uid"]}'
+
+        left_min = u['left'] // 60
+        left_sec = u['left'] % 60
+        text += (
+            f'{i}. {name}\n'
+            f'   Осталось: {left_min} мин {left_sec} сек\n'
+            f'   Кем: {u["by"]}\n'
+            f'   Причина: {u["reason"]}\n\n'
+        )
+
     bot.send_message(chat_id, text)
-    GAMES.pop(chat_id, None)
 
 
+# ==================== ЗАПУСК ====================
 if __name__ == '__main__':
-    print('Mafia bot started')
+    print('RP bot started')
     bot.infinity_polling(timeout=30, long_polling_timeout=30)
