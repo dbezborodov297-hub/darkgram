@@ -9,7 +9,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from telebot import types
 
 # ==================== НАСТРОЙКИ ====================
-TOKEN = '8514412667:AAHvjk1LlwTsozk2ijnUZS96_yDkbIg9Fco'
+TOKEN = '8514412667:AAGtzSPDoy1s63kEaqhlfRYaF-NNdeTU3bo'
 
 SPAM_LIMIT = 30
 SPAM_WINDOW = 120
