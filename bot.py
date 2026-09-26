@@ -9,7 +9,8 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from telebot import types
 
 # ==================== НАСТРОЙКИ ====================
-TOKEN = '8514412667:AAFIi-iMewgpKgFQU7Ad4KIN7ntf81UXC4A'
+TOKEN = '8514412667:AAHN-vz-JKdZcwj2eHV000x6g-fRPXyJWLk'
+WEBAPP_URL = 'https://darkgram-1.onrender.com'
 
 START_GRAM = 0
 VERIFY_BONUS = 100
@@ -24,9 +25,7 @@ USERS_FILE = 'users.json'
 NFT_FILE = 'nft.json'
 MARKET_FILE = 'market.json'
 SHOP_FILE = 'shop_prices.json'
-TASKS_FILE = 'tasks.json'
 
-# NFT: всего штук на весь бот
 NFT_TYPES = {
     'glass':    {'emoji': '🍸', 'name': 'Glass',    'price': 50,   'max': 5,  'bonus': 0.1},
     'fountain': {'emoji': '⛲', 'name': 'Fountain', 'price': 450,  'max': 7,  'bonus': 0.1},
@@ -38,7 +37,6 @@ NFT_TYPES = {
     '8ball':    {'emoji': '🎱', 'name': '8Ball',    'price': 1000, 'max': 17, 'bonus': 0.1},
 }
 
-# Скины — надеваются на NFT
 SKIN_TYPES = {
     'soccer':   {'emoji': '⚽', 'name': 'Soccer',   'price': 1090},
     'baseball': {'emoji': '⚾', 'name': 'Baseball', 'price': 1320},
@@ -47,8 +45,6 @@ SKIN_TYPES = {
     'volley':   {'emoji': '🏐', 'name': 'Volley',   'price': 1200},
 }
 
-# Ежедневные задания: 10 дней × 5 заданий
-# reward всегда 20 GRAM
 TASKS_BY_DAY = {
     1: [
         {'id': 'trade1',  'text': 'Сделай 1 сделку в трейдинге'},
@@ -134,10 +130,12 @@ except Exception as e:
 
 
 def btn(text, data, style=None):
-    try:
-        return types.InlineKeyboardButton(text=text, callback_data=data, style=style)
-    except TypeError:
-        return types.InlineKeyboardButton(text=text, callback_data=data)
+    if style:
+        try:
+            return types.InlineKeyboardButton(text=text, callback_data=data, style=style)
+        except TypeError:
+            return types.InlineKeyboardButton(text=text, callback_data=data)
+    return types.InlineKeyboardButton(text=text, callback_data=data)
 
 
 USERS = {}
@@ -158,7 +156,6 @@ TRADES_LOCK = threading.Lock()
 NEXT_NFT_ID = 1
 
 
-# ==================== ВАЛЮТЫ ====================
 CURRENCIES = {
     'GRAM':     {'name': '💎 GRAM',     'start': 1.00,  'volatility': 0.05},
     'DARKGRAM': {'name': '🌑 DARKGRAM', 'start': 2.50,  'volatility': 0.07},
@@ -194,14 +191,12 @@ def load_json(path, default):
         with open(path, 'r', encoding='utf-8') as f: return json.load(f)
     except: return default
 
-
 def save_json(path, data):
     try:
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as e:
         print(f'save {path} err:', e)
-
 
 def load_users():
     global USERS
@@ -245,24 +240,15 @@ load_market()
 load_shop()
 
 
-# ==================== ПОЛЬЗОВАТЕЛЬ ====================
 def get_user(uid):
     key = str(uid)
     if key not in USERS:
         USERS[key] = {
-            'name': '',
-            'gram': START_GRAM,
-            'verified': False,
-            'wins': 0,
-            'losses': 0,
-            'total_profit': 0,
-            'shop': {},
-            'wwr': False,
-            'nfts': [],
-            'skins': [],
-            'day': 1,
-            'tasks_done': {},
-            'tasks_date': '',
+            'name': '', 'gram': START_GRAM, 'verified': False,
+            'wins': 0, 'losses': 0, 'total_profit': 0,
+            'shop': {}, 'wwr': False,
+            'nfts': [], 'skins': [],
+            'day': 1, 'tasks_done': {}, 'tasks_date': '',
             'stats': {'trades': 0, 'wins_trade': 0, 'bought_nft': 0, 'sold_nft': 0, 'earned': 0, 'bought_skins': 0, 'bought_bit': 0},
         }
         save_users()
@@ -282,13 +268,11 @@ def get_nft_bonus(uid):
     return len(u.get('nfts', [])) * 0.1
 
 
-# ==================== КУРСЫ ====================
 def update_rates():
     with RATES_LOCK:
         for cur, info in CURRENCIES.items():
             rate = RATES[cur]
-            vol = info['volatility']
-            change = random.uniform(-vol, vol)
+            change = random.uniform(-info['volatility'], info['volatility'])
             RATES[cur] = max(0.01, round(rate * (1 + change), 4))
 
 
@@ -303,7 +287,7 @@ def get_chance_up(cur):
 def rate_loop():
     while True:
         try: update_rates()
-        except Exception as e: print('rate err:', e)
+        except: pass
         time.sleep(TRADE_TICK)
 
 threading.Thread(target=rate_loop, daemon=True).start()
@@ -321,7 +305,7 @@ def shop_loop():
                         elif cur == 'BSG': SHOP[cur]['percent'] = random.choice([5, 10, 15])
                         SHOP[cur]['updated'] = now
                 save_shop()
-        except Exception as e: print('shop err:', e)
+        except: pass
         time.sleep(60)
 
 threading.Thread(target=shop_loop, daemon=True).start()
@@ -359,7 +343,7 @@ def trade_loop_for(trade):
             if time.time() - trade.open_time > MAX_TRADE_TIME:
                 close_trade(trade, auto=True); return
             update_trade_message(trade, profit, mult)
-        except Exception as e: print('trade err:', e)
+        except: pass
         time.sleep(TRADE_TICK)
 
 
@@ -369,21 +353,18 @@ def update_trade_message(trade, profit, mult):
         chance = get_chance_up(trade.cur)
         arrow = '📈' if chance >= 50 else '📉'
         sign = '+' if profit >= 0 else ''
-        pnl_emoji = '🟢' if profit > 0 else ('🔴' if profit < 0 else '⚪')
-
+        pnl = '🟢' if profit > 0 else ('🔴' if profit < 0 else '⚪')
         text = (
             f'{CURRENCIES[trade.cur]["name"]} — торговля\n'
             f'━━━━━━━━━━━━━━━\n\n'
             f'💰 Ставка: {trade.bet} GRAM\n'
-            f'📊 Курс открытия: {trade.open_rate:.4f}\n'
-            f'📈 Текущий курс: {rate:.4f}\n'
+            f'📊 Курс: {trade.open_rate:.4f} → {rate:.4f}\n'
             f'✖️ Множитель: {mult:.2f}x\n'
-            f'{pnl_emoji} P&L: {sign}{profit} GRAM\n\n'
-            f'{arrow} Шанс вверх: {chance}% | Вниз: {100-chance}%\n\n'
-            f'⏱ Осталось: {max(0, int(MAX_TRADE_TIME-(time.time()-trade.open_time)))} сек'
+            f'{pnl} P&L: {sign}{profit} GRAM\n\n'
+            f'{arrow} Вверх: {chance}% | Вниз: {100-chance}%'
         )
         kb = types.InlineKeyboardMarkup(row_width=1)
-        kb.add(btn('ЗАКРЫТЬ СДЕЛКУ', f'close_{trade.uid}', 'danger'))
+        kb.add(btn('ЗАКРЫТЬ', f'close_{trade.uid}', 'danger'))
         kb.add(btn('Обновить', f'refresh_{trade.uid}', 'primary'))
         bot.edit_message_text(text, chat_id=trade.chat_id, message_id=trade.msg_id, reply_markup=kb)
     except: pass
@@ -411,17 +392,13 @@ def close_trade(trade, auto=False):
         gram = u['gram']
 
     sign = '+' if profit >= 0 else ''
-    pnl_emoji = '🟢' if profit > 0 else ('🔴' if profit < 0 else '⚪')
+    pnl = '🟢' if profit > 0 else ('🔴' if profit < 0 else '⚪')
     reason = ' (авто)' if auto else ''
-
     text = (
-        f'✅ СДЕЛКА ЗАКРЫТА{reason}\n'
-        f'━━━━━━━━━━━━━━━\n\n'
+        f'✅ СДЕЛКА{reason}\n━━━━━━━━━━━━━━━\n\n'
         f'{CURRENCIES[trade.cur]["name"]}\n'
-        f'💰 Ставка: {trade.bet} GRAM\n'
-        f'📊 Курс: {trade.open_rate:.4f} → {RATES[trade.cur]:.4f}\n'
-        f'✖️ Множитель: {mult:.2f}x\n'
-        f'{pnl_emoji} Итог: {sign}{profit} GRAM\n\n'
+        f'Курс: {trade.open_rate:.4f} → {RATES[trade.cur]:.4f}\n'
+        f'{pnl} Итог: {sign}{profit} GRAM\n\n'
         f'💼 Баланс: {gram} GRAM'
     )
     try: bot.edit_message_text(text, chat_id=trade.chat_id, message_id=trade.msg_id)
@@ -435,22 +412,20 @@ def close_trade(trade, auto=False):
 def cb_close(call):
     uid = int(call.data.replace('close_', ''))
     if call.from_user.id != uid:
-        bot.answer_callback_query(call.id, 'Не твоя сделка'); return
+        bot.answer_callback_query(call.id, 'Не твоя'); return
     with TRADES_LOCK: trade = ACTIVE_TRADES.get(uid)
     if not trade:
-        bot.answer_callback_query(call.id, 'Сделка закрыта'); return
+        bot.answer_callback_query(call.id, 'Закрыта'); return
     bot.answer_callback_query(call.id, 'Закрываю...')
     close_trade(trade)
 
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith('refresh_'))
-def cb_refresh(call):
-    bot.answer_callback_query(call.id, 'Обновлено')
+def cb_refresh(call): bot.answer_callback_query(call.id, 'ОК')
 
 
 # ==================== ЗАДАНИЯ ====================
-def today_str():
-    return date.today().isoformat()
+def today_str(): return date.today().isoformat()
 
 
 def check_tasks_reset(u):
@@ -468,79 +443,48 @@ def get_tasks_for_user(uid):
     return TASKS_BY_DAY.get(day, [])
 
 
-def task_completed(uid, task_id):
+def task_completed(uid, tid):
     u = get_user(uid)
     check_tasks_reset(u)
-    stats = u.get('stats', {})
-    day = u.get('day', 1)
-
-    if task_id == 'trade1': return stats.get('trades', 0) >= 1
-    if task_id == 'trade3': return stats.get('trades', 0) >= 3
-    if task_id == 'trade5': return stats.get('trades', 0) >= 5
-    if task_id == 'trade7': return stats.get('trades', 0) >= 7
-    if task_id == 'trade10': return stats.get('trades', 0) >= 10
-    if task_id == 'trade15': return stats.get('trades', 0) >= 15
-    if task_id == 'trade20': return stats.get('trades', 0) >= 20
-    if task_id == 'trade25': return stats.get('trades', 0) >= 25
-    if task_id == 'trade30': return stats.get('trades', 0) >= 30
-    if task_id == 'trade40': return stats.get('trades', 0) >= 40
-    if task_id == 'trade50': return stats.get('trades', 0) >= 50
-
-    if task_id == 'win3': return stats.get('wins_trade', 0) >= 3
-    if task_id == 'win5': return stats.get('wins_trade', 0) >= 5
-    if task_id == 'win8': return stats.get('wins_trade', 0) >= 8
-    if task_id == 'win12': return stats.get('wins_trade', 0) >= 12
-    if task_id == 'win15': return stats.get('wins_trade', 0) >= 15
-    if task_id == 'win20': return stats.get('wins_trade', 0) >= 20
-    if task_id == 'win25': return stats.get('wins_trade', 0) >= 25
-    if task_id == 'win30': return stats.get('wins_trade', 0) >= 30
-
-    if task_id == 'nft1': return stats.get('bought_nft', 0) >= 1
-    if task_id == 'nft2': return stats.get('bought_nft', 0) >= 2
-    if task_id == 'nft3': return stats.get('bought_nft', 0) >= 3
-    if task_id == 'nft5': return stats.get('bought_nft', 0) >= 5
-    if task_id == 'nft7': return stats.get('bought_nft', 0) >= 7
-    if task_id == 'nft10': return stats.get('bought_nft', 0) >= 10
-    if task_id == 'nft12': return stats.get('bought_nft', 0) >= 12
-    if task_id == 'nft15': return stats.get('bought_nft', 0) >= 15
-    if task_id == 'nft20': return stats.get('bought_nft', 0) >= 20
-    if task_id == 'nft25': return stats.get('bought_nft', 0) >= 25
-
-    if task_id == 'earn50': return stats.get('earned', 0) >= 50
-    if task_id == 'earn100': return stats.get('earned', 0) >= 100
-    if task_id == 'earn200': return stats.get('earned', 0) >= 200
-    if task_id == 'earn300': return stats.get('earned', 0) >= 300
-    if task_id == 'earn500': return stats.get('earned', 0) >= 500
-    if task_id == 'earn700': return stats.get('earned', 0) >= 700
-    if task_id == 'earn1000': return stats.get('earned', 0) >= 1000
-    if task_id == 'earn1500': return stats.get('earned', 0) >= 1500
-    if task_id == 'earn2000': return stats.get('earned', 0) >= 2000
-    if task_id == 'earn3000': return stats.get('earned', 0) >= 3000
-
-    if task_id == 'sell_nft': return stats.get('sold_nft', 0) >= 1
-    if task_id == 'sell3': return stats.get('sold_nft', 0) >= 3
-    if task_id == 'sell5': return stats.get('sold_nft', 0) >= 5
-
-    if task_id == 'skin2': return stats.get('bought_skins', 0) >= 2
-    if task_id == 'skin3': return stats.get('bought_skins', 0) >= 3
-    if task_id == 'skin5': return stats.get('bought_skins', 0) >= 5
-    if task_id == 'skin7': return stats.get('bought_skins', 0) >= 7
-
-    if task_id == 'buy_bit': return stats.get('bought_bit', 0) >= 1
-    if task_id == 'buy_bit2': return stats.get('bought_bit', 0) >= 2
-    if task_id == 'buy_all': return len(u.get('shop', {})) >= 3
-
+    s = u.get('stats', {})
+    if tid.startswith('trade'):
+        try: n = int(tid.replace('trade', ''))
+        except: n = 0
+        return s.get('trades', 0) >= n
+    if tid.startswith('win'):
+        try: n = int(tid.replace('win', ''))
+        except: n = 0
+        return s.get('wins_trade', 0) >= n
+    if tid.startswith('nft'):
+        try: n = int(tid.replace('nft', ''))
+        except: n = 0
+        return s.get('bought_nft', 0) >= n
+    if tid.startswith('earn'):
+        try: n = int(tid.replace('earn', ''))
+        except: n = 0
+        return s.get('earned', 0) >= n
+    if tid.startswith('sell'):
+        if tid == 'sell_nft': return s.get('sold_nft', 0) >= 1
+        try: n = int(tid.replace('sell', ''))
+        except: n = 0
+        return s.get('sold_nft', 0) >= n
+    if tid.startswith('skin'):
+        try: n = int(tid.replace('skin', ''))
+        except: n = 0
+        return s.get('bought_skins', 0) >= n
+    if tid == 'buy_bit': return s.get('bought_bit', 0) >= 1
+    if tid == 'buy_bit2': return s.get('bought_bit', 0) >= 2
+    if tid == 'buy_skin': return s.get('bought_skins', 0) >= 1
+    if tid == 'buy_all': return len(u.get('shop', {})) >= 3
     return False
 
 
-def claim_task(uid, task_id):
+def claim_task(uid, tid):
     u = get_user(uid)
     check_tasks_reset(u)
-    if task_id in u.get('tasks_done', {}):
-        return False
-    if not task_completed(uid, task_id):
-        return False
-    u['tasks_done'][task_id] = True
+    if tid in u.get('tasks_done', {}): return False
+    if not task_completed(uid, tid): return False
+    u['tasks_done'][tid] = True
     u['gram'] = round(u.get('gram', 0) + TASK_REWARD, 2)
     save_users()
     return True
@@ -555,26 +499,23 @@ def cb_menu_tasks(call):
     day = u.get('day', 1)
     if day > 10: day = 10
 
-    text = f'🎯 ЗАДАНИЯ ДНЯ {day}/10\n━━━━━━━━━━━━━━━\n\nНаграда: +{TASK_REWARD} GRAM за каждое\n\n'
+    text = f'🎯 ЗАДАНИЯ ДНЯ {day}/10\n━━━━━━━━━━━━━━━\n\n+{TASK_REWARD} GRAM за каждое\n\n'
     kb = types.InlineKeyboardMarkup(row_width=1)
-
     done_count = 0
     for t in tasks:
         done = t['id'] in u.get('tasks_done', {})
         done_count += 1 if done else 0
         if done:
-            text += f'✅ {t["text"]} (+{TASK_REWARD} GRAM)\n'
+            text += f'✅ {t["text"]}\n'
             kb.add(btn(f'✅ {t["text"]}', f'task_done_{t["id"]}', 'success'))
         elif task_completed(uid, t['id']):
-            text += f'🎁 {t["text"]} — ГОТОВО К ПОЛУЧЕНИЮ\n'
+            text += f'🎁 {t["text"]} — ГОТОВО\n'
             kb.add(btn(f'🎁 Забрать: {t["text"]}', f'task_claim_{t["id"]}', 'success'))
         else:
             text += f'⏳ {t["text"]}\n'
             kb.add(btn(f'⏳ {t["text"]}', f'task_na_{t["id"]}', 'danger'))
-
     text += f'\nВыполнено: {done_count}/{len(tasks)}'
     kb.add(btn('◀️ Назад', 'menu_back', 'danger'))
-
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
                               message_id=call.message.message_id, reply_markup=kb)
@@ -585,9 +526,8 @@ def cb_menu_tasks(call):
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith('task_claim_'))
 def cb_task_claim(call):
-    task_id = call.data.replace('task_claim_', '')
-    uid = call.from_user.id
-    if claim_task(uid, task_id):
+    tid = call.data.replace('task_claim_', '')
+    if claim_task(call.from_user.id, tid):
         bot.answer_callback_query(call.id, f'✅ +{TASK_REWARD} GRAM!')
     else:
         bot.answer_callback_query(call.id, '❌ Не выполнено')
@@ -595,17 +535,15 @@ def cb_task_claim(call):
 
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith('task_done_'))
-def cb_task_done(call):
-    bot.answer_callback_query(call.id, '✅ Уже получено')
+def cb_task_done(call): bot.answer_callback_query(call.id, '✅ Уже')
 
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith('task_na_'))
-def cb_task_na(call):
-    bot.answer_callback_query(call.id, '⏳ Ещё не выполнено')
+def cb_task_na(call): bot.answer_callback_query(call.id, '⏳ Не готово')
 
 
 # ==================== МЕНЮ ====================
-def main_menu():
+def main_menu(uid=None):
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(
         btn('📈 Трейдинг', 'menu_trade', 'primary'),
@@ -625,6 +563,15 @@ def main_menu():
     return kb
 
 
+def webapp_kb():
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton(
+        text='🎮 Открыть игру',
+        web_app=types.WebAppInfo(url=WEBAPP_URL)
+    ))
+    return kb
+
+
 @bot.message_handler(commands=['start'])
 def cmd_start(m):
     uid = m.from_user.id
@@ -633,23 +580,25 @@ def cmd_start(m):
     save_users()
 
     text = (
-        f'💎 DARKGRAM TRADE\n'
-        f'━━━━━━━━━━━━━━━\n\n'
+        f'💎 DARKGRAM TRADE\n━━━━━━━━━━━━━━━\n\n'
         f'👋 Привет, {m.from_user.first_name}!\n\n'
         f'💼 Баланс: {u["gram"]} GRAM\n'
         f'🎨 NFT: {len(u.get("nfts", []))} шт\n'
-        f'📅 День заданий: {u.get("day", 1)}/10\n'
+        f'📅 День: {u.get("day", 1)}/10\n'
         f'✅ Верификация: {"✅" if u["verified"] else "❌"}\n\n'
-        f'👇 Выбери действие:'
+        f'👇 Играй кнопкой ниже или в боте:'
     )
-    kb = main_menu()
-    if not u['verified']:
-        kb.add(btn('🎯 Пройти верификацию (+100 GRAM)', 'verify', 'success'))
-    bot.send_message(m.chat.id, text, reply_markup=kb)
+    bot.send_message(m.chat.id, text, reply_markup=webapp_kb())
+    bot.send_message(m.chat.id, 'Меню:', reply_markup=main_menu(uid))
 
 
 @bot.message_handler(commands=['help'])
 def cmd_help(m): cmd_start(m)
+
+
+@bot.message_handler(commands=['game'])
+def cmd_game(m):
+    bot.send_message(m.chat.id, '🎮 Открой игру:', reply_markup=webapp_kb())
 
 
 @bot.callback_query_handler(func=lambda c: c.data == 'menu_back')
@@ -657,17 +606,16 @@ def cb_menu_back(call):
     uid = call.from_user.id
     u = get_user(uid)
     text = (
-        f'💎 DARKGRAM TRADE\n'
-        f'━━━━━━━━━━━━━━━\n\n'
+        f'💎 DARKGRAM TRADE\n━━━━━━━━━━━━━━━\n\n'
         f'💼 Баланс: {u["gram"]} GRAM\n'
         f'🎨 NFT: {len(u.get("nfts", []))} шт\n'
-        f'📅 День заданий: {u.get("day", 1)}/10\n'
+        f'📅 День: {u.get("day", 1)}/10\n'
         f'✅ Верификация: {"✅" if u["verified"] else "❌"}\n\n'
-        f'👇 Выбери действие:'
+        f'👇 Выбери:'
     )
-    kb = main_menu()
+    kb = main_menu(uid)
     if not u['verified']:
-        kb.add(btn('🎯 Пройти верификацию (+100 GRAM)', 'verify', 'success'))
+        kb.add(btn('🎯 Верификация (+100 GRAM)', 'verify', 'success'))
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
                               message_id=call.message.message_id, reply_markup=kb)
@@ -681,13 +629,13 @@ def cb_verify(call):
     uid = call.from_user.id
     u = get_user(uid)
     if u.get('verified'):
-        bot.answer_callback_query(call.id, 'Уже пройдена'); return
+        bot.answer_callback_query(call.id, 'Уже'); return
     with USERS_LOCK:
         u['verified'] = True
         u['gram'] = u.get('gram', 0) + VERIFY_BONUS
         save_users()
     bot.answer_callback_query(call.id, f'✅ +{VERIFY_BONUS} GRAM!')
-    bot.send_message(call.message.chat.id, f'🎉 Верификация пройдена!\n\n💎 +{VERIFY_BONUS} GRAM')
+    bot.send_message(call.message.chat.id, f'🎉 +{VERIFY_BONUS} GRAM')
     cb_menu_back(call)
 
 
@@ -698,20 +646,14 @@ def cb_menu_trade(call):
     if not u['verified']:
         bot.answer_callback_query(call.id, 'Пройди верификацию'); return
     if call.from_user.id in ACTIVE_TRADES:
-        bot.answer_callback_query(call.id, 'У тебя уже открыта сделка'); return
+        bot.answer_callback_query(call.id, 'Уже есть сделка'); return
     bot.answer_callback_query(call.id)
-
     kb = types.InlineKeyboardMarkup(row_width=2)
     for cur in CURRENCIES:
         with RATES_LOCK: rate = RATES[cur]
         kb.add(btn(f'{CURRENCIES[cur]["name"]} ({rate:.2f})', f'trade_cur_{cur}', 'primary'))
     kb.add(btn('◀️ Назад', 'menu_back', 'danger'))
-
-    text = (
-        f'📈 ТРЕЙДИНГ\n━━━━━━━━━━━━━━━\n\n'
-        f'💼 Баланс: {u["gram"]} GRAM\n'
-        f'📊 Ставка: {MIN_BET}–{MAX_BET}\n\n👇 Выбери валюту:'
-    )
+    text = f'📈 ТРЕЙДИНГ\n━━━━━━━━━━━━━━━\n\n💼 Баланс: {u["gram"]} GRAM\n📊 {MIN_BET}–{MAX_BET}\n\n👇 Валюта:'
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
                               message_id=call.message.message_id, reply_markup=kb)
@@ -730,10 +672,8 @@ def cb_trade_cur(call):
     arrow = '📈' if chance >= 50 else '📉'
     text = (
         f'{CURRENCIES[cur]["name"]}\n━━━━━━━━━━━━━━━\n\n'
-        f'📊 Курс: {rate:.4f}\n'
-        f'{arrow} Шанс вверх: {chance}% | Вниз: {100-chance}%\n\n'
-        f'💼 Баланс: {u["gram"]} GRAM\n'
-        f'📊 Ставка: {MIN_BET}–{MAX_BET}\n\n✍️ Напиши сумму:'
+        f'📊 Курс: {rate:.4f}\n{arrow} Вверх: {chance}% | Вниз: {100-chance}%\n\n'
+        f'💼 Баланс: {u["gram"]}\n\n✍️ Сумма:'
     )
     bot.answer_callback_query(call.id)
     msg = bot.send_message(call.message.chat.id, text)
@@ -744,10 +684,11 @@ def process_bet(m, cur):
     uid = m.from_user.id
     u = get_user(uid)
     try: bet = float(m.text.strip())
-    except: bot.reply_to(m, '❌ Напиши число.'); return
-    if bet < MIN_BET: bot.reply_to(m, f'❌ Минимум: {MIN_BET}'); return
-    if bet > MAX_BET: bot.reply_to(m, f'❌ Максимум: {MAX_BET}'); return
-    if bet > u.get('gram', 0): bot.reply_to(m, f'❌ У тебя только {u["gram"]}'); return
+    except: bot.reply_to(m, '❌ Число'); return
+    if bet < MIN_BET or bet > MAX_BET:
+        bot.reply_to(m, f'❌ {MIN_BET}–{MAX_BET}'); return
+    if bet > u.get('gram', 0):
+        bot.reply_to(m, f'❌ Только {u["gram"]}'); return
 
     with USERS_LOCK:
         u['gram'] = round(u['gram'] - bet, 2)
@@ -760,14 +701,12 @@ def process_bet(m, cur):
     chance = get_chance_up(cur)
     arrow = '📈' if chance >= 50 else '📉'
     text = (
-        f'{CURRENCIES[cur]["name"]} — торговля\n━━━━━━━━━━━━━━━\n\n'
-        f'💰 Ставка: {bet} GRAM\n'
-        f'📊 Курс открытия: {rate:.4f}\n'
-        f'{arrow} Шанс вверх: {chance}% | Вниз: {100-chance}%\n\n'
-        f'⏱ Макс: {MAX_TRADE_TIME} сек'
+        f'{CURRENCIES[cur]["name"]}\n━━━━━━━━━━━━━━━\n\n'
+        f'💰 Ставка: {bet} GRAM\n📊 Курс: {rate:.4f}\n'
+        f'{arrow} Вверх: {chance}% | Вниз: {100-chance}%'
     )
     kb = types.InlineKeyboardMarkup(row_width=1)
-    kb.add(btn('ЗАКРЫТЬ СДЕЛКУ', f'close_{uid}', 'danger'))
+    kb.add(btn('ЗАКРЫТЬ', f'close_{uid}', 'danger'))
     kb.add(btn('Обновить', f'refresh_{uid}', 'primary'))
     msg = bot.send_message(m.chat.id, text, reply_markup=kb)
     trade.msg_id = msg.message_id
@@ -781,7 +720,6 @@ def cb_menu_nft(call):
     uid = call.from_user.id
     u = get_user(uid)
     with NFT_LOCK: minted = NFT_DATA.get('minted', {})
-
     kb = types.InlineKeyboardMarkup(row_width=1)
     for key, info in NFT_TYPES.items():
         sold = minted.get(key, 0)
@@ -795,13 +733,10 @@ def cb_menu_nft(call):
     kb.add(btn('📦 Мои NFT', 'nft_my', 'primary'))
     kb.add(btn('🎨 Купить скины', 'skins_menu', 'primary'))
     kb.add(btn('◀️ Назад', 'menu_back', 'danger'))
-
     text = (
         f'🎨 NFT DROP\n━━━━━━━━━━━━━━━\n\n'
-        f'💼 Баланс: {u["gram"]} GRAM\n'
-        f'🎨 Моих NFT: {len(u.get("nfts", []))}\n'
-        f'💰 Бонус: +{get_nft_bonus(uid):.1f}x к прибыли\n\n'
-        f'💡 +0.1 к прибыли за каждый NFT. Лимит — на бот!'
+        f'💼 Баланс: {u["gram"]}\n🎨 NFT: {len(u.get("nfts", []))}\n'
+        f'💰 Бонус: +{get_nft_bonus(uid):.1f}x'
     )
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
@@ -812,8 +747,7 @@ def cb_menu_nft(call):
 
 
 @bot.callback_query_handler(func=lambda c: c.data == 'nft_sold')
-def cb_nft_sold(call):
-    bot.answer_callback_query(call.id, '❌ Распродано', show_alert=True)
+def cb_nft_sold(call): bot.answer_callback_query(call.id, '❌ Распродано', show_alert=True)
 
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith('nft_buy_'))
@@ -824,30 +758,24 @@ def cb_nft_buy(call):
     info = NFT_TYPES[key]
     uid = call.from_user.id
     u = get_user(uid)
-
     with NFT_LOCK:
         sold = NFT_DATA.get('minted', {}).get(key, 0)
         if sold >= info['max']:
             bot.answer_callback_query(call.id, 'Распродано'); return
         if u.get('gram', 0) < info['price']:
-            bot.answer_callback_query(call.id, 'Недостаточно GRAM'); return
-
+            bot.answer_callback_query(call.id, 'Мало GRAM'); return
         with USERS_LOCK:
             u['gram'] -= info['price']
-            nft_id = f'N-{NEXT_NFT_ID:04d}'
+            nid = f'N-{NEXT_NFT_ID:04d}'
             NEXT_NFT_ID += 1
-            u['nfts'] = u.get('nfts', []) + [nft_id]
+            u['nfts'] = u.get('nfts', []) + [nid]
             u['stats']['bought_nft'] = u['stats'].get('bought_nft', 0) + 1
             save_users()
-
         NFT_DATA['minted'][key] = sold + 1
-        NFT_DATA['items'][nft_id] = {'type': key, 'owner': uid, 'skin': None, 'bought_at': int(time.time())}
+        NFT_DATA['items'][nid] = {'type': key, 'owner': uid, 'skin': None, 'bought_at': int(time.time())}
         save_nft()
-
-    bot.answer_callback_query(call.id, f'✅ Куплено! ID: {nft_id}')
-    bot.send_message(call.message.chat.id,
-        f'🎉 Ты купил {info["emoji"]} {info["name"]}!\n\nID: <code>{nft_id}</code>',
-        parse_mode='HTML')
+    bot.answer_callback_query(call.id, f'✅ {nid}')
+    bot.send_message(call.message.chat.id, f'🎉 Куплен {info["emoji"]}\nID: <code>{nid}</code>', parse_mode='HTML')
     cb_menu_nft(call)
 
 
@@ -857,7 +785,7 @@ def cb_nft_my(call):
     u = get_user(uid)
     nfts = u.get('nfts', [])
     if not nfts:
-        text = '📦 У тебя нет NFT.'
+        text = '📦 Нет NFT.'
         kb = types.InlineKeyboardMarkup()
         kb.add(btn('◀️ Назад', 'menu_nft', 'danger'))
         try:
@@ -866,26 +794,22 @@ def cb_nft_my(call):
         except:
             bot.send_message(call.message.chat.id, text, reply_markup=kb)
         bot.answer_callback_query(call.id); return
-
     text = '📦 МОИ NFT\n━━━━━━━━━━━━━━━\n\n'
     kb = types.InlineKeyboardMarkup(row_width=1)
     for nid in nfts:
         with NFT_LOCK: item = NFT_DATA['items'].get(nid)
         if not item: continue
         info = NFT_TYPES[item['type']]
-        skin_emoji = ''
-        if item.get('skin'):
-            skin_emoji = ' + ' + SKIN_TYPES[item['skin']]['emoji']
-        with MARKET_LOCK: on_sale = nid in MARKET
-        status = '🏪 На продаже' if on_sale else '✅'
-        text += f'{info["emoji"]}{skin_emoji} {info["name"]}\n   ID: <code>{nid}</code> {status}\n\n'
-        kb.add(btn(f'{info["emoji"]}{skin_emoji} {nid}', f'nft_item_{nid}', 'primary'))
+        skin = ''
+        if item.get('skin'): skin = ' + ' + SKIN_TYPES[item['skin']]['emoji']
+        text += f'{info["emoji"]}{skin} {nid}\n'
+        kb.add(btn(f'{info["emoji"]}{skin} {nid}', f'nft_item_{nid}', 'primary'))
     kb.add(btn('◀️ Назад', 'menu_nft', 'danger'))
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
-                              message_id=call.message.message_id, reply_markup=kb, parse_mode='HTML')
+                              message_id=call.message.message_id, reply_markup=kb)
     except:
-        bot.send_message(call.message.chat.id, text, reply_markup=kb, parse_mode='HTML')
+        bot.send_message(call.message.chat.id, text, reply_markup=kb)
     bot.answer_callback_query(call.id)
 
 
@@ -896,30 +820,23 @@ def cb_nft_item(call):
     with NFT_LOCK: item = NFT_DATA['items'].get(nid)
     if not item or item['owner'] != uid:
         bot.answer_callback_query(call.id, 'Не твой'); return
-
     info = NFT_TYPES[item['type']]
     with MARKET_LOCK:
         on_sale = nid in MARKET
         price = MARKET[nid]['price'] if on_sale else 0
-
     skin_txt = ''
-    if item.get('skin'):
-        skin_txt = f'\nСкин: {SKIN_TYPES[item["skin"]]["emoji"]} {SKIN_TYPES[item["skin"]]["name"]}'
-
+    if item.get('skin'): skin_txt = f'\nСкин: {SKIN_TYPES[item["skin"]]["emoji"]}'
     kb = types.InlineKeyboardMarkup(row_width=1)
     if on_sale:
-        kb.add(btn(f'❌ Снять с продажи ({price} GRAM)', f'nft_unsell_{nid}', 'danger'))
+        kb.add(btn(f'❌ Снять ({price} GRAM)', f'nft_unsell_{nid}', 'danger'))
     else:
-        kb.add(btn('💰 Выставить на продажу', f'nft_sell_{nid}', 'success'))
+        kb.add(btn('💰 На продажу', f'nft_sell_{nid}', 'success'))
     kb.add(btn('🎨 Сменить скин', f'nft_skin_{nid}', 'primary'))
     kb.add(btn('◀️ Назад', 'nft_my', 'danger'))
-
     text = (
-        f'{info["emoji"]} {info["name"]}{skin_txt}\n'
-        f'━━━━━━━━━━━━━━━\n\n'
-        f'ID: <code>{nid}</code>\n'
-        f'Бонус: +{info["bonus"]}x\n'
-        f'Статус: {"🏪 На продаже за " + str(price) if on_sale else "✅ В кошельке"}'
+        f'{info["emoji"]} {info["name"]}{skin_txt}\n━━━━━━━━━━━━━━━\n\n'
+        f'ID: <code>{nid}</code>\nБонус: +{info["bonus"]}x\n'
+        f'Статус: {"🏪 За " + str(price) if on_sale else "✅ В кошельке"}'
     )
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
@@ -939,8 +856,7 @@ def cb_nft_sell(call):
         bot.answer_callback_query(call.id, 'Не твой'); return
     bot.answer_callback_query(call.id)
     msg = bot.send_message(call.message.chat.id,
-        f'💰 За сколько GRAM продать <code>{nid}</code>?\n\nНапиши число:',
-        parse_mode='HTML')
+        f'💰 За сколько GRAM продать <code>{nid}</code>?', parse_mode='HTML')
     bot.register_next_step_handler(msg, process_sell, nid)
 
 
@@ -950,11 +866,11 @@ def process_sell(m, nid):
         price = float(m.text.strip())
         if price <= 0: raise ValueError
     except:
-        bot.reply_to(m, '❌ Напиши положительное число.'); return
+        bot.reply_to(m, '❌ Число'); return
     with MARKET_LOCK:
         MARKET[nid] = {'seller': uid, 'price': round(price, 2), 'listed_at': int(time.time())}
     save_market()
-    bot.reply_to(m, f'✅ <code>{nid}</code> выставлен за {price} GRAM', parse_mode='HTML')
+    bot.reply_to(m, f'✅ <code>{nid}</code> за {price} GRAM', parse_mode='HTML')
 
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith('nft_unsell_'))
@@ -975,21 +891,14 @@ def cb_nft_unsell(call):
 def cb_skins_menu(call):
     uid = call.from_user.id
     u = get_user(uid)
-    has_nft = len(u.get('nfts', [])) > 0
-
+    has = len(u.get('nfts', [])) > 0
     kb = types.InlineKeyboardMarkup(row_width=1)
     for key, info in SKIN_TYPES.items():
         kb.add(btn(f'{info["emoji"]} {info["name"]} — {info["price"]} GRAM',
                    f'skin_buy_{key}', 'success'))
     kb.add(btn('◀️ Назад', 'menu_nft', 'danger'))
-
-    warn = '' if has_nft else '\n\n⚠️ Сначала купи NFT!'
-    text = (
-        f'🎨 СКИНЫ\n━━━━━━━━━━━━━━━\n\n'
-        f'💼 Баланс: {u["gram"]} GRAM\n'
-        f'🎨 NFT: {len(u.get("nfts", []))}\n\n'
-        f'Скины надеваются на NFT и продаются вместе с ним.{warn}'
-    )
+    warn = '' if has else '\n\n⚠️ Сначала купи NFT!'
+    text = f'🎨 СКИНЫ\n━━━━━━━━━━━━━━━\n\n💼 {u["gram"]} GRAM\n🎨 NFT: {len(u.get("nfts", []))}{warn}'
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
                               message_id=call.message.message_id, reply_markup=kb)
@@ -1005,23 +914,17 @@ def cb_skin_buy(call):
     info = SKIN_TYPES[key]
     uid = call.from_user.id
     u = get_user(uid)
-
     if not u.get('nfts'):
-        bot.answer_callback_query(call.id, '❌ Сначала купи NFT', show_alert=True); return
+        bot.answer_callback_query(call.id, '❌ Сначала NFT', show_alert=True); return
     if u.get('gram', 0) < info['price']:
-        bot.answer_callback_query(call.id, 'Недостаточно GRAM'); return
-
+        bot.answer_callback_query(call.id, 'Мало GRAM'); return
     with USERS_LOCK:
         u['gram'] -= info['price']
-        if 'skins' not in u: u['skins'] = []
-        u['skins'].append(key)
+        u['skins'] = u.get('skins', []) + [key]
         u['stats']['bought_skins'] = u['stats'].get('bought_skins', 0) + 1
         save_users()
-
-    bot.answer_callback_query(call.id, f'✅ Куплено {info["emoji"]}')
-    msg = bot.send_message(call.message.chat.id,
-        f'✅ Скин {info["emoji"]} {info["name"]} куплен!\n\nНа какой NFT надеть?\n\nНапиши ID NFT:',
-        parse_mode='HTML')
+    bot.answer_callback_query(call.id, f'✅ {info["emoji"]}')
+    msg = bot.send_message(call.message.chat.id, f'✅ Куплен {info["emoji"]}\n\nНа какой NFT надеть? ID:', parse_mode='HTML')
     bot.register_next_step_handler(msg, process_skin_attach, key)
 
 
@@ -1030,13 +933,13 @@ def process_skin_attach(m, skin_key):
     nid = m.text.strip().upper()
     u = get_user(uid)
     if nid not in u.get('nfts', []):
-        bot.reply_to(m, f'❌ NFT <code>{nid}</code> не найден у тебя.', parse_mode='HTML'); return
+        bot.reply_to(m, f'❌ <code>{nid}</code> не найден', parse_mode='HTML'); return
     with NFT_LOCK:
         item = NFT_DATA['items'].get(nid)
         if not item: return
         item['skin'] = skin_key
         save_nft()
-    bot.reply_to(m, f'✅ {SKIN_TYPES[skin_key]["emoji"]} надет на <code>{nid}</code>', parse_mode='HTML')
+    bot.reply_to(m, f'✅ {SKIN_TYPES[skin_key]["emoji"]} на <code>{nid}</code>', parse_mode='HTML')
 
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith('nft_skin_'))
@@ -1048,7 +951,6 @@ def cb_nft_skin(call):
         bot.answer_callback_query(call.id, 'Не твой'); return
     if not u.get('skins'):
         bot.answer_callback_query(call.id, 'Нет скинов'); return
-
     kb = types.InlineKeyboardMarkup(row_width=1)
     for key in u['skins']:
         info = SKIN_TYPES.get(key)
@@ -1075,7 +977,7 @@ def cb_skin_set(call):
         if item:
             item['skin'] = skin_key
             save_nft()
-    bot.answer_callback_query(call.id, '✅ Установлено')
+    bot.answer_callback_query(call.id, '✅')
 
 
 # ==================== РЫНОК ====================
@@ -1083,7 +985,7 @@ def cb_skin_set(call):
 def cb_menu_market(call):
     with MARKET_LOCK: items = list(MARKET.items())
     if not items:
-        text = '🏪 РЫНОК ПУСТ\n━━━━━━━━━━━━━━━\n\nПока пусто.'
+        text = '🏪 РЫНОК ПУСТ'
         kb = types.InlineKeyboardMarkup()
         kb.add(btn('🆔 Купить по ID', 'market_byid', 'primary'))
         kb.add(btn('◀️ Назад', 'menu_back', 'danger'))
@@ -1093,19 +995,17 @@ def cb_menu_market(call):
         except:
             bot.send_message(call.message.chat.id, text, reply_markup=kb)
         bot.answer_callback_query(call.id); return
-
-    text = '🏪 РЫНОК NFT\n━━━━━━━━━━━━━━━\n\n'
+    text = '🏪 РЫНОК\n━━━━━━━━━━━━━━━\n\n'
     kb = types.InlineKeyboardMarkup(row_width=1)
     for nid, data in items[:10]:
         with NFT_LOCK: item = NFT_DATA['items'].get(nid)
         if not item: continue
         info = NFT_TYPES[item['type']]
         seller = get_user(data['seller'])
-        skin_emoji = ''
-        if item.get('skin'): skin_emoji = ' + ' + SKIN_TYPES[item['skin']]['emoji']
-        text += f'{info["emoji"]}{skin_emoji} {nid} — {data["price"]} GRAM\n   Продавец: {seller.get("name","?")}\n\n'
-        kb.add(btn(f'💎 Купить {info["emoji"]}{skin_emoji} {nid} — {data["price"]}',
-                   f'market_buy_{nid}', 'success'))
+        skin = ''
+        if item.get('skin'): skin = ' + ' + SKIN_TYPES[item['skin']]['emoji']
+        text += f'{info["emoji"]}{skin} {nid} — {data["price"]} GRAM\n{seller.get("name","?")}\n\n'
+        kb.add(btn(f'💎 Купить {nid} — {data["price"]}', f'market_buy_{nid}', 'success'))
     kb.add(btn('🆔 Купить по ID', 'market_byid', 'primary'))
     kb.add(btn('◀️ Назад', 'menu_back', 'danger'))
     try:
@@ -1125,7 +1025,7 @@ def cb_market_buy(call):
 @bot.callback_query_handler(func=lambda c: c.data == 'market_byid')
 def cb_market_byid(call):
     bot.answer_callback_query(call.id)
-    msg = bot.send_message(call.message.chat.id, '🆔 Напиши ID NFT (например N-0001):')
+    msg = bot.send_message(call.message.chat.id, '🆔 ID NFT:')
     bot.register_next_step_handler(msg, process_buy_byid)
 
 
@@ -1133,7 +1033,7 @@ def process_buy_byid(m):
     nid = m.text.strip().upper()
     with MARKET_LOCK:
         if nid not in MARKET:
-            bot.reply_to(m, f'❌ <code>{nid}</code> не найден.', parse_mode='HTML'); return
+            bot.reply_to(m, f'❌ <code>{nid}</code> не найден', parse_mode='HTML'); return
     do_market_buy_msg(m, nid)
 
 
@@ -1141,16 +1041,14 @@ def do_market_buy(call, nid):
     buyer = call.from_user.id
     with MARKET_LOCK:
         if nid not in MARKET:
-            bot.answer_callback_query(call.id, 'Не найдено'); return
+            bot.answer_callback_query(call.id, 'Нет'); return
         data = MARKET[nid]
-        seller = data['seller']
-        price = data['price']
+        seller = data['seller']; price = data['price']
     if buyer == seller:
-        bot.answer_callback_query(call.id, 'Это твой NFT'); return
+        bot.answer_callback_query(call.id, 'Твой'); return
     bu = get_user(buyer)
     if bu.get('gram', 0) < price:
-        bot.answer_callback_query(call.id, 'Недостаточно GRAM'); return
-
+        bot.answer_callback_query(call.id, 'Мало GRAM'); return
     with USERS_LOCK:
         bu['gram'] = round(bu['gram'] - price, 2)
         su = get_user(seller)
@@ -1165,9 +1063,8 @@ def do_market_buy(call, nid):
     with MARKET_LOCK:
         if nid in MARKET: del MARKET[nid]
         save_market()
-
-    bot.answer_callback_query(call.id, f'✅ Куплено за {price}')
-    bot.send_message(call.message.chat.id, f'🎉 Куплен <code>{nid}</code> за {price} GRAM', parse_mode='HTML')
+    bot.answer_callback_query(call.id, f'✅ За {price}')
+    bot.send_message(call.message.chat.id, f'🎉 Куплен <code>{nid}</code> за {price}', parse_mode='HTML')
     try: bot.send_message(seller, f'💰 Твой <code>{nid}</code> купили за {price}!', parse_mode='HTML')
     except: pass
 
@@ -1175,14 +1072,12 @@ def do_market_buy(call, nid):
 def do_market_buy_msg(m, nid):
     buyer = m.from_user.id
     with MARKET_LOCK: data = MARKET.get(nid)
-    if not data: bot.reply_to(m, 'Не найдено'); return
-    seller = data['seller']
-    price = data['price']
-    if buyer == seller: bot.reply_to(m, 'Это твой NFT'); return
+    if not data: bot.reply_to(m, 'Нет'); return
+    seller = data['seller']; price = data['price']
+    if buyer == seller: bot.reply_to(m, 'Твой'); return
     bu = get_user(buyer)
     if bu.get('gram', 0) < price:
-        bot.reply_to(m, f'❌ Нужно {price}, у тебя {bu["gram"]}'); return
-
+        bot.reply_to(m, f'❌ Нужно {price}'); return
     with USERS_LOCK:
         bu['gram'] = round(bu['gram'] - price, 2)
         su = get_user(seller)
@@ -1197,9 +1092,8 @@ def do_market_buy_msg(m, nid):
     with MARKET_LOCK:
         if nid in MARKET: del MARKET[nid]
         save_market()
-
-    bot.reply_to(m, f'🎉 Куплен <code>{nid}</code> за {price}', parse_mode='HTML')
-    try: bot.send_message(seller, f'💰 Твой <code>{nid}</code> купили за {price}!', parse_mode='HTML')
+    bot.reply_to(m, f'🎉 <code>{nid}</code> за {price}', parse_mode='HTML')
+    try: bot.send_message(seller, f'💰 <code>{nid}</code> купили за {price}!', parse_mode='HTML')
     except: pass
 
 
@@ -1229,10 +1123,8 @@ def cb_menu_wallet(call):
 # ==================== ТОП ====================
 @bot.callback_query_handler(func=lambda c: c.data == 'menu_top')
 def cb_menu_top(call):
-    arr = []
-    for uid, u in USERS.items():
-        arr.append((u.get('name', 'Player'), u.get('gram', 0)))
-    arr.sort(key=lambda x: x[1], reverse=True)
+    arr = sorted([(u.get('name', 'Player'), u.get('gram', 0)) for u in USERS.values()],
+                 key=lambda x: x[1], reverse=True)
     text = '🏆 ТОП GRAM\n━━━━━━━━━━━━━━━\n\n'
     medals = {1: '🥇', 2: '🥈', 3: '🥉'}
     for i, (name, gram) in enumerate(arr[:20], 1):
@@ -1250,12 +1142,11 @@ def cb_menu_top(call):
 # ==================== КУРСЫ ====================
 @bot.callback_query_handler(func=lambda c: c.data == 'menu_rates')
 def cb_menu_rates(call):
-    text = '📊 КУРСЫ ВАЛЮТ\n━━━━━━━━━━━━━━━\n\n'
+    text = '📊 КУРСЫ\n━━━━━━━━━━━━━━━\n\n'
     with RATES_LOCK:
         for cur, info in CURRENCIES.items():
             rate = RATES[cur]
-            start = info['start']
-            change = ((rate - start) / start) * 100
+            change = ((rate - info['start']) / info['start']) * 100
             arrow = '📈' if change >= 0 else '📉'
             sign = '+' if change >= 0 else ''
             text += f'{info["name"]}\n{arrow} {rate:.4f} ({sign}{change:.2f}%)\n\n'
@@ -1285,11 +1176,7 @@ def cb_menu_shop(call):
     kb.add(btn(f'⚡ BSG•BST (+{bsg}%) — 100 GRAM', 'buy_BSG', 'success'))
     kb.add(btn('📢 WWR (+50%) — 100 GRAM', 'buy_WWR', 'success'))
     kb.add(btn('◀️ Назад', 'menu_back', 'danger'))
-    text = (
-        f'🛒 МАГАЗИН\n━━━━━━━━━━━━━━━\n\n'
-        f'💼 Баланс: {u["gram"]} GRAM\n\n'
-        f'Куплено: DRK {"✅" if u.get("shop",{}).get("DRK") else "❌"} | DARKGRAM {"✅" if u.get("shop",{}).get("DARKGRAM") else "❌"} | BSG {"✅" if u.get("shop",{}).get("BSG") else "❌"} | WWR {"✅" if u.get("wwr") else "❌"}'
-    )
+    text = f'🛒 МАГАЗИН\n━━━━━━━━━━━━━━━\n\n💼 {u["gram"]} GRAM'
     try:
         bot.edit_message_text(text, chat_id=call.message.chat.id,
                               message_id=call.message.message_id, reply_markup=kb)
@@ -1308,10 +1195,8 @@ def cb_buy(call):
         if u.get('wwr'): bot.answer_callback_query(call.id, 'Уже'); return
         if u.get('gram', 0) < 100: bot.answer_callback_query(call.id, 'Мало'); return
         with USERS_LOCK:
-            u['gram'] -= 100
-            u['wwr'] = True
-            save_users()
-        bot.answer_callback_query(call.id, '✅ WWR куплено')
+            u['gram'] -= 100; u['wwr'] = True; save_users()
+        bot.answer_callback_query(call.id, '✅')
     else:
         if item not in prices: return
         if u.get('shop', {}).get(item): bot.answer_callback_query(call.id, 'Уже'); return
@@ -1322,7 +1207,7 @@ def cb_buy(call):
             u['shop'][item] = True
             u['stats']['bought_bit'] = u['stats'].get('bought_bit', 0) + 1
             save_users()
-        bot.answer_callback_query(call.id, f'✅ {item}')
+        bot.answer_callback_query(call.id, '✅')
     cb_menu_shop(call)
 
 
@@ -1331,14 +1216,15 @@ def cb_buy(call):
 def cb_menu_how(call):
     text = (
         'ℹ️ КАК ИГРАТЬ\n━━━━━━━━━━━━━━━\n\n'
-        '1️⃣ Верификация → +100 GRAM\n\n'
-        '2️⃣ 📈 Трейдинг — ставки, курс каждые 3 сек\n\n'
-        '3️⃣ 🎯 Задания — 10 дней, +20 GRAM за каждое\n\n'
-        '4️⃣ 🎨 NFT — 8 видов, +0.1x к прибыли\n\n'
-        '5️⃣ 🎨 Скины — надеваются на NFT\n\n'
-        '6️⃣ 🏪 Рынок — продажа NFT между игроками\n\n'
-        '7️⃣ 🛒 Магазин биткоинов\n\n'
-        '🏆 Цель: топ по GRAM!'
+        '🎮 Mini App — кнопка «Открыть игру»\n\n'
+        '1️⃣ Верификация → +100 GRAM\n'
+        '2️⃣ Трейдинг — ставки, курс 3 сек\n'
+        '3️⃣ Задания — 10 дней × 5 × +20 GRAM\n'
+        '4️⃣ NFT — 8 видов, +0.1x к прибыли\n'
+        '5️⃣ Скины — на NFT\n'
+        '6️⃣ Рынок — продажа NFT\n'
+        '7️⃣ Магазин биткоинов\n'
+        '🏆 Топ по GRAM!'
     )
     kb = types.InlineKeyboardMarkup()
     kb.add(btn('◀️ Назад', 'menu_back', 'danger'))
@@ -1352,5 +1238,5 @@ def cb_menu_how(call):
 
 # ==================== ЗАПУСК ====================
 if __name__ == '__main__':
-    print('Full bot started')
+    print('Bot started')
     bot.infinity_polling(timeout=30, long_polling_timeout=30)
