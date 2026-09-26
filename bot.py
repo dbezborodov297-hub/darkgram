@@ -10,7 +10,7 @@ from telebot import types
 
 # ==================== НАСТРОЙКИ ====================
 TOKEN = '8514412667:AAHN-vz-JKdZcwj2eHV000x6g-fRPXyJWLk'
-WEBAPP_URL = 'https://darkgram-1.onrender.com'
+WEBAPP_URL = 'https://darkgram-2.onrender.com'
 
 START_GRAM = 0
 VERIFY_BONUS = 100
