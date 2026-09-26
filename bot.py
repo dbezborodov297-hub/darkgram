@@ -9,7 +9,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from telebot import types
 
 # ==================== НАСТРОЙКИ ====================
-TOKEN = '8514412667:AAHN-vz-JKdZcwj2eHV000x6g-fRPXyJWLk'
+TOKEN = '8514412667:AAH2d2sNkYBU4Vg4TacZgHFBo5TDK1R4cPw'
 WEBAPP_URL = 'https://darkgram-2.onrender.com'
 
 START_GRAM = 0
