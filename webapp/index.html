@@ -2,44 +2,109 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
 <title>DARKGRAM</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
 :root{
---bg:#0a0e14;--card:#141a24;--card-2:#1a2130;--line:#232c3a;
---accent:#4d8fd6;--accent-2:#6ba6e3;--text:#fff;--dim:#8b9aab;
---muted:#5a6b7d;--green:#4dcd5e;--gold:#e8b64c;--red:#e0455a;
---icon-blue:#3d7ee0;--icon-purple:#8b5cf6;--icon-green:#22c55e;
---icon-gold:#e8b64c;--icon-gray:#64748b;--icon-red:#e0455a;
+  /* iOS dark palette */
+  --bg:#000000;
+  --bg-2:#0a0a0a;
+  --card:#1c1c1e;
+  --card-2:#2c2c2e;
+  --line:#2c2c2e;
+  --line-2:#3a3a3c;
+  --text:#ffffff;
+  --text-2:#ebebf5;
+  --dim:#98989f;
+  --muted:#636366;
+  --accent:#0a84ff;
+  --accent-2:#409cff;
+  --green:#30d158;
+  --green-2:#34c759;
+  --gold:#ffd60a;
+  --red:#ff453a;
+  --purple:#bf5af2;
+  --orange:#ff9f0a;
+  --pink:#ff375f;
+  --teal:#5ac8fa;
+  --icon-blue:#0a84ff;
+  --icon-purple:#bf5af2;
+  --icon-green:#30d158;
+  --icon-gold:#ffd60a;
+  --icon-gray:#636366;
+  --icon-red:#ff453a;
+  --icon-orange:#ff9f0a;
+  --icon-pink:#ff375f;
+  --icon-teal:#5ac8fa;
 }
-html,body{height:100%;overflow-x:hidden}
+
+html,body{
+  height:100%;
+  overflow-x:hidden;
+  background:var(--bg);
+}
+
 body{
-font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;
-background:radial-gradient(ellipse at top,#131a26 0%,#0a0e14 60%);
-background-attachment:fixed;color:var(--text);
--webkit-font-smoothing:antialiased;font-size:15px;line-height:1.45;
-padding-bottom:90px;min-height:100vh;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  font-size:17px;
+  line-height:1.4;
+  padding-bottom:calc(110px + env(safe-area-inset-bottom));
+  min-height:100vh;
+  letter-spacing:-.2px;
 }
+
+/* HEADER */
 .header{
-background:rgba(20,26,36,0.9);backdrop-filter:blur(20px);
-border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;
-padding:12px 16px;display:flex;justify-content:space-between;align-items:center;
+  background:rgba(0,0,0,0.85);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:.5px solid var(--line);
+  position:sticky;top:0;z-index:50;
+  padding:12px 16px;
+  padding-top:calc(12px + env(safe-area-inset-top));
+  display:flex;justify-content:space-between;align-items:center;
+  min-height:52px;
 }
-.header .logo{font-size:18px;font-weight:800;letter-spacing:-.3px}
-.header .sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px}
-.online{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim)}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--green);
-box-shadow:0 0 8px var(--green);animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.header .logo{font-size:17px;font-weight:700;letter-spacing:-.4px}
+.header .sub{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-top:2px}
+.online{
+  display:flex;align-items:center;gap:6px;
+  font-size:13px;color:var(--dim);
+  background:rgba(48,209,88,0.15);
+  padding:5px 10px;border-radius:20px;
+  font-weight:600;
+}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* CONTAINER */
 .container{padding:16px;max-width:520px;margin:0 auto}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
-padding:16px;margin-bottom:12px}
-.title{font-size:18px;font-weight:700;margin-bottom:10px}
-.sub{font-size:13px;color:var(--dim)}
-.tg-icon{width:36px;height:36px;border-radius:10px;
-display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* CARDS - iOS style */
+.card{
+  background:var(--card);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:12px;
+  border:.5px solid var(--line);
+}
+.title{font-size:20px;font-weight:700;letter-spacing:-.5px;margin-bottom:8px}
+.sub{font-size:14px;color:var(--dim);letter-spacing:-.1px}
+
+/* iOS ICONS */
+.tg-icon{
+  width:38px;height:38px;border-radius:10px;
+  display:inline-flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
 .tg-icon svg{width:22px;height:22px;stroke:#fff;fill:none;
 stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .tg-icon.blue{background:var(--icon-blue)}
@@ -48,85 +113,202 @@ stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .tg-icon.gold{background:var(--icon-gold)}
 .tg-icon.gray{background:var(--icon-gray)}
 .tg-icon.red{background:var(--icon-red)}
-.balance{text-align:center;padding:24px 16px}
-.balance .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px}
-.balance .val{font-size:40px;font-weight:800;letter-spacing:-1px;margin-top:6px}
-.balance .inc{font-size:14px;color:var(--green);font-weight:600;margin-top:4px}
+.tg-icon.orange{background:var(--icon-orange)}
+.tg-icon.pink{background:var(--icon-pink)}
+.tg-icon.teal{background:var(--icon-teal)}
+
+/* BALANCE */
+.balance{text-align:center;padding:28px 16px}
+.balance .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-weight:600}
+.balance .val{font-size:48px;font-weight:800;letter-spacing:-2px;margin-top:8px;line-height:1}
+.balance .inc{font-size:15px;color:var(--green);font-weight:600;margin-top:8px}
+
+/* GRID */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;
-display:flex;align-items:center;gap:12px}
+.stat{background:var(--card);border-radius:16px;padding:14px;
+display:flex;align-items:center;gap:12px;border:.5px solid var(--line)}
 .stat-info{flex:1;min-width:0}
-.stat .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px}
-.stat .v{font-size:18px;font-weight:700;margin-top:2px}
-.item{background:var(--card);border:1px solid var(--line);border-radius:14px;
-padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.stat .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;font-weight:600}
+.stat .v{font-size:22px;font-weight:700;margin-top:2px;letter-spacing:-.5px}
+
+/* ITEM */
+.item{
+  background:var(--card);border-radius:14px;padding:14px;
+  margin-bottom:8px;display:flex;align-items:center;gap:12px;
+  border:.5px solid var(--line);
+}
 .item-info{flex:1;min-width:0}
-.item .name{font-size:15px;font-weight:700;margin-bottom:3px}
-.item .info{font-size:12px;color:var(--dim)}
-.item .price{font-size:13px;color:var(--gold);font-weight:700;margin-top:3px}
-.btn{background:var(--accent);color:#fff;border:none;border-radius:10px;
-padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;
-font-family:inherit;white-space:nowrap;transition:.15s}
-.btn:active{transform:scale(.96);opacity:.9}
+.item .name{font-size:16px;font-weight:600;margin-bottom:2px;letter-spacing:-.2px}
+.item .info{font-size:13px;color:var(--dim);letter-spacing:-.1px}
+.item .price{font-size:14px;color:var(--gold);font-weight:600;margin-top:3px}
+
+/* BUTTONS - iOS */
+.btn{
+  background:var(--accent);color:#fff;border:none;border-radius:12px;
+  padding:11px 18px;font-size:15px;font-weight:600;cursor:pointer;
+  font-family:inherit;white-space:nowrap;transition:.15s;
+  letter-spacing:-.2px;
+}
+.btn:active{transform:scale(.96);opacity:.85}
 .btn:disabled{background:var(--card-2);color:var(--muted);cursor:not-allowed}
 .btn.green{background:var(--green)}
-.btn.gold{background:var(--gold);color:#1a1408}
+.btn.gold{background:var(--gold);color:#000}
 .btn.red{background:var(--red)}
-.btn.block{width:100%;display:block;padding:14px}
-.nav{position:fixed;bottom:0;left:0;right:0;
-background:rgba(20,26,36,0.98);backdrop-filter:blur(20px);
-border-top:1px solid var(--line);display:flex;
-padding:6px 0 calc(6px + env(safe-area-inset-bottom));z-index:100;
-max-width:520px;margin:0 auto;left:50%;transform:translateX(-50%);}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;
-justify-content:center;gap:4px;padding:8px 4px;font-size:10px;
-font-weight:600;color:var(--muted);cursor:pointer;transition:.2s;
-user-select:none;border-radius:10px;margin:0 2px;}
+.btn.block{width:100%;display:block;padding:15px;font-size:17px;border-radius:14px}
+.btn.small{padding:8px 14px;font-size:14px}
+
+/* NAVIGATION - iOS TabBar */
+.nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(20,20,22,0.92);
+  backdrop-filter:saturate(180%) blur(30px);
+  -webkit-backdrop-filter:saturate(180%) blur(30px);
+  border-top:.5px solid var(--line);
+  display:flex;
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+  z-index:100;
+  max-width:520px;margin:0 auto;left:50%;transform:translateX(-50%);
+  width:100%;
+}
+.nav-item{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  padding:6px 2px;
+  font-size:10px;
+  font-weight:500;
+  color:var(--muted);
+  cursor:pointer;
+  transition:color .2s;
+  user-select:none;
+  min-width:0;
+  -webkit-tap-highlight-color:transparent;
+}
 .nav-item.active{color:var(--accent-2)}
-.nav-item svg{width:24px;height:24px;stroke:currentColor;fill:none;
-stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:.2s}
-.nav-item.active svg{stroke:var(--accent-2)}
+.nav-item svg{
+  width:26px;height:26px;
+  stroke:currentColor;fill:none;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  transition:stroke .2s;
+}
+.nav-item span{
+  font-size:10px;
+  letter-spacing:-.1px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:100%;
+  text-align:center;
+}
+
+/* TABS */
 .tab{display:none}
-.tab.active{display:block;animation:fade .25s}
+.tab.active{display:block;animation:fade .25s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(120%);
-background:var(--card-2);border:1px solid var(--line);color:var(--text);
-padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;
-z-index:999;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:calc(120px + env(safe-area-inset-bottom));left:50%;
+  transform:translateX(-50%) translateY(120%);
+  background:rgba(44,44,46,0.98);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:.5px solid var(--line-2);
+  color:var(--text);
+  padding:12px 20px;border-radius:14px;
+  font-size:15px;font-weight:600;
+  z-index:999;opacity:0;transition:.25s;
+  pointer-events:none;max-width:90vw;text-align:center;
+  letter-spacing:-.2px;
+}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* LOADING */
 .loading{text-align:center;padding:40px;color:var(--muted);font-size:12px;
-font-weight:700;letter-spacing:2px;text-transform:uppercase}
-.rank-row{display:flex;align-items:center;gap:12px;padding:12px 14px;
-background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+font-weight:600;letter-spacing:2px;text-transform:uppercase}
+
+/* TOP */
+.rank-row{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  background:var(--card);border-radius:14px;margin-bottom:8px;
+  border:.5px solid var(--line);
+}
 .rank-row .r{font-size:16px;font-weight:800;width:30px;text-align:center;color:var(--muted)}
-.rank-row .r.g{color:#ffd700}.rank-row .r.s{color:#c0c0c0}.rank-row .r.b{color:#cd7f32}
-.rank-row .who{flex:1;font-size:14px;font-weight:600}
-.rank-row .val{font-size:13px;font-weight:700;color:var(--accent-2)}
+.rank-row .r.g{color:#ffd700}
+.rank-row .r.s{color:#c0c0c0}
+.rank-row .r.b{color:#cd7f32}
+.rank-row .who{flex:1;font-size:16px;font-weight:600;letter-spacing:-.2px;
+overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-row .val{font-size:15px;font-weight:700;color:var(--accent-2);white-space:nowrap}
+
+/* FIELDS - iOS */
 .field{margin-bottom:12px}
-.field label{display:block;font-size:11px;font-weight:700;color:var(--muted);
-text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px}
-.field input,.field select{width:100%;background:var(--bg);border:1px solid var(--line);
-border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-family:inherit}
-.field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
-.task-row{display:flex;align-items:center;gap:12px;padding:12px 14px;
-background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
-.task-row.done{border-color:var(--green);opacity:.7}
-.task-row.ready{border-color:var(--gold)}
-.task-text{flex:1;font-size:14px;font-weight:600}
-.task-status{font-size:12px;font-weight:700;white-space:nowrap}
-.trade-active{background:linear-gradient(135deg,var(--accent),#3a6ea5);
-color:#fff;border-radius:16px;padding:20px;margin-bottom:12px}
+.field label{
+  display:block;font-size:12px;font-weight:600;
+  color:var(--muted);text-transform:uppercase;
+  letter-spacing:1.2px;margin-bottom:6px;
+}
+.field input,.field select{
+  width:100%;background:var(--card-2);
+  border:none;border-radius:12px;
+  padding:14px 16px;color:var(--text);
+  font-size:17px;font-family:inherit;
+  letter-spacing:-.2px;
+}
+.field input:focus,.field select:focus{
+  outline:2px solid var(--accent);
+  outline-offset:-1px;
+}
+.field input::placeholder{color:var(--muted)}
+
+/* TASK ROW */
+.task-row{
+  display:flex;align-items:center;gap:12px;
+  padding:14px;background:var(--card);
+  border-radius:14px;margin-bottom:8px;
+  border:.5px solid var(--line);
+}
+.task-row.done{border-color:rgba(48,209,88,0.3);opacity:.7}
+.task-row.ready{border-color:rgba(255,214,10,0.4);background:rgba(255,214,10,0.05)}
+.task-text{flex:1;font-size:15px;font-weight:500;letter-spacing:-.2px}
+.task-status{font-size:13px;font-weight:600;white-space:nowrap}
+
+/* TRADE ACTIVE */
+.trade-active{
+  background:linear-gradient(135deg,#0a84ff,#0060df);
+  color:#fff;border-radius:20px;padding:22px;
+  margin-bottom:12px;
+  box-shadow:0 8px 24px rgba(10,132,255,0.3);
+}
 .trade-active .row{display:flex;justify-content:space-between;
-font-size:14px;margin-bottom:8px}
-.trade-active .big{font-size:28px;font-weight:800;text-align:center;margin:12px 0}
-.progress{background:var(--bg);border-radius:10px;height:8px;overflow:hidden;
-border:1px solid var(--line);margin:10px 0}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));
-transition:width .3s;border-radius:10px}
-.skin-slot{width:44px;height:44px;border-radius:12px;background:var(--card-2);
-border:1px solid var(--line);display:inline-flex;align-items:center;
-justify-content:center;font-size:22px;margin-right:8px;margin-bottom:8px}
-.skin-slot.active{border-color:var(--accent);background:rgba(77,143,214,0.15)}
+font-size:15px;margin-bottom:10px;opacity:.95}
+.trade-active .big{font-size:36px;font-weight:800;text-align:center;
+margin:16px 0;letter-spacing:-1.5px}
+
+/* PROGRESS */
+.progress{
+  background:var(--card-2);border-radius:10px;
+  height:8px;overflow:hidden;margin:10px 0;
+}
+.progress-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  transition:width .3s;border-radius:10px;
+}
+
+/* SKINS */
+.skin-slot{
+  width:48px;height:48px;border-radius:12px;
+  background:var(--card-2);border:.5px solid var(--line);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:24px;margin-right:8px;margin-bottom:8px;
+}
+.skin-slot.active{border-color:var(--accent);background:rgba(10,132,255,0.15)}
 .skin-grid{display:flex;flex-wrap:wrap;gap:8px}
 </style>
 </head>
@@ -191,7 +373,7 @@ justify-content:center;font-size:22px;margin-right:8px;margin-bottom:8px}
     </div>
     <div class="card">
       <div class="title">Скины</div>
-      <div class="sub">Скины надеваются на NFT</div>
+      <div class="sub">Надеваются на NFT</div>
       <div id="skinsShop" style="margin-top:12px"></div>
     </div>
   </div>
@@ -200,7 +382,7 @@ justify-content:center;font-size:22px;margin-right:8px;margin-bottom:8px}
   <div class="tab" id="tab-tasks">
     <div class="card">
       <div class="title">Задания · День <span id="taskDay">1</span>/10</div>
-      <div class="sub">Награда: +20 GRAM за каждое</div>
+      <div class="sub">+20 GRAM за каждое</div>
       <div class="progress"><div class="progress-fill" id="taskProgress" style="width:0%"></div></div>
       <div class="sub" id="taskCount">0/5</div>
     </div>
@@ -237,7 +419,7 @@ justify-content:center;font-size:22px;margin-right:8px;margin-bottom:8px}
           <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
         </div>
         <div>
-          <div style="font-size:16px;font-weight:700" id="userName">Профиль</div>
+          <div style="font-size:18px;font-weight:700;letter-spacing:-.3px" id="userName">Профиль</div>
           <div class="sub" id="userId"></div>
         </div>
       </div>
@@ -256,12 +438,12 @@ justify-content:center;font-size:22px;margin-right:8px;margin-bottom:8px}
     <div id="verifyBox"></div>
 
     <div class="card">
-      <div class="title" style="font-size:16px">Магазин биткоинов</div>
+      <div class="title" style="font-size:18px">Магазин биткоинов</div>
       <div id="shopList" style="margin-top:12px"></div>
     </div>
 
     <div class="card">
-      <div class="title" style="font-size:16px">Перевести GRAM</div>
+      <div class="title" style="font-size:18px">Перевести GRAM</div>
       <div class="field" style="margin-top:12px">
         <label>Кому (ID)</label>
         <input id="payTarget" placeholder="123456789" inputmode="numeric">
@@ -276,6 +458,7 @@ justify-content:center;font-size:22px;margin-right:8px;margin-bottom:8px}
 
 </div>
 
+<!-- НАВИГАЦИЯ — iOS TabBar -->
 <div class="nav">
   <div class="nav-item active" data-tab="trade">
     <svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>
@@ -359,7 +542,7 @@ async function loadPlayer() {
 
   const vbox = document.getElementById('verifyBox');
   if (!player.verified) {
-    vbox.innerHTML = '<div class="card"><div class="title" style="font-size:16px">Верификация</div><div class="sub">Пройди один раз, получи +100 GRAM</div><button class="btn green block" style="margin-top:12px" onclick="doVerify()">Пройти верификацию</button></div>';
+    vbox.innerHTML = '<div class="card"><div class="title" style="font-size:18px">Верификация</div><div class="sub">Пройди один раз, получи +100 GRAM</div><button class="btn green block" style="margin-top:12px" onclick="doVerify()">Пройти верификацию</button></div>';
   } else {
     vbox.innerHTML = '';
   }
@@ -409,13 +592,13 @@ function renderTrade() {
   if (!currentTrade) { el.innerHTML = ''; return; }
   const profit = currentTrade.profit || 0;
   const sign = profit >= 0 ? '+' : '';
-  const color = profit >= 0 ? 'var(--green)' : 'var(--red)';
+  const color = profit >= 0 ? '#c8ffd4' : '#ffcccc';
   el.innerHTML = '<div class="trade-active">' +
     '<div class="row"><span>Валютa</span><b>' + currentTrade.currency + '</b></div>' +
     '<div class="row"><span>Ставка</span><b>' + currentTrade.bet + ' GRAM</b></div>' +
     '<div class="row"><span>Курс</span><b>' + currentTrade.open_rate.toFixed(4) + ' → ' + currentTrade.current_rate.toFixed(4) + '</b></div>' +
     '<div class="big" style="color:' + color + '">' + sign + profit.toFixed(2) + ' GRAM</div>' +
-    '<button class="btn block" style="background:#fff;color:#1a1408" onclick="closeTrade()">ЗАКРЫТЬ СДЕЛКУ</button>' +
+    '<button class="btn block" style="background:#fff;color:#0a84ff" onclick="closeTrade()">ЗАКРЫТЬ СДЕЛКУ</button>' +
   '</div>';
 }
 
@@ -464,7 +647,7 @@ async function loadNft() {
         '<div class="info">' + sold + '/' + info.max + (left > 0 ? ' · осталось ' + left : ' · РАСПРОДАНО') + '</div>' +
         '<div class="price">' + info.price + ' GRAM</div>' +
       '</div>' +
-      '<button class="btn ' + (can ? 'green' : '') + '" ' + (can ? '' : 'disabled') +
+      '<button class="btn small ' + (can ? 'green' : '') + '" ' + (can ? '' : 'disabled') +
       ' onclick="buyNft(\'' + key + '\')">' + (left > 0 ? (can ? 'Купить' : 'Мало') : 'Нет') + '</button>' +
     '</div>';
   }).join('');
@@ -477,7 +660,7 @@ async function loadNft() {
       return '<div class="item">' +
         '<div class="tg-icon purple"><svg viewBox="0 0 24 24"><path d="M12 2l4 4-4 4-4-4z"/></svg></div>' +
         '<div class="item-info"><div class="name">' + nid + '</div><div class="info">Бонус +0.1x</div></div>' +
-        '<button class="btn gold" onclick="sellNft(\'' + nid + '\')">Продать</button>' +
+        '<button class="btn small gold" onclick="sellNft(\'' + nid + '\')">Продать</button>' +
       '</div>';
     }).join('');
   }
@@ -488,7 +671,7 @@ async function loadNft() {
       const can = player.gram >= info.price;
       return '<div class="item">' +
         '<div class="item-info"><div class="name">' + info.emoji + ' ' + info.name + '</div><div class="price">' + info.price + ' GRAM</div></div>' +
-        '<button class="btn ' + (can ? 'green' : '') + '" ' + (can ? '' : 'disabled') +
+        '<button class="btn small ' + (can ? 'green' : '') + '" ' + (can ? '' : 'disabled') +
         ' onclick="buySkin(\'' + key + '\')">' + (can ? 'Купить' : 'Мало') + '</button>' +
       '</div>';
     }).join('');
@@ -505,7 +688,7 @@ async function buyNft(key) {
 async function sellNft(nid) {
   const price = prompt('За сколько GRAM продать ' + nid + '?');
   if (!price) return;
-  const r = await api('/api/nft/sell', { nid, price: parseFloat(price) });
+  const r = await api('/api/nft/sell', { nft_id: nid, price: parseFloat(price) });
   if (r.error) return toast(r.error);
   toast('Выставлено за ' + price);
   await loadMarket();
@@ -534,7 +717,7 @@ async function loadTasks() {
     let onclick = '';
     if (t.done) {
       cls += ' done';
-      status = '<span class="task-status" style="color:var(--green)">Получено</span>';
+      status = '<span class="task-status" style="color:var(--green)">Готово</span>';
     } else if (t.ready) {
       cls += ' ready';
       status = '<span class="task-status" style="color:var(--gold)">Забрать</span>';
@@ -585,7 +768,7 @@ async function loadMarket() {
           '<div class="info">Продавец: ' + item.seller_name + '</div>' +
           '<div class="price">' + item.price + ' GRAM</div>' +
         '</div>' +
-        '<button class="btn ' + (can ? 'green' : '') + '" ' + (can ? '' : 'disabled') +
+        '<button class="btn small ' + (can ? 'green' : '') + '" ' + (can ? '' : 'disabled') +
         ' onclick="buyMarket(\'' + item.nft_id + '\')">' + (can ? 'Купить' : 'Мало') + '</button>' +
       '</div>' +
     '</div>';
@@ -622,7 +805,7 @@ async function loadShop() {
         '<div class="info">+' + info.percent + '% к прибыли</div>' +
         '<div class="price">' + info.price + ' GRAM</div>' +
       '</div>' +
-      '<button class="btn ' + (owned ? 'gold' : (can ? 'green' : '')) + '" ' + ((can || owned) ? '' : 'disabled') +
+      '<button class="btn small ' + (owned ? 'gold' : (can ? 'green' : '')) + '" ' + ((can || owned) ? '' : 'disabled') +
       ' onclick="buyShop(\'' + key + '\')">' + (owned ? 'Куплено' : (can ? 'Купить' : 'Мало')) + '</button>' +
     '</div>';
   }).join('');
