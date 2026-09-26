@@ -1,1 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DARKGRAM</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+--bg:#0a0e14;--card:#141a24;--card-2:#1a2130;--line:#232c3a;
+--accent:#4d8fd6;--accent-2:#6ba6e3;--text:#fff;--dim:#8b9aab;
+--muted:#5a6b7d;--green:#4dcd5e;--gold:#e8b64c;--red:#e0455a;
+}
+html,body{height:100%;overflow-x:hidden}
+body{
+font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;
+background:radial-gradient(ellipse at top,#131a26 0%,#0a0e14 60%);
+background-attachment:fixed;color:var(--text);
+-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.45;
+padding-bottom:70px;min-height:100vh;
+}
+.header{
+background:rgba(20,26,36,0.9);backdrop-filter:blur(20px);
+border-bottom:1px solid var(--line);
+position:sticky;top:0;z-index:50;padding:12px 16px;
+display:flex;justify-content:space-between;align-items:center;
+}
+.header .logo{font-size:18px;font-weight:800;letter-spacing:-.3px}
+.header .sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px}
+.online{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);
+box-shadow:0 0 8px var(--green);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.container{padding:16px;max-width:520px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+padding:16px;margin-bottom:12px}
+.title{font-size:18px;font-weight:700;margin-bottom:10px}
+.sub{font-size:13px;color:var(--dim)}
+.balance{text-align:center;padding:24px 16px}
+.balance .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px}
+.balance .val{font-size:38px;font-weight:800;letter-spacing:-1px;margin-top:6px}
+.balance .inc{font-size:14px;color:var(--green);font-weight:600;margin-top:4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.stat .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px}
+.stat .v{font-size:18px;font-weight:700;margin-top:4px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:14px;
+padding:14px;margin-bottom:8px;display:flex;justify-content:space-between;
+align-items:center;gap:12px}
+.item .name{font-size:15px;font-weight:700}
+.item .info{font-size:12px;color:var(--dim);margin-top:3px}
+.item .price{font-size:13px;color:var(--gold);font-weight:700;margin-top:3px}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:10px;
+padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;
+font-family:inherit;white-space:nowrap;transition:.15s}
+.btn:active{transform:scale(.96);opacity:.9}
+.btn:disabled{background:var(--card-2);color:var(--muted);cursor:not-allowed}
+.btn.green{background:var(--green)}
+.btn.gold{background:var(--gold);color:#1a1408}
+.btn.red{background:var(--red)}
+.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(20,26,36,0.95);
+backdrop-filter:blur(20px);border-top:1px solid var(--line);
+display:flex;padding:8px 0 calc(8px + env(safe-area-inset-bottom));
+z-index:100;max-width:520px;margin:0 auto;left:50%;transform:translateX(-50%);
+}
+.nav-item{flex:1;text-align:center;padding:10px 4px;font-size:11px;
+font-weight:700;color:var(--muted);cursor:pointer;transition:.2s;user-select:none}
+.nav-item.active{color:var(--accent-2)}
+.tab{display:none}
+.tab.active{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(120%);
+background:var(--card-2);border:1px solid var(--line);color:var(--text);
+padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;
+z-index:999;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.loading{text-align:center;padding:40px;color:var(--muted);font-size:12px;
+font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.rank-row{display:flex;align-items:center;gap:12px;padding:12px 14px;
+background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+.rank-row .r{font-size:16px;font-weight:800;width:30px;text-align:center;color:var(--muted)}
+.rank-row .r.g{color:#ffd700}.rank-row .r.s{color:#c0c0c0}.rank-row .r.b{color:#cd7f32}
+.rank-row .who{flex:1;font-size:14px;font-weight:600}
+.rank-row .val{font-size:13px;font-weight:700;color:var(--accent-2)}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--muted);
+text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px}
+.field input{width:100%;background:var(--bg);border:1px solid var(--line);
+border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-family:inherit}
+.field input:focus{outline:none;border-color:var(--accent)}
+</style>
+</head>
+<body>
 
+<div class="header">
+  <div>
+    <div class="logo">DARKGRAM</div>
+    <div class="sub">trade</div>
+  </div>
+  <div class="online"><div class="dot"></div><span id="onlineCount">0</span> онлайн</div>
+</div>
+
+<div class="container">
+
+  <!-- ТРЕЙДИНГ -->
+  <div class="tab active" id="tab-trade">
+    <div class="card balance">
+      <div class="lbl">Баланс GRAM</div>
+      <div class="val" id="balance">0</div>
+      <div class="inc" id="profit">+0 профит</div>
+    </div>
+    <div class="grid">
+      <div class="stat"><div class="k">Побед</div><div class="v" id="wins">0</div></div>
+      <div class="stat"><div class="k">NFT</div><div class="v" id="nftCount">0</div></div>
+    </div>
+    <div class="card">
+      <div class="title">📊 Курсы валют</div>
+      <div id="ratesList"><div class="loading">Загрузка</div></div>
+    </div>
+  </div>
+
+  <!-- NFT -->
+  <div class="tab" id="tab-nft">
+    <div class="card">
+      <div class="title">🎨 Магазин NFT</div>
+      <div class="sub" id="nftInfo">Загрузка...</div>
+      <div id="nftShop" style="margin-top:12px"><div class="loading">Загрузка</div></div>
+    </div>
+    <div class="card">
+      <div class="title">📦 Мои NFT</div>
+      <div id="myNft"><div class="loading">Загрузка</div></div>
+    </div>
+  </div>
+
+  <!-- ТОП -->
+  <div class="tab" id="tab-top">
+    <div class="card">
+      <div class="title">🏆 Топ по GRAM</div>
+      <div id="topList"><div class="loading">Загрузка</div></div>
+    </div>
+  </div>
+
+  <!-- ПРОФИЛЬ -->
+  <div class="tab" id="tab-profile">
+    <div class="card">
+      <div class="title">👤 Профиль</div>
+      <div class="sub" id="userName" style="margin-top:8px">Загрузка...</div>
+      <div class="sub" id="userId"></div>
+    </div>
+    <div class="grid">
+      <div class="stat"><div class="k">Побед</div><div class="v" id="pWins">0</div></div>
+      <div class="stat"><div class="k">Поражений</div><div class="v" id="pLosses">0</div></div>
+    </div>
+    <div class="card">
+      <div class="title" style="font-size:16px">💸 Перевести GRAM</div>
+      <div class="field" style="margin-top:12px">
+        <label>Кому (ID)</label>
+        <input id="payTarget" placeholder="123456789" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>Сколько</label>
+        <input id="payAmount" type="number" placeholder="100">
+      </div>
+      <button class="btn" style="width:100%" onclick="doPay()">Перевести</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="nav">
+  <div class="nav-item active" data-tab="trade">📈 Трейд</div>
+  <div class="nav-item" data-tab="nft">🎨 NFT</div>
+  <div class="nav-item" data-tab="top">🏆 Топ</div>
+  <div class="nav-item" data-tab="profile">👤 Профиль</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+
+const user = tg?.initDataUnsafe?.user || { id: 0, first_name: 'Player' };
+const UID = user.id;
+
+let player = {};
+let pingInterval = null;
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function fmt(n) {
+  n = Number(n);
+  if (n >= 1e9) return (n/1e9).toFixed(1) + 'B';
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+  return Math.floor(n);
+}
+
+async function api(path, body) {
+  try {
+    const r = await fetch(path, {
+      method: body ? 'POST' : 'GET',
+      headers: {'Content-Type': 'application/json'},
+      body: body ? JSON.stringify({uid: UID, name: user.first_name, ...body}) : undefined
+    });
+    return await r.json();
+  } catch(e) { return null; }
+}
+
+async function loadPlayer() {
+  const r = await api('/api/player');
+  if (!r || r.error) return;
+  player = r;
+  document.getElementById('balance').textContent = fmt(player.gram || 0);
+  document.getElementById('profit').textContent = '+' + (player.total_profit || 0) + ' профит';
+  document.getElementById('wins').textContent = player.wins || 0;
+  document.getElementById('nftCount').textContent = (player.nfts || []).length;
+  document.getElementById('userName').textContent = player.name || user.first_name;
+  document.getElementById('userId').textContent = 'ID: ' + UID;
+  document.getElementById('pWins').textContent = player.wins || 0;
+  document.getElementById('pLosses').textContent = player.losses || 0;
+}
+
+async function loadRates() {
+  const r = await fetch('/api/rates');
+  const rates = await r.json();
+  const el = document.getElementById('ratesList');
+  el.innerHTML = Object.entries(rates).map(([k, v]) => {
+    const change = v.change || 0;
+    const arrow = change >= 0 ? '📈' : '📉';
+    const sign = change >= 0 ? '+' : '';
+    const color = change >= 0 ? 'var(--green)' : 'var(--red)';
+    return '<div class="item">' +
+      '<div><div class="name">' + v.name + '</div>' +
+      '<div class="info" style="color:' + color + '">' + arrow + ' ' + sign + change.toFixed(2) + '%</div></div>' +
+      '<div class="price">' + v.rate.toFixed(4) + '</div></div>';
+  }).join('');
+}
+
+async function loadNft() {
+  const r = await fetch('/api/nft');
+  const data = await r.json();
+  document.getElementById('nftInfo').textContent = 'Куплено у тебя: ' + (player.nfts || []).length + ' | Бонус: +' + ((player.nfts || []).length * 0.1).toFixed(1) + 'x';
+
+  const shop = document.getElementById('nftShop');
+  shop.innerHTML = Object.entries(data.types).map(([key, info]) => {
+    const sold = data.minted[key] || 0;
+    const left = info.max - sold;
+    const can = player.gram >= info.price && left > 0;
+    return '<div class="item">' +
+      '<div><div class="name">' + info.emoji + ' ' + info.name + '</div>' +
+      '<div class="info">' + sold + '/' + info.max + (left > 0 ? ' (осталось ' + left + ')' : ' РАСПРОДАНО') + '</div>' +
+      '<div class="price">' + info.price + ' GRAM</div></div>' +
+      '<button class="btn ' + (can ? 'green' : '') + '" ' + (can ? '' : 'disabled') +
+      ' onclick="buyNft(\'' + key + '\')">' + (left > 0 ? (can ? 'Купить' : 'Мало') : 'Нет') + '</button></div>';
+  }).join('');
+
+  const my = document.getElementById('myNft');
+  if (!player.nfts || player.nfts.length === 0) {
+    my.innerHTML = '<div class="sub">У тебя пока нет NFT</div>';
+  } else {
+    my.innerHTML = player.nfts.map(nid => {
+      return '<div class="item"><div><div class="name">' + nid + '</div>' +
+        '<div class="info">Бонус +0.1x</div></div>' +
+        '<button class="btn gold" onclick="sellNft(\'' + nid + '\')">Продать</button></div>';
+    }).join('');
+  }
+}
+
+async function loadTop() {
+  const r = await fetch('/api/top');
+  const arr = await r.json();
+  const el = document.getElementById('topList');
+  if (!arr.length) { el.innerHTML = '<div class="sub">Пока пусто</div>'; return; }
+  el.innerHTML = arr.map((u, i) => {
+    const cls = i === 0 ? 'g' : i === 1 ? 's' : i === 2 ? 'b' : '';
+    return '<div class="rank-row"><div class="r ' + cls + '">' + (i+1) + '</div>' +
+      '<div class="who">' + u.name + '</div>' +
+      '<div class="val">' + u.gram + ' GRAM</div></div>';
+  }).join('');
+}
+
+async function buyNft(key) {
+  const r = await api('/api/nft/buy', { key });
+  if (r.error) return toast(r.error);
+  toast('✅ Куплено! ID: ' + r.nft_id);
+  await loadPlayer();
+  await loadNft();
+}
+
+async function sellNft(nid) {
+  const price = prompt('За сколько GRAM продать ' + nid + '?');
+  if (!price) return;
+  const r = await api('/api/nft/sell', { nid, price: parseFloat(price) });
+  if (r.error) return toast(r.error);
+  toast('✅ Выставлено за ' + price + ' GRAM');
+  await loadNft();
+}
+
+async function doPay() {
+  const target = document.getElementById('payTarget').value.trim();
+  const amount = parseFloat(document.getElementById('payAmount').value);
+  if (!target || !amount) return toast('Заполни поля');
+  const r = await api('/api/pay', { target, amount });
+  if (r.error) return toast(r.error);
+  toast('✅ Переведено!');
+  document.getElementById('payTarget').value = '';
+  document.getElementById('payAmount').value = '';
+  await loadPlayer();
+}
+
+async function ping() {
+  await fetch('/api/ping', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({uid: UID})
+  });
+}
+
+async function loadOnline() {
+  const r = await fetch('/api/online');
+  const data = await r.json();
+  document.getElementById('onlineCount').textContent = data.count || 0;
+}
+
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.onclick = () => {
+    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-' + el.dataset.tab).classList.add('active');
+    if (el.dataset.tab === 'top') loadTop();
+    if (el.dataset.tab === 'nft') loadNft();
+  };
+});
+
+(async () => {
+  await loadPlayer();
+  await loadRates();
+  await loadNft();
+  await loadOnline();
+
+  ping();
+  pingInterval = setInterval(ping, 30000);
+
+  setInterval(loadPlayer, 10000);
+  setInterval(loadRates, 5000);
+  setInterval(loadOnline, 15000);
+})();
+</script>
+
+</body>
+</html>
