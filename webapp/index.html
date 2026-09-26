@@ -8,9 +8,23 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
---bg:#0a0e14;--card:#141a24;--card-2:#1a2130;--line:#232c3a;
---accent:#4d8fd6;--accent-2:#6ba6e3;--text:#fff;--dim:#8b9aab;
---muted:#5a6b7d;--green:#4dcd5e;--gold:#e8b64c;--red:#e0455a;
+--bg:#0a0e14;
+--card:#141a24;
+--card-2:#1a2130;
+--line:#232c3a;
+--accent:#4d8fd6;
+--accent-2:#6ba6e3;
+--text:#fff;
+--dim:#8b9aab;
+--muted:#5a6b7d;
+--green:#4dcd5e;
+--gold:#e8b64c;
+--red:#e0455a;
+--icon-blue:#3d7ee0;
+--icon-purple:#8b5cf6;
+--icon-green:#22c55e;
+--icon-gold:#e8b64c;
+--icon-gray:#64748b;
 }
 html,body{height:100%;overflow-x:hidden}
 body{
@@ -18,12 +32,15 @@ font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,
 background:radial-gradient(ellipse at top,#131a26 0%,#0a0e14 60%);
 background-attachment:fixed;color:var(--text);
 -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.45;
-padding-bottom:70px;min-height:100vh;
+padding-bottom:90px;min-height:100vh;
 }
+
+/* ШАПКА */
 .header{
 background:rgba(20,26,36,0.9);backdrop-filter:blur(20px);
 border-bottom:1px solid var(--line);
-position:sticky;top:0;z-index:50;padding:12px 16px;
+position:sticky;top:0;z-index:50;
+padding:12px 16px;
 display:flex;justify-content:space-between;align-items:center;
 }
 .header .logo{font-size:18px;font-weight:800;letter-spacing:-.3px}
@@ -32,25 +49,51 @@ display:flex;justify-content:space-between;align-items:center;
 .dot{width:8px;height:8px;border-radius:50%;background:var(--green);
 box-shadow:0 0 8px var(--green);animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* КОНТЕНТ */
 .container{padding:16px;max-width:520px;margin:0 auto}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
 padding:16px;margin-bottom:12px}
 .title{font-size:18px;font-weight:700;margin-bottom:10px}
 .sub{font-size:13px;color:var(--dim)}
+
+/* ИКОНКИ (как в Telegram) */
+.tg-icon{
+width:36px;height:36px;border-radius:10px;
+display:inline-flex;align-items:center;justify-content:center;
+flex-shrink:0;
+}
+.tg-icon svg{width:22px;height:22px;stroke:#fff;fill:none;
+stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tg-icon.blue{background:var(--icon-blue)}
+.tg-icon.purple{background:var(--icon-purple)}
+.tg-icon.green{background:var(--icon-green)}
+.tg-icon.gold{background:var(--icon-gold)}
+.tg-icon.gray{background:var(--icon-gray)}
+
+/* БАЛАНС */
 .balance{text-align:center;padding:24px 16px}
 .balance .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px}
-.balance .val{font-size:38px;font-weight:800;letter-spacing:-1px;margin-top:6px}
+.balance .val{font-size:40px;font-weight:800;letter-spacing:-1px;margin-top:6px}
 .balance .inc{font-size:14px;color:var(--green);font-weight:600;margin-top:4px}
+
+/* GRID */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;
+display:flex;align-items:center;gap:12px}
+.stat-info{flex:1;min-width:0}
 .stat .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px}
-.stat .v{font-size:18px;font-weight:700;margin-top:4px}
+.stat .v{font-size:18px;font-weight:700;margin-top:2px}
+
+/* ITEM */
 .item{background:var(--card);border:1px solid var(--line);border-radius:14px;
-padding:14px;margin-bottom:8px;display:flex;justify-content:space-between;
-align-items:center;gap:12px}
-.item .name{font-size:15px;font-weight:700}
-.item .info{font-size:12px;color:var(--dim);margin-top:3px}
+padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.item-info{flex:1;min-width:0}
+.item .name{font-size:15px;font-weight:700;margin-bottom:3px}
+.item .info{font-size:12px;color:var(--dim)}
 .item .price{font-size:13px;color:var(--gold);font-weight:700;margin-top:3px}
+
+/* КНОПКИ */
 .btn{background:var(--accent);color:#fff;border:none;border-radius:10px;
 padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;
 font-family:inherit;white-space:nowrap;transition:.15s}
@@ -59,30 +102,65 @@ font-family:inherit;white-space:nowrap;transition:.15s}
 .btn.green{background:var(--green)}
 .btn.gold{background:var(--gold);color:#1a1408}
 .btn.red{background:var(--red)}
-.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(20,26,36,0.95);
-backdrop-filter:blur(20px);border-top:1px solid var(--line);
-display:flex;padding:8px 0 calc(8px + env(safe-area-inset-bottom));
-z-index:100;max-width:520px;margin:0 auto;left:50%;transform:translateX(-50%);
+
+/* НАВИГАЦИЯ ВНИЗУ — КАК В TELEGRAM */
+.nav{
+position:fixed;bottom:0;left:0;right:0;
+background:rgba(20,26,36,0.98);
+backdrop-filter:blur(20px);
+border-top:1px solid var(--line);
+display:flex;
+padding:6px 0 calc(6px + env(safe-area-inset-bottom));
+z-index:100;
+max-width:520px;margin:0 auto;left:50%;transform:translateX(-50%);
 }
-.nav-item{flex:1;text-align:center;padding:10px 4px;font-size:11px;
-font-weight:700;color:var(--muted);cursor:pointer;transition:.2s;user-select:none}
+.nav-item{
+flex:1;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:4px;
+padding:8px 4px;
+font-size:10px;
+font-weight:600;
+color:var(--muted);
+cursor:pointer;
+transition:.2s;
+user-select:none;
+border-radius:10px;
+margin:0 2px;
+}
 .nav-item.active{color:var(--accent-2)}
+.nav-item svg{width:24px;height:24px;stroke:currentColor;fill:none;
+stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:.2s}
+.nav-item.active svg{stroke:var(--accent-2)}
+
+/* ТАБЫ */
 .tab{display:none}
 .tab.active{display:block;animation:fade .25s}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(120%);
+
+/* TOAST */
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(120%);
 background:var(--card-2);border:1px solid var(--line);color:var(--text);
 padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;
 z-index:999;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* LOADING */
 .loading{text-align:center;padding:40px;color:var(--muted);font-size:12px;
 font-weight:700;letter-spacing:2px;text-transform:uppercase}
+
+/* ТОП */
 .rank-row{display:flex;align-items:center;gap:12px;padding:12px 14px;
 background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
 .rank-row .r{font-size:16px;font-weight:800;width:30px;text-align:center;color:var(--muted)}
 .rank-row .r.g{color:#ffd700}.rank-row .r.s{color:#c0c0c0}.rank-row .r.b{color:#cd7f32}
 .rank-row .who{flex:1;font-size:14px;font-weight:600}
 .rank-row .val{font-size:13px;font-weight:700;color:var(--accent-2)}
+
+/* ПОЛЯ */
 .field{margin-bottom:12px}
 .field label{display:block;font-size:11px;font-weight:700;color:var(--muted);
 text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px}
@@ -98,12 +176,12 @@ border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-famil
     <div class="logo">DARKGRAM</div>
     <div class="sub">trade</div>
   </div>
-  <div class="online"><div class="dot"></div><span id="onlineCount">0</span> онлайн</div>
+  <div class="online"><div class="dot"></div><span id="onlineCount">0</span></div>
 </div>
 
 <div class="container">
 
-  <!-- ТРЕЙДИНГ -->
+  <!-- ТРЕЙД -->
   <div class="tab active" id="tab-trade">
     <div class="card balance">
       <div class="lbl">Баланс GRAM</div>
@@ -111,11 +189,27 @@ border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-famil
       <div class="inc" id="profit">+0 профит</div>
     </div>
     <div class="grid">
-      <div class="stat"><div class="k">Побед</div><div class="v" id="wins">0</div></div>
-      <div class="stat"><div class="k">NFT</div><div class="v" id="nftCount">0</div></div>
+      <div class="stat">
+        <div class="tg-icon green">
+          <svg viewBox="0 0 24 24"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/></svg>
+        </div>
+        <div class="stat-info">
+          <div class="k">Побед</div>
+          <div class="v" id="wins">0</div>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="tg-icon purple">
+          <svg viewBox="0 0 24 24"><path d="M12 2l4 4-4 4-4-4z"/><path d="M12 14l4 4-4 4-4-4z"/><path d="M2 12l4-4 4 4-4 4z"/><path d="M14 12l4-4 4 4-4 4z"/></svg>
+        </div>
+        <div class="stat-info">
+          <div class="k">NFT</div>
+          <div class="v" id="nftCount">0</div>
+        </div>
+      </div>
     </div>
     <div class="card">
-      <div class="title">📊 Курсы валют</div>
+      <div class="title">Курсы валют</div>
       <div id="ratesList"><div class="loading">Загрузка</div></div>
     </div>
   </div>
@@ -123,12 +217,12 @@ border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-famil
   <!-- NFT -->
   <div class="tab" id="tab-nft">
     <div class="card">
-      <div class="title">🎨 Магазин NFT</div>
+      <div class="title">Магазин NFT</div>
       <div class="sub" id="nftInfo">Загрузка...</div>
       <div id="nftShop" style="margin-top:12px"><div class="loading">Загрузка</div></div>
     </div>
     <div class="card">
-      <div class="title">📦 Мои NFT</div>
+      <div class="title">Мои NFT</div>
       <div id="myNft"><div class="loading">Загрузка</div></div>
     </div>
   </div>
@@ -136,7 +230,7 @@ border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-famil
   <!-- ТОП -->
   <div class="tab" id="tab-top">
     <div class="card">
-      <div class="title">🏆 Топ по GRAM</div>
+      <div class="title">Топ по GRAM</div>
       <div id="topList"><div class="loading">Загрузка</div></div>
     </div>
   </div>
@@ -144,16 +238,38 @@ border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-famil
   <!-- ПРОФИЛЬ -->
   <div class="tab" id="tab-profile">
     <div class="card">
-      <div class="title">👤 Профиль</div>
-      <div class="sub" id="userName" style="margin-top:8px">Загрузка...</div>
-      <div class="sub" id="userId"></div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="tg-icon blue">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        </div>
+        <div>
+          <div style="font-size:16px;font-weight:700" id="userName">Профиль</div>
+          <div class="sub" id="userId"></div>
+        </div>
+      </div>
     </div>
     <div class="grid">
-      <div class="stat"><div class="k">Побед</div><div class="v" id="pWins">0</div></div>
-      <div class="stat"><div class="k">Поражений</div><div class="v" id="pLosses">0</div></div>
+      <div class="stat">
+        <div class="tg-icon green">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="stat-info">
+          <div class="k">Побед</div>
+          <div class="v" id="pWins">0</div>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="tg-icon gray">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+        <div class="stat-info">
+          <div class="k">Поражений</div>
+          <div class="v" id="pLosses">0</div>
+        </div>
+      </div>
     </div>
     <div class="card">
-      <div class="title" style="font-size:16px">💸 Перевести GRAM</div>
+      <div class="title" style="font-size:16px">Перевести GRAM</div>
       <div class="field" style="margin-top:12px">
         <label>Кому (ID)</label>
         <input id="payTarget" placeholder="123456789" inputmode="numeric">
@@ -168,11 +284,24 @@ border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-famil
 
 </div>
 
+<!-- НАВИГАЦИЯ (как в Telegram) -->
 <div class="nav">
-  <div class="nav-item active" data-tab="trade">📈 Трейд</div>
-  <div class="nav-item" data-tab="nft">🎨 NFT</div>
-  <div class="nav-item" data-tab="top">🏆 Топ</div>
-  <div class="nav-item" data-tab="profile">👤 Профиль</div>
+  <div class="nav-item active" data-tab="trade">
+    <svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>
+    <span>Трейд</span>
+  </div>
+  <div class="nav-item" data-tab="nft">
+    <svg viewBox="0 0 24 24"><path d="M12 2l4 4-4 4-4-4z"/><path d="M12 14l4 4-4 4-4-4z"/></svg>
+    <span>NFT</span>
+  </div>
+  <div class="nav-item" data-tab="top">
+    <svg viewBox="0 0 24 24"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/></svg>
+    <span>Топ</span>
+  </div>
+  <div class="nav-item" data-tab="profile">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+    <span>Профиль</span>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -185,7 +314,6 @@ const user = tg?.initDataUnsafe?.user || { id: 0, first_name: 'Player' };
 const UID = user.id;
 
 let player = {};
-let pingInterval = null;
 
 function toast(msg) {
   const t = document.getElementById('toast');
@@ -234,20 +362,22 @@ async function loadRates() {
   const el = document.getElementById('ratesList');
   el.innerHTML = Object.entries(rates).map(([k, v]) => {
     const change = v.change || 0;
-    const arrow = change >= 0 ? '📈' : '📉';
-    const sign = change >= 0 ? '+' : '';
     const color = change >= 0 ? 'var(--green)' : 'var(--red)';
     return '<div class="item">' +
-      '<div><div class="name">' + v.name + '</div>' +
-      '<div class="info" style="color:' + color + '">' + arrow + ' ' + sign + change.toFixed(2) + '%</div></div>' +
-      '<div class="price">' + v.rate.toFixed(4) + '</div></div>';
+      '<div class="tg-icon blue"><svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/></svg></div>' +
+      '<div class="item-info">' +
+        '<div class="name">' + v.name + '</div>' +
+        '<div class="info" style="color:' + color + '">' + (change >= 0 ? '+' : '') + change.toFixed(2) + '%</div>' +
+      '</div>' +
+      '<div class="price">' + v.rate.toFixed(4) + '</div>' +
+    '</div>';
   }).join('');
 }
 
 async function loadNft() {
   const r = await fetch('/api/nft');
   const data = await r.json();
-  document.getElementById('nftInfo').textContent = 'Куплено у тебя: ' + (player.nfts || []).length + ' | Бонус: +' + ((player.nfts || []).length * 0.1).toFixed(1) + 'x';
+  document.getElementById('nftInfo').textContent = 'У тебя: ' + (player.nfts || []).length + ' | Бонус: +' + ((player.nfts || []).length * 0.1).toFixed(1) + 'x';
 
   const shop = document.getElementById('nftShop');
   shop.innerHTML = Object.entries(data.types).map(([key, info]) => {
@@ -255,11 +385,14 @@ async function loadNft() {
     const left = info.max - sold;
     const can = player.gram >= info.price && left > 0;
     return '<div class="item">' +
-      '<div><div class="name">' + info.emoji + ' ' + info.name + '</div>' +
-      '<div class="info">' + sold + '/' + info.max + (left > 0 ? ' (осталось ' + left + ')' : ' РАСПРОДАНО') + '</div>' +
-      '<div class="price">' + info.price + ' GRAM</div></div>' +
+      '<div class="item-info">' +
+        '<div class="name">' + info.emoji + ' ' + info.name + '</div>' +
+        '<div class="info">' + sold + '/' + info.max + (left > 0 ? ' · осталось ' + left : ' · РАСПРОДАНО') + '</div>' +
+        '<div class="price">' + info.price + ' GRAM</div>' +
+      '</div>' +
       '<button class="btn ' + (can ? 'green' : '') + '" ' + (can ? '' : 'disabled') +
-      ' onclick="buyNft(\'' + key + '\')">' + (left > 0 ? (can ? 'Купить' : 'Мало') : 'Нет') + '</button></div>';
+      ' onclick="buyNft(\'' + key + '\')">' + (left > 0 ? (can ? 'Купить' : 'Мало') : 'Нет') + '</button>' +
+    '</div>';
   }).join('');
 
   const my = document.getElementById('myNft');
@@ -267,9 +400,11 @@ async function loadNft() {
     my.innerHTML = '<div class="sub">У тебя пока нет NFT</div>';
   } else {
     my.innerHTML = player.nfts.map(nid => {
-      return '<div class="item"><div><div class="name">' + nid + '</div>' +
-        '<div class="info">Бонус +0.1x</div></div>' +
-        '<button class="btn gold" onclick="sellNft(\'' + nid + '\')">Продать</button></div>';
+      return '<div class="item">' +
+        '<div class="tg-icon purple"><svg viewBox="0 0 24 24"><path d="M12 2l4 4-4 4-4-4z"/><path d="M12 14l4 4-4 4-4-4z"/></svg></div>' +
+        '<div class="item-info"><div class="name">' + nid + '</div><div class="info">Бонус +0.1x</div></div>' +
+        '<button class="btn gold" onclick="sellNft(\'' + nid + '\')">Продать</button>' +
+      '</div>';
     }).join('');
   }
 }
@@ -283,14 +418,14 @@ async function loadTop() {
     const cls = i === 0 ? 'g' : i === 1 ? 's' : i === 2 ? 'b' : '';
     return '<div class="rank-row"><div class="r ' + cls + '">' + (i+1) + '</div>' +
       '<div class="who">' + u.name + '</div>' +
-      '<div class="val">' + u.gram + ' GRAM</div></div>';
+      '<div class="val">' + u.gram + '</div></div>';
   }).join('');
 }
 
 async function buyNft(key) {
   const r = await api('/api/nft/buy', { key });
   if (r.error) return toast(r.error);
-  toast('✅ Куплено! ID: ' + r.nft_id);
+  toast('Куплено! ID: ' + r.nft_id);
   await loadPlayer();
   await loadNft();
 }
@@ -300,8 +435,7 @@ async function sellNft(nid) {
   if (!price) return;
   const r = await api('/api/nft/sell', { nid, price: parseFloat(price) });
   if (r.error) return toast(r.error);
-  toast('✅ Выставлено за ' + price + ' GRAM');
-  await loadNft();
+  toast('Выставлено за ' + price);
 }
 
 async function doPay() {
@@ -310,18 +444,15 @@ async function doPay() {
   if (!target || !amount) return toast('Заполни поля');
   const r = await api('/api/pay', { target, amount });
   if (r.error) return toast(r.error);
-  toast('✅ Переведено!');
+  toast('Переведено!');
   document.getElementById('payTarget').value = '';
   document.getElementById('payAmount').value = '';
   await loadPlayer();
 }
 
 async function ping() {
-  await fetch('/api/ping', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({uid: UID})
-  });
+  await fetch('/api/ping', { method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({uid: UID}) });
 }
 
 async function loadOnline() {
@@ -346,10 +477,8 @@ document.querySelectorAll('.nav-item').forEach(el => {
   await loadRates();
   await loadNft();
   await loadOnline();
-
   ping();
-  pingInterval = setInterval(ping, 30000);
-
+  setInterval(ping, 30000);
   setInterval(loadPlayer, 10000);
   setInterval(loadRates, 5000);
   setInterval(loadOnline, 15000);
