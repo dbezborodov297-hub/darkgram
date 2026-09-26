@@ -10,7 +10,6 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
 :root{
-  /* iOS dark palette */
   --bg:#000000;
   --bg-2:#0a0a0a;
   --card:#1c1c1e;
@@ -18,49 +17,31 @@
   --line:#2c2c2e;
   --line-2:#3a3a3c;
   --text:#ffffff;
-  --text-2:#ebebf5;
   --dim:#98989f;
   --muted:#636366;
   --accent:#0a84ff;
   --accent-2:#409cff;
   --green:#30d158;
-  --green-2:#34c759;
   --gold:#ffd60a;
   --red:#ff453a;
   --purple:#bf5af2;
   --orange:#ff9f0a;
   --pink:#ff375f;
   --teal:#5ac8fa;
-  --icon-blue:#0a84ff;
-  --icon-purple:#bf5af2;
-  --icon-green:#30d158;
-  --icon-gold:#ffd60a;
-  --icon-gray:#636366;
-  --icon-red:#ff453a;
-  --icon-orange:#ff9f0a;
-  --icon-pink:#ff375f;
-  --icon-teal:#5ac8fa;
+  --brown:#a2845e;
 }
 
-html,body{
-  height:100%;
-  overflow-x:hidden;
-  background:var(--bg);
-}
+html,body{height:100%;overflow-x:hidden;background:var(--bg)}
 
 body{
   font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,sans-serif;
-  background:var(--bg);
-  color:var(--text);
+  background:var(--bg);color:var(--text);
   -webkit-font-smoothing:antialiased;
-  font-size:17px;
-  line-height:1.4;
+  font-size:17px;line-height:1.4;
   padding-bottom:calc(110px + env(safe-area-inset-bottom));
-  min-height:100vh;
-  letter-spacing:-.2px;
+  min-height:100vh;letter-spacing:-.2px;
 }
 
-/* HEADER */
 .header{
   background:rgba(0,0,0,0.85);
   backdrop-filter:saturate(180%) blur(20px);
@@ -78,77 +59,69 @@ body{
   display:flex;align-items:center;gap:6px;
   font-size:13px;color:var(--dim);
   background:rgba(48,209,88,0.15);
-  padding:5px 10px;border-radius:20px;
-  font-weight:600;
+  padding:5px 10px;border-radius:20px;font-weight:600;
 }
 .dot{width:7px;height:7px;border-radius:50%;background:var(--green);
 box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 
-/* CONTAINER */
 .container{padding:16px;max-width:520px;margin:0 auto}
 
-/* CARDS - iOS style */
-.card{
-  background:var(--card);
-  border-radius:16px;
-  padding:16px;
-  margin-bottom:12px;
-  border:.5px solid var(--line);
-}
+.card{background:var(--card);border-radius:16px;padding:16px;
+margin-bottom:12px;border:.5px solid var(--line)}
 .title{font-size:20px;font-weight:700;letter-spacing:-.5px;margin-bottom:8px}
 .sub{font-size:14px;color:var(--dim);letter-spacing:-.1px}
 
-/* iOS ICONS */
-.tg-icon{
+/* SVG ICONS */
+.icon{
   width:38px;height:38px;border-radius:10px;
   display:inline-flex;align-items:center;justify-content:center;
   flex-shrink:0;
 }
-.tg-icon svg{width:22px;height:22px;stroke:#fff;fill:none;
+.icon svg{width:22px;height:22px;stroke:#fff;fill:none;
 stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.tg-icon.blue{background:var(--icon-blue)}
-.tg-icon.purple{background:var(--icon-purple)}
-.tg-icon.green{background:var(--icon-green)}
-.tg-icon.gold{background:var(--icon-gold)}
-.tg-icon.gray{background:var(--icon-gray)}
-.tg-icon.red{background:var(--icon-red)}
-.tg-icon.orange{background:var(--icon-orange)}
-.tg-icon.pink{background:var(--icon-pink)}
-.tg-icon.teal{background:var(--icon-teal)}
+.icon.lg{width:44px;height:44px;border-radius:12px}
+.icon.lg svg{width:26px;height:26px}
+.icon.sm{width:32px;height:32px;border-radius:8px}
+.icon.sm svg{width:18px;height:18px}
 
-/* BALANCE */
+.icon.blue{background:#0a84ff}
+.icon.purple{background:#bf5af2}
+.icon.green{background:#30d158}
+.icon.gold{background:#ffd60a}
+.icon.gray{background:#636366}
+.icon.red{background:#ff453a}
+.icon.orange{background:#ff9f0a}
+.icon.pink{background:#ff375f}
+.icon.teal{background:#5ac8fa}
+.icon.brown{background:#a2845e}
+.icon.black{background:#1c1c1e;border:1px solid #3a3a3c}
+
 .balance{text-align:center;padding:28px 16px}
-.balance .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-weight:600}
+.balance .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;
+letter-spacing:2px;font-weight:600}
 .balance .val{font-size:48px;font-weight:800;letter-spacing:-2px;margin-top:8px;line-height:1}
 .balance .inc{font-size:15px;color:var(--green);font-weight:600;margin-top:8px}
 
-/* GRID */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .stat{background:var(--card);border-radius:16px;padding:14px;
 display:flex;align-items:center;gap:12px;border:.5px solid var(--line)}
 .stat-info{flex:1;min-width:0}
-.stat .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;font-weight:600}
+.stat .k{font-size:11px;color:var(--muted);text-transform:uppercase;
+letter-spacing:1.2px;font-weight:600}
 .stat .v{font-size:22px;font-weight:700;margin-top:2px;letter-spacing:-.5px}
 
-/* ITEM */
-.item{
-  background:var(--card);border-radius:14px;padding:14px;
-  margin-bottom:8px;display:flex;align-items:center;gap:12px;
-  border:.5px solid var(--line);
-}
+.item{background:var(--card);border-radius:14px;padding:14px;
+margin-bottom:8px;display:flex;align-items:center;gap:12px;
+border:.5px solid var(--line)}
 .item-info{flex:1;min-width:0}
 .item .name{font-size:16px;font-weight:600;margin-bottom:2px;letter-spacing:-.2px}
 .item .info{font-size:13px;color:var(--dim);letter-spacing:-.1px}
 .item .price{font-size:14px;color:var(--gold);font-weight:600;margin-top:3px}
 
-/* BUTTONS - iOS */
-.btn{
-  background:var(--accent);color:#fff;border:none;border-radius:12px;
-  padding:11px 18px;font-size:15px;font-weight:600;cursor:pointer;
-  font-family:inherit;white-space:nowrap;transition:.15s;
-  letter-spacing:-.2px;
-}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:12px;
+padding:11px 18px;font-size:15px;font-weight:600;cursor:pointer;
+font-family:inherit;white-space:nowrap;transition:.15s;letter-spacing:-.2px}
 .btn:active{transform:scale(.96);opacity:.85}
 .btn:disabled{background:var(--card-2);color:var(--muted);cursor:not-allowed}
 .btn.green{background:var(--green)}
@@ -157,7 +130,6 @@ display:flex;align-items:center;gap:12px;border:.5px solid var(--line)}
 .btn.block{width:100%;display:block;padding:15px;font-size:17px;border-radius:14px}
 .btn.small{padding:8px 14px;font-size:14px}
 
-/* NAVIGATION - iOS TabBar */
 .nav{
   position:fixed;bottom:0;left:0;right:0;
   background:rgba(20,20,22,0.92);
@@ -171,73 +143,38 @@ display:flex;align-items:center;gap:12px;border:.5px solid var(--line)}
   width:100%;
 }
 .nav-item{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:3px;
-  padding:6px 2px;
-  font-size:10px;
-  font-weight:500;
-  color:var(--muted);
-  cursor:pointer;
-  transition:color .2s;
-  user-select:none;
-  min-width:0;
-  -webkit-tap-highlight-color:transparent;
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:3px;padding:6px 2px;
+  font-size:10px;font-weight:500;color:var(--muted);
+  cursor:pointer;transition:color .2s;user-select:none;
+  min-width:0;-webkit-tap-highlight-color:transparent;
 }
 .nav-item.active{color:var(--accent-2)}
-.nav-item svg{
-  width:26px;height:26px;
-  stroke:currentColor;fill:none;
-  stroke-width:1.8;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-  transition:stroke .2s;
-}
-.nav-item span{
-  font-size:10px;
-  letter-spacing:-.1px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  max-width:100%;
-  text-align:center;
-}
+.nav-item svg{width:26px;height:26px;stroke:currentColor;fill:none;
+stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
+.nav-item span{font-size:10px;letter-spacing:-.1px;white-space:nowrap;
+overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:center}
 
-/* TABS */
 .tab{display:none}
 .tab.active{display:block;animation:fade .25s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-/* TOAST */
-.toast{
-  position:fixed;bottom:calc(120px + env(safe-area-inset-bottom));left:50%;
-  transform:translateX(-50%) translateY(120%);
-  background:rgba(44,44,46,0.98);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  border:.5px solid var(--line-2);
-  color:var(--text);
-  padding:12px 20px;border-radius:14px;
-  font-size:15px;font-weight:600;
-  z-index:999;opacity:0;transition:.25s;
-  pointer-events:none;max-width:90vw;text-align:center;
-  letter-spacing:-.2px;
-}
+.toast{position:fixed;bottom:calc(120px + env(safe-area-inset-bottom));
+left:50%;transform:translateX(-50%) translateY(120%);
+background:rgba(44,44,46,0.98);backdrop-filter:blur(20px);
+-webkit-backdrop-filter:blur(20px);
+border:.5px solid var(--line-2);color:var(--text);
+padding:12px 20px;border-radius:14px;font-size:15px;font-weight:600;
+z-index:999;opacity:0;transition:.25s;pointer-events:none;
+max-width:90vw;text-align:center;letter-spacing:-.2px}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* LOADING */
-.loading{text-align:center;padding:40px;color:var(--muted);font-size:12px;
-font-weight:600;letter-spacing:2px;text-transform:uppercase}
+.loading{text-align:center;padding:40px;color:var(--muted);
+font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase}
 
-/* TOP */
-.rank-row{
-  display:flex;align-items:center;gap:12px;padding:12px 14px;
-  background:var(--card);border-radius:14px;margin-bottom:8px;
-  border:.5px solid var(--line);
-}
+.rank-row{display:flex;align-items:center;gap:12px;padding:12px 14px;
+background:var(--card);border-radius:14px;margin-bottom:8px;
+border:.5px solid var(--line)}
 .rank-row .r{font-size:16px;font-weight:800;width:30px;text-align:center;color:var(--muted)}
 .rank-row .r.g{color:#ffd700}
 .rank-row .r.s{color:#c0c0c0}
@@ -246,70 +183,43 @@ font-weight:600;letter-spacing:2px;text-transform:uppercase}
 overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rank-row .val{font-size:15px;font-weight:700;color:var(--accent-2);white-space:nowrap}
 
-/* FIELDS - iOS */
 .field{margin-bottom:12px}
-.field label{
-  display:block;font-size:12px;font-weight:600;
-  color:var(--muted);text-transform:uppercase;
-  letter-spacing:1.2px;margin-bottom:6px;
-}
-.field input,.field select{
-  width:100%;background:var(--card-2);
-  border:none;border-radius:12px;
-  padding:14px 16px;color:var(--text);
-  font-size:17px;font-family:inherit;
-  letter-spacing:-.2px;
-}
-.field input:focus,.field select:focus{
-  outline:2px solid var(--accent);
-  outline-offset:-1px;
-}
+.field label{display:block;font-size:12px;font-weight:600;
+color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px}
+.field input,.field select{width:100%;background:var(--card-2);
+border:none;border-radius:12px;padding:14px 16px;color:var(--text);
+font-size:17px;font-family:inherit;letter-spacing:-.2px}
+.field input:focus,.field select:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .field input::placeholder{color:var(--muted)}
 
-/* TASK ROW */
-.task-row{
-  display:flex;align-items:center;gap:12px;
-  padding:14px;background:var(--card);
-  border-radius:14px;margin-bottom:8px;
-  border:.5px solid var(--line);
-}
+.task-row{display:flex;align-items:center;gap:12px;
+padding:14px;background:var(--card);border-radius:14px;
+margin-bottom:8px;border:.5px solid var(--line)}
 .task-row.done{border-color:rgba(48,209,88,0.3);opacity:.7}
 .task-row.ready{border-color:rgba(255,214,10,0.4);background:rgba(255,214,10,0.05)}
 .task-text{flex:1;font-size:15px;font-weight:500;letter-spacing:-.2px}
 .task-status{font-size:13px;font-weight:600;white-space:nowrap}
 
-/* TRADE ACTIVE */
-.trade-active{
-  background:linear-gradient(135deg,#0a84ff,#0060df);
-  color:#fff;border-radius:20px;padding:22px;
-  margin-bottom:12px;
-  box-shadow:0 8px 24px rgba(10,132,255,0.3);
-}
+.trade-active{background:linear-gradient(135deg,#0a84ff,#0060df);
+color:#fff;border-radius:20px;padding:22px;margin-bottom:12px;
+box-shadow:0 8px 24px rgba(10,132,255,0.3)}
 .trade-active .row{display:flex;justify-content:space-between;
 font-size:15px;margin-bottom:10px;opacity:.95}
 .trade-active .big{font-size:36px;font-weight:800;text-align:center;
 margin:16px 0;letter-spacing:-1.5px}
 
-/* PROGRESS */
-.progress{
-  background:var(--card-2);border-radius:10px;
-  height:8px;overflow:hidden;margin:10px 0;
-}
-.progress-fill{
-  height:100%;
-  background:linear-gradient(90deg,var(--accent),var(--accent-2));
-  transition:width .3s;border-radius:10px;
-}
+.progress{background:var(--card-2);border-radius:10px;height:8px;
+overflow:hidden;margin:10px 0}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));
+transition:width .3s;border-radius:10px}
 
-/* SKINS */
-.skin-slot{
-  width:48px;height:48px;border-radius:12px;
-  background:var(--card-2);border:.5px solid var(--line);
+.nft-emoji{
+  width:38px;height:38px;border-radius:10px;
   display:inline-flex;align-items:center;justify-content:center;
-  font-size:24px;margin-right:8px;margin-bottom:8px;
+  background:var(--card-2);font-size:22px;flex-shrink:0;
+  border:.5px solid var(--line);
 }
-.skin-slot.active{border-color:var(--accent);background:rgba(10,132,255,0.15)}
-.skin-grid{display:flex;flex-wrap:wrap;gap:8px}
+.nft-emoji.lg{width:44px;height:44px;border-radius:12px;font-size:26px}
 </style>
 </head>
 <body>
@@ -333,18 +243,14 @@ margin:16px 0;letter-spacing:-1.5px}
     </div>
     <div class="grid">
       <div class="stat">
-        <div class="tg-icon green">
-          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
+        <div class="icon green"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div class="stat-info">
           <div class="k">Побед</div>
           <div class="v" id="wins">0</div>
         </div>
       </div>
       <div class="stat">
-        <div class="tg-icon purple">
-          <svg viewBox="0 0 24 24"><path d="M12 2l4 4-4 4-4-4z"/><path d="M12 14l4 4-4 4-4-4z"/></svg>
-        </div>
+        <div class="icon purple"><svg viewBox="0 0 24 24"><path d="M12 2l4 4-4 4-4-4z"/><path d="M12 14l4 4-4 4-4-4z"/></svg></div>
         <div class="stat-info">
           <div class="k">NFT</div>
           <div class="v" id="nftCount">0</div>
@@ -415,7 +321,7 @@ margin:16px 0;letter-spacing:-1.5px}
   <div class="tab" id="tab-profile">
     <div class="card">
       <div style="display:flex;align-items:center;gap:14px">
-        <div class="tg-icon blue">
+        <div class="icon blue lg">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
         </div>
         <div>
@@ -426,11 +332,11 @@ margin:16px 0;letter-spacing:-1.5px}
     </div>
     <div class="grid">
       <div class="stat">
-        <div class="tg-icon green"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="icon green"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div class="stat-info"><div class="k">Побед</div><div class="v" id="pWins">0</div></div>
       </div>
       <div class="stat">
-        <div class="tg-icon red"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+        <div class="icon red"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
         <div class="stat-info"><div class="k">Поражений</div><div class="v" id="pLosses">0</div></div>
       </div>
     </div>
@@ -458,7 +364,6 @@ margin:16px 0;letter-spacing:-1.5px}
 
 </div>
 
-<!-- НАВИГАЦИЯ — iOS TabBar -->
 <div class="nav">
   <div class="nav-item active" data-tab="trade">
     <svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>
@@ -499,6 +404,26 @@ let player = {};
 let rates = {};
 let currentTrade = null;
 let tradeTimer = null;
+
+const CUR_ICONS = {
+  'GRAM':     {color:'teal',   svg:'<svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/><path d="M12 3l-4 6 4 12 4-12-4-6z"/></svg>'},
+  'DARKGRAM': {color:'purple', svg:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>'},
+  'DRK':      {color:'black',  svg:'<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>'},
+  'BSG':      {color:'gold',   svg:'<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'},
+  'WWR':      {color:'red',    svg:'<svg viewBox="0 0 24 24"><path d="M3 11l18-8v18l-18-8z"/><path d="M11 5v14"/></svg>'},
+};
+
+const SHOP_ICONS = {
+  'DRK':      {color:'black',  svg:'<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>'},
+  'DARKGRAM': {color:'purple', svg:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>'},
+  'BSG':      {color:'gold',   svg:'<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'},
+  'WWR':      {color:'red',    svg:'<svg viewBox="0 0 24 24"><path d="M3 11l18-8v18l-18-8z"/><path d="M11 5v14"/></svg>'},
+};
+
+function iconHTML(color, svg, size){
+  size = size || '';
+  return '<div class="icon ' + color + ' ' + size + '">' + svg + '</div>';
+}
 
 function toast(msg) {
   const t = document.getElementById('toast');
@@ -562,8 +487,9 @@ async function loadRates() {
   el.innerHTML = Object.entries(rates).map(([k, v]) => {
     const change = v.change || 0;
     const color = change >= 0 ? 'var(--green)' : 'var(--red)';
+    const ic = CUR_ICONS[k] || CUR_ICONS['GRAM'];
     return '<div class="item" onclick="openTrade(\'' + k + '\')">' +
-      '<div class="tg-icon blue"><svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/></svg></div>' +
+      iconHTML(ic.color, ic.svg) +
       '<div class="item-info">' +
         '<div class="name">' + v.name + '</div>' +
         '<div class="info" style="color:' + color + '">' + (change >= 0 ? '+' : '') + change.toFixed(2) + '%</div>' +
@@ -642,8 +568,9 @@ async function loadNft() {
     const left = info.max - sold;
     const can = player.gram >= info.price && left > 0;
     return '<div class="item">' +
+      '<div class="nft-emoji">' + info.emoji + '</div>' +
       '<div class="item-info">' +
-        '<div class="name">' + info.emoji + ' ' + info.name + '</div>' +
+        '<div class="name">' + info.name + '</div>' +
         '<div class="info">' + sold + '/' + info.max + (left > 0 ? ' · осталось ' + left : ' · РАСПРОДАНО') + '</div>' +
         '<div class="price">' + info.price + ' GRAM</div>' +
       '</div>' +
@@ -658,7 +585,7 @@ async function loadNft() {
   } else {
     my.innerHTML = player.nfts.map(nid => {
       return '<div class="item">' +
-        '<div class="tg-icon purple"><svg viewBox="0 0 24 24"><path d="M12 2l4 4-4 4-4-4z"/></svg></div>' +
+        '<div class="icon purple"><svg viewBox="0 0 24 24"><path d="M12 2l4 4-4 4-4-4z"/></svg></div>' +
         '<div class="item-info"><div class="name">' + nid + '</div><div class="info">Бонус +0.1x</div></div>' +
         '<button class="btn small gold" onclick="sellNft(\'' + nid + '\')">Продать</button>' +
       '</div>';
@@ -670,7 +597,8 @@ async function loadNft() {
     skins.innerHTML = Object.entries(data.skins).map(([key, info]) => {
       const can = player.gram >= info.price;
       return '<div class="item">' +
-        '<div class="item-info"><div class="name">' + info.emoji + ' ' + info.name + '</div><div class="price">' + info.price + ' GRAM</div></div>' +
+        '<div class="nft-emoji">' + info.emoji + '</div>' +
+        '<div class="item-info"><div class="name">' + info.name + '</div><div class="price">' + info.price + ' GRAM</div></div>' +
         '<button class="btn small ' + (can ? 'green' : '') + '" ' + (can ? '' : 'disabled') +
         ' onclick="buySkin(\'' + key + '\')">' + (can ? 'Купить' : 'Мало') + '</button>' +
       '</div>';
@@ -715,17 +643,21 @@ async function loadTasks() {
     let cls = 'task-row';
     let status = '';
     let onclick = '';
+    let ic = '';
     if (t.done) {
       cls += ' done';
+      ic = '<div class="icon green sm"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>';
       status = '<span class="task-status" style="color:var(--green)">Готово</span>';
     } else if (t.ready) {
       cls += ' ready';
+      ic = '<div class="icon gold sm"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>';
       status = '<span class="task-status" style="color:var(--gold)">Забрать</span>';
       onclick = 'onclick="claimTask(\'' + t.id + '\')"';
     } else {
+      ic = '<div class="icon gray sm"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>';
       status = '<span class="task-status" style="color:var(--muted)">В процессе</span>';
     }
-    return '<div class="' + cls + '" ' + onclick + '>' +
+    return '<div class="' + cls + '" ' + onclick + '>' + ic +
       '<div class="task-text">' + t.text + '</div>' + status +
     '</div>';
   }).join('');
@@ -763,8 +695,9 @@ async function loadMarket() {
     const can = player.gram >= item.price;
     return '<div class="card">' +
       '<div class="item" style="margin:0;background:transparent;border:none;padding:0">' +
+        '<div class="nft-emoji">' + item.emoji + '</div>' +
         '<div class="item-info">' +
-          '<div class="name">' + item.emoji + ' ' + item.nft_id + '</div>' +
+          '<div class="name">' + item.nft_id + '</div>' +
           '<div class="info">Продавец: ' + item.seller_name + '</div>' +
           '<div class="price">' + item.price + ' GRAM</div>' +
         '</div>' +
@@ -799,9 +732,11 @@ async function loadShop() {
   el.innerHTML = Object.entries(data.items).map(([key, info]) => {
     const owned = data.owned[key];
     const can = player.gram >= info.price && !owned;
+    const ic = SHOP_ICONS[key] || SHOP_ICONS['DRK'];
     return '<div class="item">' +
+      iconHTML(ic.color, ic.svg) +
       '<div class="item-info">' +
-        '<div class="name">' + info.name + '</div>' +
+        '<div class="name">' + info.name.replace(/^[^\s]+\s/, '') + '</div>' +
         '<div class="info">+' + info.percent + '% к прибыли</div>' +
         '<div class="price">' + info.price + ' GRAM</div>' +
       '</div>' +
