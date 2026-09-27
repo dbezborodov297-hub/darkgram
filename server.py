@@ -48,7 +48,7 @@ def get_user(uid):
             'accepted': 0, 'rejected': 0,
             'avatar': None, 'avatar_bg': None,
             'chat_wallpaper': None,
-            'chat_font': 'default',
+            'chat_font': 'sf',
             'chat_bubble_color': 'blue',
             'chat_notifications': True,
             'chat_read_receipts': True,
@@ -119,7 +119,7 @@ def api_player():
         'avatar': u.get('avatar'),
         'avatar_bg': u.get('avatar_bg'),
         'chat_wallpaper': u.get('chat_wallpaper'),
-        'chat_font': u.get('chat_font', 'default'),
+        'chat_font': u.get('chat_font', 'sf'),
         'chat_bubble_color': u.get('chat_bubble_color', 'blue'),
         'chat_notifications': u.get('chat_notifications', True),
         'chat_read_receipts': u.get('chat_read_receipts', True),
@@ -133,6 +133,43 @@ def api_user_by_id(uid):
     if str(uid) not in users:
         return jsonify({'error': 'not found'}), 404
     return jsonify(public_user(users[str(uid)]))
+
+
+@app.route('/api/users/search')
+def api_users_search():
+    q = (request.args.get('q') or '').strip().lower().replace('@', '')
+    my_uid = request.args.get('uid')
+    if not q:
+        return jsonify([])
+    users = load_json(USERS_FILE, {})
+    results = []
+    for uid, u in users.items():
+        if str(uid) == str(my_uid): continue
+        name = (u.get('name') or '').lower()
+        uname = (u.get('username') or '').lower()
+        if q in name or q in uname or q == str(uid):
+            results.append(public_user(u))
+        if len(results) >= 30: break
+    # сортировка по началу совпадения
+    results.sort(key=lambda u: (
+        0 if u['username'].lower().startswith(q) else 1,
+        0 if u['name'].lower().startswith(q) else 1,
+        u['name'].lower()
+    ))
+    return jsonify(results[:20])
+
+
+@app.route('/api/users/all')
+def api_users_all():
+    my_uid = request.args.get('uid')
+    users = load_json(USERS_FILE, {})
+    results = []
+    for uid, u in users.items():
+        if str(uid) == str(my_uid): continue
+        if not u.get('name') and not u.get('username'): continue
+        results.append(public_user(u))
+    results.sort(key=lambda u: u.get('joined', 0), reverse=True)
+    return jsonify(results[:30])
 
 
 @app.route('/api/save_profile', methods=['POST'])
@@ -420,7 +457,6 @@ def api_chat_get():
     key = chat_key(uid, other)
     messages = load_json(MESSAGES_FILE, {})
     chat = messages.get(key, {'messages': []})
-    # пометить прочитанными
     changed = False
     for m in chat['messages']:
         if str(m.get('to')) == str(uid) and not m.get('read'):
