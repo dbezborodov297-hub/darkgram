@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<title>DARKGRAM</title>
+<title>ФЛОРИССАНТ</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -29,7 +29,6 @@
   --indigo:#5e5ce6;
   --brown:#ac8e68;
   --radius:10px;
-  --radius-lg:14px;
 }
 
 body.theme-gray{--bg:#1c1c1e;--card:#2c2c2e;--card-2:#3a3a3c;--line:#48484a}
@@ -37,7 +36,6 @@ body.theme-light{
   --bg:#f2f2f7;--card:#fff;--card-2:#e5e5ea;--line:#d1d1d6;
   --text:#000;--dim:#8e8e93;--muted:#c7c7cc;
 }
-
 body.font-small{font-size:15px}
 body.font-medium{font-size:17px}
 body.font-large{font-size:19px}
@@ -45,11 +43,7 @@ body.font-huge{font-size:21px}
 body.no-anim *{transition:none!important;animation:none!important}
 body.transparent-icons .ic{background:rgba(120,120,128,0.24)!important}
 body.transparent-icons .ic svg{stroke:var(--text)}
-body.transparent-icons .ic.gold svg{stroke:var(--gold)}
 body.round-icons .ic{border-radius:50%!important}
-body.radius-sm{--radius:6px;--radius-lg:8px}
-body.radius-md{--radius:10px;--radius-lg:14px}
-body.radius-lg{--radius:16px;--radius-lg:20px}
 
 html,body{height:100%;overflow-x:hidden;background:var(--bg)}
 body{
@@ -59,7 +53,6 @@ body{
   font-size:17px;line-height:1.4;
   padding-bottom:calc(120px + env(safe-area-inset-bottom));
   min-height:100vh;letter-spacing:-.4px;
-  transition:background .25s,color .25s;
 }
 
 .header{
@@ -74,8 +67,9 @@ body{
   min-height:44px;
 }
 body.theme-light .header{background:rgba(242,242,247,0.85)}
-.header-left{display:flex;align-items:center;gap:10px}
-.header .logo{font-size:15px;font-weight:600;letter-spacing:-.3px}
+.header-left{display:flex;align-items:center;gap:8px}
+.header .logo{font-size:15px;font-weight:700;letter-spacing:-.2px;background:linear-gradient(90deg,#0a84ff,#bf5af2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header .sub{font-size:11px;color:var(--muted);letter-spacing:.3px;margin-top:1px}
 .header-right{display:flex;align-items:center;gap:8px}
 .online{
   display:flex;align-items:center;gap:5px;
@@ -99,9 +93,9 @@ stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 .large-title-wrap{padding:8px 16px 0;max-width:540px;margin:0 auto}
 .large-title{
-  font-size:34px;font-weight:800;letter-spacing:-1px;
+  font-size:32px;font-weight:800;letter-spacing:-.8px;
   line-height:1.1;padding:10px 0 8px;
-  transition:font-size .25s cubic-bezier(0.32,0.72,0,1), padding .25s cubic-bezier(0.32,0.72,0,1);
+  transition:font-size .25s cubic-bezier(0.32,0.72,0,1), padding .25s;
 }
 .large-title.compact{font-size:22px;padding:4px 0;letter-spacing:-.5px}
 
@@ -118,50 +112,41 @@ stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   background:var(--card);border-radius:var(--radius);
   margin-bottom:14px;overflow:hidden;
   box-shadow:0 1px 2px rgba(0,0,0,0.08);
-  transition:background .25s,border-radius .25s;
 }
 
 .row{
   display:flex;align-items:center;gap:12px;
   padding:11px 16px;min-height:44px;
-  position:relative;transition:background .12s;
-  cursor:default;
+  position:relative;transition:background .12s;cursor:default;
 }
 .row + .row::before{
-  content:'';position:absolute;top:0;
-  left:16px;right:0;height:.5px;background:var(--line);
+  content:'';position:absolute;top:0;left:16px;right:0;
+  height:.5px;background:var(--line);
 }
 .row.has-icon + .row.has-icon::before{left:60px}
 .row.tappable{cursor:pointer}
 .row.tappable:active{background:var(--card-2)}
 .row .row-info{flex:1;min-width:0}
 .row .row-title{font-size:17px;font-weight:400;letter-spacing:-.4px;line-height:1.3}
-.row .row-sub{font-size:13px;color:var(--dim);margin-top:2px;
-letter-spacing:-.2px;line-height:1.3}
-.row .row-value{font-size:17px;font-weight:400;color:var(--dim);
-letter-spacing:-.3px;white-space:nowrap}
+.row .row-sub{font-size:13px;color:var(--dim);margin-top:2px;letter-spacing:-.2px;line-height:1.3}
+.row .row-value{font-size:17px;font-weight:400;color:var(--dim);letter-spacing:-.3px;white-space:nowrap}
 .row .row-value.blue{color:var(--accent)}
 .row .row-value.gold{color:var(--gold)}
 .row .row-value.green{color:var(--green)}
-.row .chev{color:var(--muted);font-size:20px;line-height:1;
-font-weight:300;margin-left:auto}
+.row .chev{color:var(--muted);font-size:20px;line-height:1;font-weight:300;margin-left:auto}
 
 .ic{
   width:29px;height:29px;border-radius:7px;
   display:inline-flex;align-items:center;justify-content:center;
   flex-shrink:0;position:relative;overflow:hidden;
-  transition:background .25s,border-radius .25s;
 }
 .ic::after{
   content:'';position:absolute;inset:0;
   background:linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0) 55%);
   pointer-events:none;
 }
-.ic svg{
-  width:17px;height:17px;stroke:#fff;fill:none;
-  stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;
-  position:relative;z-index:1;
-}
+.ic svg{width:17px;height:17px;stroke:#fff;fill:none;
+stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;position:relative;z-index:1}
 .ic.lg{width:34px;height:34px;border-radius:8px}
 .ic.lg svg{width:20px;height:20px}
 .ic.blue{background:#0a84ff}
@@ -177,25 +162,6 @@ font-weight:300;margin-left:auto}
 .ic.gray{background:#8e8e93}
 .ic.brown{background:#ac8e68}
 
-.balance-card{
-  text-align:center;padding:26px 16px 22px;
-  background:var(--card);border-radius:var(--radius);
-  margin-bottom:14px;
-}
-.balance-card .lbl{font-size:13px;color:var(--muted);
-text-transform:uppercase;letter-spacing:.8px;font-weight:600}
-.balance-card .val{font-size:48px;font-weight:800;
-letter-spacing:-2px;margin-top:6px;line-height:1}
-.balance-card .inc{font-size:15px;color:var(--green);
-font-weight:600;margin-top:8px;letter-spacing:-.2px}
-
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-.grid-2 .card{margin-bottom:0}
-.stat{padding:14px;text-align:left}
-.stat .k{font-size:12px;color:var(--dim);
-text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px}
-.stat .v{font-size:26px;font-weight:700;letter-spacing:-.7px;line-height:1}
-
 .btn{
   background:var(--accent);color:#fff;border:none;border-radius:var(--radius);
   padding:14px 20px;font-size:17px;font-weight:600;
@@ -207,16 +173,8 @@ text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px}
 .btn.green{background:var(--green)}
 .btn.gold{background:var(--gold);color:#000}
 .btn.red{background:var(--red)}
-.btn.small{width:auto;display:inline-block;padding:7px 14px;
-font-size:15px;border-radius:18px}
+.btn.small{width:auto;display:inline-block;padding:7px 14px;font-size:15px;border-radius:18px}
 .btn-row{padding:12px 16px}
-
-.nft-emoji{
-  width:38px;height:38px;border-radius:var(--radius);
-  display:inline-flex;align-items:center;justify-content:center;
-  background:var(--card-2);font-size:22px;flex-shrink:0;
-  border:.5px solid var(--line);
-}
 
 .nav{
   position:fixed;bottom:0;left:0;right:0;
@@ -231,17 +189,13 @@ font-size:15px;border-radius:18px}
 }
 body.theme-light .nav{background:rgba(255,255,255,0.85)}
 .nav-item{
-  flex:1;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:2px;
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
   padding:4px 2px;color:var(--muted);cursor:pointer;
   user-select:none;min-width:0;transition:color .12s;
 }
 .nav-item.active{color:var(--accent-2)}
-.nav-item svg{
-  width:26px;height:26px;stroke:currentColor;fill:none;
-  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
-  transition:stroke .12s;
-}
+.nav-item svg{width:26px;height:26px;stroke:currentColor;fill:none;
+stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .nav-item span{font-size:10px;letter-spacing:-.1px;font-weight:500;
 white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 
@@ -252,35 +206,17 @@ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .toast{
   position:fixed;bottom:calc(130px + env(safe-area-inset-bottom));
   left:50%;transform:translateX(-50%) translateY(120%);
-  background:rgba(44,44,46,0.96);
-  backdrop-filter:blur(20px);
+  background:rgba(44,44,46,0.96);backdrop-filter:blur(20px);
   -webkit-backdrop-filter:blur(20px);
-  border:.5px solid var(--line);
-  color:var(--text);padding:12px 20px;border-radius:14px;
-  font-size:15px;font-weight:500;z-index:999;opacity:0;
-  transition:.25s;pointer-events:none;max-width:90vw;text-align:center;
-  letter-spacing:-.3px;
+  border:.5px solid var(--line);color:var(--text);
+  padding:12px 20px;border-radius:14px;font-size:15px;font-weight:500;
+  z-index:999;opacity:0;transition:.25s;pointer-events:none;
+  max-width:90vw;text-align:center;letter-spacing:-.3px;
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 .loading{text-align:center;padding:40px;color:var(--muted);
 font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase}
-
-.rank-row{display:flex;align-items:center;gap:12px;
-padding:12px 16px;position:relative}
-.rank-row + .rank-row::before{
-  content:'';position:absolute;top:0;left:16px;right:0;
-  height:.5px;background:var(--line);
-}
-.rank-row .r{font-size:17px;font-weight:700;width:28px;
-text-align:center;color:var(--muted);letter-spacing:-.3px}
-.rank-row .r.g{color:#ffd700}
-.rank-row .r.s{color:#c0c0c0}
-.rank-row .r.b{color:#cd7f32}
-.rank-row .who{flex:1;font-size:16px;font-weight:400;letter-spacing:-.3px;
-overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rank-row .val{font-size:15px;font-weight:600;color:var(--accent-2);
-white-space:nowrap;letter-spacing:-.2px}
 
 .field{padding:11px 16px;position:relative}
 .field + .field::before{
@@ -289,24 +225,110 @@ white-space:nowrap;letter-spacing:-.2px}
 }
 .field label{display:block;font-size:12px;font-weight:600;
 color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.field input{width:100%;background:var(--card-2);
-border:none;border-radius:8px;padding:11px 14px;color:var(--text);
-font-size:16px;font-family:inherit;letter-spacing:-.3px}
-.field input:focus{outline:2px solid var(--accent);outline-offset:-1px}
-.field input::placeholder{color:var(--muted)}
+.field input,.field textarea{
+  width:100%;background:var(--card-2);border:none;border-radius:8px;
+  padding:11px 14px;color:var(--text);font-size:16px;
+  font-family:inherit;letter-spacing:-.3px;resize:none;
+}
+.field input:focus,.field textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.field input::placeholder,.field textarea::placeholder{color:var(--muted)}
 
-.progress{background:var(--card-2);border-radius:10px;
-height:5px;overflow:hidden;margin:8px 0 0}
-.progress-fill{height:100%;background:var(--green);
-transition:width .3s;border-radius:10px}
+/* PROFILE */
+.profile-header{
+  text-align:center;padding:20px 16px 24px;
+  background:var(--card);border-radius:var(--radius);margin-bottom:14px;
+}
+.profile-avatar{
+  width:84px;height:84px;border-radius:50%;
+  background:linear-gradient(135deg,#0a84ff,#bf5af2);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 14px;font-size:36px;font-weight:700;color:#fff;
+  position:relative;
+  box-shadow:0 8px 24px rgba(10,132,255,0.3);
+}
+.profile-avatar .acc-badge{
+  position:absolute;bottom:-4px;right:-4px;
+  font-size:24px;background:var(--bg);border-radius:50%;
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--card);
+}
+.profile-name{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.profile-username{font-size:14px;color:var(--accent-2);margin-top:4px;font-weight:500}
 
-.verified-badge{
-  display:inline-flex;align-items:center;gap:4px;
-  background:rgba(48,209,88,0.15);color:var(--green);
-  padding:3px 10px;border-radius:20px;font-size:12px;
-  font-weight:600;letter-spacing:-.2px;
+/* POST */
+.post-card{
+  background:var(--card);border-radius:var(--radius);
+  padding:16px;margin-bottom:12px;
+}
+.post-head{
+  display:flex;align-items:center;gap:10px;margin-bottom:10px;
+}
+.post-author{font-size:14px;font-weight:600}
+.post-time{font-size:12px;color:var(--muted);margin-top:1px}
+.post-text{font-size:15px;line-height:1.5;letter-spacing:-.2px;white-space:pre-wrap;word-wrap:break-word}
+.post-image{
+  width:100%;border-radius:10px;margin-top:12px;
+  display:block;max-height:400px;object-fit:cover;
 }
 
+/* CONTEST */
+.contest-card{
+  background:var(--card);border-radius:var(--radius);
+  padding:16px;margin-bottom:12px;
+  border:1px solid transparent;
+}
+.contest-card.active{border-color:rgba(48,209,88,0.3)}
+.contest-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.contest-emoji{font-size:32px}
+.contest-title{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.contest-status{font-size:12px;color:var(--green);font-weight:600;margin-top:2px}
+.contest-status.closed{color:var(--red)}
+.contest-desc{font-size:14px;color:var(--dim);line-height:1.5;margin-bottom:12px;white-space:pre-wrap}
+
+/* APPLICATION */
+.app-card{
+  background:var(--card);border-radius:var(--radius);
+  padding:14px;margin-bottom:10px;
+}
+.app-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.app-user-info{flex:1;min-width:0}
+.app-user-name{font-size:15px;font-weight:600}
+.app-user-username{font-size:13px;color:var(--accent-2);margin-top:1px}
+.app-photo{
+  width:100%;max-height:260px;object-fit:cover;
+  border-radius:10px;margin:10px 0;
+}
+.app-comment{font-size:14px;color:var(--dim);line-height:1.5;margin:8px 0;white-space:pre-wrap}
+.app-status{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:12px;font-weight:600;
+  padding:4px 10px;border-radius:20px;
+}
+.app-status.pending{background:rgba(255,214,10,0.15);color:var(--gold)}
+.app-status.accepted{background:rgba(48,209,88,0.15);color:var(--green)}
+.app-status.rejected{background:rgba(255,69,58,0.15);color:var(--red)}
+.app-reason{
+  font-size:13px;color:var(--red);
+  background:rgba(255,69,58,0.1);
+  padding:8px 12px;border-radius:8px;margin-top:8px;
+}
+
+/* ACCESSORIES */
+.acc-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  gap:8px;padding:12px 16px;
+}
+.acc-item{
+  aspect-ratio:1;
+  background:var(--card-2);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;cursor:pointer;transition:.15s;
+  border:2px solid transparent;
+}
+.acc-item.active{border-color:var(--accent);background:rgba(10,132,255,0.15)}
+.acc-item:active{transform:scale(.92)}
+
+/* SETTINGS */
 .settings-screen{
   position:fixed;top:0;left:0;right:0;bottom:0;
   background:var(--bg);z-index:200;overflow-y:auto;
@@ -315,7 +337,6 @@ transition:width .3s;border-radius:10px}
   padding-bottom:calc(40px + env(safe-area-inset-bottom));
 }
 .settings-screen.open{transform:translateX(0)}
-
 .settings-header{
   background:rgba(0,0,0,0.72);
   backdrop-filter:saturate(180%) blur(30px);
@@ -331,13 +352,18 @@ body.theme-light .settings-header{background:rgba(242,242,247,0.85)}
 color:var(--accent);font-size:17px;font-weight:400;
 font-family:inherit;display:flex;align-items:center;gap:2px;
 padding:6px 6px 6px 0;letter-spacing:-.4px}
-.back-btn svg{width:11px;height:19px;stroke:var(--accent);
-fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-.settings-title{font-size:17px;font-weight:600;
-letter-spacing:-.5px;flex:1;text-align:center;margin-right:60px}
-
+.back-btn svg{width:11px;height:19px;stroke:var(--accent);fill:none;
+stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.settings-title{font-size:17px;font-weight:600;letter-spacing:-.5px;
+flex:1;text-align:center;margin-right:60px}
 .settings-container{padding:0 16px;max-width:540px;margin:0 auto}
-
+.switch{width:51px;height:31px;background:var(--card-2);
+border-radius:20px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.switch.on{background:var(--green)}
+.switch::after{content:'';position:absolute;top:2px;left:2px;
+width:27px;height:27px;border-radius:50%;background:#fff;
+transition:transform .2s;box-shadow:0 2px 4px rgba(0,0,0,0.2)}
+.switch.on::after{transform:translateX(20px)}
 .theme-preview{display:inline-flex;gap:8px;padding:6px;
 background:var(--card-2);border-radius:10px}
 .theme-swatch{width:42px;height:30px;border-radius:6px;
@@ -348,46 +374,77 @@ font-size:11px;font-weight:700;transition:.15s}
 .theme-swatch.dark{background:#000;color:#fff}
 .theme-swatch.gray{background:#1c1c1e;color:#fff}
 .theme-swatch.light{background:#f2f2f7;color:#000}
-
 .color-dots{display:flex;gap:8px}
 .color-dot{width:24px;height:24px;border-radius:50%;
 border:2px solid transparent;cursor:pointer;transition:.15s}
 .color-dot.active{border-color:var(--text);transform:scale(1.12)}
-
-.switch{width:51px;height:31px;background:var(--card-2);
-border-radius:20px;position:relative;cursor:pointer;
-transition:background .2s;flex-shrink:0}
-.switch.on{background:var(--green)}
-.switch::after{content:'';position:absolute;top:2px;left:2px;
-width:27px;height:27px;border-radius:50%;background:#fff;
-transition:transform .2s;box-shadow:0 2px 4px rgba(0,0,0,0.2)}
-.switch.on::after{transform:translateX(20px)}
-
-.about-text{font-size:13px;color:var(--dim);
-padding:12px 16px;line-height:1.5}
+.about-text{font-size:13px;color:var(--dim);padding:12px 16px;line-height:1.5}
 .about-text b{color:var(--text);font-weight:600}
 
-.seg-control{
-  display:inline-flex;background:var(--card-2);
-  border-radius:8px;padding:2px;
+/* MODAL */
+.modal-back{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.6);
+  z-index:300;
+  display:none;
+  align-items:flex-end;
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
 }
-.seg-btn{
-  padding:5px 12px;font-size:13px;
-  border-radius:6px;cursor:pointer;
-  color:var(--dim);font-weight:500;transition:.15s;
-  font-family:inherit;background:none;border:none;
+.modal-back.open{display:flex}
+.modal{
+  background:var(--card);
+  width:100%;max-width:540px;
+  border-radius:20px 20px 0 0;
+  padding:20px;
+  max-height:90vh;
+  overflow-y:auto;
+  padding-bottom:calc(20px + env(safe-area-inset-bottom));
+  animation:slideUp .3s cubic-bezier(0.32,0.72,0,1);
 }
-.seg-btn.active{
-  background:var(--card);color:var(--text);
-  box-shadow:0 1px 3px rgba(0,0,0,0.15);
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title{
+  font-size:22px;font-weight:700;letter-spacing:-.5px;
+  margin-bottom:16px;text-align:center;
 }
+.modal-close{
+  position:absolute;top:16px;right:16px;
+  background:var(--card-2);border:none;
+  width:30px;height:30px;border-radius:50%;
+  cursor:pointer;color:var(--text);
+  font-size:16px;font-weight:300;
+  display:flex;align-items:center;justify-content:center;
+}
+.emoji-picker{
+  display:flex;gap:6px;flex-wrap:wrap;padding:8px 0;
+}
+.emoji-opt{
+  width:42px;height:42px;border-radius:10px;
+  background:var(--card-2);border:2px solid transparent;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;cursor:pointer;
+}
+.emoji-opt.active{border-color:var(--accent);background:rgba(10,132,255,0.15)}
+.upload-photo{
+  width:100%;padding:20px;border-radius:10px;
+  border:2px dashed var(--line);
+  background:var(--card-2);
+  text-align:center;cursor:pointer;
+  color:var(--dim);font-size:14px;
+  margin:8px 0;
+}
+.upload-photo.has-photo{padding:0;border-style:solid;border-color:var(--accent)}
+.upload-photo img{width:100%;border-radius:8px;display:block}
 </style>
 </head>
-<body class="theme-dark font-medium radius-md">
+<body class="theme-dark font-medium">
 
 <div class="header">
   <div class="header-left">
-    <div class="logo">DARKGRAM</div>
+    <div>
+      <div class="logo">ФЛОРИССАНТ</div>
+      <div class="sub">принять участие</div>
+    </div>
   </div>
   <div class="header-right">
     <div class="online"><div class="dot"></div><span id="onlineCount">0</span></div>
@@ -398,144 +455,73 @@ padding:12px 16px;line-height:1.5}
 </div>
 
 <div class="large-title-wrap">
-  <div class="large-title" id="pageTitle">Трейдинг</div>
+  <div class="large-title" id="pageTitle">Лента</div>
 </div>
 
 <div class="container">
 
-  <div class="tab active" id="tab-trade">
-    <div class="balance-card">
-      <div class="lbl">Баланс GRAM</div>
-      <div class="val" id="balance">0</div>
-      <div class="inc" id="profit">+0 профит</div>
-    </div>
-    <div class="grid-2">
-      <div class="card stat"><div class="k">Побед</div><div class="v" id="wins">0</div></div>
-      <div class="card stat"><div class="k">NFT</div><div class="v" id="nftCount">0</div></div>
-    </div>
-    <div id="activeTrade"></div>
-    <div class="section-header">Курсы валют</div>
-    <div class="card" id="ratesList"><div class="loading">Загрузка</div></div>
-    <div id="verifySection"></div>
+  <!-- ЛЕНТА -->
+  <div class="tab active" id="tab-feed">
+    <div id="postsList"><div class="loading">Загрузка</div></div>
   </div>
 
-  <div class="tab" id="tab-nft">
-    <div class="section-header">Магазин</div>
-    <div class="card" id="nftShop"><div class="loading">Загрузка</div></div>
-    <div class="section-header">Мои NFT</div>
-    <div class="card" id="myNft"><div class="loading">Загрузка</div></div>
-    <div class="section-header">Скины</div>
-    <div class="card" id="skinsShop"></div>
+  <!-- КОНКУРСЫ -->
+  <div class="tab" id="tab-contests">
+    <div id="contestsList"><div class="loading">Загрузка</div></div>
   </div>
 
-  <div class="tab" id="tab-tasks">
-    <div class="card" style="padding:14px 16px">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:15px;font-weight:600;letter-spacing:-.3px">День <span id="taskDay">1</span>/10</div>
-          <div style="font-size:13px;color:var(--dim);margin-top:4px">+20 GRAM за каждое</div>
-        </div>
-        <div style="font-size:15px;font-weight:700;color:var(--accent-2);letter-spacing:-.3px" id="taskCount">0/5</div>
-      </div>
-      <div class="progress"><div class="progress-fill" id="taskProgress" style="width:0%"></div></div>
-    </div>
-    <div class="card" id="tasksList"><div class="loading">Загрузка</div></div>
+  <!-- МОИ ЗАЯВКИ -->
+  <div class="tab" id="tab-myapps">
+    <div id="myAppsList"><div class="loading">Загрузка</div></div>
   </div>
 
-  <div class="tab" id="tab-market">
-    <div class="section-header">Купить по ID</div>
-    <div class="card">
-      <div class="field">
-        <label>ID NFT</label>
-        <input id="buyIdInput" placeholder="N-0001">
-      </div>
-      <div class="btn-row"><button class="btn" onclick="buyById()">Купить</button></div>
-    </div>
-    <div class="section-header">На продаже</div>
-    <div class="card" id="marketList"><div class="loading">Загрузка</div></div>
-  </div>
-
-  <div class="tab" id="tab-top">
-    <div class="section-header">По балансу GRAM</div>
-    <div class="card" id="topList"><div class="loading">Загрузка</div></div>
-  </div>
-
+  <!-- ПРОФИЛЬ -->
   <div class="tab" id="tab-profile">
-    <div class="card">
-      <div class="row has-icon">
-        <div class="ic blue lg"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>
-        <div class="row-info">
-          <div class="row-title" id="userName">Профиль</div>
-          <div class="row-sub" id="userId"></div>
-        </div>
-      </div>
-    </div>
+    <div class="profile-header" id="profileHeader"></div>
 
     <div class="section-header">Статистика</div>
+    <div class="card" id="statsCard"></div>
+
+    <div class="section-header">Аксессуары</div>
     <div class="card">
-      <div class="row has-icon">
-        <div class="ic green"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div class="row-info"><div class="row-title">Побед</div></div>
-        <div class="row-value" id="pWins">0</div>
-      </div>
-      <div class="row has-icon">
-        <div class="ic red"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
-        <div class="row-info"><div class="row-title">Поражений</div></div>
-        <div class="row-value" id="pLosses">0</div>
-      </div>
-      <div class="row has-icon">
-        <div class="ic gold"><svg viewBox="0 0 24 24"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/></svg></div>
-        <div class="row-info"><div class="row-title">Профит</div></div>
-        <div class="row-value gold" id="pProfit">0</div>
-      </div>
+      <div class="acc-grid" id="accGrid"></div>
     </div>
 
-    <div class="section-header">Магазин биткоинов</div>
-    <div class="card" id="shopList"></div>
+    <div class="section-header">Аккаунт</div>
+    <div class="card" id="accountCard"></div>
+  </div>
 
-    <div class="section-header">Перевод GRAM</div>
-    <div class="card">
-      <div class="field">
-        <label>Кому (ID)</label>
-        <input id="payTarget" placeholder="123456789" inputmode="numeric">
-      </div>
-      <div class="field">
-        <label>Сколько</label>
-        <input id="payAmount" type="number" placeholder="100">
-      </div>
-      <div class="btn-row"><button class="btn" onclick="doPay()">Перевести</button></div>
-    </div>
+  <!-- АДМИНКА -->
+  <div class="tab" id="tab-admin">
+    <div id="adminContent"></div>
   </div>
 
 </div>
 
-<div class="nav">
-  <div class="nav-item active" data-tab="trade" data-title="Трейдинг">
-    <svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>
-    <span>Трейд</span>
+<div class="nav" id="mainNav">
+  <div class="nav-item active" data-tab="feed" data-title="Лента">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+    <span>Лента</span>
   </div>
-  <div class="nav-item" data-tab="nft" data-title="NFT">
-    <svg viewBox="0 0 24 24"><path d="M12 2l4 4-4 4-4-4z"/><path d="M12 14l4 4-4 4-4-4z"/></svg>
-    <span>NFT</span>
+  <div class="nav-item" data-tab="contests" data-title="Конкурсы">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+    <span>Конкурсы</span>
   </div>
-  <div class="nav-item" data-tab="tasks" data-title="Задания">
-    <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-    <span>Задания</span>
-  </div>
-  <div class="nav-item" data-tab="market" data-title="Рынок">
-    <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg>
-    <span>Рынок</span>
-  </div>
-  <div class="nav-item" data-tab="top" data-title="Топ">
-    <svg viewBox="0 0 24 24"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/></svg>
-    <span>Топ</span>
+  <div class="nav-item" data-tab="myapps" data-title="Мои заявки">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span>Мои</span>
   </div>
   <div class="nav-item" data-tab="profile" data-title="Профиль">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
     <span>Профиль</span>
   </div>
+  <div class="nav-item" data-tab="admin" data-title="Админка" id="adminNavBtn" style="display:none">
+    <svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3 9-8 10-5-1-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+    <span>Админ</span>
+  </div>
 </div>
 
+<!-- НАСТРОЙКИ -->
 <div class="settings-screen" id="settingsScreen">
   <div class="settings-header">
     <button class="back-btn" onclick="closeSettings()">
@@ -544,9 +530,7 @@ padding:12px 16px;line-height:1.5}
     </button>
     <div class="settings-title">Настройки</div>
   </div>
-
   <div class="settings-container">
-
     <div class="section-header">Внешний вид</div>
     <div class="card">
       <div class="row has-icon">
@@ -560,10 +544,8 @@ padding:12px 16px;line-height:1.5}
       </div>
       <div class="row has-icon tappable" onclick="cycleFont()">
         <div class="ic purple"><svg viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></div>
-        <div class="row-info">
-          <div class="row-title">Размер текста</div>
-          <div class="row-sub" id="fontLabel">Средний</div>
-        </div>
+        <div class="row-info"><div class="row-title">Размер текста</div>
+        <div class="row-sub" id="fontLabel">Средний</div></div>
         <div class="chev">›</div>
       </div>
       <div class="row has-icon">
@@ -577,25 +559,12 @@ padding:12px 16px;line-height:1.5}
           <div class="color-dot" style="background:#ff453a" onclick="setAccent('red')" data-color="red"></div>
         </div>
       </div>
-      <div class="row has-icon">
-        <div class="ic orange"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg></div>
-        <div class="row-info"><div class="row-title">Радиус карточек</div></div>
-        <div class="seg-control">
-          <button class="seg-btn" onclick="setRadius('sm')" data-r="sm">S</button>
-          <button class="seg-btn" onclick="setRadius('md')" data-r="md">M</button>
-          <button class="seg-btn" onclick="setRadius('lg')" data-r="lg">L</button>
-        </div>
-      </div>
     </div>
-
     <div class="section-header">Иконки</div>
     <div class="card">
       <div class="row has-icon tappable" onclick="toggleTransparent()">
-        <div class="ic teal"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18"/></svg></div>
-        <div class="row-info">
-          <div class="row-title">Прозрачный фон</div>
-          <div class="row-sub">Как в iOS на паузе</div>
-        </div>
+        <div class="ic teal"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/></svg></div>
+        <div class="row-info"><div class="row-title">Прозрачный фон</div></div>
         <div class="switch" id="sw-transparent"></div>
       </div>
       <div class="row has-icon tappable" onclick="toggleRound()">
@@ -604,21 +573,6 @@ padding:12px 16px;line-height:1.5}
         <div class="switch" id="sw-round"></div>
       </div>
     </div>
-
-    <div class="section-header">Отображение</div>
-    <div class="card">
-      <div class="row has-icon tappable" onclick="toggleHideBalance()">
-        <div class="ic green"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
-        <div class="row-info"><div class="row-title">Скрыть баланс</div></div>
-        <div class="switch" id="sw-hide"></div>
-      </div>
-      <div class="row has-icon tappable" onclick="toggleShowLuck()">
-        <div class="ic gold"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-        <div class="row-info"><div class="row-title">Показывать везение</div></div>
-        <div class="switch" id="sw-luck"></div>
-      </div>
-    </div>
-
     <div class="section-header">Поведение</div>
     <div class="card">
       <div class="row has-icon tappable" onclick="toggleAnim()">
@@ -631,52 +585,25 @@ padding:12px 16px;line-height:1.5}
         <div class="row-info"><div class="row-title">Вибрация</div></div>
         <div class="switch" id="sw-haptic"></div>
       </div>
-      <div class="row has-icon tappable" onclick="toggleNotify()">
-        <div class="ic red"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
-        <div class="row-info"><div class="row-title">Уведомления о сделках</div></div>
-        <div class="switch" id="sw-notify"></div>
-      </div>
-      <div class="row has-icon">
-        <div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
-        <div class="row-info"><div class="row-title">Обновление курсов</div></div>
-        <div class="seg-control">
-          <button class="seg-btn" onclick="setRefresh(3)" data-r="3">3с</button>
-          <button class="seg-btn" onclick="setRefresh(5)" data-r="5">5с</button>
-          <button class="seg-btn" onclick="setRefresh(10)" data-r="10">10с</button>
-        </div>
-      </div>
     </div>
-
-    <div class="section-header">Данные</div>
-    <div class="card">
-      <div class="row has-icon tappable" onclick="exportData()">
-        <div class="ic teal"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
-        <div class="row-info"><div class="row-title">Экспорт данных</div></div>
-        <div class="chev">›</div>
-      </div>
-      <div class="row has-icon tappable" onclick="clearCache()">
-        <div class="ic red"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 01-2 2H9a2 2 0 01-2-2L5 6"/></svg></div>
-        <div class="row-info"><div class="row-title">Очистить кэш</div></div>
-        <div class="chev">›</div>
-      </div>
-    </div>
-
     <div class="section-header">О приложении</div>
     <div class="card">
       <div class="row has-icon">
         <div class="ic indigo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
-        <div class="row-info">
-          <div class="row-title">DARKGRAM Trade</div>
-          <div class="row-sub">Версия 2.0.0</div>
-        </div>
+        <div class="row-info"><div class="row-title">ФЛОРИССАНТ</div>
+        <div class="row-sub">Версия 1.0.0</div></div>
       </div>
       <div class="about-text">
-        <b>Mini App</b> для торговли GRAM, NFT и выполнения заданий.<br><br>
-        Разработка: <b>DARKGRAM</b>
+        <b>Платформа конкурсов</b> — участвуй, побеждай, твори.<br><br>
+        Разработка: <b>Флориссант</b>
       </div>
     </div>
-
   </div>
+</div>
+
+<!-- МОДАЛКА -->
+<div class="modal-back" id="modalBack" onclick="closeModal(event)">
+  <div class="modal" id="modalContent" onclick="event.stopPropagation()"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -685,29 +612,31 @@ padding:12px 16px;line-height:1.5}
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
-const user = tg?.initDataUnsafe?.user || { id: 0, first_name: 'Player' };
+const user = tg?.initDataUnsafe?.user || { id: 0, first_name: 'Гость', username: '' };
 const UID = user.id;
+const UNAME = user.username || '';
 
 let player = {};
-let rates = {};
-let currentTrade = null;
-let tradeTimer = null;
-let refreshTimer = null;
+let isAdmin = false;
 
-const SETTINGS_KEY = 'dg_settings_v3';
+const ACCESSORIES = {
+  'none':   '',
+  'star':   '⭐',
+  'crown':  '👑',
+  'fire':   '🔥',
+  'diamond':'💎',
+  'heart':  '💖',
+  'flower': '🌸',
+  'rocket': '🚀',
+  'trophy': '🏆',
+  'lightning': '⚡',
+};
+
+// ============ SETTINGS ============
+const SETTINGS_KEY = 'fl_settings';
 let settings = {
-  theme: 'dark',
-  font: 'medium',
-  accent: 'blue',
-  anim: true,
-  haptic: true,
-  transparentIcons: false,
-  roundIcons: false,
-  radius: 'md',
-  hideBalance: false,
-  showLuck: true,
-  notify: true,
-  refresh: 5,
+  theme: 'dark', font: 'medium', accent: 'blue',
+  anim: true, haptic: true, transparentIcons: false, roundIcons: false,
 };
 
 function loadSettings() {
@@ -717,585 +646,727 @@ function loadSettings() {
   } catch(e){}
   applySettings();
 }
-
 function saveSettings() {
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch(e){}
 }
-
 function applySettings() {
   document.body.classList.remove('theme-dark','theme-gray','theme-light');
   document.body.classList.add('theme-' + settings.theme);
-
   document.body.classList.remove('font-small','font-medium','font-large','font-huge');
   document.body.classList.add('font-' + settings.font);
-
-  document.body.classList.remove('radius-sm','radius-md','radius-lg');
-  document.body.classList.add('radius-' + settings.radius);
-
   document.body.classList.toggle('no-anim', !settings.anim);
   document.body.classList.toggle('transparent-icons', settings.transparentIcons);
   document.body.classList.toggle('round-icons', settings.roundIcons);
-
   const accents = {
-    blue:   ['#0a84ff', '#409cff'],
-    green:  ['#30d158', '#30d158'],
-    purple: ['#bf5af2', '#bf5af2'],
-    orange: ['#ff9f0a', '#ff9f0a'],
-    red:    ['#ff453a', '#ff453a'],
+    blue:['#0a84ff','#409cff'], green:['#30d158','#30d158'],
+    purple:['#bf5af2','#bf5af2'], orange:['#ff9f0a','#ff9f0a'],
+    red:['#ff453a','#ff453a'],
   };
-  const [a1, a2] = accents[settings.accent] || accents.blue;
+  const [a1,a2] = accents[settings.accent] || accents.blue;
   document.documentElement.style.setProperty('--accent', a1);
   document.documentElement.style.setProperty('--accent-2', a2);
-
   const fl = document.getElementById('fontLabel');
-  if (fl) fl.textContent = {small:'Маленький',medium:'Средний',large:'Большой',huge:'Огромный'}[settings.font] || 'Средний';
-
+  if (fl) fl.textContent = {small:'Маленький',medium:'Средний',large:'Большой',huge:'Огромный'}[settings.font];
   ['dark','gray','light'].forEach(t => {
-    const sw = document.getElementById('sw-' + t);
+    const sw = document.getElementById('sw-'+t);
     if (sw) sw.classList.toggle('active', settings.theme === t);
   });
-
   document.querySelectorAll('.color-dot').forEach(d => {
     d.classList.toggle('active', d.dataset.color === settings.accent);
   });
-
-  document.querySelectorAll('.seg-btn[data-r]').forEach(b => {
-    const val = b.dataset.r;
-    let active = false;
-    if (val === 'sm' || val === 'md' || val === 'lg') active = (settings.radius === val);
-    else active = (parseInt(val) === settings.refresh);
-    b.classList.toggle('active', active);
-  });
-
-  ['sw-anim','sw-haptic','sw-transparent','sw-round','sw-hide','sw-luck','sw-notify'].forEach(id => {
+  ['sw-anim','sw-haptic','sw-transparent','sw-round'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    const key = id.replace('sw-','');
-    const map = {anim:'anim',haptic:'haptic',transparent:'transparentIcons',round:'roundIcons',hide:'hideBalance',luck:'showLuck',notify:'notify'};
-    el.classList.toggle('on', !!settings[map[key]]);
+    const map = {anim:'anim',haptic:'haptic',transparent:'transparentIcons',round:'roundIcons'};
+    el.classList.toggle('on', !!settings[map[id.replace('sw-','')]]);
   });
 }
-
-function setTheme(t) { settings.theme = t; saveSettings(); applySettings(); haptic('light'); }
-function cycleFont() {
-  const o = ['small','medium','large','huge'];
-  settings.font = o[(o.indexOf(settings.font) + 1) % o.length];
-  saveSettings(); applySettings(); haptic('light');
+function setTheme(t){settings.theme=t;saveSettings();applySettings();haptic('light');}
+function cycleFont(){
+  const o=['small','medium','large','huge'];
+  settings.font=o[(o.indexOf(settings.font)+1)%o.length];
+  saveSettings();applySettings();haptic('light');
 }
-function setAccent(a) { settings.accent = a; saveSettings(); applySettings(); haptic('light'); }
-function setRadius(r) { settings.radius = r; saveSettings(); applySettings(); haptic('light'); }
-function setRefresh(n) {
-  settings.refresh = n;
-  saveSettings(); applySettings();
-  startRefreshTimer();
-  haptic('light');
-}
-function toggleAnim() { settings.anim = !settings.anim; saveSettings(); applySettings(); haptic('light'); }
-function toggleHaptic() { settings.haptic = !settings.haptic; saveSettings(); applySettings(); }
-function toggleTransparent() { settings.transparentIcons = !settings.transparentIcons; saveSettings(); applySettings(); haptic('light'); }
-function toggleRound() { settings.roundIcons = !settings.roundIcons; saveSettings(); applySettings(); haptic('light'); }
-function toggleHideBalance() {
-  settings.hideBalance = !settings.hideBalance;
-  saveSettings(); applySettings();
-  await_loadPlayer();
-  haptic('light');
-}
-function toggleShowLuck() { settings.showLuck = !settings.showLuck; saveSettings(); applySettings(); haptic('light'); }
-function toggleNotify() { settings.notify = !settings.notify; saveSettings(); applySettings(); haptic('light'); }
-
-function clearCache() {
-  if (!confirm('Очистить локальные настройки?')) return;
-  try { localStorage.removeItem(SETTINGS_KEY); } catch(e){}
-  settings = {
-    theme:'dark',font:'medium',accent:'blue',anim:true,haptic:true,
-    transparentIcons:false,roundIcons:false,radius:'md',
-    hideBalance:false,showLuck:true,notify:true,refresh:5,
-  };
-  applySettings();
-  toast('Кэш очищен');
-  haptic('success');
-}
-
-function exportData() {
-  const data = {
-    settings: settings,
-    player: player,
-    exportDate: new Date().toISOString(),
-  };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'darkgram-data.json';
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('Скачано');
-  haptic('success');
-}
-
-function haptic(type) {
+function setAccent(a){settings.accent=a;saveSettings();applySettings();haptic('light');}
+function toggleAnim(){settings.anim=!settings.anim;saveSettings();applySettings();haptic('light');}
+function toggleHaptic(){settings.haptic=!settings.haptic;saveSettings();applySettings();}
+function toggleTransparent(){settings.transparentIcons=!settings.transparentIcons;saveSettings();applySettings();haptic('light');}
+function toggleRound(){settings.roundIcons=!settings.roundIcons;saveSettings();applySettings();haptic('light');}
+function haptic(type){
   if (!settings.haptic) return;
   try {
-    if (tg && tg.HapticFeedback) {
-      if (type === 'light') tg.HapticFeedback.impactOccurred('light');
-      else if (type === 'medium') tg.HapticFeedback.impactOccurred('medium');
-      else if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
-      else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
+    if (tg && tg.HapticFeedback){
+      if(type==='light') tg.HapticFeedback.impactOccurred('light');
+      else if(type==='medium') tg.HapticFeedback.impactOccurred('medium');
+      else if(type==='success') tg.HapticFeedback.notificationOccurred('success');
+      else if(type==='error') tg.HapticFeedback.notificationOccurred('error');
     }
   } catch(e){}
 }
-
-function openSettings() {
-  document.getElementById('settingsScreen').classList.add('open');
-  haptic('light');
-}
-function closeSettings() {
-  document.getElementById('settingsScreen').classList.remove('open');
-  haptic('light');
-}
+function openSettings(){document.getElementById('settingsScreen').classList.add('open');haptic('light');}
+function closeSettings(){document.getElementById('settingsScreen').classList.remove('open');haptic('light');}
 
 loadSettings();
 
-const CUR_ICONS = {
-  'GRAM':     {color:'teal',   svg:'<svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/></svg>'},
-  'DARKGRAM': {color:'purple', svg:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>'},
-  'DRK':      {color:'indigo', svg:'<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>'},
-  'BSG':      {color:'gold',   svg:'<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'},
-  'WWR':      {color:'red',    svg:'<svg viewBox="0 0 24 24"><path d="M3 11l18-8v18l-18-8z"/></svg>'},
-};
-const SHOP_ICONS = {
-  'DRK':      {color:'indigo', svg:'<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>'},
-  'DARKGRAM': {color:'purple', svg:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>'},
-  'BSG':      {color:'gold',   svg:'<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'},
-  'WWR':      {color:'red',    svg:'<svg viewBox="0 0 24 24"><path d="M3 11l18-8v18l-18-8z"/></svg>'},
-};
-
-function icHTML(color, svg){ return '<div class="ic ' + color + '">' + svg + '</div>'; }
-
-function toast(msg) {
+// ============ UTILS ============
+function toast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('show'), 1800);
+  t._t = setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-function fmt(n) {
-  n = Number(n);
-  if (n >= 1e9) return (n/1e9).toFixed(1) + 'B';
-  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
-  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
-  return Math.floor(n);
+function timeAgo(ts){
+  const d = Math.floor(Date.now()/1000) - ts;
+  if (d < 60) return 'только что';
+  if (d < 3600) return Math.floor(d/60) + ' мин назад';
+  if (d < 86400) return Math.floor(d/3600) + ' ч назад';
+  if (d < 604800) return Math.floor(d/86400) + ' дн назад';
+  return new Date(ts*1000).toLocaleDateString('ru');
 }
 
-function fmtBalance(n) {
-  if (settings.hideBalance) return '•••';
-  return fmt(n);
+function fmtTime(sec){
+  if (sec < 60) return sec + ' сек';
+  if (sec < 3600) return Math.floor(sec/60) + ' мин';
+  if (sec < 86400) return Math.floor(sec/3600) + ' ч ' + Math.floor((sec%3600)/60) + ' мин';
+  return Math.floor(sec/86400) + ' дн';
 }
 
-async function api(path, body) {
+async function api(path, body){
   try {
     const r = await fetch(path, {
       method: body ? 'POST' : 'GET',
       headers: {'Content-Type': 'application/json'},
-      body: body ? JSON.stringify({uid: UID, name: user.first_name, ...body}) : undefined
+      body: body ? JSON.stringify({uid: UID, name: user.first_name, username: UNAME, ...body}) : undefined
     });
     return await r.json();
-  } catch(e) { return null; }
+  } catch(e){ return null; }
 }
 
-async function await_loadPlayer(){ await loadPlayer(); }
+function esc(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
-async function loadPlayer() {
-  const r = await api('/api/player');
+// ============ PLAYER ============
+async function loadPlayer(){
+  const r = await api('/api/player', {});
   if (!r || r.error) return;
   player = r;
-  document.getElementById('balance').textContent = fmtBalance(player.gram || 0);
-  document.getElementById('profit').textContent = '+' + (player.total_profit || 0) + ' профит';
-  document.getElementById('wins').textContent = player.wins || 0;
-  document.getElementById('nftCount').textContent = (player.nfts || []).length;
-  document.getElementById('userName').textContent = player.name || user.first_name;
-  document.getElementById('userId').textContent = 'ID: ' + UID;
-  document.getElementById('pWins').textContent = player.wins || 0;
-  document.getElementById('pLosses').textContent = player.losses || 0;
-  document.getElementById('pProfit').textContent = (player.total_profit || 0);
-  renderVerify();
-}
-
-function renderVerify() {
-  const el = document.getElementById('verifySection');
-  if (!el) return;
-  if (player.verified) {
-    el.innerHTML = '<div class="section-header">Верификация</div>' +
-      '<div class="card"><div class="row has-icon">' +
-        '<div class="ic green"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>' +
-        '<div class="row-info"><div class="row-title">Верификация пройдена</div>' +
-        '<div class="row-sub">Ты получил стартовый бонус</div></div>' +
-        '<div class="verified-badge">Активна</div>' +
-      '</div></div>';
-  } else {
-    el.innerHTML = '<div class="section-header">Верификация</div>' +
-      '<div class="card">' +
-        '<div class="row has-icon">' +
-          '<div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></div>' +
-          '<div class="row-info"><div class="row-title">Пройди верификацию</div>' +
-          '<div class="row-sub">Получи +100 GRAM один раз</div></div>' +
-        '</div>' +
-        '<div class="btn-row"><button class="btn green" onclick="doVerify()">Пройти верификацию</button></div>' +
-      '</div>';
+  isAdmin = r.is_admin;
+  if (isAdmin){
+    const btn = document.getElementById('adminNavBtn');
+    btn.style.display = 'flex';
   }
+  renderProfile();
 }
 
-async function doVerify() {
-  const r = await api('/api/verify', {});
-  if (r.error) return toast(r.error);
-  toast('+100 GRAM!');
-  haptic('success');
-  await loadPlayer();
-}
+function renderProfile(){
+  if (!player.uid) return;
+  const acc = ACCESSORIES[player.accessory] || '';
+  const firstLetter = (player.name || 'Гость').charAt(0).toUpperCase();
+  const username = player.username ? '@' + player.username : 'без username';
 
-async function loadRates() {
-  const r = await fetch('/api/rates');
-  rates = await r.json();
-  const el = document.getElementById('ratesList');
-  if (!el) return;
-  el.innerHTML = Object.entries(rates).map(([k, v]) => {
-    const change = v.change || 0;
-    const color = change >= 0 ? 'var(--green)' : 'var(--red)';
-    const ic = CUR_ICONS[k] || CUR_ICONS['GRAM'];
-    return '<div class="row has-icon tappable" onclick="openTrade(\'' + k + '\')">' +
-      icHTML(ic.color, ic.svg) +
-      '<div class="row-info"><div class="row-title">' + v.name + '</div>' +
-      '<div class="row-sub" style="color:' + color + '">' + (change >= 0 ? '+' : '') + change.toFixed(2) + '%</div></div>' +
-      '<div class="row-value gold">' + v.rate.toFixed(4) + '</div>' +
-      '<div class="chev">›</div>' +
+  document.getElementById('profileHeader').innerHTML =
+    '<div class="profile-avatar">' + firstLetter +
+      (acc ? '<div class="acc-badge">' + acc + '</div>' : '') +
+    '</div>' +
+    '<div class="profile-name">' + esc(player.name || 'Гость') + '</div>' +
+    '<div class="profile-username">' + esc(username) + '</div>' +
+    (isAdmin ? '<div style="margin-top:8px;display:inline-block;background:rgba(255,214,10,0.15);color:var(--gold);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">👑 Админ</div>' : '');
+
+  document.getElementById('statsCard').innerHTML =
+    '<div class="row has-icon">' +
+      '<div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">Время в приложении</div></div>' +
+      '<div class="row-value">' + fmtTime(player.total_time || 0) + '</div>' +
+    '</div>' +
+    '<div class="row has-icon">' +
+      '<div class="ic green"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">Всего заявок</div></div>' +
+      '<div class="row-value">' + (player.applications_count || 0) + '</div>' +
+    '</div>' +
+    '<div class="row has-icon">' +
+      '<div class="ic gold"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">Принято</div></div>' +
+      '<div class="row-value green">' + (player.accepted || 0) + '</div>' +
+    '</div>' +
+    '<div class="row has-icon">' +
+      '<div class="ic red"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">Отклонено</div></div>' +
+      '<div class="row-value">' + (player.rejected || 0) + '</div>' +
     '</div>';
-  }).join('');
-}
 
-async function openTrade(cur) {
-  if (currentTrade) return toast('Уже есть сделка');
-  const bet = prompt('Ставка в GRAM (' + cur + '):\nМин 10, макс 500');
-  if (!bet) return;
-  const amount = parseFloat(bet);
-  if (isNaN(amount)) return toast('Число');
-  const r = await api('/api/trade/open', { currency: cur, bet: amount });
-  if (r.error) return toast(r.error);
-  currentTrade = r.trade;
-  toast('Сделка открыта');
-  haptic('medium');
-  renderTrade();
-  startTradeTimer();
-}
-
-function renderTrade() {
-  const el = document.getElementById('activeTrade');
-  if (!el) return;
-  if (!currentTrade) { el.innerHTML = ''; return; }
-  const profit = currentTrade.profit || 0;
-  const sign = profit >= 0 ? '+' : '';
-  const color = profit >= 0 ? '#c8ffd4' : '#ffcccc';
-  el.innerHTML = '<div style="background:linear-gradient(135deg,var(--accent),#0060df);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:0 8px 24px rgba(10,132,255,0.3)">' +
-    '<div style="display:flex;justify-content:space-between;font-size:15px;margin-bottom:8px;opacity:.95"><span>Валютa</span><b>' + currentTrade.currency + '</b></div>' +
-    '<div style="display:flex;justify-content:space-between;font-size:15px;margin-bottom:8px;opacity:.95"><span>Ставка</span><b>' + currentTrade.bet + ' GRAM</b></div>' +
-    '<div style="display:flex;justify-content:space-between;font-size:15px;margin-bottom:8px;opacity:.95"><span>Курс</span><b>' + currentTrade.open_rate.toFixed(4) + ' → ' + currentTrade.current_rate.toFixed(4) + '</b></div>' +
-    '<div style="font-size:36px;font-weight:800;text-align:center;margin:14px 0;letter-spacing:-1.5px;color:' + color + '">' + sign + profit.toFixed(2) + ' GRAM</div>' +
-    '<button class="btn" style="background:#fff;color:var(--accent)" onclick="closeTrade()">Закрыть сделку</button>' +
-  '</div>';
-}
-
-function startTradeTimer() {
-  if (tradeTimer) clearInterval(tradeTimer);
-  tradeTimer = setInterval(async () => {
-    if (!currentTrade) { clearInterval(tradeTimer); return; }
-    const r = await api('/api/trade/status', {});
-    if (r.trade) {
-      currentTrade = r.trade;
-      renderTrade();
-      if (r.closed) {
-        currentTrade = null;
-        clearInterval(tradeTimer);
-        if (settings.notify) {
-          toast('Сделка закрыта автоматически');
-          haptic('error');
-        }
-        await loadPlayer();
-        renderTrade();
-      }
-    }
-  }, 3000);
-}
-
-function startRefreshTimer() {
-  if (refreshTimer) clearInterval(refreshTimer);
-  refreshTimer = setInterval(loadRates, settings.refresh * 1000);
-}
-
-async function closeTrade() {
-  const r = await api('/api/trade/close', {});
-  if (r.error) return toast(r.error);
-  currentTrade = null;
-  clearInterval(tradeTimer);
-  toast('Закрыто: ' + (r.profit >= 0 ? '+' : '') + r.profit + ' GRAM');
-  haptic('success');
-  await loadPlayer();
-  renderTrade();
-}
-
-async function loadNft() {
-  const r = await fetch('/api/nft');
-  const data = await r.json();
-  const shop = document.getElementById('nftShop');
-  if (shop) {
-    shop.innerHTML = Object.entries(data.types).map(([key, info]) => {
-      const sold = data.minted[key] || 0;
-      const left = info.max - sold;
-      const can = player.gram >= info.price && left > 0;
-      return '<div class="row">' +
-        '<div class="nft-emoji">' + info.emoji + '</div>' +
-        '<div class="row-info"><div class="row-title">' + info.name + '</div>' +
-        '<div class="row-sub">' + sold + '/' + info.max + (left > 0 ? ' · осталось ' + left : ' · распродано') + '</div>' +
-        '<div class="row-sub" style="color:var(--gold);font-weight:600">' + info.price + ' GRAM</div></div>' +
-        '<button class="btn small ' + (can ? 'green' : '') + '" ' + (can ? '' : 'disabled') +
-        ' onclick="buyNft(\'' + key + '\')">' + (left > 0 ? (can ? 'Купить' : 'Мало') : 'Нет') + '</button>' +
-      '</div>';
-    }).join('');
-  }
-
-  const my = document.getElementById('myNft');
-  if (my) {
-    if (!player.nfts || player.nfts.length === 0) {
-      my.innerHTML = '<div class="row"><div class="row-info"><div class="row-sub">У тебя пока нет NFT</div></div></div>';
+  // accessories
+  let accHtml = '';
+  Object.entries(ACCESSORIES).forEach(([key, emoji]) => {
+    if (key === 'none'){
+      accHtml += '<div class="acc-item ' + (player.accessory === 'none' ? 'active' : '') + '" onclick="setAcc(\'' + key + '\')">∅</div>';
     } else {
-      my.innerHTML = player.nfts.map(nid => {
-        return '<div class="row has-icon">' +
-          icHTML('purple', '<svg viewBox="0 0 24 24"><path d="M12 2l4 4-4 4-4-4z"/></svg>') +
-          '<div class="row-info"><div class="row-title">' + nid + '</div><div class="row-sub">+0.1x к прибыли</div></div>' +
-          '<button class="btn small gold" onclick="sellNft(\'' + nid + '\')">Продать</button>' +
+      accHtml += '<div class="acc-item ' + (player.accessory === key ? 'active' : '') + '" onclick="setAcc(\'' + key + '\')">' + emoji + '</div>';
+    }
+  });
+  document.getElementById('accGrid').innerHTML = accHtml;
+
+  document.getElementById('accountCard').innerHTML =
+    '<div class="row has-icon">' +
+      '<div class="ic indigo"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">Твой ID</div></div>' +
+      '<div class="row-value">' + UID + '</div>' +
+    '</div>' +
+    '<div class="row has-icon">' +
+      '<div class="ic teal"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">Регистрация</div></div>' +
+      '<div class="row-value">' + new Date((player.joined || 0) * 1000).toLocaleDateString('ru') + '</div>' +
+    '</div>';
+}
+
+async function setAcc(key){
+  player.accessory = key;
+  renderProfile();
+  await api('/api/save_profile', { accessory: key });
+  haptic('success');
+}
+
+// ============ FEED ============
+async function loadFeed(){
+  const r = await fetch('/api/posts');
+  const posts = await r.json();
+  const el = document.getElementById('postsList');
+  if (!posts.length){
+    el.innerHTML = '<div class="card" style="padding:40px 20px;text-align:center;color:var(--muted)">Постов пока нет</div>';
+    return;
+  }
+  el.innerHTML = posts.map(p => {
+    let html = '<div class="post-card">' +
+      '<div class="post-head">' +
+        '<div class="ic blue lg"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div class="post-author">' + esc(p.author_name || 'Админ') + '</div>' +
+          '<div class="post-time">' + timeAgo(p.created) + '</div>' +
         '</div>';
-      }).join('');
+    if (isAdmin){
+      html += '<button class="btn small red" onclick="deletePost(' + p.id + ')">Удалить</button>';
     }
-  }
+    html += '</div>';
+    if (p.text) html += '<div class="post-text">' + esc(p.text) + '</div>';
+    if (p.image) html += '<img class="post-image" src="' + p.image + '">';
+    html += '</div>';
+    return html;
+  }).join('');
+}
 
-  const skins = document.getElementById('skinsShop');
-  if (skins && data.skins) {
-    skins.innerHTML = Object.entries(data.skins).map(([key, info]) => {
-      const can = player.gram >= info.price;
-      return '<div class="row">' +
-        '<div class="nft-emoji">' + info.emoji + '</div>' +
-        '<div class="row-info"><div class="row-title">' + info.name + '</div>' +
-        '<div class="row-sub" style="color:var(--gold);font-weight:600">' + info.price + ' GRAM</div></div>' +
-        '<button class="btn small ' + (can ? 'green' : '') + '" ' + (can ? '' : 'disabled') +
-        ' onclick="buySkin(\'' + key + '\')">' + (can ? 'Купить' : 'Мало') + '</button>' +
+async function deletePost(pid){
+  if (!confirm('Удалить пост?')) return;
+  await api('/api/posts/delete', { post_id: pid });
+  toast('Удалено');
+  loadFeed();
+}
+
+// ============ CONTESTS ============
+async function loadContests(){
+  const r = await fetch('/api/contests');
+  const contests = await r.json();
+  const el = document.getElementById('contestsList');
+  if (!contests.length){
+    el.innerHTML = '<div class="card" style="padding:40px 20px;text-align:center;color:var(--muted)">Конкурсов пока нет</div>';
+    return;
+  }
+  el.innerHTML = contests.map(c => {
+    const closed = c.closed;
+    let html = '<div class="contest-card ' + (c.active && !closed ? 'active' : '') + '">' +
+      '<div class="contest-head">' +
+        '<div class="contest-emoji">' + (c.emoji || '🎨') + '</div>' +
+        '<div style="flex:1">' +
+          '<div class="contest-title">' + esc(c.title) + '</div>' +
+          '<div class="contest-status ' + (closed ? 'closed' : '') + '">' +
+            (closed ? '● Набор закрыт' : '● Идёт набор') +
+          '</div>' +
+        '</div>' +
       '</div>';
-    }).join('');
-  }
-}
-
-async function buyNft(key) {
-  const r = await api('/api/nft/buy', { key });
-  if (r.error) return toast(r.error);
-  toast('Куплено! ID: ' + r.nft_id);
-  haptic('success');
-  await loadPlayer(); await loadNft();
-}
-
-async function sellNft(nid) {
-  const price = prompt('За сколько GRAM продать ' + nid + '?');
-  if (!price) return;
-  const r = await api('/api/nft/sell', { nft_id: nid, price: parseFloat(price) });
-  if (r.error) return toast(r.error);
-  toast('Выставлено за ' + price);
-  await loadMarket();
-}
-
-async function buySkin(key) {
-  const nid = prompt('На какой NFT надеть? (ID)');
-  if (!nid) return;
-  const r = await api('/api/skin/buy', { key, nft_id: nid.toUpperCase() });
-  if (r.error) return toast(r.error);
-  toast('Скин куплен');
-  await loadPlayer(); await loadNft();
-}
-
-async function loadTasks() {
-  const r = await fetch('/api/tasks?uid=' + UID);
-  const data = await r.json();
-  document.getElementById('taskDay').textContent = data.day;
-  const done = data.tasks.filter(t => t.done).length;
-  document.getElementById('taskCount').textContent = done + '/' + data.tasks.length;
-  document.getElementById('taskProgress').style.width = (done / data.tasks.length * 100) + '%';
-
-  document.getElementById('tasksList').innerHTML = data.tasks.map(t => {
-    let onclick = '', ic = '', sub = '';
-    if (t.done) {
-      ic = icHTML('green', '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>');
-      sub = '<div class="row-sub" style="color:var(--green)">Готово</div>';
-    } else if (t.ready) {
-      ic = icHTML('gold', '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>');
-      sub = '<div class="row-sub" style="color:var(--gold);font-weight:600">Нажми, чтобы забрать +20</div>';
-      onclick = 'onclick="claimTask(\'' + t.id + '\')"';
-    } else {
-      ic = icHTML('gray', '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>');
-      sub = '<div class="row-sub">В процессе</div>';
+    if (c.description) html += '<div class="contest-desc">' + esc(c.description) + '</div>';
+    if (!closed){
+      html += '<button class="btn green" onclick="openApplyModal(' + c.id + ')">Принять участие</button>';
     }
-    return '<div class="row has-icon tappable" ' + onclick + '>' + ic +
-      '<div class="row-info"><div class="row-title">' + t.text + '</div>' + sub + '</div></div>';
+    html += '</div>';
+    return html;
   }).join('');
 }
 
-async function claimTask(tid) {
-  const r = await api('/api/tasks/claim', { task_id: tid });
-  if (r.error) return toast(r.error);
-  toast('+' + r.reward + ' GRAM');
-  haptic('success');
-  await loadPlayer(); await loadTasks();
+// ============ MY APPS ============
+async function loadMyApps(){
+  const r = await api('/api/applications', {});
+  const apps = Array.isArray(r) ? r : [];
+  const el = document.getElementById('myAppsList');
+  if (!apps.length){
+    el.innerHTML = '<div class="card" style="padding:40px 20px;text-align:center;color:var(--muted)">У тебя пока нет заявок</div>';
+    return;
+  }
+  el.innerHTML = apps.map(a => renderAppCard(a, false)).join('');
 }
 
-async function loadTop() {
-  const r = await fetch('/api/top');
-  const arr = await r.json();
-  const el = document.getElementById('topList');
-  if (!arr.length) { el.innerHTML = '<div class="row"><div class="row-info"><div class="row-sub">Пока пусто</div></div></div>'; return; }
-  el.innerHTML = arr.map((u, i) => {
-    const cls = i === 0 ? 'g' : i === 1 ? 's' : i === 2 ? 'b' : '';
-    return '<div class="rank-row"><div class="r ' + cls + '">' + (i+1) + '</div>' +
-      '<div class="who">' + u.name + '</div>' +
-      '<div class="val">' + u.gram + '</div></div>';
-  }).join('');
-}
+function renderAppCard(a, adminView){
+  const statusMap = {
+    pending: {label:'⏳ На рассмотрении', cls:'pending'},
+    accepted: {label:'✅ Принят', cls:'accepted'},
+    rejected: {label:'❌ Отклонён', cls:'rejected'},
+  };
+  const st = statusMap[a.status] || statusMap.pending;
 
-async function loadMarket() {
-  const r = await fetch('/api/market');
-  const arr = await r.json();
-  const el = document.getElementById('marketList');
-  if (!arr.length) { el.innerHTML = '<div class="row"><div class="row-info"><div class="row-sub">Рынок пуст</div></div></div>'; return; }
-  el.innerHTML = arr.map(item => {
-    const can = player.gram >= item.price;
-    return '<div class="row">' +
-      '<div class="nft-emoji">' + item.emoji + '</div>' +
-      '<div class="row-info"><div class="row-title">' + item.nft_id + '</div>' +
-      '<div class="row-sub">Продавец: ' + item.seller_name + '</div>' +
-      '<div class="row-sub" style="color:var(--gold);font-weight:600">' + item.price + ' GRAM</div></div>' +
-      '<button class="btn small ' + (can ? 'green' : '') + '" ' + (can ? '' : 'disabled') +
-      ' onclick="buyMarket(\'' + item.nft_id + '\')">' + (can ? 'Купить' : 'Мало') + '</button>' +
+  let html = '<div class="app-card">' +
+    '<div class="app-head">' +
+      '<div class="contest-emoji" style="font-size:24px">' + (a.contest_emoji || '🎨') + '</div>' +
+      '<div class="app-user-info">' +
+        '<div class="app-user-name">' + esc(a.contest_title) + '</div>' +
+        '<div class="app-user-username">' + timeAgo(a.created) + '</div>' +
+      '</div>' +
+      '<div class="app-status ' + st.cls + '">' + st.label + '</div>' +
     '</div>';
-  }).join('');
-}
 
-async function buyMarket(nid) {
-  const r = await api('/api/market/buy', { nft_id: nid });
-  if (r.error) return toast(r.error);
-  toast('Куплено!');
-  haptic('success');
-  await loadPlayer(); await loadMarket();
-}
-
-async function buyById() {
-  const nid = document.getElementById('buyIdInput').value.trim().toUpperCase();
-  if (!nid) return toast('Введи ID');
-  const r = await api('/api/market/buy', { nft_id: nid });
-  if (r.error) return toast(r.error);
-  toast('Куплено!');
-  haptic('success');
-  document.getElementById('buyIdInput').value = '';
-  await loadPlayer(); await loadMarket();
-}
-
-async function loadShop() {
-  const r = await fetch('/api/shop?uid=' + UID);
-  const data = await r.json();
-  const el = document.getElementById('shopList');
-  if (!el) return;
-  el.innerHTML = Object.entries(data.items).map(([key, info]) => {
-    const owned = data.owned[key];
-    const can = player.gram >= info.price && !owned;
-    const ic = SHOP_ICONS[key] || SHOP_ICONS['DRK'];
-    return '<div class="row has-icon">' +
-      icHTML(ic.color, ic.svg) +
-      '<div class="row-info"><div class="row-title">' + info.name.replace(/^[^\s]+\s/, '') + '</div>' +
-      '<div class="row-sub">+' + info.percent + '% к прибыли</div>' +
-      '<div class="row-sub" style="color:var(--gold);font-weight:600">' + info.price + ' GRAM</div></div>' +
-      '<button class="btn small ' + (owned ? 'gold' : (can ? 'green' : '')) + '" ' + ((can || owned) ? '' : 'disabled') +
-      ' onclick="buyShop(\'' + key + '\')">' + (owned ? '✓' : (can ? 'Купить' : 'Мало')) + '</button>' +
+  if (adminView){
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-top:.5px solid var(--line);border-bottom:.5px solid var(--line)">' +
+      '<div class="ic purple lg"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div class="app-user-name">' + esc(a.user_name || 'Гость') + '</div>' +
+        '<div class="app-user-username">' + (a.user_username ? '@' + esc(a.user_username) : 'ID: ' + a.user_id) + '</div>' +
+      '</div>' +
     '</div>';
-  }).join('');
+  }
+
+  if (a.photo) html += '<img class="app-photo" src="' + a.photo + '">';
+  if (a.comment) html += '<div class="app-comment">' + esc(a.comment) + '</div>';
+  if (a.reason) html += '<div class="app-reason">Причина отказа: ' + esc(a.reason) + '</div>';
+
+  if (adminView && a.status === 'pending'){
+    html += '<div style="display:flex;gap:8px;margin-top:12px">' +
+      '<button class="btn green" onclick="decideApp(' + a.id + ', \'accepted\')">Принять</button>' +
+      '<button class="btn red" onclick="decideApp(' + a.id + ', \'rejected\')">Отклонить</button>' +
+    '</div>';
+  }
+
+  html += '</div>';
+  return html;
 }
 
-async function buyShop(key) {
-  const r = await api('/api/shop/buy', { item: key });
-  if (r.error) return toast(r.error);
-  toast('Куплено!');
+// ============ APPLY MODAL ============
+let currentContest = null;
+let currentPhoto = null;
+
+async function openApplyModal(contestId){
+  const r = await fetch('/api/contests');
+  const contests = await r.json();
+  currentContest = contests.find(c => c.id === contestId);
+  if (!currentContest) return;
+  currentPhoto = null;
+
+  const modal = document.getElementById('modalContent');
+  modal.innerHTML =
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<div class="modal-title">Заявка на конкурс</div>' +
+    '<div style="text-align:center;margin-bottom:16px">' +
+      '<div style="font-size:36px">' + (currentContest.emoji || '🎨') + '</div>' +
+      '<div style="font-size:18px;font-weight:700;margin-top:8px">' + esc(currentContest.title) + '</div>' +
+    '</div>' +
+    '<div class="field">' +
+      '<label>Твоё имя (авто из Telegram)</label>' +
+      '<input id="applyName" value="' + esc(user.first_name || '') + '" readonly style="opacity:.7">' +
+    '</div>' +
+    '<div class="field">' +
+      '<label>@username (авто)</label>' +
+      '<input id="applyUsername" value="' + esc(UNAME ? '@' + UNAME : 'нет username') + '" readonly style="opacity:.7">' +
+    '</div>' +
+    '<div class="field">' +
+      '<label>Фотография</label>' +
+      '<div class="upload-photo" id="photoBox" onclick="document.getElementById(\'photoInput\').click()">' +
+        '📷 Нажми, чтобы загрузить фото' +
+      '</div>' +
+      '<input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(this)">' +
+    '</div>' +
+    '<div class="field">' +
+      '<label>Комментарий</label>' +
+      '<textarea id="applyComment" rows="3" placeholder="Почему ты хочешь участвовать?"></textarea>' +
+    '</div>' +
+    '<div class="btn-row" style="padding:16px 0 0">' +
+      '<button class="btn green" onclick="submitApplication()">Отправить заявку</button>' +
+    '</div>';
+
+  document.getElementById('modalBack').classList.add('open');
+  haptic('light');
+}
+
+function handlePhoto(input){
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 3 * 1024 * 1024){
+    toast('Фото слишком большое (макс 3 МБ)');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      // сжатие до 400px
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      const max = 400;
+      if (w > max || h > max){
+        if (w > h){ h = h * max / w; w = max; }
+        else { w = w * max / h; h = max; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      currentPhoto = canvas.toDataURL('image/jpeg', 0.75);
+      const box = document.getElementById('photoBox');
+      box.classList.add('has-photo');
+      box.innerHTML = '<img src="' + currentPhoto + '">';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function submitApplication(){
+  const comment = document.getElementById('applyComment').value.trim();
+  if (!currentPhoto){
+    toast('Загрузи фото');
+    return;
+  }
+  const r = await api('/api/applications/create', {
+    contest_id: currentContest.id,
+    photo: currentPhoto,
+    comment: comment,
+  });
+  if (r.error){
+    toast(r.error);
+    haptic('error');
+    return;
+  }
+  closeModal();
+  toast('Заявка отправлена!');
   haptic('success');
-  await loadPlayer(); await loadShop();
+  loadMyApps();
+  loadPlayer();
 }
 
-async function doPay() {
-  const target = document.getElementById('payTarget').value.trim();
-  const amount = parseFloat(document.getElementById('payAmount').value);
-  if (!target || !amount) return toast('Заполни поля');
-  const r = await api('/api/pay', { target, amount });
-  if (r.error) return toast(r.error);
-  toast('Переведено!');
+// ============ ADMIN ============
+async function loadAdmin(){
+  if (!isAdmin){
+    document.getElementById('adminContent').innerHTML =
+      '<div class="card" style="padding:40px 20px;text-align:center;color:var(--muted)">Нет доступа</div>';
+    return;
+  }
+  const stats = await (await fetch('/api/stats')).json();
+  const apps = await api('/api/applications', {});
+  const admins = await (await fetch('/api/admins')).json();
+
+  const pending = (Array.isArray(apps) ? apps : []).filter(a => a.status === 'pending');
+
+  let html = '<div class="section-header">Статистика</div>' +
+    '<div class="card">' +
+      '<div class="row has-icon">' +
+        '<div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>' +
+        '<div class="row-info"><div class="row-title">Пользователей</div></div>' +
+        '<div class="row-value">' + stats.users_total + '</div>' +
+      '</div>' +
+      '<div class="row has-icon">' +
+        '<div class="ic green"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div>' +
+        '<div class="row-info"><div class="row-title">Постов</div></div>' +
+        '<div class="row-value">' + stats.posts_total + '</div>' +
+      '</div>' +
+      '<div class="row has-icon">' +
+        '<div class="ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/></svg></div>' +
+        '<div class="row-info"><div class="row-title">Конкурсов (активных)</div></div>' +
+        '<div class="row-value">' + stats.contests_active + '</div>' +
+      '</div>' +
+      '<div class="row has-icon">' +
+        '<div class="ic gold"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>' +
+        '<div class="row-info"><div class="row-title">Заявок ожидает</div></div>' +
+        '<div class="row-value gold">' + stats.pending + '</div>' +
+      '</div>' +
+    '</div>';
+
+  html += '<div class="section-header">Действия</div>' +
+    '<div class="card">' +
+      '<div class="row has-icon tappable" onclick="openPostModal()">' +
+        '<div class="ic blue"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>' +
+        '<div class="row-info"><div class="row-title">Написать пост</div></div>' +
+        '<div class="chev">›</div>' +
+      '</div>' +
+      '<div class="row has-icon tappable" onclick="openContestModal()">' +
+        '<div class="ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/></svg></div>' +
+        '<div class="row-info"><div class="row-title">Создать конкурс</div></div>' +
+        '<div class="chev">›</div>' +
+      '</div>' +
+    '</div>';
+
+  html += '<div class="section-header">Заявки (ожидают: ' + pending.length + ')</div>';
+  if (!pending.length){
+    html += '<div class="card" style="padding:40px 20px;text-align:center;color:var(--muted)">Нет новых заявок</div>';
+  } else {
+    html += pending.map(a => renderAppCard(a, true)).join('');
+  }
+
+  html += '<div class="section-header">Админы</div>' +
+    '<div class="card">' +
+      Object.entries(admins).map(([aid, a]) =>
+        '<div class="row has-icon">' +
+          '<div class="ic gold"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3 9-8 10-5-1-8-5-8-10V6z"/></svg></div>' +
+          '<div class="row-info"><div class="row-title">' + esc(a.name || 'Админ') + '</div>' +
+          '<div class="row-sub">ID: ' + aid + (a.main ? ' · главный' : '') + '</div></div>' +
+          (a.main ? '' : '<button class="btn small red" onclick="removeAdmin(\'' + aid + '\')">Убрать</button>') +
+        '</div>'
+      ).join('') +
+      '<div class="row has-icon tappable" onclick="openAddAdminModal()">' +
+        '<div class="ic green"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>' +
+        '<div class="row-info"><div class="row-title">Добавить админа</div></div>' +
+        '<div class="chev">›</div>' +
+      '</div>' +
+    '</div>';
+
+  document.getElementById('adminContent').innerHTML = html;
+}
+
+function openPostModal(){
+  const modal = document.getElementById('modalContent');
+  modal.innerHTML =
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<div class="modal-title">Написать пост</div>' +
+    '<div class="field">' +
+      '<label>Текст поста</label>' +
+      '<textarea id="postText" rows="5" placeholder="Что нового?"></textarea>' +
+    '</div>' +
+    '<div class="field">' +
+      '<label>Фото (опционально)</label>' +
+      '<div class="upload-photo" id="postPhotoBox" onclick="document.getElementById(\'postPhotoInput\').click()">📷 Добавить фото</div>' +
+      '<input type="file" id="postPhotoInput" accept="image/*" style="display:none" onchange="handlePostPhoto(this)">' +
+    '</div>' +
+    '<div class="btn-row" style="padding:16px 0 0">' +
+      '<button class="btn" onclick="submitPost()">Опубликовать</button>' +
+    '</div>';
+  currentPhoto = null;
+  document.getElementById('modalBack').classList.add('open');
+  haptic('light');
+}
+
+function handlePostPhoto(input){
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 3 * 1024 * 1024){
+    toast('Фото слишком большое');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      const max = 600;
+      if (w > max || h > max){
+        if (w > h){ h = h * max / w; w = max; }
+        else { w = w * max / h; h = max; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      currentPhoto = canvas.toDataURL('image/jpeg', 0.75);
+      const box = document.getElementById('postPhotoBox');
+      box.classList.add('has-photo');
+      box.innerHTML = '<img src="' + currentPhoto + '">';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function submitPost(){
+  const text = document.getElementById('postText').value.trim();
+  if (!text && !currentPhoto){
+    toast('Напиши текст или добавь фото');
+    return;
+  }
+  const r = await api('/api/posts/create', { text: text, image: currentPhoto });
+  if (r.error){
+    toast(r.error);
+    return;
+  }
+  closeModal();
+  toast('Пост опубликован');
   haptic('success');
-  document.getElementById('payTarget').value = '';
-  document.getElementById('payAmount').value = '';
-  await loadPlayer();
+  loadFeed();
+  loadAdmin();
 }
 
-async function ping() {
-  await fetch('/api/ping', { method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({uid: UID}) });
+function openContestModal(){
+  const emojis = ['🎨','📸','🎵','💃','✍️','🏆','🎭','🎬','🧩','🌟'];
+  const modal = document.getElementById('modalContent');
+  modal.innerHTML =
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<div class="modal-title">Создать конкурс</div>' +
+    '<div class="field">' +
+      '<label>Эмодзи конкурса</label>' +
+      '<div class="emoji-picker" id="emojiPicker">' +
+        emojis.map((e,i) => '<div class="emoji-opt ' + (i===0?'active':'') + '" onclick="pickEmoji(\'' + e + '\', this)">' + e + '</div>').join('') +
+      '</div>' +
+    '</div>' +
+    '<div class="field">' +
+      '<label>Название конкурса</label>' +
+      '<input id="contestTitle" placeholder="Например: Массарт осень 2026">' +
+    '</div>' +
+    '<div class="field">' +
+      '<label>Описание</label>' +
+      '<textarea id="contestDesc" rows="4" placeholder="Опиши правила, что нужно сделать, призы..."></textarea>' +
+    '</div>' +
+    '<div class="btn-row" style="padding:16px 0 0">' +
+      '<button class="btn green" onclick="submitContest()">Выпустить набор</button>' +
+    '</div>';
+  currentPhoto = emojis[0];
+  document.getElementById('modalBack').classList.add('open');
+  haptic('light');
 }
 
-async function loadOnline() {
-  const r = await fetch('/api/online');
-  const data = await r.json();
-  document.getElementById('onlineCount').textContent = data.count || 0;
+function pickEmoji(e, el){
+  document.querySelectorAll('.emoji-opt').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  currentPhoto = e;
 }
 
+async function submitContest(){
+  const title = document.getElementById('contestTitle').value.trim();
+  const desc = document.getElementById('contestDesc').value.trim();
+  if (!title){
+    toast('Введи название');
+    return;
+  }
+  const r = await api('/api/contests/create', {
+    title: title, description: desc, emoji: currentPhoto || '🎨',
+  });
+  if (r.error){
+    toast(r.error);
+    return;
+  }
+  closeModal();
+  toast('Конкурс выпущен');
+  haptic('success');
+  loadContests();
+  loadAdmin();
+}
+
+async function decideApp(aid, status){
+  let reason = '';
+  if (status === 'rejected'){
+    reason = prompt('Причина отказа:');
+    if (!reason) return;
+  }
+  const r = await api('/api/applications/decide', {
+    application_id: aid, status: status, reason: reason,
+  });
+  if (r.error){
+    toast(r.error);
+    return;
+  }
+  toast(status === 'accepted' ? 'Принят' : 'Отклонён');
+  haptic('success');
+  loadAdmin();
+}
+
+function openAddAdminModal(){
+  const modal = document.getElementById('modalContent');
+  modal.innerHTML =
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<div class="modal-title">Добавить админа</div>' +
+    '<div class="field">' +
+      '<label>ID пользователя</label>' +
+      '<input id="addAdminId" placeholder="123456789" inputmode="numeric">' +
+    '</div>' +
+    '<div class="field">' +
+      '<label>Имя (для отображения)</label>' +
+      '<input id="addAdminName" placeholder="Имя">' +
+    '</div>' +
+    '<div class="btn-row" style="padding:16px 0 0">' +
+      '<button class="btn green" onclick="submitAddAdmin()">Добавить</button>' +
+    '</div>';
+  document.getElementById('modalBack').classList.add('open');
+  haptic('light');
+}
+
+async function submitAddAdmin(){
+  const target = document.getElementById('addAdminId').value.trim();
+  const name = document.getElementById('addAdminName').value.trim() || 'Админ';
+  if (!target){
+    toast('Введи ID');
+    return;
+  }
+  const r = await api('/api/admins/add', { target_uid: target, target_name: name });
+  if (r.error){
+    toast(r.error);
+    return;
+  }
+  closeModal();
+  toast('Админ добавлен');
+  haptic('success');
+  loadAdmin();
+}
+
+async function removeAdmin(aid){
+  if (!confirm('Убрать админа?')) return;
+  await api('/api/admins/remove', { target_uid: aid });
+  toast('Удалён');
+  loadAdmin();
+}
+
+function closeModal(e){
+  if (e && e.target !== e.currentTarget && e.target.id !== 'modalBack') return;
+  document.getElementById('modalBack').classList.remove('open');
+  currentPhoto = null;
+}
+
+// ============ NAV ============
 document.querySelectorAll('.nav-item').forEach(el => {
   el.onclick = () => {
     document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
     el.classList.add('active');
     document.getElementById('tab-' + el.dataset.tab).classList.add('active');
-    document.getElementById('pageTitle').textContent = el.dataset.title || '';
+    document.getElementById('pageTitle').textContent = el.dataset.title;
     haptic('light');
     const t = el.dataset.tab;
-    if (t === 'top') loadTop();
-    if (t === 'nft') loadNft();
-    if (t === 'tasks') loadTasks();
-    if (t === 'market') loadMarket();
-    if (t === 'profile') { loadShop(); loadPlayer(); }
+    if (t === 'feed') loadFeed();
+    if (t === 'contests') loadContests();
+    if (t === 'myapps') loadMyApps();
+    if (t === 'profile') loadPlayer();
+    if (t === 'admin') loadAdmin();
   };
 });
 
-// scroll: compact title
-let lastScroll = 0;
+// scroll compact title
 window.addEventListener('scroll', () => {
-  const title = document.getElementById('pageTitle');
-  if (!title) return;
-  const y = window.scrollY;
-  if (y > 20) title.classList.add('compact');
-  else title.classList.remove('compact');
+  const t = document.getElementById('pageTitle');
+  if (!t) return;
+  if (window.scrollY > 20) t.classList.add('compact');
+  else t.classList.remove('compact');
 });
 
+// ============ ONLINE ============
+async function ping(){
+  await api('/api/ping', {});
+}
+
+async function loadOnline(){
+  const r = await fetch('/api/online');
+  const d = await r.json();
+  document.getElementById('onlineCount').textContent = d.count || 0;
+}
+
+// ============ INIT ============
 (async () => {
   await loadPlayer();
-  await loadRates();
-  await loadNft();
-  await loadTasks();
-  await loadMarket();
-  await loadShop();
+  await loadFeed();
+  await loadContests();
+  await loadMyApps();
   await loadOnline();
-  await api('/api/trade/status', {}).then(r => {
-    if (r && r.trade) { currentTrade = r.trade; renderTrade(); startTradeTimer(); }
-  });
   ping();
-  startRefreshTimer();
   setInterval(ping, 30000);
-  setInterval(loadPlayer, 10000);
   setInterval(loadOnline, 15000);
 })();
 </script>
