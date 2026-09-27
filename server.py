@@ -13,8 +13,9 @@ POSTS_FILE = 'posts.json'
 CONTESTS_FILE = 'contests.json'
 APPS_FILE = 'applications.json'
 ADMINS_FILE = 'admins.json'
+MESSAGES_FILE = 'messages.json'
 
-ADMIN_IDS = [8907438590] # ВСТАВЬ СВОЙ ID
+ADMIN_IDS = [8907438590]
 
 ONLINE = {}
 ONLINE_LOCK = threading.Lock()
@@ -45,9 +46,12 @@ def get_user(uid):
             'joined': int(time.time()), 'total_time': 0, 'last_seen': 0,
             'posts_count': 0, 'applications_count': 0,
             'accepted': 0, 'rejected': 0,
-            'accessory': 'none', 'accent': 'none',
-            'avatar': None,
-            'avatar_bg': 'blue',
+            'avatar': None, 'avatar_bg': None,
+            'chat_wallpaper': None,
+            'chat_font': 'default',
+            'chat_bubble_color': 'blue',
+            'chat_notifications': True,
+            'chat_read_receipts': True,
         }
         save_json(USERS_FILE, users)
     return users[key]
@@ -75,18 +79,32 @@ def save_admins(d):
     save_json(ADMINS_FILE, d)
 
 
+def public_user(u):
+    return {
+        'uid': u.get('uid'),
+        'name': u.get('name', ''),
+        'username': u.get('username', ''),
+        'avatar': u.get('avatar'),
+        'is_admin': is_admin(u.get('uid')),
+        'joined': u.get('joined', 0),
+    }
+
+
 @app.route('/')
 def index():
     return send_from_directory('webapp', 'index.html')
 
 
+# ============ PLAYER ============
 @app.route('/api/player', methods=['POST', 'GET'])
 def api_player():
     if request.method == 'POST':
         d = request.json or {}
         uid = d.get('uid'); name = d.get('name', ''); username = d.get('username', '')
     else:
-        uid = request.args.get('uid'); name = request.args.get('name', ''); username = request.args.get('username', '')
+        uid = request.args.get('uid')
+        name = request.args.get('name', '')
+        username = request.args.get('username', '')
     if not uid: return jsonify({'error': 'no uid'}), 400
     u = get_user(uid)
     if name: u['name'] = name
@@ -98,11 +116,23 @@ def api_player():
         'posts_count': u.get('posts_count', 0),
         'applications_count': u.get('applications_count', 0),
         'accepted': u.get('accepted', 0), 'rejected': u.get('rejected', 0),
-        'accessory': u.get('accessory', 'none'), 'accent': u.get('accent', 'none'),
         'avatar': u.get('avatar'),
-        'avatar_bg': u.get('avatar_bg', 'blue'),
+        'avatar_bg': u.get('avatar_bg'),
+        'chat_wallpaper': u.get('chat_wallpaper'),
+        'chat_font': u.get('chat_font', 'default'),
+        'chat_bubble_color': u.get('chat_bubble_color', 'blue'),
+        'chat_notifications': u.get('chat_notifications', True),
+        'chat_read_receipts': u.get('chat_read_receipts', True),
         'is_admin': is_admin(uid),
     })
+
+
+@app.route('/api/user/<uid>')
+def api_user_by_id(uid):
+    users = load_json(USERS_FILE, {})
+    if str(uid) not in users:
+        return jsonify({'error': 'not found'}), 404
+    return jsonify(public_user(users[str(uid)]))
 
 
 @app.route('/api/save_profile', methods=['POST'])
@@ -111,10 +141,10 @@ def api_save_profile():
     uid = d.get('uid')
     if not uid: return jsonify({'error': 'no uid'}), 400
     u = get_user(uid)
-    if 'accessory' in d: u['accessory'] = d['accessory']
-    if 'accent' in d: u['accent'] = d['accent']
-    if 'avatar' in d: u['avatar'] = d['avatar']
-    if 'avatar_bg' in d: u['avatar_bg'] = d['avatar_bg']
+    for field in ['avatar', 'avatar_bg', 'chat_wallpaper', 'chat_font',
+                  'chat_bubble_color', 'chat_notifications', 'chat_read_receipts']:
+        if field in d:
+            u[field] = d[field]
     save_user(uid, u)
     return jsonify({'ok': True})
 
@@ -146,6 +176,7 @@ def api_online():
     return jsonify({'count': len(active)})
 
 
+# ============ POSTS ============
 @app.route('/api/posts')
 def api_posts():
     posts = load_json(POSTS_FILE, [])
@@ -186,6 +217,7 @@ def api_posts_delete():
     return jsonify({'ok': True})
 
 
+# ============ CONTESTS ============
 @app.route('/api/contests')
 def api_contests():
     contests = load_json(CONTESTS_FILE, [])
@@ -212,19 +244,7 @@ def api_contests_create():
     return jsonify({'ok': True, 'contest': c})
 
 
-@app.route('/api/contests/close', methods=['POST'])
-def api_contests_close():
-    d = request.json or {}
-    if not is_admin(d.get('uid')): return jsonify({'error': 'Нет доступа'}), 403
-    cid = d.get('contest_id')
-    contests = load_json(CONTESTS_FILE, [])
-    for c in contests:
-        if c['id'] == cid:
-            c['active'] = False; c['closed'] = True
-    save_json(CONTESTS_FILE, contests)
-    return jsonify({'ok': True})
-
-
+# ============ APPLICATIONS ============
 @app.route('/api/applications', methods=['GET'])
 def api_applications():
     uid = request.args.get('uid')
@@ -301,19 +321,7 @@ def api_applications_decide():
     return jsonify({'ok': True})
 
 
-@app.route('/api/applications/seen', methods=['POST'])
-def api_applications_seen():
-    d = request.json or {}
-    uid = d.get('uid')
-    if not uid: return jsonify({'error': 'no uid'}), 400
-    apps = load_json(APPS_FILE, [])
-    for a in apps:
-        if str(a.get('user_id')) == str(uid):
-            a['seen'] = True
-    save_json(APPS_FILE, apps)
-    return jsonify({'ok': True})
-
-
+# ============ ADMINS ============
 @app.route('/api/admins')
 def api_admins():
     return jsonify(get_admins())
@@ -348,12 +356,15 @@ def api_admins_remove():
     return jsonify({'ok': True})
 
 
+# ============ STATS ============
 @app.route('/api/stats')
 def api_stats():
     users = load_json(USERS_FILE, {})
     posts = load_json(POSTS_FILE, [])
     contests = load_json(CONTESTS_FILE, [])
     apps = load_json(APPS_FILE, [])
+    messages = load_json(MESSAGES_FILE, {})
+    total_msgs = sum(len(m.get('messages', [])) for m in messages.values())
     return jsonify({
         'users_total': len(users), 'posts_total': len(posts),
         'contests_total': len(contests),
@@ -362,7 +373,107 @@ def api_stats():
         'pending': sum(1 for a in apps if a.get('status') == 'pending'),
         'accepted': sum(1 for a in apps if a.get('status') == 'accepted'),
         'rejected': sum(1 for a in apps if a.get('status') == 'rejected'),
+        'messages_total': total_msgs,
     })
+
+
+# ============ CHAT ============
+def chat_key(a, b):
+    a = str(a); b = str(b)
+    return '_'.join(sorted([a, b]))
+
+
+@app.route('/api/chat/list', methods=['GET'])
+def api_chat_list():
+    uid = request.args.get('uid')
+    if not uid: return jsonify([])
+    messages = load_json(MESSAGES_FILE, {})
+    chats = []
+    for key, chat in messages.items():
+        if not chat.get('messages'): continue
+        if str(uid) not in key.split('_'):
+            continue
+        other_id = [x for x in key.split('_') if x != str(uid)]
+        if not other_id: continue
+        other_id = other_id[0]
+        u = get_user(other_id)
+        last = chat['messages'][-1] if chat['messages'] else None
+        unread = 0
+        for m in chat['messages']:
+            if str(m.get('to')) == str(uid) and not m.get('read'):
+                unread += 1
+        chats.append({
+            'other': public_user(u),
+            'last_message': last.get('text', '') if last else '',
+            'last_time': last.get('created', 0) if last else 0,
+            'unread': unread,
+        })
+    chats.sort(key=lambda x: x['last_time'], reverse=True)
+    return jsonify(chats)
+
+
+@app.route('/api/chat/get', methods=['GET'])
+def api_chat_get():
+    uid = request.args.get('uid')
+    other = request.args.get('other')
+    if not uid or not other: return jsonify({'error': 'bad'}), 400
+    key = chat_key(uid, other)
+    messages = load_json(MESSAGES_FILE, {})
+    chat = messages.get(key, {'messages': []})
+    # пометить прочитанными
+    changed = False
+    for m in chat['messages']:
+        if str(m.get('to')) == str(uid) and not m.get('read'):
+            m['read'] = True
+            changed = True
+    if changed:
+        messages[key] = chat
+        save_json(MESSAGES_FILE, messages)
+    other_u = get_user(other)
+    return jsonify({
+        'other': public_user(other_u),
+        'messages': chat['messages'][-200:],
+    })
+
+
+@app.route('/api/chat/send', methods=['POST'])
+def api_chat_send():
+    d = request.json or {}
+    uid = d.get('uid')
+    to = d.get('to')
+    text = (d.get('text') or '').strip()
+    if not uid or not to or not text:
+        return jsonify({'error': 'bad'}), 400
+    key = chat_key(uid, to)
+    messages = load_json(MESSAGES_FILE, {})
+    if key not in messages:
+        messages[key] = {'messages': []}
+    msg = {
+        'id': int(time.time() * 1000),
+        'from': uid, 'to': to,
+        'text': text[:2000],
+        'created': int(time.time()),
+        'read': False,
+    }
+    messages[key]['messages'].append(msg)
+    if len(messages[key]['messages']) > 500:
+        messages[key]['messages'] = messages[key]['messages'][-500:]
+    save_json(MESSAGES_FILE, messages)
+    return jsonify({'ok': True, 'message': msg})
+
+
+@app.route('/api/chat/unread', methods=['GET'])
+def api_chat_unread():
+    uid = request.args.get('uid')
+    if not uid: return jsonify({'count': 0})
+    messages = load_json(MESSAGES_FILE, {})
+    unread = 0
+    for key, chat in messages.items():
+        if str(uid) not in key.split('_'): continue
+        for m in chat.get('messages', []):
+            if str(m.get('to')) == str(uid) and not m.get('read'):
+                unread += 1
+    return jsonify({'count': unread})
 
 
 if __name__ == '__main__':
