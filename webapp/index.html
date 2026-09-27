@@ -10,24 +10,12 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
 :root{
-  --bg:#000;
-  --card:#1c1c1e;
-  --card-2:#2c2c2e;
-  --line:#38383a;
-  --text:#fff;
-  --dim:#98989f;
-  --muted:#636366;
-  --accent:#0a84ff;
-  --accent-2:#409cff;
-  --green:#30d158;
-  --gold:#ffd60a;
-  --red:#ff453a;
-  --orange:#ff9f0a;
-  --purple:#bf5af2;
-  --pink:#ff375f;
-  --teal:#5ac8fa;
-  --indigo:#5e5ce6;
-  --brown:#ac8e68;
+  --bg:#000;--card:#1c1c1e;--card-2:#2c2c2e;--line:#38383a;
+  --text:#fff;--dim:#98989f;--muted:#636366;
+  --accent:#0a84ff;--accent-2:#409cff;
+  --green:#30d158;--gold:#ffd60a;--red:#ff453a;
+  --orange:#ff9f0a;--purple:#bf5af2;--pink:#ff375f;
+  --teal:#5ac8fa;--indigo:#5e5ce6;--brown:#ac8e68;
   --radius:10px;
 }
 
@@ -44,6 +32,8 @@ body.no-anim *{transition:none!important;animation:none!important}
 body.transparent-icons .ic{background:rgba(120,120,128,0.24)!important}
 body.transparent-icons .ic svg{stroke:var(--text)}
 body.round-icons .ic{border-radius:50%!important}
+body.hide-labels .nav-item span{display:none}
+body.hide-labels .nav-item{padding:8px 2px}
 
 html,body{height:100%;overflow-x:hidden;background:var(--bg)}
 body{
@@ -68,7 +58,12 @@ body{
 }
 body.theme-light .header{background:rgba(242,242,247,0.85)}
 .header-left{display:flex;align-items:center;gap:8px}
-.header .logo{font-size:15px;font-weight:700;letter-spacing:-.2px;background:linear-gradient(90deg,#0a84ff,#bf5af2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header .logo{
+  font-size:15px;font-weight:700;letter-spacing:-.2px;
+  background:linear-gradient(90deg,#0a84ff,#bf5af2);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
 .header .sub{font-size:11px;color:var(--muted);letter-spacing:.3px;margin-top:1px}
 .header-right{display:flex;align-items:center;gap:8px}
 .online{
@@ -192,12 +187,21 @@ body.theme-light .nav{background:rgba(255,255,255,0.85)}
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
   padding:4px 2px;color:var(--muted);cursor:pointer;
   user-select:none;min-width:0;transition:color .12s;
+  position:relative;
 }
 .nav-item.active{color:var(--accent-2)}
 .nav-item svg{width:26px;height:26px;stroke:currentColor;fill:none;
 stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .nav-item span{font-size:10px;letter-spacing:-.1px;font-weight:500;
 white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.nav-badge{
+  position:absolute;top:0;right:calc(50% - 18px);
+  min-width:16px;height:16px;padding:0 4px;
+  background:var(--red);color:#fff;
+  border-radius:8px;font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--bg);
+}
 
 .tab{display:none}
 .tab.active{display:block;animation:fade .3s cubic-bezier(0.32,0.72,0,1)}
@@ -233,43 +237,98 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
 .field input:focus,.field textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .field input::placeholder,.field textarea::placeholder{color:var(--muted)}
 
+/* NOTIFICATION BANNER */
+.notif-banner{
+  position:fixed;top:calc(12px + env(safe-area-inset-top));
+  left:12px;right:12px;max-width:520px;margin:0 auto;
+  background:rgba(28,28,30,0.98);
+  backdrop-filter:blur(30px);
+  -webkit-backdrop-filter:blur(30px);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px 16px;
+  z-index:1500;
+  display:flex;align-items:flex-start;gap:12px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  transform:translateY(calc(-100% - 40px));
+  transition:transform .35s cubic-bezier(0.32,0.72,0,1);
+  pointer-events:none;
+}
+.notif-banner.show{transform:translateY(0);pointer-events:auto}
+.notif-banner .n-text{flex:1;font-size:15px;line-height:1.4}
+.notif-banner .n-title{font-weight:600;margin-bottom:2px}
+.notif-banner .n-desc{font-size:13px;color:var(--dim);margin-top:2px}
+
 /* PROFILE */
 .profile-header{
-  text-align:center;padding:20px 16px 24px;
+  text-align:center;padding:22px 16px 24px;
   background:var(--card);border-radius:var(--radius);margin-bottom:14px;
+  position:relative;overflow:hidden;
+}
+.profile-avatar-wrap{
+  position:relative;width:100px;height:100px;
+  margin:0 auto 14px;
+}
+.profile-avatar-bg{
+  position:absolute;inset:0;border-radius:50%;
+  background:linear-gradient(135deg,#0a84ff,#bf5af2);
+  transition:background .3s;
 }
 .profile-avatar{
-  width:84px;height:84px;border-radius:50%;
-  background:linear-gradient(135deg,#0a84ff,#bf5af2);
+  position:absolute;inset:4px;border-radius:50%;
+  background:#1c1c1e;
   display:flex;align-items:center;justify-content:center;
-  margin:0 auto 14px;font-size:36px;font-weight:700;color:#fff;
-  position:relative;
-  box-shadow:0 8px 24px rgba(10,132,255,0.3);
+  font-size:36px;font-weight:700;color:#fff;
+  cursor:pointer;overflow:hidden;
+  background-size:cover;background-position:center;
 }
-.profile-avatar .acc-badge{
-  position:absolute;bottom:-4px;right:-4px;
-  font-size:24px;background:var(--bg);border-radius:50%;
-  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
-  border:2px solid var(--card);
+.profile-avatar:active{opacity:.85}
+.profile-avatar .avatar-placeholder{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  background:#1c1c1e;
 }
 .profile-name{font-size:22px;font-weight:700;letter-spacing:-.5px}
 .profile-username{font-size:14px;color:var(--accent-2);margin-top:4px;font-weight:500}
+.profile-admin-badge{
+  margin-top:8px;display:inline-block;
+  background:rgba(255,214,10,0.15);color:var(--gold);
+  padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;
+}
+.avatar-hint{
+  font-size:12px;color:var(--muted);margin-top:6px;
+}
+
+/* BG PICKER */
+.bg-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  gap:8px;padding:12px 16px;
+}
+.bg-item{
+  aspect-ratio:1;border-radius:50%;
+  cursor:pointer;transition:.15s;
+  border:3px solid transparent;
+  position:relative;
+}
+.bg-item.active{border-color:var(--text);transform:scale(1.05)}
+.bg-item:active{transform:scale(.92)}
+.bg-item.upload{
+  background:var(--card-2);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--dim);font-size:22px;
+}
 
 /* POST */
 .post-card{
   background:var(--card);border-radius:var(--radius);
   padding:16px;margin-bottom:12px;
 }
-.post-head{
-  display:flex;align-items:center;gap:10px;margin-bottom:10px;
-}
+.post-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .post-author{font-size:14px;font-weight:600}
 .post-time{font-size:12px;color:var(--muted);margin-top:1px}
-.post-text{font-size:15px;line-height:1.5;letter-spacing:-.2px;white-space:pre-wrap;word-wrap:break-word}
-.post-image{
-  width:100%;border-radius:10px;margin-top:12px;
-  display:block;max-height:400px;object-fit:cover;
-}
+.post-text{font-size:15px;line-height:1.5;letter-spacing:-.2px;
+white-space:pre-wrap;word-wrap:break-word}
+.post-image{width:100%;border-radius:10px;margin-top:12px;
+display:block;max-height:400px;object-fit:cover}
 
 /* CONTEST */
 .contest-card{
@@ -294,39 +353,18 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
 .app-user-info{flex:1;min-width:0}
 .app-user-name{font-size:15px;font-weight:600}
 .app-user-username{font-size:13px;color:var(--accent-2);margin-top:1px}
-.app-photo{
-  width:100%;max-height:260px;object-fit:cover;
-  border-radius:10px;margin:10px 0;
-}
-.app-comment{font-size:14px;color:var(--dim);line-height:1.5;margin:8px 0;white-space:pre-wrap}
-.app-status{
-  display:inline-flex;align-items:center;gap:4px;
-  font-size:12px;font-weight:600;
-  padding:4px 10px;border-radius:20px;
-}
+.app-photo{width:100%;max-height:260px;object-fit:cover;
+border-radius:10px;margin:10px 0}
+.app-comment{font-size:14px;color:var(--dim);line-height:1.5;
+margin:8px 0;white-space:pre-wrap}
+.app-status{display:inline-flex;align-items:center;gap:4px;
+font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px}
 .app-status.pending{background:rgba(255,214,10,0.15);color:var(--gold)}
 .app-status.accepted{background:rgba(48,209,88,0.15);color:var(--green)}
 .app-status.rejected{background:rgba(255,69,58,0.15);color:var(--red)}
-.app-reason{
-  font-size:13px;color:var(--red);
-  background:rgba(255,69,58,0.1);
-  padding:8px 12px;border-radius:8px;margin-top:8px;
-}
-
-/* ACCESSORIES */
-.acc-grid{
-  display:grid;grid-template-columns:repeat(5,1fr);
-  gap:8px;padding:12px 16px;
-}
-.acc-item{
-  aspect-ratio:1;
-  background:var(--card-2);border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:24px;cursor:pointer;transition:.15s;
-  border:2px solid transparent;
-}
-.acc-item.active{border-color:var(--accent);background:rgba(10,132,255,0.15)}
-.acc-item:active{transform:scale(.92)}
+.app-reason{font-size:13px;color:var(--red);
+background:rgba(255,69,58,0.1);padding:8px 12px;
+border-radius:8px;margin-top:8px}
 
 /* SETTINGS */
 .settings-screen{
@@ -358,7 +396,8 @@ stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 flex:1;text-align:center;margin-right:60px}
 .settings-container{padding:0 16px;max-width:540px;margin:0 auto}
 .switch{width:51px;height:31px;background:var(--card-2);
-border-radius:20px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+border-radius:20px;position:relative;cursor:pointer;
+transition:background .2s;flex-shrink:0}
 .switch.on{background:var(--green)}
 .switch::after{content:'';position:absolute;top:2px;left:2px;
 width:27px;height:27px;border-radius:50%;background:#fff;
@@ -378,66 +417,69 @@ font-size:11px;font-weight:700;transition:.15s}
 .color-dot{width:24px;height:24px;border-radius:50%;
 border:2px solid transparent;cursor:pointer;transition:.15s}
 .color-dot.active{border-color:var(--text);transform:scale(1.12)}
-.about-text{font-size:13px;color:var(--dim);padding:12px 16px;line-height:1.5}
+.about-text{font-size:13px;color:var(--dim);
+padding:12px 16px;line-height:1.5}
 .about-text b{color:var(--text);font-weight:600}
+
+.seg-control{display:inline-flex;background:var(--card-2);
+border-radius:8px;padding:2px}
+.seg-btn{padding:5px 12px;font-size:13px;
+border-radius:6px;cursor:pointer;color:var(--dim);
+font-weight:500;transition:.15s;font-family:inherit;
+background:none;border:none}
+.seg-btn.active{background:var(--card);color:var(--text);
+box-shadow:0 1px 3px rgba(0,0,0,0.15)}
 
 /* MODAL */
 .modal-back{
   position:fixed;top:0;left:0;right:0;bottom:0;
-  background:rgba(0,0,0,0.6);
-  z-index:300;
-  display:none;
-  align-items:flex-end;
+  background:rgba(0,0,0,0.6);z-index:300;
+  display:none;align-items:flex-end;
   backdrop-filter:blur(6px);
   -webkit-backdrop-filter:blur(6px);
 }
 .modal-back.open{display:flex}
 .modal{
-  background:var(--card);
-  width:100%;max-width:540px;
+  background:var(--card);width:100%;max-width:540px;
   border-radius:20px 20px 0 0;
-  padding:20px;
-  max-height:90vh;
-  overflow-y:auto;
+  padding:20px;max-height:90vh;overflow-y:auto;
   padding-bottom:calc(20px + env(safe-area-inset-bottom));
   animation:slideUp .3s cubic-bezier(0.32,0.72,0,1);
 }
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-title{
-  font-size:22px;font-weight:700;letter-spacing:-.5px;
-  margin-bottom:16px;text-align:center;
-}
-.modal-close{
-  position:absolute;top:16px;right:16px;
-  background:var(--card-2);border:none;
-  width:30px;height:30px;border-radius:50%;
-  cursor:pointer;color:var(--text);
-  font-size:16px;font-weight:300;
-  display:flex;align-items:center;justify-content:center;
-}
-.emoji-picker{
-  display:flex;gap:6px;flex-wrap:wrap;padding:8px 0;
-}
-.emoji-opt{
-  width:42px;height:42px;border-radius:10px;
-  background:var(--card-2);border:2px solid transparent;
-  display:flex;align-items:center;justify-content:center;
-  font-size:22px;cursor:pointer;
-}
+.modal-title{font-size:22px;font-weight:700;letter-spacing:-.5px;
+margin-bottom:16px;text-align:center}
+.modal-close{position:absolute;top:16px;right:16px;
+background:var(--card-2);border:none;
+width:30px;height:30px;border-radius:50%;
+cursor:pointer;color:var(--text);
+font-size:16px;font-weight:300;
+display:flex;align-items:center;justify-content:center}
+.emoji-picker{display:flex;gap:6px;flex-wrap:wrap;padding:8px 0}
+.emoji-opt{width:42px;height:42px;border-radius:10px;
+background:var(--card-2);border:2px solid transparent;
+display:flex;align-items:center;justify-content:center;
+font-size:22px;cursor:pointer}
 .emoji-opt.active{border-color:var(--accent);background:rgba(10,132,255,0.15)}
-.upload-photo{
-  width:100%;padding:20px;border-radius:10px;
-  border:2px dashed var(--line);
-  background:var(--card-2);
-  text-align:center;cursor:pointer;
-  color:var(--dim);font-size:14px;
-  margin:8px 0;
-}
+.upload-photo{width:100%;padding:20px;border-radius:10px;
+border:2px dashed var(--line);background:var(--card-2);
+text-align:center;cursor:pointer;color:var(--dim);
+font-size:14px;margin:8px 0}
 .upload-photo.has-photo{padding:0;border-style:solid;border-color:var(--accent)}
 .upload-photo img{width:100%;border-radius:8px;display:block}
 </style>
 </head>
 <body class="theme-dark font-medium">
+
+<div class="notif-banner" id="notifBanner">
+  <div class="ic green lg" id="notifIcon" style="margin-top:2px">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <div class="n-text">
+    <div class="n-title" id="notifTitle">Уведомление</div>
+    <div class="n-desc" id="notifDesc"></div>
+  </div>
+</div>
 
 <div class="header">
   <div class="header-left">
@@ -460,38 +502,44 @@ border:2px solid transparent;cursor:pointer;transition:.15s}
 
 <div class="container">
 
-  <!-- ЛЕНТА -->
   <div class="tab active" id="tab-feed">
     <div id="postsList"><div class="loading">Загрузка</div></div>
   </div>
 
-  <!-- КОНКУРСЫ -->
   <div class="tab" id="tab-contests">
     <div id="contestsList"><div class="loading">Загрузка</div></div>
   </div>
 
-  <!-- МОИ ЗАЯВКИ -->
   <div class="tab" id="tab-myapps">
     <div id="myAppsList"><div class="loading">Загрузка</div></div>
   </div>
 
-  <!-- ПРОФИЛЬ -->
   <div class="tab" id="tab-profile">
-    <div class="profile-header" id="profileHeader"></div>
+    <div class="profile-header">
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar-bg" id="avatarBg"></div>
+        <div class="profile-avatar" id="avatarBox" onclick="openAvatarPicker()">
+          <div class="avatar-placeholder" id="avatarInner">?</div>
+        </div>
+      </div>
+      <div class="profile-name" id="profileName">Загрузка...</div>
+      <div class="profile-username" id="profileUsername"></div>
+      <div id="adminBadgeSlot"></div>
+      <div class="avatar-hint">Нажми на аватар, чтобы изменить</div>
+    </div>
+
+    <div class="section-header">Фон аватарки</div>
+    <div class="card">
+      <div class="bg-grid" id="bgGrid"></div>
+    </div>
 
     <div class="section-header">Статистика</div>
     <div class="card" id="statsCard"></div>
-
-    <div class="section-header">Аксессуары</div>
-    <div class="card">
-      <div class="acc-grid" id="accGrid"></div>
-    </div>
 
     <div class="section-header">Аккаунт</div>
     <div class="card" id="accountCard"></div>
   </div>
 
-  <!-- АДМИНКА -->
   <div class="tab" id="tab-admin">
     <div id="adminContent"></div>
   </div>
@@ -521,7 +569,6 @@ border:2px solid transparent;cursor:pointer;transition:.15s}
   </div>
 </div>
 
-<!-- НАСТРОЙКИ -->
 <div class="settings-screen" id="settingsScreen">
   <div class="settings-header">
     <button class="back-btn" onclick="closeSettings()">
@@ -531,6 +578,7 @@ border:2px solid transparent;cursor:pointer;transition:.15s}
     <div class="settings-title">Настройки</div>
   </div>
   <div class="settings-container">
+
     <div class="section-header">Внешний вид</div>
     <div class="card">
       <div class="row has-icon">
@@ -559,7 +607,16 @@ border:2px solid transparent;cursor:pointer;transition:.15s}
           <div class="color-dot" style="background:#ff453a" onclick="setAccent('red')" data-color="red"></div>
         </div>
       </div>
+      <div class="row has-icon">
+        <div class="ic orange"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg></div>
+        <div class="row-info"><div class="row-title">Стиль шапки</div></div>
+        <div class="seg-control">
+          <button class="seg-btn" onclick="setHeader('normal')" data-h="normal">Обычная</button>
+          <button class="seg-btn" onclick="setHeader('big')" data-h="big">Большая</button>
+        </div>
+      </div>
     </div>
+
     <div class="section-header">Иконки</div>
     <div class="card">
       <div class="row has-icon tappable" onclick="toggleTransparent()">
@@ -572,7 +629,33 @@ border:2px solid transparent;cursor:pointer;transition:.15s}
         <div class="row-info"><div class="row-title">Круглые иконки</div></div>
         <div class="switch" id="sw-round"></div>
       </div>
+      <div class="row has-icon tappable" onclick="toggleHideLabels()">
+        <div class="ic indigo"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/></svg></div>
+        <div class="row-info"><div class="row-title">Скрыть подписи вкладок</div></div>
+        <div class="switch" id="sw-hidelabels"></div>
+      </div>
     </div>
+
+    <div class="section-header">Уведомления</div>
+    <div class="card">
+      <div class="row has-icon tappable" onclick="toggleNotifyApps()">
+        <div class="ic green"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div>
+        <div class="row-info"><div class="row-title">О заявках</div>
+        <div class="row-sub">Принято / отклонено</div></div>
+        <div class="switch" id="sw-notifyapps"></div>
+      </div>
+      <div class="row has-icon tappable" onclick="toggleNotifyPosts()">
+        <div class="ic blue"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+        <div class="row-info"><div class="row-title">О постах</div></div>
+        <div class="switch" id="sw-notifyposts"></div>
+      </div>
+      <div class="row has-icon tappable" onclick="toggleNotifyContests()">
+        <div class="ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/></svg></div>
+        <div class="row-info"><div class="row-title">О конкурсах</div></div>
+        <div class="switch" id="sw-notifycontests"></div>
+      </div>
+    </div>
+
     <div class="section-header">Поведение</div>
     <div class="card">
       <div class="row has-icon tappable" onclick="toggleAnim()">
@@ -585,23 +668,47 @@ border:2px solid transparent;cursor:pointer;transition:.15s}
         <div class="row-info"><div class="row-title">Вибрация</div></div>
         <div class="switch" id="sw-haptic"></div>
       </div>
+      <div class="row has-icon">
+        <div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <div class="row-info"><div class="row-title">Автообновление</div></div>
+        <div class="seg-control">
+          <button class="seg-btn" onclick="setRefresh(15)" data-r="15">15с</button>
+          <button class="seg-btn" onclick="setRefresh(30)" data-r="30">30с</button>
+          <button class="seg-btn" onclick="setRefresh(60)" data-r="60">60с</button>
+        </div>
+      </div>
     </div>
+
+    <div class="section-header">Данные</div>
+    <div class="card">
+      <div class="row has-icon tappable" onclick="exportData()">
+        <div class="ic teal"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+        <div class="row-info"><div class="row-title">Экспорт данных</div></div>
+        <div class="chev">›</div>
+      </div>
+      <div class="row has-icon tappable" onclick="clearCache()">
+        <div class="ic red"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 01-2 2H9a2 2 0 01-2-2L5 6"/></svg></div>
+        <div class="row-info"><div class="row-title">Очистить кэш</div></div>
+        <div class="chev">›</div>
+      </div>
+    </div>
+
     <div class="section-header">О приложении</div>
     <div class="card">
       <div class="row has-icon">
         <div class="ic indigo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
         <div class="row-info"><div class="row-title">ФЛОРИССАНТ</div>
-        <div class="row-sub">Версия 1.0.0</div></div>
+        <div class="row-sub">Версия 2.0.0</div></div>
       </div>
       <div class="about-text">
         <b>Платформа конкурсов</b> — участвуй, побеждай, твори.<br><br>
         Разработка: <b>Флориссант</b>
       </div>
     </div>
+
   </div>
 </div>
 
-<!-- МОДАЛКА -->
 <div class="modal-back" id="modalBack" onclick="closeModal(event)">
   <div class="modal" id="modalContent" onclick="event.stopPropagation()"></div>
 </div>
@@ -618,25 +725,31 @@ const UNAME = user.username || '';
 
 let player = {};
 let isAdmin = false;
+let lastAppsCheck = [];
 
-const ACCESSORIES = {
-  'none':   '',
-  'star':   '⭐',
-  'crown':  '👑',
-  'fire':   '🔥',
-  'diamond':'💎',
-  'heart':  '💖',
-  'flower': '🌸',
-  'rocket': '🚀',
-  'trophy': '🏆',
-  'lightning': '⚡',
+const GRADIENTS = {
+  'blue':     'linear-gradient(135deg,#0a84ff,#5ac8fa)',
+  'green':    'linear-gradient(135deg,#30d158,#63e6e2)',
+  'purple':   'linear-gradient(135deg,#bf5af2,#5e5ce6)',
+  'orange':   'linear-gradient(135deg,#ff9f0a,#ff453a)',
+  'red':      'linear-gradient(135deg,#ff453a,#ff375f)',
+  'pink':     'linear-gradient(135deg,#ff375f,#bf5af2)',
+  'teal':     'linear-gradient(135deg,#5ac8fa,#63e6e2)',
+  'gold':     'linear-gradient(135deg,#ffd60a,#ff9f0a)',
+  'indigo':   'linear-gradient(135deg,#5e5ce6,#0a84ff)',
+  'dark':     'linear-gradient(135deg,#38383a,#1c1c1e)',
 };
 
 // ============ SETTINGS ============
-const SETTINGS_KEY = 'fl_settings';
+const SETTINGS_KEY = 'fl_settings_v2';
 let settings = {
   theme: 'dark', font: 'medium', accent: 'blue',
-  anim: true, haptic: true, transparentIcons: false, roundIcons: false,
+  anim: true, haptic: true,
+  transparentIcons: false, roundIcons: false,
+  hideLabels: false,
+  headerStyle: 'big',
+  notifyApps: true, notifyPosts: true, notifyContests: true,
+  refresh: 30,
 };
 
 function loadSettings() {
@@ -657,6 +770,8 @@ function applySettings() {
   document.body.classList.toggle('no-anim', !settings.anim);
   document.body.classList.toggle('transparent-icons', settings.transparentIcons);
   document.body.classList.toggle('round-icons', settings.roundIcons);
+  document.body.classList.toggle('hide-labels', settings.hideLabels);
+
   const accents = {
     blue:['#0a84ff','#409cff'], green:['#30d158','#30d158'],
     purple:['#bf5af2','#bf5af2'], orange:['#ff9f0a','#ff9f0a'],
@@ -665,8 +780,10 @@ function applySettings() {
   const [a1,a2] = accents[settings.accent] || accents.blue;
   document.documentElement.style.setProperty('--accent', a1);
   document.documentElement.style.setProperty('--accent-2', a2);
+
   const fl = document.getElementById('fontLabel');
   if (fl) fl.textContent = {small:'Маленький',medium:'Средний',large:'Большой',huge:'Огромный'}[settings.font];
+
   ['dark','gray','light'].forEach(t => {
     const sw = document.getElementById('sw-'+t);
     if (sw) sw.classList.toggle('active', settings.theme === t);
@@ -674,11 +791,22 @@ function applySettings() {
   document.querySelectorAll('.color-dot').forEach(d => {
     d.classList.toggle('active', d.dataset.color === settings.accent);
   });
-  ['sw-anim','sw-haptic','sw-transparent','sw-round'].forEach(id => {
+  document.querySelectorAll('.seg-btn[data-h]').forEach(b => {
+    b.classList.toggle('active', b.dataset.h === settings.headerStyle);
+  });
+  document.querySelectorAll('.seg-btn[data-r]').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.r) === settings.refresh);
+  });
+  const map = {
+    'sw-anim':'anim', 'sw-haptic':'haptic',
+    'sw-transparent':'transparentIcons', 'sw-round':'roundIcons',
+    'sw-hidelabels':'hideLabels',
+    'sw-notifyapps':'notifyApps', 'sw-notifyposts':'notifyPosts',
+    'sw-notifycontests':'notifyContests',
+  };
+  Object.entries(map).forEach(([id, key]) => {
     const el = document.getElementById(id);
-    if (!el) return;
-    const map = {anim:'anim',haptic:'haptic',transparent:'transparentIcons',round:'roundIcons'};
-    el.classList.toggle('on', !!settings[map[id.replace('sw-','')]]);
+    if (el) el.classList.toggle('on', !!settings[key]);
   });
 }
 function setTheme(t){settings.theme=t;saveSettings();applySettings();haptic('light');}
@@ -692,6 +820,12 @@ function toggleAnim(){settings.anim=!settings.anim;saveSettings();applySettings(
 function toggleHaptic(){settings.haptic=!settings.haptic;saveSettings();applySettings();}
 function toggleTransparent(){settings.transparentIcons=!settings.transparentIcons;saveSettings();applySettings();haptic('light');}
 function toggleRound(){settings.roundIcons=!settings.roundIcons;saveSettings();applySettings();haptic('light');}
+function toggleHideLabels(){settings.hideLabels=!settings.hideLabels;saveSettings();applySettings();haptic('light');}
+function toggleNotifyApps(){settings.notifyApps=!settings.notifyApps;saveSettings();applySettings();}
+function toggleNotifyPosts(){settings.notifyPosts=!settings.notifyPosts;saveSettings();applySettings();}
+function toggleNotifyContests(){settings.notifyContests=!settings.notifyContests;saveSettings();applySettings();}
+function setHeader(h){settings.headerStyle=h;saveSettings();applySettings();haptic('light');}
+function setRefresh(n){settings.refresh=n;saveSettings();applySettings();haptic('light');startRefreshTimer();}
 function haptic(type){
   if (!settings.haptic) return;
   try {
@@ -706,7 +840,57 @@ function haptic(type){
 function openSettings(){document.getElementById('settingsScreen').classList.add('open');haptic('light');}
 function closeSettings(){document.getElementById('settingsScreen').classList.remove('open');haptic('light');}
 
+function clearCache(){
+  if (!confirm('Очистить локальные настройки?')) return;
+  try { localStorage.removeItem(SETTINGS_KEY); } catch(e){}
+  settings = {
+    theme:'dark', font:'medium', accent:'blue',
+    anim:true, haptic:true,
+    transparentIcons:false, roundIcons:false,
+    hideLabels:false, headerStyle:'big',
+    notifyApps:true, notifyPosts:true, notifyContests:true,
+    refresh:30,
+  };
+  applySettings();
+  toast('Кэш очищен');
+  haptic('success');
+}
+
+function exportData(){
+  const data = { settings, player, exportDate: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'florissant-data.json'; a.click();
+  URL.revokeObjectURL(url);
+  toast('Скачано');
+  haptic('success');
+}
+
 loadSettings();
+
+// ============ NOTIFICATIONS ============
+let notifTimeout = null;
+function showNotification(title, desc, type){
+  if (type === 'apps' && !settings.notifyApps) return;
+  if (type === 'posts' && !settings.notifyPosts) return;
+  if (type === 'contests' && !settings.notifyContests) return;
+  const b = document.getElementById('notifBanner');
+  document.getElementById('notifTitle').textContent = title;
+  document.getElementById('notifDesc').textContent = desc || '';
+  const icon = document.getElementById('notifIcon');
+  if (type === 'reject' || type === 'error'){
+    icon.className = 'ic red lg';
+    icon.innerHTML = '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  } else {
+    icon.className = 'ic green lg';
+    icon.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+  }
+  b.classList.add('show');
+  haptic('success');
+  clearTimeout(notifTimeout);
+  notifTimeout = setTimeout(() => b.classList.remove('show'), 4000);
+}
 
 // ============ UTILS ============
 function toast(msg){
@@ -756,25 +940,44 @@ async function loadPlayer(){
   isAdmin = r.is_admin;
   if (isAdmin){
     const btn = document.getElementById('adminNavBtn');
-    btn.style.display = 'flex';
+    if (btn) btn.style.display = 'flex';
   }
   renderProfile();
+  checkNotifications();
 }
 
 function renderProfile(){
   if (!player.uid) return;
-  const acc = ACCESSORIES[player.accessory] || '';
   const firstLetter = (player.name || 'Гость').charAt(0).toUpperCase();
+
+  document.getElementById('profileName').textContent = player.name || 'Гость';
   const username = player.username ? '@' + player.username : 'без username';
+  document.getElementById('profileUsername').textContent = username;
 
-  document.getElementById('profileHeader').innerHTML =
-    '<div class="profile-avatar">' + firstLetter +
-      (acc ? '<div class="acc-badge">' + acc + '</div>' : '') +
-    '</div>' +
-    '<div class="profile-name">' + esc(player.name || 'Гость') + '</div>' +
-    '<div class="profile-username">' + esc(username) + '</div>' +
-    (isAdmin ? '<div style="margin-top:8px;display:inline-block;background:rgba(255,214,10,0.15);color:var(--gold);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">👑 Админ</div>' : '');
+  document.getElementById('adminBadgeSlot').innerHTML =
+    isAdmin ? '<div class="profile-admin-badge">👑 Админ</div>' : '';
 
+  // avatar
+  const avatarInner = document.getElementById('avatarInner');
+  if (player.avatar){
+    avatarInner.style.backgroundImage = 'url(' + player.avatar + ')';
+    avatarInner.style.backgroundSize = 'cover';
+    avatarInner.style.backgroundPosition = 'center';
+    avatarInner.textContent = '';
+  } else {
+    avatarInner.style.backgroundImage = '';
+    avatarInner.textContent = firstLetter;
+  }
+
+  // bg
+  const bg = document.getElementById('avatarBg');
+  if (player.avatar_bg && player.avatar_bg.startsWith('data:')){
+    bg.style.background = 'url(' + player.avatar_bg + ') center/cover';
+  } else {
+    bg.style.background = GRADIENTS[player.avatar_bg] || GRADIENTS.blue;
+  }
+
+  // stats
   document.getElementById('statsCard').innerHTML =
     '<div class="row has-icon">' +
       '<div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>' +
@@ -797,17 +1000,7 @@ function renderProfile(){
       '<div class="row-value">' + (player.rejected || 0) + '</div>' +
     '</div>';
 
-  // accessories
-  let accHtml = '';
-  Object.entries(ACCESSORIES).forEach(([key, emoji]) => {
-    if (key === 'none'){
-      accHtml += '<div class="acc-item ' + (player.accessory === 'none' ? 'active' : '') + '" onclick="setAcc(\'' + key + '\')">∅</div>';
-    } else {
-      accHtml += '<div class="acc-item ' + (player.accessory === key ? 'active' : '') + '" onclick="setAcc(\'' + key + '\')">' + emoji + '</div>';
-    }
-  });
-  document.getElementById('accGrid').innerHTML = accHtml;
-
+  // account
   document.getElementById('accountCard').innerHTML =
     '<div class="row has-icon">' +
       '<div class="ic indigo"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>' +
@@ -819,13 +1012,117 @@ function renderProfile(){
       '<div class="row-info"><div class="row-title">Регистрация</div></div>' +
       '<div class="row-value">' + new Date((player.joined || 0) * 1000).toLocaleDateString('ru') + '</div>' +
     '</div>';
+
+  // bg grid
+  renderBgGrid();
 }
 
-async function setAcc(key){
-  player.accessory = key;
+function renderBgGrid(){
+  const el = document.getElementById('bgGrid');
+  if (!el) return;
+  let html = '';
+  Object.entries(GRADIENTS).forEach(([key, css]) => {
+    const active = player.avatar_bg === key ? 'active' : '';
+    html += '<div class="bg-item ' + active + '" style="background:' + css + '" onclick="setBg(\'' + key + '\')"></div>';
+  });
+  // upload
+  const isCustom = player.avatar_bg && player.avatar_bg.startsWith('data:');
+  html += '<div class="bg-item upload ' + (isCustom ? 'active' : '') + '" onclick="document.getElementById(\'bgUploadInput\').click()">📷</div>';
+  el.innerHTML = html;
+}
+
+async function setBg(key){
+  player.avatar_bg = key;
   renderProfile();
-  await api('/api/save_profile', { accessory: key });
+  await api('/api/save_profile', { avatar_bg: key });
   haptic('success');
+}
+
+function openAvatarPicker(){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = function(e){
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024){
+      toast('Фото слишком большое (макс 3 МБ)');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      const img = new Image();
+      img.onload = function(){
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        const max = 300;
+        if (w > h){ h = h * max / w; w = max; }
+        else { w = w * max / h; h = max; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        saveAvatar(dataUrl);
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+async function saveAvatar(dataUrl){
+  player.avatar = dataUrl;
+  renderProfile();
+  await api('/api/save_profile', { avatar: dataUrl });
+  haptic('success');
+  toast('Аватарка обновлена');
+}
+
+async function uploadCustomBg(file){
+  if (file.size > 3 * 1024 * 1024){
+    toast('Фото слишком большое');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      const max = 300;
+      if (w > h){ h = h * max / w; w = max; }
+      else { w = w * max / h; h = max; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      player.avatar_bg = dataUrl;
+      renderProfile();
+      api('/api/save_profile', { avatar_bg: dataUrl });
+      haptic('success');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ============ NOTIFICATIONS CHECK ============
+async function checkNotifications(){
+  if (!player.uid) return;
+  const r = await api('/api/applications', {});
+  const apps = Array.isArray(r) ? r : [];
+  const badge = document.getElementById('myBadge');
+  const decided = apps.filter(a => a.status !== 'pending');
+  const newDecided = decided.filter(a => !lastAppsCheck.includes(a.id + '_' + a.status));
+  if (newDecided.length > 0){
+    newDecided.forEach(a => {
+      if (a.status === 'accepted'){
+        showNotification('🎉 Заявка принята!', a.contest_title, 'apps');
+      } else if (a.status === 'rejected'){
+        showNotification('❌ Заявка отклонена', 'Причина: ' + (a.reason || 'не указана'), 'reject');
+      }
+    });
+  }
+  lastAppsCheck = decided.map(a => a.id + '_' + a.status);
 }
 
 // ============ FEED ============
@@ -846,7 +1143,7 @@ async function loadFeed(){
           '<div class="post-time">' + timeAgo(p.created) + '</div>' +
         '</div>';
     if (isAdmin){
-      html += '<button class="btn small red" onclick="deletePost(' + p.id + ')">Удалить</button>';
+      html += '<button class="btn small red" onclick="deletePost(' + p.id + ')">✕</button>';
     }
     html += '</div>';
     if (p.text) html += '<div class="post-text">' + esc(p.text) + '</div>';
@@ -903,6 +1200,25 @@ async function loadMyApps(){
     return;
   }
   el.innerHTML = apps.map(a => renderAppCard(a, false)).join('');
+  // badge
+  const pending = apps.filter(a => a.status !== 'pending').length;
+  updateMyBadge(apps.filter(a => a.status !== 'pending' && !a.seen).length);
+}
+
+function updateMyBadge(count){
+  const nav = document.querySelector('[data-tab="myapps"]');
+  if (!nav) return;
+  let badge = nav.querySelector('.nav-badge');
+  if (count > 0){
+    if (!badge){
+      badge = document.createElement('div');
+      badge.className = 'nav-badge';
+      nav.appendChild(badge);
+    }
+    badge.textContent = count;
+  } else if (badge){
+    badge.remove();
+  }
 }
 
 function renderAppCard(a, adminView){
@@ -948,7 +1264,7 @@ function renderAppCard(a, adminView){
   return html;
 }
 
-// ============ APPLY MODAL ============
+// ============ APPLY ============
 let currentContest = null;
 let currentPhoto = null;
 
@@ -967,28 +1283,17 @@ async function openApplyModal(contestId){
       '<div style="font-size:36px">' + (currentContest.emoji || '🎨') + '</div>' +
       '<div style="font-size:18px;font-weight:700;margin-top:8px">' + esc(currentContest.title) + '</div>' +
     '</div>' +
-    '<div class="field">' +
-      '<label>Твоё имя (авто из Telegram)</label>' +
-      '<input id="applyName" value="' + esc(user.first_name || '') + '" readonly style="opacity:.7">' +
-    '</div>' +
-    '<div class="field">' +
-      '<label>@username (авто)</label>' +
-      '<input id="applyUsername" value="' + esc(UNAME ? '@' + UNAME : 'нет username') + '" readonly style="opacity:.7">' +
-    '</div>' +
-    '<div class="field">' +
-      '<label>Фотография</label>' +
-      '<div class="upload-photo" id="photoBox" onclick="document.getElementById(\'photoInput\').click()">' +
-        '📷 Нажми, чтобы загрузить фото' +
-      '</div>' +
-      '<input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(this)">' +
-    '</div>' +
-    '<div class="field">' +
-      '<label>Комментарий</label>' +
-      '<textarea id="applyComment" rows="3" placeholder="Почему ты хочешь участвовать?"></textarea>' +
-    '</div>' +
+    '<div class="field"><label>Имя (авто)</label>' +
+      '<input value="' + esc(user.first_name || '') + '" readonly style="opacity:.7"></div>' +
+    '<div class="field"><label>@username (авто)</label>' +
+      '<input value="' + esc(UNAME ? '@' + UNAME : 'нет') + '" readonly style="opacity:.7"></div>' +
+    '<div class="field"><label>Фотография</label>' +
+      '<div class="upload-photo" id="photoBox" onclick="document.getElementById(\'photoInput\').click()">📷 Нажми, чтобы загрузить</div>' +
+      '<input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(this)"></div>' +
+    '<div class="field"><label>Комментарий</label>' +
+      '<textarea id="applyComment" rows="3" placeholder="Почему ты хочешь участвовать?"></textarea></div>' +
     '<div class="btn-row" style="padding:16px 0 0">' +
-      '<button class="btn green" onclick="submitApplication()">Отправить заявку</button>' +
-    '</div>';
+      '<button class="btn green" onclick="submitApplication()">Отправить</button></div>';
 
   document.getElementById('modalBack').classList.add('open');
   haptic('light');
@@ -997,15 +1302,11 @@ async function openApplyModal(contestId){
 function handlePhoto(input){
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 3 * 1024 * 1024){
-    toast('Фото слишком большое (макс 3 МБ)');
-    return;
-  }
+  if (file.size > 3 * 1024 * 1024){ toast('Фото слишком большое'); return; }
   const reader = new FileReader();
   reader.onload = function(e){
     const img = new Image();
     img.onload = function(){
-      // сжатие до 400px
       const canvas = document.createElement('canvas');
       let w = img.width, h = img.height;
       const max = 400;
@@ -1013,8 +1314,7 @@ function handlePhoto(input){
         if (w > h){ h = h * max / w; w = max; }
         else { w = w * max / h; h = max; }
       }
-      canvas.width = w;
-      canvas.height = h;
+      canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       currentPhoto = canvas.toDataURL('image/jpeg', 0.75);
       const box = document.getElementById('photoBox');
@@ -1028,20 +1328,11 @@ function handlePhoto(input){
 
 async function submitApplication(){
   const comment = document.getElementById('applyComment').value.trim();
-  if (!currentPhoto){
-    toast('Загрузи фото');
-    return;
-  }
+  if (!currentPhoto){ toast('Загрузи фото'); return; }
   const r = await api('/api/applications/create', {
-    contest_id: currentContest.id,
-    photo: currentPhoto,
-    comment: comment,
+    contest_id: currentContest.id, photo: currentPhoto, comment: comment,
   });
-  if (r.error){
-    toast(r.error);
-    haptic('error');
-    return;
-  }
+  if (r.error){ toast(r.error); haptic('error'); return; }
   closeModal();
   toast('Заявка отправлена!');
   haptic('success');
@@ -1059,45 +1350,26 @@ async function loadAdmin(){
   const stats = await (await fetch('/api/stats')).json();
   const apps = await api('/api/applications', {});
   const admins = await (await fetch('/api/admins')).json();
-
   const pending = (Array.isArray(apps) ? apps : []).filter(a => a.status === 'pending');
 
-  let html = '<div class="section-header">Статистика</div>' +
-    '<div class="card">' +
-      '<div class="row has-icon">' +
-        '<div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>' +
-        '<div class="row-info"><div class="row-title">Пользователей</div></div>' +
-        '<div class="row-value">' + stats.users_total + '</div>' +
-      '</div>' +
-      '<div class="row has-icon">' +
-        '<div class="ic green"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div>' +
-        '<div class="row-info"><div class="row-title">Постов</div></div>' +
-        '<div class="row-value">' + stats.posts_total + '</div>' +
-      '</div>' +
-      '<div class="row has-icon">' +
-        '<div class="ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/></svg></div>' +
-        '<div class="row-info"><div class="row-title">Конкурсов (активных)</div></div>' +
-        '<div class="row-value">' + stats.contests_active + '</div>' +
-      '</div>' +
-      '<div class="row has-icon">' +
-        '<div class="ic gold"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>' +
-        '<div class="row-info"><div class="row-title">Заявок ожидает</div></div>' +
-        '<div class="row-value gold">' + stats.pending + '</div>' +
-      '</div>' +
+  let html = '<div class="section-header">Статистика</div><div class="card">' +
+    '<div class="row has-icon"><div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">Пользователей</div></div><div class="row-value">' + stats.users_total + '</div></div>' +
+    '<div class="row has-icon"><div class="ic green"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">Постов</div></div><div class="row-value">' + stats.posts_total + '</div></div>' +
+    '<div class="row has-icon"><div class="ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">Активных конкурсов</div></div><div class="row-value">' + stats.contests_active + '</div></div>' +
+    '<div class="row has-icon"><div class="ic gold"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">Заявок ожидает</div></div><div class="row-value gold">' + stats.pending + '</div></div>' +
     '</div>';
 
-  html += '<div class="section-header">Действия</div>' +
-    '<div class="card">' +
-      '<div class="row has-icon tappable" onclick="openPostModal()">' +
-        '<div class="ic blue"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>' +
-        '<div class="row-info"><div class="row-title">Написать пост</div></div>' +
-        '<div class="chev">›</div>' +
-      '</div>' +
-      '<div class="row has-icon tappable" onclick="openContestModal()">' +
-        '<div class="ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/></svg></div>' +
-        '<div class="row-info"><div class="row-title">Создать конкурс</div></div>' +
-        '<div class="chev">›</div>' +
-      '</div>' +
+  html += '<div class="section-header">Действия</div><div class="card">' +
+    '<div class="row has-icon tappable" onclick="openPostModal()">' +
+      '<div class="ic blue"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">Написать пост</div></div><div class="chev">›</div></div>' +
+    '<div class="row has-icon tappable" onclick="openContestModal()">' +
+      '<div class="ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">Создать конкурс</div></div><div class="chev">›</div></div>' +
     '</div>';
 
   html += '<div class="section-header">Заявки (ожидают: ' + pending.length + ')</div>';
@@ -1107,21 +1379,18 @@ async function loadAdmin(){
     html += pending.map(a => renderAppCard(a, true)).join('');
   }
 
-  html += '<div class="section-header">Админы</div>' +
-    '<div class="card">' +
-      Object.entries(admins).map(([aid, a]) =>
-        '<div class="row has-icon">' +
-          '<div class="ic gold"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3 9-8 10-5-1-8-5-8-10V6z"/></svg></div>' +
-          '<div class="row-info"><div class="row-title">' + esc(a.name || 'Админ') + '</div>' +
-          '<div class="row-sub">ID: ' + aid + (a.main ? ' · главный' : '') + '</div></div>' +
-          (a.main ? '' : '<button class="btn small red" onclick="removeAdmin(\'' + aid + '\')">Убрать</button>') +
-        '</div>'
-      ).join('') +
-      '<div class="row has-icon tappable" onclick="openAddAdminModal()">' +
-        '<div class="ic green"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>' +
-        '<div class="row-info"><div class="row-title">Добавить админа</div></div>' +
-        '<div class="chev">›</div>' +
-      '</div>' +
+  html += '<div class="section-header">Админы</div><div class="card">' +
+    Object.entries(admins).map(([aid, a]) =>
+      '<div class="row has-icon">' +
+        '<div class="ic gold"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3 9-8 10-5-1-8-5-8-10V6z"/></svg></div>' +
+        '<div class="row-info"><div class="row-title">' + esc(a.name || 'Админ') + '</div>' +
+        '<div class="row-sub">ID: ' + aid + (a.main ? ' · главный' : '') + '</div></div>' +
+        (a.main ? '' : '<button class="btn small red" onclick="removeAdmin(\'' + aid + '\')">✕</button>') +
+      '</div>'
+    ).join('') +
+    '<div class="row has-icon tappable" onclick="openAddAdminModal()">' +
+      '<div class="ic green"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">Добавить админа</div></div><div class="chev">›</div></div>' +
     '</div>';
 
   document.getElementById('adminContent').innerHTML = html;
@@ -1132,18 +1401,11 @@ function openPostModal(){
   modal.innerHTML =
     '<button class="modal-close" onclick="closeModal()">✕</button>' +
     '<div class="modal-title">Написать пост</div>' +
-    '<div class="field">' +
-      '<label>Текст поста</label>' +
-      '<textarea id="postText" rows="5" placeholder="Что нового?"></textarea>' +
-    '</div>' +
-    '<div class="field">' +
-      '<label>Фото (опционально)</label>' +
-      '<div class="upload-photo" id="postPhotoBox" onclick="document.getElementById(\'postPhotoInput\').click()">📷 Добавить фото</div>' +
-      '<input type="file" id="postPhotoInput" accept="image/*" style="display:none" onchange="handlePostPhoto(this)">' +
-    '</div>' +
-    '<div class="btn-row" style="padding:16px 0 0">' +
-      '<button class="btn" onclick="submitPost()">Опубликовать</button>' +
-    '</div>';
+    '<div class="field"><label>Текст</label><textarea id="postText" rows="5" placeholder="Что нового?"></textarea></div>' +
+    '<div class="field"><label>Фото</label>' +
+      '<div class="upload-photo" id="postPhotoBox" onclick="document.getElementById(\'postPhotoInput\').click()">📷 Добавить</div>' +
+      '<input type="file" id="postPhotoInput" accept="image/*" style="display:none" onchange="handlePostPhoto(this)"></div>' +
+    '<div class="btn-row" style="padding:16px 0 0"><button class="btn" onclick="submitPost()">Опубликовать</button></div>';
   currentPhoto = null;
   document.getElementById('modalBack').classList.add('open');
   haptic('light');
@@ -1152,10 +1414,7 @@ function openPostModal(){
 function handlePostPhoto(input){
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 3 * 1024 * 1024){
-    toast('Фото слишком большое');
-    return;
-  }
+  if (file.size > 3 * 1024 * 1024){ toast('Фото слишком большое'); return; }
   const reader = new FileReader();
   reader.onload = function(e){
     const img = new Image();
@@ -1181,15 +1440,9 @@ function handlePostPhoto(input){
 
 async function submitPost(){
   const text = document.getElementById('postText').value.trim();
-  if (!text && !currentPhoto){
-    toast('Напиши текст или добавь фото');
-    return;
-  }
+  if (!text && !currentPhoto){ toast('Напиши текст или добавь фото'); return; }
   const r = await api('/api/posts/create', { text: text, image: currentPhoto });
-  if (r.error){
-    toast(r.error);
-    return;
-  }
+  if (r.error){ toast(r.error); return; }
   closeModal();
   toast('Пост опубликован');
   haptic('success');
@@ -1203,23 +1456,15 @@ function openContestModal(){
   modal.innerHTML =
     '<button class="modal-close" onclick="closeModal()">✕</button>' +
     '<div class="modal-title">Создать конкурс</div>' +
-    '<div class="field">' +
-      '<label>Эмодзи конкурса</label>' +
+    '<div class="field"><label>Эмодзи</label>' +
       '<div class="emoji-picker" id="emojiPicker">' +
         emojis.map((e,i) => '<div class="emoji-opt ' + (i===0?'active':'') + '" onclick="pickEmoji(\'' + e + '\', this)">' + e + '</div>').join('') +
-      '</div>' +
-    '</div>' +
-    '<div class="field">' +
-      '<label>Название конкурса</label>' +
-      '<input id="contestTitle" placeholder="Например: Массарт осень 2026">' +
-    '</div>' +
-    '<div class="field">' +
-      '<label>Описание</label>' +
-      '<textarea id="contestDesc" rows="4" placeholder="Опиши правила, что нужно сделать, призы..."></textarea>' +
-    '</div>' +
-    '<div class="btn-row" style="padding:16px 0 0">' +
-      '<button class="btn green" onclick="submitContest()">Выпустить набор</button>' +
-    '</div>';
+      '</div></div>' +
+    '<div class="field"><label>Название</label>' +
+      '<input id="contestTitle" placeholder="Например: Массарт осень 2026"></div>' +
+    '<div class="field"><label>Описание</label>' +
+      '<textarea id="contestDesc" rows="4" placeholder="Правила, условия, призы..."></textarea></div>' +
+    '<div class="btn-row" style="padding:16px 0 0"><button class="btn green" onclick="submitContest()">Выпустить набор</button></div>';
   currentPhoto = emojis[0];
   document.getElementById('modalBack').classList.add('open');
   haptic('light');
@@ -1234,17 +1479,9 @@ function pickEmoji(e, el){
 async function submitContest(){
   const title = document.getElementById('contestTitle').value.trim();
   const desc = document.getElementById('contestDesc').value.trim();
-  if (!title){
-    toast('Введи название');
-    return;
-  }
-  const r = await api('/api/contests/create', {
-    title: title, description: desc, emoji: currentPhoto || '🎨',
-  });
-  if (r.error){
-    toast(r.error);
-    return;
-  }
+  if (!title){ toast('Введи название'); return; }
+  const r = await api('/api/contests/create', { title: title, description: desc, emoji: currentPhoto || '🎨' });
+  if (r.error){ toast(r.error); return; }
   closeModal();
   toast('Конкурс выпущен');
   haptic('success');
@@ -1258,13 +1495,8 @@ async function decideApp(aid, status){
     reason = prompt('Причина отказа:');
     if (!reason) return;
   }
-  const r = await api('/api/applications/decide', {
-    application_id: aid, status: status, reason: reason,
-  });
-  if (r.error){
-    toast(r.error);
-    return;
-  }
+  const r = await api('/api/applications/decide', { application_id: aid, status: status, reason: reason });
+  if (r.error){ toast(r.error); return; }
   toast(status === 'accepted' ? 'Принят' : 'Отклонён');
   haptic('success');
   loadAdmin();
@@ -1275,17 +1507,9 @@ function openAddAdminModal(){
   modal.innerHTML =
     '<button class="modal-close" onclick="closeModal()">✕</button>' +
     '<div class="modal-title">Добавить админа</div>' +
-    '<div class="field">' +
-      '<label>ID пользователя</label>' +
-      '<input id="addAdminId" placeholder="123456789" inputmode="numeric">' +
-    '</div>' +
-    '<div class="field">' +
-      '<label>Имя (для отображения)</label>' +
-      '<input id="addAdminName" placeholder="Имя">' +
-    '</div>' +
-    '<div class="btn-row" style="padding:16px 0 0">' +
-      '<button class="btn green" onclick="submitAddAdmin()">Добавить</button>' +
-    '</div>';
+    '<div class="field"><label>ID пользователя</label><input id="addAdminId" placeholder="123456789" inputmode="numeric"></div>' +
+    '<div class="field"><label>Имя</label><input id="addAdminName" placeholder="Имя"></div>' +
+    '<div class="btn-row" style="padding:16px 0 0"><button class="btn green" onclick="submitAddAdmin()">Добавить</button></div>';
   document.getElementById('modalBack').classList.add('open');
   haptic('light');
 }
@@ -1293,15 +1517,9 @@ function openAddAdminModal(){
 async function submitAddAdmin(){
   const target = document.getElementById('addAdminId').value.trim();
   const name = document.getElementById('addAdminName').value.trim() || 'Админ';
-  if (!target){
-    toast('Введи ID');
-    return;
-  }
+  if (!target){ toast('Введи ID'); return; }
   const r = await api('/api/admins/add', { target_uid: target, target_name: name });
-  if (r.error){
-    toast(r.error);
-    return;
-  }
+  if (r.error){ toast(r.error); return; }
   closeModal();
   toast('Админ добавлен');
   haptic('success');
@@ -1339,7 +1557,6 @@ document.querySelectorAll('.nav-item').forEach(el => {
   };
 });
 
-// scroll compact title
 window.addEventListener('scroll', () => {
   const t = document.getElementById('pageTitle');
   if (!t) return;
@@ -1347,15 +1564,36 @@ window.addEventListener('scroll', () => {
   else t.classList.remove('compact');
 });
 
-// ============ ONLINE ============
-async function ping(){
-  await api('/api/ping', {});
-}
+// bg upload
+document.addEventListener('DOMContentLoaded', () => {
+  const bgInput = document.createElement('input');
+  bgInput.type = 'file'; bgInput.accept = 'image/*'; bgInput.style.display = 'none';
+  bgInput.id = 'bgUploadInput';
+  bgInput.onchange = function(e){
+    const file = e.target.files[0];
+    if (file) uploadCustomBg(file);
+  };
+  document.body.appendChild(bgInput);
+});
 
+// ============ ONLINE ============
+async function ping(){ await api('/api/ping', {}); }
 async function loadOnline(){
   const r = await fetch('/api/online');
   const d = await r.json();
   document.getElementById('onlineCount').textContent = d.count || 0;
+}
+
+let refreshTimer = null;
+function startRefreshTimer(){
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(async () => {
+    await loadPlayer();
+    const t = document.querySelector('.nav-item.active')?.dataset.tab;
+    if (t === 'myapps') loadMyApps();
+    if (t === 'feed') loadFeed();
+    if (t === 'admin') loadAdmin();
+  }, settings.refresh * 1000);
 }
 
 // ============ INIT ============
@@ -1368,6 +1606,7 @@ async function loadOnline(){
   ping();
   setInterval(ping, 30000);
   setInterval(loadOnline, 15000);
+  startRefreshTimer();
 })();
 </script>
 
