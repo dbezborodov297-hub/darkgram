@@ -17,7 +17,7 @@
   --orange:#ff9f0a;--purple:#bf5af2;--pink:#ff375f;
   --teal:#5ac8fa;--indigo:#5e5ce6;--brown:#ac8e68;
   --radius:10px;
-  --chat-font: -apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,sans-serif;
+  --chat-font:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,sans-serif;
 }
 
 body.theme-gray{--bg:#1c1c1e;--card:#2c2c2e;--card-2:#3a3a3c;--line:#48484a}
@@ -36,7 +36,6 @@ body.round-icons .ic{border-radius:50%!important}
 body.hide-labels .nav-item span{display:none}
 body.hide-labels .nav-item{padding:8px 2px}
 
-/* chat fonts */
 body.chatfont-sf{--chat-font:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,sans-serif}
 body.chatfont-serif{--chat-font:Georgia,'Times New Roman',serif}
 body.chatfont-mono{--chat-font:'SF Mono',Menlo,Monaco,Consolas,monospace}
@@ -157,6 +156,8 @@ stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;position:relative;z-index:1}
 .ic.lg{width:34px;height:34px;border-radius:8px}
 .ic.lg svg{width:20px;height:20px}
+.ic.xl{width:60px;height:60px;border-radius:16px}
+.ic.xl svg{width:32px;height:32px;stroke-width:2}
 .ic.blue{background:#0a84ff}
 .ic.green{background:#30d158}
 .ic.red{background:#ff453a}
@@ -250,6 +251,40 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
 .field input:focus,.field textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .field input::placeholder,.field textarea::placeholder{color:var(--muted)}
 
+/* SEARCH */
+.search-bar{
+  padding:0 16px 12px;
+}
+.search-input-wrap{
+  display:flex;align-items:center;gap:8px;
+  background:var(--card-2);border-radius:10px;
+  padding:0 12px;
+}
+.search-input-wrap svg{
+  width:18px;height:18px;stroke:var(--muted);fill:none;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;
+}
+.search-input{
+  flex:1;background:none;border:none;
+  padding:11px 0;color:var(--text);
+  font-size:16px;font-family:inherit;letter-spacing:-.3px;
+  outline:none;
+}
+.search-input::placeholder{color:var(--muted)}
+
+.empty-state{
+  text-align:center;padding:60px 30px;
+}
+.empty-state .icon-wrap{
+  margin:0 auto 16px;
+}
+.empty-state .empty-title{
+  font-size:16px;font-weight:600;margin-bottom:6px;
+}
+.empty-state .empty-desc{
+  font-size:14px;color:var(--dim);line-height:1.5;
+}
+
 .notif-banner{
   position:fixed;top:calc(12px + env(safe-area-inset-top));
   left:12px;right:12px;max-width:520px;margin:0 auto;
@@ -272,15 +307,10 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
 .notif-banner .n-desc{font-size:13px;color:var(--dim);margin-top:2px}
 
 .profile-header{
-  text-align:center;
-  padding:30px 16px 26px;
-  background:var(--card);
-  border-radius:var(--radius);
-  margin-bottom:14px;
-  position:relative;
-  overflow:hidden;
-  min-height:260px;
-  display:flex;flex-direction:column;
+  text-align:center;padding:30px 16px 26px;
+  background:var(--card);border-radius:var(--radius);
+  margin-bottom:14px;position:relative;overflow:hidden;
+  min-height:260px;display:flex;flex-direction:column;
   align-items:center;justify-content:center;
 }
 .profile-header.has-bg::before{
@@ -302,8 +332,7 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
   cursor:pointer;overflow:hidden;
   background-size:cover;background-position:center;
   border:3px solid rgba(255,255,255,0.2);
-  margin:0 auto 14px;
-  box-shadow:0 6px 24px rgba(0,0,0,0.4);
+  margin:0 auto 14px;box-shadow:0 6px 24px rgba(0,0,0,0.4);
   transition:.15s;
 }
 .profile-avatar:active{transform:scale(.95);opacity:.9}
@@ -331,16 +360,11 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
   margin-top:12px;text-shadow:0 1px 4px rgba(0,0,0,0.6);
 }
 
-.bg-grid{
-  display:grid;grid-template-columns:repeat(5,1fr);
-  gap:8px;padding:12px 16px;
-}
+.bg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:12px 16px;}
 .bg-item{
-  aspect-ratio:1;border-radius:50%;
-  cursor:pointer;transition:.15s;
+  aspect-ratio:1;border-radius:50%;cursor:pointer;transition:.15s;
   border:3px solid transparent;position:relative;
-  background:var(--card-2);
-  display:flex;align-items:center;justify-content:center;
+  background:var(--card-2);display:flex;align-items:center;justify-content:center;
   color:var(--dim);font-size:22px;overflow:hidden;
 }
 .bg-item img{width:100%;height:100%;object-fit:cover}
@@ -349,15 +373,11 @@ stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .bg-item.active{border-color:var(--accent);transform:scale(1.05)}
 .bg-item:active{transform:scale(.92)}
 
-.post-card{
-  background:var(--card);border-radius:var(--radius);
-  padding:16px;margin-bottom:12px;
-}
+.post-card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
 .post-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .post-author{
-  font-size:14px;font-weight:600;
-  display:inline-flex;align-items:center;gap:5px;
-  cursor:pointer;
+  font-size:14px;font-weight:600;display:inline-flex;
+  align-items:center;gap:5px;cursor:pointer;
 }
 .post-author:active{opacity:.7}
 .post-time{font-size:12px;color:var(--muted);margin-top:1px}
@@ -368,8 +388,7 @@ display:block;max-height:400px;object-fit:cover}
 
 .contest-card{
   background:var(--card);border-radius:var(--radius);
-  padding:16px;margin-bottom:12px;
-  border:1px solid transparent;
+  padding:16px;margin-bottom:12px;border:1px solid transparent;
 }
 .contest-card.active{border-color:rgba(48,209,88,0.3)}
 .contest-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
@@ -379,29 +398,22 @@ display:block;max-height:400px;object-fit:cover}
 .contest-status.closed{color:var(--red)}
 .contest-desc{font-size:14px;color:var(--dim);line-height:1.5;margin-bottom:12px;white-space:pre-wrap}
 
-.app-card{
-  background:var(--card);border-radius:var(--radius);
-  padding:14px;margin-bottom:10px;
-}
+.app-card{background:var(--card);border-radius:var(--radius);padding:14px;margin-bottom:10px;}
 .app-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .app-user-info{flex:1;min-width:0}
-.app-user-name{font-size:15px;font-weight:600;
-display:inline-flex;align-items:center;gap:5px}
+.app-user-name{font-size:15px;font-weight:600;display:inline-flex;align-items:center;gap:5px}
 .app-user-username{font-size:13px;color:var(--accent-2);margin-top:1px}
-.app-photo{width:100%;max-height:260px;object-fit:cover;
-border-radius:10px;margin:10px 0}
-.app-comment{font-size:14px;color:var(--dim);line-height:1.5;
-margin:8px 0;white-space:pre-wrap}
+.app-photo{width:100%;max-height:260px;object-fit:cover;border-radius:10px;margin:10px 0}
+.app-comment{font-size:14px;color:var(--dim);line-height:1.5;margin:8px 0;white-space:pre-wrap}
 .app-status{display:inline-flex;align-items:center;gap:4px;
 font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px}
 .app-status.pending{background:rgba(255,214,10,0.15);color:var(--gold)}
 .app-status.accepted{background:rgba(48,209,88,0.15);color:var(--green)}
 .app-status.rejected{background:rgba(255,69,58,0.15);color:var(--red)}
 .app-reason{font-size:13px;color:var(--red);
-background:rgba(255,69,58,0.1);padding:8px 12px;
-border-radius:8px;margin-top:8px}
+background:rgba(255,69,58,0.1);padding:8px 12px;border-radius:8px;margin-top:8px}
 
-/* CHAT */
+/* CHAT LIST */
 .chat-list-item{
   display:flex;align-items:center;gap:12px;
   padding:12px 16px;position:relative;cursor:pointer;
@@ -422,9 +434,8 @@ border-radius:8px;margin-top:8px}
 }
 .chat-list-info{flex:1;min-width:0}
 .chat-list-name{
-  font-size:16px;font-weight:600;
-  display:inline-flex;align-items:center;gap:4px;
-  margin-bottom:3px;
+  font-size:16px;font-weight:600;display:inline-flex;
+  align-items:center;gap:4px;margin-bottom:3px;
 }
 .chat-list-preview{
   font-size:14px;color:var(--dim);
@@ -440,7 +451,6 @@ border-radius:8px;margin-top:8px}
   line-height:20px;text-align:center;
 }
 
-/* CHAT SCREEN */
 .chat-screen{
   position:fixed;top:0;left:0;right:0;bottom:0;
   background:var(--bg);z-index:210;
@@ -460,9 +470,7 @@ border-radius:8px;margin-top:8px}
   display:flex;align-items:center;min-height:44px;gap:8px;
 }
 body.theme-light .chat-header{background:rgba(242,242,247,0.85)}
-.chat-header-info{
-  flex:1;text-align:center;min-width:0;
-}
+.chat-header-info{flex:1;text-align:center;min-width:0;cursor:pointer}
 .chat-header-name{
   font-size:16px;font-weight:600;
   display:inline-flex;align-items:center;gap:5px;
@@ -472,8 +480,7 @@ body.theme-light .chat-header{background:rgba(242,242,247,0.85)}
   flex:1;overflow-y:auto;
   padding:12px 12px 16px;
   font-family:var(--chat-font);
-  background-size:cover;
-  background-position:center;
+  background-size:cover;background-position:center;
 }
 .chat-msg{
   max-width:78%;margin-bottom:8px;
@@ -483,13 +490,11 @@ body.theme-light .chat-header{background:rgba(242,242,247,0.85)}
   position:relative;
 }
 .chat-msg.mine{
-  margin-left:auto;
-  background:var(--accent);color:#fff;
+  margin-left:auto;background:var(--accent);color:#fff;
   border-bottom-right-radius:6px;
 }
 .chat-msg.theirs{
-  margin-right:auto;
-  background:var(--card-2);color:var(--text);
+  margin-right:auto;background:var(--card-2);color:var(--text);
   border-bottom-left-radius:6px;
 }
 body.theme-light .chat-msg.theirs{background:#e5e5ea;color:#000}
@@ -510,8 +515,7 @@ body.theme-light .chat-input-bar{background:rgba(255,255,255,0.9)}
   flex:1;background:var(--card-2);border:none;
   border-radius:20px;padding:10px 14px;
   color:var(--text);font-size:16px;font-family:var(--chat-font);
-  resize:none;max-height:120px;
-  letter-spacing:-.3px;
+  resize:none;max-height:120px;letter-spacing:-.3px;
 }
 .chat-input:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .chat-send{
@@ -524,11 +528,9 @@ body.theme-light .chat-input-bar{background:rgba(255,255,255,0.9)}
 .chat-send svg{width:18px;height:18px;stroke:#fff;fill:none;
 stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 
-/* USER PROFILE MODAL */
 .user-profile-modal{
   position:fixed;top:0;left:0;right:0;bottom:0;
-  background:var(--bg);z-index:220;
-  overflow-y:auto;
+  background:var(--bg);z-index:220;overflow-y:auto;
   transform:translateX(100%);
   transition:transform .3s cubic-bezier(0.32,0.72,0,1);
   padding-bottom:calc(40px + env(safe-area-inset-bottom));
@@ -536,9 +538,8 @@ stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .user-profile-modal.open{transform:translateX(0)}
 .user-profile-header{
   text-align:center;padding:30px 16px 26px;
-  background:var(--card);
-  margin-bottom:14px;position:relative;overflow:hidden;
-  min-height:220px;
+  background:var(--card);margin-bottom:14px;
+  position:relative;overflow:hidden;min-height:220px;
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
 }
@@ -611,15 +612,6 @@ border:2px solid transparent;cursor:pointer;transition:.15s}
 padding:14px 16px;line-height:1.55}
 .about-text b{color:var(--text);font-weight:600}
 
-.seg-control{display:inline-flex;background:var(--card-2);
-border-radius:8px;padding:2px}
-.seg-btn{padding:5px 12px;font-size:13px;
-border-radius:6px;cursor:pointer;color:var(--dim);
-font-weight:500;transition:.15s;font-family:inherit;
-background:none;border:none}
-.seg-btn.active{background:var(--card);color:var(--text);
-box-shadow:0 1px 3px rgba(0,0,0,0.15)}
-
 .font-list{padding:8px 16px}
 .font-item{
   display:flex;align-items:center;justify-content:space-between;
@@ -630,10 +622,7 @@ box-shadow:0 1px 3px rgba(0,0,0,0.15)}
   height:.5px;background:var(--line);
 }
 .font-item .font-name{font-size:16px}
-.font-item .font-preview{
-  font-size:17px;color:var(--dim);margin-left:auto;
-  font-weight:500;
-}
+.font-item .font-preview{font-size:17px;color:var(--dim);margin-left:auto;font-weight:500}
 .font-item.active .font-name{color:var(--accent)}
 
 .wallpaper-grid{
@@ -650,26 +639,21 @@ box-shadow:0 1px 3px rgba(0,0,0,0.15)}
 }
 .wallpaper-item.active{border-color:var(--accent);transform:scale(1.03)}
 .wallpaper-item:active{transform:scale(.95)}
-.wallpaper-item.upload{
-  background:var(--card-2);color:var(--dim);
-}
+.wallpaper-item.upload{background:var(--card-2);color:var(--dim)}
 .wallpaper-item.upload svg{width:22px;height:22px;
 stroke:currentColor;fill:none;stroke-width:2;
 stroke-linecap:round;stroke-linejoin:round}
 
-/* ABOUT APP */
 .about-hero{
   text-align:center;padding:32px 16px 24px;
   background:linear-gradient(135deg,rgba(10,132,255,0.15),rgba(191,90,242,0.15));
-  border-radius:var(--radius);
-  margin-bottom:14px;
+  border-radius:var(--radius);margin-bottom:14px;
 }
 .about-logo{
   width:80px;height:80px;border-radius:22px;
   background:linear-gradient(135deg,#0a84ff,#bf5af2);
   display:flex;align-items:center;justify-content:center;
-  margin:0 auto 14px;
-  box-shadow:0 8px 24px rgba(10,132,255,0.35);
+  margin:0 auto 14px;box-shadow:0 8px 24px rgba(10,132,255,0.35);
 }
 .about-logo svg{width:42px;height:42px;stroke:#fff;fill:none;
 stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -759,6 +743,12 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   </div>
 
   <div class="tab" id="tab-chats">
+    <div class="search-bar">
+      <div class="search-input-wrap">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" id="searchInput" placeholder="@username или ID" oninput="onSearchInput(this.value)">
+      </div>
+    </div>
     <div id="chatList"><div class="loading">Загрузка</div></div>
   </div>
 
@@ -820,7 +810,6 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   </div>
 </div>
 
-<!-- ЧАТ ЭКРАН -->
 <div class="chat-screen" id="chatScreen">
   <div class="chat-header">
     <button class="back-btn" onclick="closeChat()">
@@ -843,7 +832,6 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   </div>
 </div>
 
-<!-- ПРОФИЛЬ ИГРОКА -->
 <div class="user-profile-modal" id="userProfileModal">
   <div class="settings-header">
     <button class="back-btn" onclick="closeUserProfile()">
@@ -859,12 +847,11 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
     </div>
     <div class="card" id="userProfileInfo"></div>
     <div class="btn-row">
-      <button class="btn" onclick="startChatWith()">Написать сообщение</button>
+      <button class="btn" id="writeBtn" onclick="startChatWith()">Написать сообщение</button>
     </div>
   </div>
 </div>
 
-<!-- НАСТРОЙКИ -->
 <div class="settings-screen" id="settingsScreen">
   <div class="settings-header">
     <button class="back-btn" onclick="closeSettings()">
@@ -962,20 +949,6 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
       </div>
     </div>
 
-    <div class="section-header">Уведомления</div>
-    <div class="card">
-      <div class="row has-icon tappable" onclick="toggleNotifyApps()">
-        <div class="ic green"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div>
-        <div class="row-info"><div class="row-title">О заявках</div></div>
-        <div class="switch" id="sw-notifyapps"></div>
-      </div>
-      <div class="row has-icon tappable" onclick="toggleNotifyPosts()">
-        <div class="ic blue"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
-        <div class="row-info"><div class="row-title">О постах</div></div>
-        <div class="switch" id="sw-notifyposts"></div>
-      </div>
-    </div>
-
     <div class="section-header">Поведение</div>
     <div class="card">
       <div class="row has-icon tappable" onclick="toggleAnim()">
@@ -1022,15 +995,15 @@ let isAdmin = false;
 let lastAppsCheck = [];
 let currentChatUser = null;
 let chatRefreshTimer = null;
-let lastMessageId = 0;
+let currentProfileUid = null;
+let searchTimer = null;
 
-const SETTINGS_KEY = 'fl_settings_v3';
+const SETTINGS_KEY = 'fl_settings_v4';
 let settings = {
   theme: 'dark', font: 'medium', accent: 'blue',
   anim: true, haptic: true,
   transparentIcons: false, roundIcons: false,
   hideLabels: false,
-  notifyApps: true, notifyPosts: true,
   chatFont: 'sf',
   chatWallpaper: null,
   chatBubbleColor: 'blue',
@@ -1052,7 +1025,6 @@ const FONTS = [
 ];
 
 const WALLPAPERS = {
-  'none':  null,
   'blue':  'linear-gradient(135deg,#0a84ff,#5ac8fa)',
   'purple':'linear-gradient(135deg,#bf5af2,#5e5ce6)',
   'green': 'linear-gradient(135deg,#30d158,#63e6e2)',
@@ -1128,7 +1100,6 @@ function applySettings() {
     'sw-anim':'anim', 'sw-haptic':'haptic',
     'sw-transparent':'transparentIcons', 'sw-round':'roundIcons',
     'sw-hidelabels':'hideLabels',
-    'sw-notifyapps':'notifyApps', 'sw-notifyposts':'notifyPosts',
     'sw-chatnotif':'chatNotifications', 'sw-read':'readReceipts',
   };
   Object.entries(map).forEach(([id, key]) => {
@@ -1150,8 +1121,6 @@ function toggleHaptic(){settings.haptic=!settings.haptic;saveSettings();applySet
 function toggleTransparent(){settings.transparentIcons=!settings.transparentIcons;saveSettings();applySettings();haptic('light');}
 function toggleRound(){settings.roundIcons=!settings.roundIcons;saveSettings();applySettings();haptic('light');}
 function toggleHideLabels(){settings.hideLabels=!settings.hideLabels;saveSettings();applySettings();haptic('light');}
-function toggleNotifyApps(){settings.notifyApps=!settings.notifyApps;saveSettings();applySettings();}
-function toggleNotifyPosts(){settings.notifyPosts=!settings.notifyPosts;saveSettings();applySettings();}
 function toggleChatNotif(){settings.chatNotifications=!settings.chatNotifications;
   saveSettings();applySettings();api('/api/save_profile', {chat_notifications: settings.chatNotifications});}
 function toggleReadReceipts(){settings.readReceipts=!settings.readReceipts;
@@ -1178,9 +1147,6 @@ function verifyIcon(){
 
 let notifTimeout = null;
 function showNotification(title, desc, type){
-  if (type === 'apps' && !settings.notifyApps) return;
-  if (type === 'posts' && !settings.notifyPosts) return;
-  if (type === 'chat' && !settings.chatNotifications) return;
   const b = document.getElementById('notifBanner');
   document.getElementById('notifTitle').textContent = title;
   document.getElementById('notifDesc').textContent = desc || '';
@@ -1270,7 +1236,6 @@ async function loadPlayer(){
 function renderProfile(){
   if (!player.uid) return;
   const firstLetter = (player.name || 'Гость').charAt(0).toUpperCase();
-
   const vIcon = isAdmin ? verifyIcon() : '';
   document.getElementById('profileName').innerHTML = esc(player.name || 'Гость') + vIcon;
 
@@ -1442,7 +1407,7 @@ async function checkNotifications(){
   const newDecided = decided.filter(a => !lastAppsCheck.includes(a.id + '_' + a.status));
   if (newDecided.length > 0){
     newDecided.forEach(a => {
-      if (a.status === 'accepted') showNotification('🎉 Заявка принята!', a.contest_title, 'apps');
+      if (a.status === 'accepted') showNotification('🎉 Заявка принята!', a.contest_title);
       else if (a.status === 'rejected') showNotification('❌ Заявка отклонена', 'Причина: ' + (a.reason || 'не указана'), 'reject');
     });
   }
@@ -1570,16 +1535,22 @@ function renderAppCard(a, adminView){
 }
 
 // ============ USER PROFILE ============
-let currentProfileUid = null;
-
 async function openUserProfile(uid){
-  if (!uid || uid === UID){
-    // открыть свой профиль через вкладку
+  if (!uid){
     document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
     document.querySelector('[data-tab="profile"]').classList.add('active');
     document.getElementById('tab-profile').classList.add('active');
     document.getElementById('pageTitle').textContent = 'Профиль';
+    return;
+  }
+  if (String(uid) === String(UID)){
+    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelector('[data-tab="profile"]').classList.add('active');
+    document.getElementById('tab-profile').classList.add('active');
+    document.getElementById('pageTitle').textContent = 'Профиль';
+    haptic('light');
     return;
   }
   currentProfileUid = uid;
@@ -1634,16 +1605,58 @@ function startChatWith(){
   setTimeout(() => openChat(uid), 250);
 }
 
+// ============ SEARCH ============
+function onSearchInput(value){
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    if (!value.trim()){
+      loadChats();
+    } else {
+      searchUsers(value.trim());
+    }
+  }, 300);
+}
+
+async function searchUsers(q){
+  const r = await fetch('/api/users/search?q=' + encodeURIComponent(q) + '&uid=' + UID);
+  const users = await r.json();
+  const el = document.getElementById('chatList');
+  if (!users.length){
+    el.innerHTML = '<div class="empty-state">' +
+      '<div class="ic gray xl icon-wrap"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>' +
+      '<div class="empty-title">Никого не найдено</div>' +
+      '<div class="empty-desc">Попробуй другой @username или ID</div>' +
+    '</div>';
+    return;
+  }
+  el.innerHTML = '<div class="card" style="padding:0">' +
+    users.map(u => {
+      const firstLetter = (u.name || 'Гость').charAt(0).toUpperCase();
+      const avatarStyle = u.avatar ? 'background-image:url(' + u.avatar + ');background-size:cover;background-position:center;' : '';
+      const vIcon = u.is_admin ? verifyIcon() : '';
+      return '<div class="chat-list-item" onclick="openUserProfile(' + u.uid + ')">' +
+        '<div class="chat-avatar" style="' + avatarStyle + '">' + (u.avatar ? '' : firstLetter) + '</div>' +
+        '<div class="chat-list-info">' +
+          '<div class="chat-list-name">' + esc(u.name || 'Гость') + vIcon + '</div>' +
+          '<div class="chat-list-preview">' + (u.username ? '@' + esc(u.username) : 'ID: ' + u.uid) + '</div>' +
+        '</div>' +
+        '<div class="chat-list-meta"><span class="chev">›</span></div>' +
+      '</div>';
+    }).join('') +
+  '</div>';
+}
+
 // ============ CHAT ============
 async function loadChats(){
   const r = await fetch('/api/chat/list?uid=' + UID);
   const chats = await r.json();
   const el = document.getElementById('chatList');
   if (!chats.length){
-    el.innerHTML = '<div class="card" style="padding:60px 20px;text-align:center;color:var(--muted)">' +
-      '<div style="font-size:48px;margin-bottom:12px">💬</div>' +
-      '<div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">Нет чатов</div>' +
-      '<div>Открой профиль пользователя и нажми «Написать»</div></div>';
+    el.innerHTML = '<div class="empty-state">' +
+      '<div class="ic blue xl icon-wrap"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>' +
+      '<div class="empty-title">Нет чатов</div>' +
+      '<div class="empty-desc">Найди пользователя через поиск выше и напиши ему</div>' +
+    '</div>';
     return;
   }
   el.innerHTML = '<div class="card" style="padding:0">' +
@@ -1671,9 +1684,7 @@ async function openChat(otherUid){
   const d = await r.json();
   if (d.error){ toast('Ошибка'); return; }
   currentChatUser = d.other;
-  lastMessageId = 0;
 
-  const firstLetter = (d.other.name || 'Гость').charAt(0).toUpperCase();
   const vIcon = d.other.is_admin ? verifyIcon() : '';
   document.getElementById('chatHeaderName').innerHTML = esc(d.other.name || 'Гость') + vIcon;
   document.getElementById('chatHeaderSub').textContent = d.other.username ? '@' + d.other.username : 'ID: ' + d.other.uid;
@@ -1697,7 +1708,6 @@ function applyChatWallpaper(){
   const body = document.getElementById('chatBody');
   if (settings.chatWallpaper){
     if (settings.chatWallpaper.startsWith('data:')){
-      body.style.backgroundImage = 'url(' + settings.chatWallpaper + ')';
       body.style.background = 'url(' + settings.chatWallpaper + ') center/cover';
     } else if (WALLPAPERS[settings.chatWallpaper]){
       body.style.background = WALLPAPERS[settings.chatWallpaper];
@@ -1706,7 +1716,6 @@ function applyChatWallpaper(){
     }
   } else {
     body.style.background = '';
-    body.style.backgroundImage = '';
   }
 }
 
@@ -1770,22 +1779,19 @@ document.getElementById('chatInput').addEventListener('keydown', function(e){
   if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
 });
 
-// ============ CHAT SETTINGS MODALS ============
+// ============ CHAT SETTINGS ============
 function openChatWallpaper(){
   const modal = document.getElementById('modalContent');
   let html = '<button class="modal-close" onclick="closeModal()">✕</button>' +
     '<div class="modal-title">Обои чата</div>' +
     '<div class="wallpaper-grid">';
   Object.entries(WALLPAPERS).forEach(([k, v]) => {
-    if (!v) return;
     const active = settings.chatWallpaper === k ? 'active' : '';
     html += '<div class="wallpaper-item ' + active + '" style="background:' + v + '" onclick="setWallpaper(\'' + k + '\')"></div>';
   });
-  // upload
   const isCustom = settings.chatWallpaper && settings.chatWallpaper.startsWith('data:');
   html += '<div class="wallpaper-item upload ' + (isCustom ? 'active' : '') + '" onclick="document.getElementById(\'wallUploadInput\').click()">' +
     '<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>';
-  // none
   const noneActive = !settings.chatWallpaper ? 'active' : '';
   html += '<div class="wallpaper-item ' + noneActive + '" style="background:#1c1c1e;border:2px solid var(--line)" onclick="setWallpaper(\'none\')">✕</div>';
   html += '</div>';
@@ -1834,8 +1840,7 @@ async function setChatFont(id){
   toast('Шрифт обновлён');
 }
 
-async function openChatSettings(){
-  // Открыть общие настройки и проскроллить к разделу чата
+function openChatSettings(){
   openSettings();
   setTimeout(() => {
     const headers = document.querySelectorAll('#settingsScreen .section-header');
@@ -1862,33 +1867,20 @@ function openAbout(){
         '<b>ФЛОРИССАНТ</b> — платформа для проведения конкурсов и творческих мероприятий. ' +
         'Участвуй в конкурсах, общайся с другими участниками, следи за результатами и твори.<br><br>' +
         '<b>Возможности:</b><br>' +
-        '• 📋 Участие в конкурсах<br>' +
-        '• 💬 Личные сообщения<br>' +
-        '• 👤 Профили участников<br>' +
-        '• 📸 Загрузка работ<br>' +
-        '• 🎨 Кастомизация интерфейса<br>' +
-        '• 🌙 Тёмная и светлая темы<br>' +
-        '• 🎯 Задания и награды<br><br>' +
-        '<b>Цель проекта</b> — объединить творческих людей и дать им площадку для самовыражения.<br><br>' +
+        '• Участие в конкурсах<br>' +
+        '• Личные сообщения<br>' +
+        '• Профили участников<br>' +
+        '• Загрузка работ<br>' +
+        '• Кастомизация интерфейса<br>' +
+        '• Тёмная и светлая темы<br><br>' +
         'Спасибо, что ты с нами! ❤️' +
       '</div>' +
     '</div>' +
     '<div class="card">' +
-      '<div class="row has-icon">' +
-        '<div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 006 0v-1a10 10 0 00-20 0"/></svg></div>' +
-        '<div class="row-info"><div class="row-title">Разработчик</div>' +
-        '<div class="row-sub">Команда ФЛОРИССАНТ</div></div>' +
-      '</div>' +
       '<div class="row has-icon tappable" onclick="copyText(\'@FlorissantBot\')">' +
         '<div class="ic purple"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>' +
         '<div class="row-info"><div class="row-title">Поддержка</div>' +
         '<div class="row-sub">@FlorissantBot</div></div>' +
-        '<div class="chev">›</div>' +
-      '</div>' +
-      '<div class="row has-icon tappable" onclick="copyText(\'florissant.app\')">' +
-        '<div class="ic teal"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M2 12h20"/><path d="M12 2a15 15 0 010 20"/><path d="M12 2a15 15 0 000 20"/></svg></div>' +
-        '<div class="row-info"><div class="row-title">Сайт</div>' +
-        '<div class="row-sub">florissant.app</div></div>' +
         '<div class="chev">›</div>' +
       '</div>' +
     '</div>' +
@@ -2194,7 +2186,7 @@ document.querySelectorAll('.nav-item').forEach(el => {
     const t = el.dataset.tab;
     if (t === 'feed') loadFeed();
     if (t === 'contests') loadContests();
-    if (t === 'chats') loadChats();
+    if (t === 'chats') { document.getElementById('searchInput').value = ''; loadChats(); }
     if (t === 'myapps') loadMyApps();
     if (t === 'profile') loadPlayer();
     if (t === 'admin') loadAdmin();
