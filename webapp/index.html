@@ -258,8 +258,9 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
 .notif-banner .n-title{font-weight:600;margin-bottom:2px}
 .notif-banner .n-desc{font-size:13px;color:var(--dim);margin-top:2px}
 
+/* ============ PROFILE ============ */
 .profile-header{
-  text-align:center;padding:22px 16px 24px;
+  text-align:center;padding:24px 16px 24px;
   background:var(--card);border-radius:var(--radius);margin-bottom:14px;
   position:relative;overflow:hidden;
 }
@@ -269,9 +270,7 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
 }
 .profile-avatar-bg{
   position:absolute;inset:0;border-radius:50%;
-  background:#2c2c2e;
-  transition:background .3s;
-  overflow:hidden;
+  background:#2c2c2e;overflow:hidden;
 }
 .profile-avatar-bg img{width:100%;height:100%;object-fit:cover}
 .profile-avatar{
@@ -289,20 +288,20 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
 }
 .profile-name{
   font-size:22px;font-weight:700;letter-spacing:-.5px;
-  display:inline-flex;align-items:center;gap:6px;
+  display:inline-flex;align-items:center;gap:5px;
   justify-content:center;
 }
 .verify-badge{
   display:inline-flex;align-items:center;justify-content:center;
-  width:18px;height:18px;border-radius:50%;
+  width:14px;height:14px;border-radius:50%;
   background:#0a84ff;flex-shrink:0;
+  position:relative;top:1px;
 }
 .verify-badge svg{
-  width:11px;height:11px;
-  stroke:#fff;fill:none;stroke-width:3;
+  width:9px;height:9px;
+  stroke:#fff;fill:none;stroke-width:3.2;
   stroke-linecap:round;stroke-linejoin:round;
 }
-.profile-username{font-size:14px;color:var(--accent-2);margin-top:4px;font-weight:500}
 .avatar-hint{
   font-size:12px;color:var(--muted);margin-top:10px;
 }
@@ -322,21 +321,28 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
   overflow:hidden;
 }
 .bg-item img{width:100%;height:100%;object-fit:cover}
+.bg-item svg{width:22px;height:22px;stroke:currentColor;fill:none;
+stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .bg-item.active{border-color:var(--accent);transform:scale(1.05)}
 .bg-item:active{transform:scale(.92)}
 
+/* ============ POST ============ */
 .post-card{
   background:var(--card);border-radius:var(--radius);
   padding:16px;margin-bottom:12px;
 }
 .post-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.post-author{font-size:14px;font-weight:600}
+.post-author{
+  font-size:14px;font-weight:600;
+  display:inline-flex;align-items:center;gap:5px;
+}
 .post-time{font-size:12px;color:var(--muted);margin-top:1px}
 .post-text{font-size:15px;line-height:1.5;letter-spacing:-.2px;
 white-space:pre-wrap;word-wrap:break-word}
 .post-image{width:100%;border-radius:10px;margin-top:12px;
 display:block;max-height:400px;object-fit:cover}
 
+/* ============ CONTEST ============ */
 .contest-card{
   background:var(--card);border-radius:var(--radius);
   padding:16px;margin-bottom:12px;
@@ -350,13 +356,15 @@ display:block;max-height:400px;object-fit:cover}
 .contest-status.closed{color:var(--red)}
 .contest-desc{font-size:14px;color:var(--dim);line-height:1.5;margin-bottom:12px;white-space:pre-wrap}
 
+/* ============ APPLICATION ============ */
 .app-card{
   background:var(--card);border-radius:var(--radius);
   padding:14px;margin-bottom:10px;
 }
 .app-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .app-user-info{flex:1;min-width:0}
-.app-user-name{font-size:15px;font-weight:600}
+.app-user-name{font-size:15px;font-weight:600;
+display:inline-flex;align-items:center;gap:5px}
 .app-user-username{font-size:13px;color:var(--accent-2);margin-top:1px}
 .app-photo{width:100%;max-height:260px;object-fit:cover;
 border-radius:10px;margin:10px 0}
@@ -371,6 +379,7 @@ font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px}
 background:rgba(255,69,58,0.1);padding:8px 12px;
 border-radius:8px;margin-top:8px}
 
+/* ============ SETTINGS ============ */
 .settings-screen{
   position:fixed;top:0;left:0;right:0;bottom:0;
   background:var(--bg);z-index:200;overflow-y:auto;
@@ -467,7 +476,10 @@ font-size:22px;cursor:pointer}
 .upload-photo{width:100%;padding:20px;border-radius:10px;
 border:2px dashed var(--line);background:var(--card-2);
 text-align:center;cursor:pointer;color:var(--dim);
-font-size:14px;margin:8px 0}
+font-size:14px;margin:8px 0;
+display:flex;flex-direction:column;align-items:center;gap:8px}
+.upload-photo svg{width:24px;height:24px;stroke:var(--dim);
+fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .upload-photo.has-photo{padding:0;border-style:solid;border-color:var(--accent)}
 .upload-photo img{width:100%;border-radius:8px;display:block}
 </style>
@@ -526,7 +538,6 @@ font-size:14px;margin:8px 0}
         </div>
       </div>
       <div class="profile-name" id="profileName">Загрузка...</div>
-      <div class="profile-username" id="profileUsername"></div>
       <div class="avatar-hint">Нажми на аватар, чтобы изменить</div>
     </div>
 
@@ -535,11 +546,11 @@ font-size:14px;margin:8px 0}
       <div class="bg-grid" id="bgGrid"></div>
     </div>
 
-    <div class="section-header">Статистика</div>
-    <div class="card" id="statsCard"></div>
-
     <div class="section-header">Аккаунт</div>
     <div class="card" id="accountCard"></div>
+
+    <div class="section-header">Статистика</div>
+    <div class="card" id="statsCard"></div>
   </div>
 
   <div class="tab" id="tab-admin">
@@ -692,7 +703,7 @@ font-size:14px;margin:8px 0}
       <div class="row has-icon">
         <div class="ic indigo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
         <div class="row-info"><div class="row-title">ФЛОРИССАНТ</div>
-        <div class="row-sub">Версия 2.1.0</div></div>
+        <div class="row-sub">Версия 2.2.0</div></div>
       </div>
       <div class="about-text">
         <b>Платформа конкурсов</b> — участвуй, побеждай, твори.<br><br>
@@ -721,7 +732,6 @@ let player = {};
 let isAdmin = false;
 let lastAppsCheck = [];
 
-// ============ SETTINGS ============
 const SETTINGS_KEY = 'fl_settings_v2';
 let settings = {
   theme: 'dark', font: 'medium', accent: 'blue',
@@ -845,7 +855,10 @@ function exportData(){
 
 loadSettings();
 
-// ============ NOTIFICATIONS ============
+function verifyIcon(){
+  return '<span class="verify-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>';
+}
+
 let notifTimeout = null;
 function showNotification(title, desc, type){
   if (type === 'apps' && !settings.notifyApps) return;
@@ -868,7 +881,6 @@ function showNotification(title, desc, type){
   notifTimeout = setTimeout(() => b.classList.remove('show'), 4000);
 }
 
-// ============ UTILS ============
 function toast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -908,7 +920,6 @@ function esc(s){
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ============ PLAYER ============
 async function loadPlayer(){
   const r = await api('/api/player', {});
   if (!r || r.error) return;
@@ -926,18 +937,10 @@ function renderProfile(){
   if (!player.uid) return;
   const firstLetter = (player.name || 'Гость').charAt(0).toUpperCase();
 
-  // ИМЯ + ГАЛОЧКА
-  const verifyIcon = isAdmin
-    ? '<span class="verify-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>'
-    : '';
+  const vIcon = isAdmin ? verifyIcon() : '';
   document.getElementById('profileName').innerHTML =
-    esc(player.name || 'Гость') + verifyIcon;
+    esc(player.name || 'Гость') + vIcon;
 
-  // USERNAME
-  const username = player.username ? '@' + player.username : 'без username';
-  document.getElementById('profileUsername').textContent = username;
-
-  // AVATAR
   const avatarInner = document.getElementById('avatarInner');
   if (player.avatar){
     avatarInner.style.backgroundImage = 'url(' + player.avatar + ')';
@@ -949,7 +952,6 @@ function renderProfile(){
     avatarInner.textContent = firstLetter;
   }
 
-  // BACKGROUND
   const bg = document.getElementById('avatarBg');
   if (player.avatar_bg && player.avatar_bg.startsWith('data:')){
     bg.innerHTML = '<img src="' + player.avatar_bg + '">';
@@ -958,7 +960,25 @@ function renderProfile(){
     bg.style.background = '#2c2c2e';
   }
 
-  // stats
+  // ACCOUNT (с @ и ID)
+  document.getElementById('accountCard').innerHTML =
+    '<div class="row has-icon tappable" onclick="copyText(\'@' + esc(player.username || '') + '\')">' +
+      '<div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 006 0v-1a10 10 0 10-4 8"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">Username</div></div>' +
+      '<div class="row-value blue">' + (player.username ? '@' + esc(player.username) : '—') + '</div>' +
+    '</div>' +
+    '<div class="row has-icon tappable" onclick="copyText(\'' + UID + '\')">' +
+      '<div class="ic purple"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 2v4"/><path d="M16 2v4"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">ID</div></div>' +
+      '<div class="row-value">' + UID + '</div>' +
+    '</div>' +
+    '<div class="row has-icon">' +
+      '<div class="ic teal"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">Регистрация</div></div>' +
+      '<div class="row-value">' + new Date((player.joined || 0) * 1000).toLocaleDateString('ru') + '</div>' +
+    '</div>';
+
+  // STATS
   document.getElementById('statsCard').innerHTML =
     '<div class="row has-icon">' +
       '<div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>' +
@@ -981,19 +1001,6 @@ function renderProfile(){
       '<div class="row-value">' + (player.rejected || 0) + '</div>' +
     '</div>';
 
-  // account
-  document.getElementById('accountCard').innerHTML =
-    '<div class="row has-icon">' +
-      '<div class="ic indigo"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Твой ID</div></div>' +
-      '<div class="row-value">' + UID + '</div>' +
-    '</div>' +
-    '<div class="row has-icon">' +
-      '<div class="ic teal"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Регистрация</div></div>' +
-      '<div class="row-value">' + new Date((player.joined || 0) * 1000).toLocaleDateString('ru') + '</div>' +
-    '</div>';
-
   renderBgGrid();
 }
 
@@ -1002,10 +1009,10 @@ function renderBgGrid(){
   if (!el) return;
   const hasCustom = player.avatar_bg && player.avatar_bg.startsWith('data:');
   el.innerHTML =
-    '<div class="bg-item ' + (hasCustom ? 'active' : '') + '" onclick="document.getElementById(\'bgUploadInput\').click()" style="grid-column:span 1">' +
-      (hasCustom ? '<img src="' + player.avatar_bg + '">' : '📷') +
+    '<div class="bg-item ' + (hasCustom ? 'active' : '') + '" onclick="document.getElementById(\'bgUploadInput\').click()">' +
+      (hasCustom ? '<img src="' + player.avatar_bg + '">' : '<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>') +
     '</div>' +
-    (hasCustom ? '<div class="bg-item" onclick="removeBg()" style="font-size:20px">✕</div>' : '');
+    (hasCustom ? '<div class="bg-item" onclick="removeBg()" style="font-size:18px">✕</div>' : '');
 }
 
 async function removeBg(){
@@ -1013,6 +1020,23 @@ async function removeBg(){
   renderProfile();
   await api('/api/save_profile', { avatar_bg: null });
   haptic('success');
+}
+
+function copyText(text){
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      toast('Скопировано');
+      haptic('success');
+    });
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('Скопировано');
+  }
 }
 
 function openAvatarPicker(){
@@ -1082,7 +1106,6 @@ async function uploadCustomBg(file){
   reader.readAsDataURL(file);
 }
 
-// ============ NOTIFICATIONS CHECK ============
 async function checkNotifications(){
   if (!player.uid) return;
   const r = await api('/api/applications', {});
@@ -1115,7 +1138,7 @@ async function loadFeed(){
       '<div class="post-head">' +
         '<div class="ic blue lg"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>' +
         '<div style="flex:1;min-width:0">' +
-          '<div class="post-author">' + esc(p.author_name || 'Админ') + '</div>' +
+          '<div class="post-author">' + esc(p.author_name || 'Админ') + verifyIcon() + '</div>' +
           '<div class="post-time">' + timeAgo(p.created) + '</div>' +
         '</div>';
     if (isAdmin){
@@ -1197,6 +1220,7 @@ function renderAppCard(a, adminView){
     '</div>';
 
   if (adminView){
+    const isUserAdmin = false;
     html += '<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-top:.5px solid var(--line);border-bottom:.5px solid var(--line)">' +
       '<div class="ic purple lg"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>' +
       '<div style="flex:1;min-width:0">' +
@@ -1245,7 +1269,10 @@ async function openApplyModal(contestId){
     '<div class="field"><label>@username (авто)</label>' +
       '<input value="' + esc(UNAME ? '@' + UNAME : 'нет') + '" readonly style="opacity:.7"></div>' +
     '<div class="field"><label>Фотография</label>' +
-      '<div class="upload-photo" id="photoBox" onclick="document.getElementById(\'photoInput\').click()">📷 Нажми, чтобы загрузить</div>' +
+      '<div class="upload-photo" id="photoBox" onclick="document.getElementById(\'photoInput\').click()">' +
+        '<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>' +
+        '<span>Нажми, чтобы загрузить</span>' +
+      '</div>' +
       '<input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(this)"></div>' +
     '<div class="field"><label>Комментарий</label>' +
       '<textarea id="applyComment" rows="3" placeholder="Почему ты хочешь участвовать?"></textarea></div>' +
@@ -1340,7 +1367,7 @@ async function loadAdmin(){
     Object.entries(admins).map(([aid, a]) =>
       '<div class="row has-icon">' +
         '<div class="ic gold"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3 9-8 10-5-1-8-5-8-10V6z"/></svg></div>' +
-        '<div class="row-info"><div class="row-title">' + esc(a.name || 'Админ') + '</div>' +
+        '<div class="row-info"><div class="row-title">' + esc(a.name || 'Админ') + verifyIcon() + '</div>' +
         '<div class="row-sub">ID: ' + aid + (a.main ? ' · главный' : '') + '</div></div>' +
         (a.main ? '' : '<button class="btn small red" onclick="removeAdmin(\'' + aid + '\')">✕</button>') +
       '</div>'
@@ -1360,7 +1387,10 @@ function openPostModal(){
     '<div class="modal-title">Написать пост</div>' +
     '<div class="field"><label>Текст</label><textarea id="postText" rows="5" placeholder="Что нового?"></textarea></div>' +
     '<div class="field"><label>Фото</label>' +
-      '<div class="upload-photo" id="postPhotoBox" onclick="document.getElementById(\'postPhotoInput\').click()">📷 Добавить</div>' +
+      '<div class="upload-photo" id="postPhotoBox" onclick="document.getElementById(\'postPhotoInput\').click()">' +
+        '<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>' +
+        '<span>Добавить фото</span>' +
+      '</div>' +
       '<input type="file" id="postPhotoInput" accept="image/*" style="display:none" onchange="handlePostPhoto(this)"></div>' +
     '<div class="btn-row" style="padding:16px 0 0"><button class="btn" onclick="submitPost()">Опубликовать</button></div>';
   currentPhoto = null;
@@ -1496,7 +1526,6 @@ function closeModal(e){
   currentPhoto = null;
 }
 
-// ============ NAV ============
 document.querySelectorAll('.nav-item').forEach(el => {
   el.onclick = () => {
     document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
