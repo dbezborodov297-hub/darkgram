@@ -8,7 +8,6 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-
 :root{
   --bg:#000;--card:#1c1c1e;--card-2:#2c2c2e;--line:#38383a;
   --text:#fff;--dim:#98989f;--muted:#636366;
@@ -19,7 +18,6 @@
   --radius:10px;
   --chat-font:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,sans-serif;
 }
-
 body.theme-gray{--bg:#1c1c1e;--card:#2c2c2e;--card-2:#3a3a3c;--line:#48484a}
 body.theme-light{
   --bg:#f2f2f7;--card:#fff;--card-2:#e5e5ea;--line:#d1d1d6;
@@ -35,7 +33,6 @@ body.transparent-icons .ic svg{stroke:var(--text)}
 body.round-icons .ic{border-radius:50%!important}
 body.hide-labels .nav-item span{display:none}
 body.hide-labels .nav-item{padding:8px 2px}
-
 body.chatfont-sf{--chat-font:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,sans-serif}
 body.chatfont-serif{--chat-font:Georgia,'Times New Roman',serif}
 body.chatfont-mono{--chat-font:'SF Mono',Menlo,Monaco,Consolas,monospace}
@@ -46,7 +43,6 @@ body.chatfont-impact{--chat-font:Impact,'Haettenschweiler',sans-serif}
 body.chatfont-georgia{--chat-font:'Palatino','Book Antiqua',serif}
 body.chatfont-verdana{--chat-font:Verdana,Geneva,sans-serif}
 body.chatfont-optima{--chat-font:Optima,'Segoe UI',sans-serif}
-
 html,body{height:100%;overflow-x:hidden;background:var(--bg)}
 body{
   font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,sans-serif;
@@ -56,7 +52,6 @@ body{
   padding-bottom:calc(120px + env(safe-area-inset-bottom));
   min-height:100vh;letter-spacing:-.4px;
 }
-
 .header{
   background:rgba(0,0,0,0.72);
   backdrop-filter:saturate(180%) blur(30px);
@@ -87,7 +82,6 @@ body.theme-light .header{background:rgba(242,242,247,0.85)}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--green);
 box-shadow:0 0 5px var(--green);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
 .gear-btn{
   width:32px;height:32px;border-radius:16px;
   background:var(--card-2);border:none;
@@ -97,7 +91,6 @@ box-shadow:0 0 5px var(--green);animation:pulse 2s infinite}
 .gear-btn:active{transform:scale(.92);opacity:.8}
 .gear-btn svg{width:17px;height:17px;stroke:var(--text);fill:none;
 stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-
 .large-title-wrap{padding:8px 16px 0;max-width:540px;margin:0 auto}
 .large-title{
   font-size:32px;font-weight:800;letter-spacing:-.8px;
@@ -105,22 +98,18 @@ stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   transition:font-size .25s cubic-bezier(0.32,0.72,0,1), padding .25s;
 }
 .large-title.compact{font-size:22px;padding:4px 0;letter-spacing:-.5px}
-
 .container{padding:0 16px;max-width:540px;margin:0 auto}
-
 .section-header{
   font-size:13px;font-weight:600;
   color:var(--muted);text-transform:uppercase;
   letter-spacing:.5px;padding:22px 4px 8px;
 }
 .section-header:first-child{padding-top:8px}
-
 .card{
   background:var(--card);border-radius:var(--radius);
   margin-bottom:14px;overflow:hidden;
   box-shadow:0 1px 2px rgba(0,0,0,0.08);
 }
-
 .row{
   display:flex;align-items:center;gap:12px;
   padding:11px 16px;min-height:44px;
@@ -141,7 +130,6 @@ stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .row .row-value.gold{color:var(--gold)}
 .row .row-value.green{color:var(--green)}
 .row .chev{color:var(--muted);font-size:20px;line-height:1;font-weight:300;margin-left:auto}
-
 .ic{
   width:29px;height:29px;border-radius:7px;
   display:inline-flex;align-items:center;justify-content:center;
@@ -156,8 +144,10 @@ stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;position:relative;z-index:1}
 .ic.lg{width:34px;height:34px;border-radius:8px}
 .ic.lg svg{width:20px;height:20px}
-.ic.xl{width:60px;height:60px;border-radius:16px}
-.ic.xl svg{width:32px;height:32px;stroke-width:2}
+.ic.xl{width:64px;height:64px;border-radius:18px}
+.ic.xl svg{width:34px;height:34px;stroke-width:1.8}
+.ic.sm{width:24px;height:24px;border-radius:6px}
+.ic.sm svg{width:14px;height:14px}
 .ic.blue{background:#0a84ff}
 .ic.green{background:#30d158}
 .ic.red{background:#ff453a}
@@ -170,7 +160,6 @@ stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;position:relative;z-
 .ic.gold svg{stroke:#1a1408}
 .ic.gray{background:#8e8e93}
 .ic.brown{background:#ac8e68}
-
 .btn{
   background:var(--accent);color:#fff;border:none;border-radius:var(--radius);
   padding:14px 20px;font-size:17px;font-weight:600;
@@ -184,7 +173,6 @@ stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;position:relative;z-
 .btn.red{background:var(--red)}
 .btn.small{width:auto;display:inline-block;padding:7px 14px;font-size:15px;border-radius:18px}
 .btn-row{padding:12px 16px}
-
 .nav{
   position:fixed;bottom:0;left:0;right:0;
   background:rgba(20,20,22,0.78);
@@ -216,11 +204,9 @@ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   display:flex;align-items:center;justify-content:center;
   border:2px solid var(--bg);
 }
-
 .tab{display:none}
 .tab.active{display:block;animation:fade .3s cubic-bezier(0.32,0.72,0,1)}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-
 .toast{
   position:fixed;bottom:calc(130px + env(safe-area-inset-bottom));
   left:50%;transform:translateX(-50%) translateY(120%);
@@ -232,10 +218,8 @@ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   max-width:90vw;text-align:center;letter-spacing:-.3px;
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
 .loading{text-align:center;padding:40px;color:var(--muted);
 font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase}
-
 .field{padding:11px 16px;position:relative}
 .field + .field::before{
   content:'';position:absolute;top:0;left:16px;right:0;
@@ -250,11 +234,7 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
 }
 .field input:focus,.field textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .field input::placeholder,.field textarea::placeholder{color:var(--muted)}
-
-/* SEARCH */
-.search-bar{
-  padding:0 16px 12px;
-}
+.search-bar{padding:0 16px 12px}
 .search-input-wrap{
   display:flex;align-items:center;gap:8px;
   background:var(--card-2);border-radius:10px;
@@ -271,20 +251,10 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
   outline:none;
 }
 .search-input::placeholder{color:var(--muted)}
-
-.empty-state{
-  text-align:center;padding:60px 30px;
-}
-.empty-state .icon-wrap{
-  margin:0 auto 16px;
-}
-.empty-state .empty-title{
-  font-size:16px;font-weight:600;margin-bottom:6px;
-}
-.empty-state .empty-desc{
-  font-size:14px;color:var(--dim);line-height:1.5;
-}
-
+.empty-state{text-align:center;padding:60px 30px}
+.empty-state .icon-wrap{margin:0 auto 16px}
+.empty-state .empty-title{font-size:16px;font-weight:600;margin-bottom:6px}
+.empty-state .empty-desc{font-size:14px;color:var(--dim);line-height:1.5}
 .notif-banner{
   position:fixed;top:calc(12px + env(safe-area-inset-top));
   left:12px;right:12px;max-width:520px;margin:0 auto;
@@ -305,7 +275,6 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
 .notif-banner .n-text{flex:1;font-size:15px;line-height:1.4}
 .notif-banner .n-title{font-weight:600;margin-bottom:2px}
 .notif-banner .n-desc{font-size:13px;color:var(--dim);margin-top:2px}
-
 .profile-header{
   text-align:center;padding:30px 16px 26px;
   background:var(--card);border-radius:var(--radius);
@@ -342,16 +311,17 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
 }
 .profile-name{
   font-size:22px;font-weight:700;letter-spacing:-.5px;
-  display:inline-flex;align-items:center;gap:5px;justify-content:center;
+  display:inline-flex;align-items:center;gap:6px;justify-content:center;
   color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.6);
 }
 .verify-badge{
   display:inline-flex;align-items:center;justify-content:center;
-  width:14px;height:14px;border-radius:50%;
-  background:#0a84ff;flex-shrink:0;position:relative;top:1px;
+  width:16px;height:16px;border-radius:50%;
+  background:#0a84ff;flex-shrink:0;position:relative;
+  top:0;
 }
 .verify-badge svg{
-  width:9px;height:9px;
+  width:10px;height:10px;
   stroke:#fff;fill:none;stroke-width:3.2;
   stroke-linecap:round;stroke-linejoin:round;
 }
@@ -359,8 +329,7 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
   font-size:12px;color:rgba(255,255,255,0.65);
   margin-top:12px;text-shadow:0 1px 4px rgba(0,0,0,0.6);
 }
-
-.bg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:12px 16px;}
+.bg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:12px 16px}
 .bg-item{
   aspect-ratio:1;border-radius:50%;cursor:pointer;transition:.15s;
   border:3px solid transparent;position:relative;
@@ -372,12 +341,11 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
 stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .bg-item.active{border-color:var(--accent);transform:scale(1.05)}
 .bg-item:active{transform:scale(.92)}
-
-.post-card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
+.post-card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px}
 .post-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .post-author{
   font-size:14px;font-weight:600;display:inline-flex;
-  align-items:center;gap:5px;cursor:pointer;
+  align-items:center;gap:6px;cursor:pointer;
 }
 .post-author:active{opacity:.7}
 .post-time{font-size:12px;color:var(--muted);margin-top:1px}
@@ -385,35 +353,89 @@ stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 white-space:pre-wrap;word-wrap:break-word}
 .post-image{width:100%;border-radius:10px;margin-top:12px;
 display:block;max-height:400px;object-fit:cover}
-
+.post-actions{
+  display:flex;gap:16px;margin-top:12px;
+  padding-top:12px;border-top:.5px solid var(--line);
+}
+.post-action{
+  display:flex;align-items:center;gap:6px;
+  color:var(--dim);font-size:14px;cursor:pointer;
+  transition:.15s;background:none;border:none;
+  font-family:inherit;padding:4px 0;
+}
+.post-action:active{opacity:.6}
+.post-action svg{width:18px;height:18px;stroke:currentColor;fill:none;
+stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.comments-list{margin-top:12px}
+.comment{
+  display:flex;gap:10px;padding:10px 0;
+  position:relative;
+}
+.comment + .comment::before{
+  content:'';position:absolute;top:0;left:44px;right:0;
+  height:.5px;background:var(--line);
+}
+.comment-avatar{
+  width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,#0a84ff,#bf5af2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:600;color:#fff;
+  flex-shrink:0;overflow:hidden;
+  background-size:cover;background-position:center;
+}
+.comment-info{flex:1;min-width:0}
+.comment-name{
+  font-size:13px;font-weight:600;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.comment-time{font-size:11px;color:var(--muted);margin-left:6px;font-weight:400}
+.comment-text{
+  font-size:14px;line-height:1.45;margin-top:3px;
+  white-space:pre-wrap;word-wrap:break-word;letter-spacing:-.2px;
+}
+.comment-delete{
+  background:none;border:none;color:var(--muted);
+  font-size:16px;cursor:pointer;padding:2px 6px;
+  align-self:flex-start;font-weight:300;
+}
 .contest-card{
   background:var(--card);border-radius:var(--radius);
-  padding:16px;margin-bottom:12px;border:1px solid transparent;
+  padding:0;margin-bottom:12px;border:1px solid transparent;
+  overflow:hidden;
 }
 .contest-card.active{border-color:rgba(48,209,88,0.3)}
-.contest-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-.contest-emoji{font-size:32px}
+.contest-cover{
+  width:100%;height:140px;
+  background:linear-gradient(135deg,#0a84ff,#bf5af2);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  background-size:cover;background-position:center;
+}
+.contest-cover svg{width:48px;height:48px;stroke:#fff;fill:none;
+stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.contest-content{padding:14px 16px}
 .contest-title{font-size:18px;font-weight:700;letter-spacing:-.3px}
 .contest-status{font-size:12px;color:var(--green);font-weight:600;margin-top:2px}
 .contest-status.closed{color:var(--red)}
-.contest-desc{font-size:14px;color:var(--dim);line-height:1.5;margin-bottom:12px;white-space:pre-wrap}
-
-.app-card{background:var(--card);border-radius:var(--radius);padding:14px;margin-bottom:10px;}
+.contest-desc{font-size:14px;color:var(--dim);line-height:1.5;margin:10px 0 12px;white-space:pre-wrap}
+.app-card{background:var(--card);border-radius:var(--radius);padding:14px;margin-bottom:10px}
 .app-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .app-user-info{flex:1;min-width:0}
-.app-user-name{font-size:15px;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+.app-user-name{font-size:15px;font-weight:600;
+display:inline-flex;align-items:center;gap:6px}
 .app-user-username{font-size:13px;color:var(--accent-2);margin-top:1px}
-.app-photo{width:100%;max-height:260px;object-fit:cover;border-radius:10px;margin:10px 0}
-.app-comment{font-size:14px;color:var(--dim);line-height:1.5;margin:8px 0;white-space:pre-wrap}
+.app-photo{width:100%;max-height:260px;object-fit:cover;
+border-radius:10px;margin:10px 0}
+.app-comment{font-size:14px;color:var(--dim);line-height:1.5;
+margin:8px 0;white-space:pre-wrap}
 .app-status{display:inline-flex;align-items:center;gap:4px;
 font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px}
 .app-status.pending{background:rgba(255,214,10,0.15);color:var(--gold)}
 .app-status.accepted{background:rgba(48,209,88,0.15);color:var(--green)}
 .app-status.rejected{background:rgba(255,69,58,0.15);color:var(--red)}
 .app-reason{font-size:13px;color:var(--red);
-background:rgba(255,69,58,0.1);padding:8px 12px;border-radius:8px;margin-top:8px}
-
-/* CHAT LIST */
+background:rgba(255,69,58,0.1);padding:8px 12px;
+border-radius:8px;margin-top:8px}
 .chat-list-item{
   display:flex;align-items:center;gap:12px;
   padding:12px 16px;position:relative;cursor:pointer;
@@ -424,6 +446,12 @@ background:rgba(255,69,58,0.1);padding:8px 12px;border-radius:8px;margin-top:8px
   height:.5px;background:var(--line);
 }
 .chat-list-item:active{background:var(--card-2)}
+.chat-list-pin{
+  position:absolute;right:10px;top:6px;
+  color:var(--accent);width:14px;height:14px;
+}
+.chat-list-pin svg{width:14px;height:14px;stroke:currentColor;
+fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .chat-avatar{
   width:52px;height:52px;border-radius:50%;
   background:linear-gradient(135deg,#0a84ff,#bf5af2);
@@ -435,7 +463,7 @@ background:rgba(255,69,58,0.1);padding:8px 12px;border-radius:8px;margin-top:8px
 .chat-list-info{flex:1;min-width:0}
 .chat-list-name{
   font-size:16px;font-weight:600;display:inline-flex;
-  align-items:center;gap:4px;margin-bottom:3px;
+  align-items:center;gap:6px;margin-bottom:3px;
 }
 .chat-list-preview{
   font-size:14px;color:var(--dim);
@@ -450,7 +478,6 @@ background:rgba(255,69,58,0.1);padding:8px 12px;border-radius:8px;margin-top:8px
   border-radius:10px;font-size:12px;font-weight:700;
   line-height:20px;text-align:center;
 }
-
 .chat-screen{
   position:fixed;top:0;left:0;right:0;bottom:0;
   background:var(--bg);z-index:210;
@@ -473,9 +500,25 @@ body.theme-light .chat-header{background:rgba(242,242,247,0.85)}
 .chat-header-info{flex:1;text-align:center;min-width:0;cursor:pointer}
 .chat-header-name{
   font-size:16px;font-weight:600;
-  display:inline-flex;align-items:center;gap:5px;
+  display:inline-flex;align-items:center;gap:6px;
 }
 .chat-header-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.chat-pinned-banner{
+  background:rgba(48,209,88,0.1);
+  border-bottom:.5px solid rgba(48,209,88,0.2);
+  padding:8px 16px;
+  display:flex;align-items:center;gap:10px;
+}
+.chat-pinned-banner svg{width:16px;height:16px;stroke:var(--green);
+fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.chat-pinned-text{
+  flex:1;font-size:13px;color:var(--green);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.chat-pinned-close{
+  background:none;border:none;color:var(--green);
+  font-size:16px;cursor:pointer;font-weight:300;padding:0 4px;
+}
 .chat-body{
   flex:1;overflow-y:auto;
   padding:12px 12px 16px;
@@ -488,7 +531,10 @@ body.theme-light .chat-header{background:rgba(242,242,247,0.85)}
   font-size:15px;line-height:1.4;
   word-wrap:break-word;white-space:pre-wrap;
   position:relative;
+  cursor:pointer;
+  transition:.12s;
 }
+.chat-msg:active{opacity:.85}
 .chat-msg.mine{
   margin-left:auto;background:var(--accent);color:#fff;
   border-bottom-right-radius:6px;
@@ -527,7 +573,6 @@ body.theme-light .chat-input-bar{background:rgba(255,255,255,0.9)}
 .chat-send:active{transform:scale(.92);opacity:.85}
 .chat-send svg{width:18px;height:18px;stroke:#fff;fill:none;
 stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-
 .user-profile-modal{
   position:fixed;top:0;left:0;right:0;bottom:0;
   background:var(--bg);z-index:220;overflow-y:auto;
@@ -555,9 +600,8 @@ stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 }
 .user-profile-name{
   font-size:22px;font-weight:700;letter-spacing:-.5px;
-  display:inline-flex;align-items:center;gap:5px;justify-content:center;
+  display:inline-flex;align-items:center;gap:6px;justify-content:center;
 }
-
 .settings-screen{
   position:fixed;top:0;left:0;right:0;bottom:0;
   background:var(--bg);z-index:200;overflow-y:auto;
@@ -604,14 +648,13 @@ font-size:11px;font-weight:700;transition:.15s}
 .theme-swatch.dark{background:#000;color:#fff}
 .theme-swatch.gray{background:#1c1c1e;color:#fff}
 .theme-swatch.light{background:#f2f2f7;color:#000}
-.color-dots{display:flex;gap:8px;flex-wrap:wrap}
+.color-dots{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .color-dot{width:24px;height:24px;border-radius:50%;
 border:2px solid transparent;cursor:pointer;transition:.15s}
 .color-dot.active{border-color:var(--text);transform:scale(1.12)}
 .about-text{font-size:14px;color:var(--dim);
 padding:14px 16px;line-height:1.55}
 .about-text b{color:var(--text);font-weight:600}
-
 .font-list{padding:8px 16px}
 .font-item{
   display:flex;align-items:center;justify-content:space-between;
@@ -624,7 +667,6 @@ padding:14px 16px;line-height:1.55}
 .font-item .font-name{font-size:16px}
 .font-item .font-preview{font-size:17px;color:var(--dim);margin-left:auto;font-weight:500}
 .font-item.active .font-name{color:var(--accent)}
-
 .wallpaper-grid{
   display:grid;grid-template-columns:repeat(4,1fr);
   gap:10px;padding:12px 16px;
@@ -643,7 +685,6 @@ padding:14px 16px;line-height:1.55}
 .wallpaper-item.upload svg{width:22px;height:22px;
 stroke:currentColor;fill:none;stroke-width:2;
 stroke-linecap:round;stroke-linejoin:round}
-
 .about-hero{
   text-align:center;padding:32px 16px 24px;
   background:linear-gradient(135deg,rgba(10,132,255,0.15),rgba(191,90,242,0.15));
@@ -659,7 +700,6 @@ stroke-linecap:round;stroke-linejoin:round}
 stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .about-app-name{font-size:24px;font-weight:800;letter-spacing:-.6px}
 .about-version{font-size:13px;color:var(--dim);margin-top:6px}
-
 .modal-back{
   position:fixed;top:0;left:0;right:0;bottom:0;
   background:rgba(0,0,0,0.6);z-index:300;
@@ -684,12 +724,6 @@ width:30px;height:30px;border-radius:50%;
 cursor:pointer;color:var(--text);
 font-size:16px;font-weight:300;
 display:flex;align-items:center;justify-content:center}
-.emoji-picker{display:flex;gap:6px;flex-wrap:wrap;padding:8px 0}
-.emoji-opt{width:42px;height:42px;border-radius:10px;
-background:var(--card-2);border:2px solid transparent;
-display:flex;align-items:center;justify-content:center;
-font-size:22px;cursor:pointer}
-.emoji-opt.active{border-color:var(--accent);background:rgba(10,132,255,0.15)}
 .upload-photo{width:100%;padding:20px;border-radius:10px;
 border:2px dashed var(--line);background:var(--card-2);
 text-align:center;cursor:pointer;color:var(--dim);
@@ -699,6 +733,33 @@ display:flex;flex-direction:column;align-items:center;gap:8px}
 fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .upload-photo.has-photo{padding:0;border-style:solid;border-color:var(--accent)}
 .upload-photo img{width:100%;border-radius:8px;display:block}
+.action-sheet-item{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 16px;position:relative;cursor:pointer;
+  transition:.12s;
+}
+.action-sheet-item + .action-sheet-item::before{
+  content:'';position:absolute;top:0;left:56px;right:0;
+  height:.5px;background:var(--line);
+}
+.action-sheet-item:active{background:var(--card-2)}
+.action-sheet-item svg{
+  width:22px;height:22px;stroke:var(--text);fill:none;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+}
+.action-sheet-item.danger svg{stroke:var(--red)}
+.action-sheet-item.danger .action-label{color:var(--red)}
+.action-label{font-size:17px;font-weight:400;letter-spacing:-.3px}
+.perm-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 0;position:relative;
+}
+.perm-item + .perm-item::before{
+  content:'';position:absolute;top:0;left:0;right:0;
+  height:.5px;background:var(--line);
+}
+.perm-label{font-size:15px;font-weight:400}
+.perm-desc{font-size:12px;color:var(--dim);margin-top:2px}
 </style>
 </head>
 <body class="theme-dark font-medium chatfont-sf">
@@ -708,7 +769,7 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
     <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
   </div>
   <div class="n-text">
-    <div class="n-title" id="notifTitle">Уведомление</div>
+    <div class="n-title" id="notifTitle"></div>
     <div class="n-desc" id="notifDesc"></div>
   </div>
 </div>
@@ -717,7 +778,7 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   <div class="header-left">
     <div>
       <div class="logo">ФЛОРИССАНТ</div>
-      <div class="sub">принять участие</div>
+      <div class="sub" id="headerSub">принять участие</div>
     </div>
   </div>
   <div class="header-right">
@@ -733,15 +794,12 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </div>
 
 <div class="container">
-
   <div class="tab active" id="tab-feed">
     <div id="postsList"><div class="loading">Загрузка</div></div>
   </div>
-
   <div class="tab" id="tab-contests">
     <div id="contestsList"><div class="loading">Загрузка</div></div>
   </div>
-
   <div class="tab" id="tab-chats">
     <div class="search-bar">
       <div class="search-input-wrap">
@@ -751,62 +809,53 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
     </div>
     <div id="chatList"><div class="loading">Загрузка</div></div>
   </div>
-
   <div class="tab" id="tab-myapps">
     <div id="myAppsList"><div class="loading">Загрузка</div></div>
   </div>
-
   <div class="tab" id="tab-profile">
     <div class="profile-header" id="profileHeader">
       <div class="profile-avatar" id="avatarBox" onclick="openAvatarPicker()">
         <div class="avatar-placeholder" id="avatarInner">?</div>
       </div>
-      <div class="profile-name" id="profileName">Загрузка...</div>
-      <div class="avatar-hint">Нажми на аватар, чтобы изменить</div>
+      <div class="profile-name" id="profileName"></div>
+      <div class="avatar-hint" id="avatarHint">Нажми на аватар, чтобы изменить</div>
     </div>
-
-    <div class="section-header">Фон профиля</div>
-    <div class="card">
-      <div class="bg-grid" id="bgGrid"></div>
-    </div>
-
-    <div class="section-header">Аккаунт</div>
+    <div class="section-header" id="bgSectionHeader">Фон профиля</div>
+    <div class="card"><div class="bg-grid" id="bgGrid"></div></div>
+    <div class="section-header" id="accountSectionHeader">Аккаунт</div>
     <div class="card" id="accountCard"></div>
-
-    <div class="section-header">Статистика</div>
+    <div class="section-header" id="statsSectionHeader">Статистика</div>
     <div class="card" id="statsCard"></div>
   </div>
-
   <div class="tab" id="tab-admin">
     <div id="adminContent"></div>
   </div>
-
 </div>
 
 <div class="nav" id="mainNav">
-  <div class="nav-item active" data-tab="feed" data-title="Лента">
+  <div class="nav-item active" data-tab="feed" data-title-key="feed">
     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
-    <span>Лента</span>
+    <span data-i18n="nav_feed">Лента</span>
   </div>
-  <div class="nav-item" data-tab="contests" data-title="Конкурсы">
+  <div class="nav-item" data-tab="contests" data-title-key="contests">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
-    <span>Конкурсы</span>
+    <span data-i18n="nav_contests">Конкурсы</span>
   </div>
-  <div class="nav-item" data-tab="chats" data-title="Чаты" id="chatsNavBtn">
+  <div class="nav-item" data-tab="chats" data-title-key="chats" id="chatsNavBtn">
     <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-    <span>Чаты</span>
+    <span data-i18n="nav_chats">Чаты</span>
   </div>
-  <div class="nav-item" data-tab="myapps" data-title="Мои заявки">
+  <div class="nav-item" data-tab="myapps" data-title-key="myapps">
     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-    <span>Мои</span>
+    <span data-i18n="nav_myapps">Мои</span>
   </div>
-  <div class="nav-item" data-tab="profile" data-title="Профиль">
+  <div class="nav-item" data-tab="profile" data-title-key="profile">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-    <span>Профиль</span>
+    <span data-i18n="nav_profile">Профиль</span>
   </div>
-  <div class="nav-item" data-tab="admin" data-title="Админка" id="adminNavBtn" style="display:none">
+  <div class="nav-item" data-tab="admin" data-title-key="admin" id="adminNavBtn" style="display:none">
     <svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3 9-8 10-5-1-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
-    <span>Админ</span>
+    <span data-i18n="nav_admin">Админ</span>
   </div>
 </div>
 
@@ -816,13 +865,14 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <div class="chat-header-info" onclick="openUserProfile(currentChatUser.uid)">
-      <div class="chat-header-name" id="chatHeaderName">Чат</div>
+      <div class="chat-header-name" id="chatHeaderName"></div>
       <div class="chat-header-sub" id="chatHeaderSub"></div>
     </div>
-    <button class="gear-btn" onclick="openChatSettings()">
+    <button class="gear-btn" onclick="openChatMenu()">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
     </button>
   </div>
+  <div id="chatPinnedBanner"></div>
   <div class="chat-body" id="chatBody"></div>
   <div class="chat-input-bar">
     <textarea class="chat-input" id="chatInput" rows="1" placeholder="Сообщение..."></textarea>
@@ -836,9 +886,9 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   <div class="settings-header">
     <button class="back-btn" onclick="closeUserProfile()">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      Назад
+      <span data-i18n="back">Назад</span>
     </button>
-    <div class="settings-title">Профиль</div>
+    <div class="settings-title" data-i18n="profile">Профиль</div>
   </div>
   <div class="settings-container" style="padding-top:14px">
     <div class="user-profile-header" id="userProfileHeader">
@@ -847,7 +897,7 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
     </div>
     <div class="card" id="userProfileInfo"></div>
     <div class="btn-row">
-      <button class="btn" id="writeBtn" onclick="startChatWith()">Написать сообщение</button>
+      <button class="btn" id="writeBtn" onclick="startChatWith()" data-i18n="write_message">Написать сообщение</button>
     </div>
   </div>
 </div>
@@ -856,17 +906,16 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   <div class="settings-header">
     <button class="back-btn" onclick="closeSettings()">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      Назад
+      <span data-i18n="back">Назад</span>
     </button>
-    <div class="settings-title">Настройки</div>
+    <div class="settings-title" data-i18n="settings">Настройки</div>
   </div>
   <div class="settings-container">
-
-    <div class="section-header">Внешний вид</div>
+    <div class="section-header" data-i18n="sec_appearance">Внешний вид</div>
     <div class="card">
       <div class="row has-icon">
         <div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 000 18 4.5 4.5 0 000-9 4.5 4.5 0 010-9z"/></svg></div>
-        <div class="row-info"><div class="row-title">Тема</div></div>
+        <div class="row-info"><div class="row-title" data-i18n="theme">Тема</div></div>
         <div class="theme-preview">
           <div class="theme-swatch dark" onclick="setTheme('dark')" id="sw-dark">◐</div>
           <div class="theme-swatch gray" onclick="setTheme('gray')" id="sw-gray">◑</div>
@@ -875,13 +924,13 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
       </div>
       <div class="row has-icon tappable" onclick="cycleFont()">
         <div class="ic purple"><svg viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></div>
-        <div class="row-info"><div class="row-title">Размер текста</div>
-        <div class="row-sub" id="fontLabel">Средний</div></div>
+        <div class="row-info"><div class="row-title" data-i18n="font_size">Размер текста</div>
+        <div class="row-sub" id="fontLabel"></div></div>
         <div class="chev">›</div>
       </div>
       <div class="row has-icon">
         <div class="ic pink"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></div>
-        <div class="row-info"><div class="row-title">Акцент</div></div>
+        <div class="row-info"><div class="row-title" data-i18n="accent">Акцент</div></div>
         <div class="color-dots">
           <div class="color-dot" style="background:#0a84ff" onclick="setAccent('blue')" data-color="blue"></div>
           <div class="color-dot" style="background:#30d158" onclick="setAccent('green')" data-color="green"></div>
@@ -892,42 +941,58 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
       </div>
     </div>
 
-    <div class="section-header">Иконки</div>
+    <div class="section-header" data-i18n="sec_language">Язык</div>
+    <div class="card">
+      <div class="row has-icon tappable" onclick="setLanguage('ru')">
+        <div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M2 12h20"/><path d="M12 2a15 15 0 010 20"/><path d="M12 2a15 15 0 000 20"/></svg></div>
+        <div class="row-info"><div class="row-title">Русский</div>
+        <div class="row-sub">Russian</div></div>
+        <div class="chev" id="lang-check-ru" style="color:var(--accent)">›</div>
+      </div>
+      <div class="row has-icon tappable" onclick="setLanguage('en')">
+        <div class="ic teal"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M2 12h20"/><path d="M12 2a15 15 0 010 20"/><path d="M12 2a15 15 0 000 20"/></svg></div>
+        <div class="row-info"><div class="row-title">English</div>
+        <div class="row-sub">English</div></div>
+        <div class="chev" id="lang-check-en" style="color:var(--accent)">›</div>
+      </div>
+    </div>
+
+    <div class="section-header" data-i18n="sec_icons">Иконки</div>
     <div class="card">
       <div class="row has-icon tappable" onclick="toggleTransparent()">
         <div class="ic teal"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/></svg></div>
-        <div class="row-info"><div class="row-title">Прозрачный фон</div></div>
+        <div class="row-info"><div class="row-title" data-i18n="transparent_icons">Прозрачный фон</div></div>
         <div class="switch" id="sw-transparent"></div>
       </div>
       <div class="row has-icon tappable" onclick="toggleRound()">
         <div class="ic brown"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg></div>
-        <div class="row-info"><div class="row-title">Круглые иконки</div></div>
+        <div class="row-info"><div class="row-title" data-i18n="round_icons">Круглые иконки</div></div>
         <div class="switch" id="sw-round"></div>
       </div>
       <div class="row has-icon tappable" onclick="toggleHideLabels()">
         <div class="ic indigo"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/></svg></div>
-        <div class="row-info"><div class="row-title">Скрыть подписи вкладок</div></div>
+        <div class="row-info"><div class="row-title" data-i18n="hide_labels">Скрыть подписи</div></div>
         <div class="switch" id="sw-hidelabels"></div>
       </div>
     </div>
 
-    <div class="section-header">Настройки чатов</div>
+    <div class="section-header" data-i18n="sec_chat_settings">Настройки чатов</div>
     <div class="card">
       <div class="row has-icon tappable" onclick="openChatWallpaper()">
         <div class="ic teal"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
-        <div class="row-info"><div class="row-title">Обои чата</div>
-        <div class="row-sub" id="wallpaperLabel">По умолчанию</div></div>
+        <div class="row-info"><div class="row-title" data-i18n="chat_wallpaper">Обои чата</div>
+        <div class="row-sub" id="wallpaperLabel"></div></div>
         <div class="chev">›</div>
       </div>
       <div class="row has-icon tappable" onclick="openChatFonts()">
         <div class="ic purple"><svg viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></div>
-        <div class="row-info"><div class="row-title">Шрифт чата</div>
-        <div class="row-sub" id="fontChatLabel">Системный</div></div>
+        <div class="row-info"><div class="row-title" data-i18n="chat_font">Шрифт чата</div>
+        <div class="row-sub" id="fontChatLabel"></div></div>
         <div class="chev">›</div>
       </div>
       <div class="row has-icon">
         <div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></div>
-        <div class="row-info"><div class="row-title">Цвет сообщений</div></div>
+        <div class="row-info"><div class="row-title" data-i18n="chat_color">Цвет сообщений</div></div>
         <div class="color-dots">
           <div class="color-dot" style="background:#0a84ff" onclick="setChatColor('blue')" data-chat-color="blue"></div>
           <div class="color-dot" style="background:#30d158" onclick="setChatColor('green')" data-chat-color="green"></div>
@@ -939,40 +1004,39 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
       </div>
       <div class="row has-icon tappable" onclick="toggleChatNotif()">
         <div class="ic red"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
-        <div class="row-info"><div class="row-title">Уведомления о сообщениях</div></div>
+        <div class="row-info"><div class="row-title" data-i18n="chat_notif">Уведомления о сообщениях</div></div>
         <div class="switch" id="sw-chatnotif"></div>
       </div>
       <div class="row has-icon tappable" onclick="toggleReadReceipts()">
         <div class="ic green"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div class="row-info"><div class="row-title">Галочки прочтения</div></div>
+        <div class="row-info"><div class="row-title" data-i18n="read_receipts">Галочки прочтения</div></div>
         <div class="switch" id="sw-read"></div>
       </div>
     </div>
 
-    <div class="section-header">Поведение</div>
+    <div class="section-header" data-i18n="sec_behavior">Поведение</div>
     <div class="card">
       <div class="row has-icon tappable" onclick="toggleAnim()">
         <div class="ic orange"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
-        <div class="row-info"><div class="row-title">Анимации</div></div>
+        <div class="row-info"><div class="row-title" data-i18n="animations">Анимации</div></div>
         <div class="switch" id="sw-anim"></div>
       </div>
       <div class="row has-icon tappable" onclick="toggleHaptic()">
         <div class="ic indigo"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 9h14"/><path d="M5 15h14"/></svg></div>
-        <div class="row-info"><div class="row-title">Вибрация</div></div>
+        <div class="row-info"><div class="row-title" data-i18n="haptic">Вибрация</div></div>
         <div class="switch" id="sw-haptic"></div>
       </div>
     </div>
 
-    <div class="section-header">О приложении</div>
+    <div class="section-header" data-i18n="sec_about">О приложении</div>
     <div class="card">
       <div class="row has-icon tappable" onclick="openAbout()">
         <div class="ic indigo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
-        <div class="row-info"><div class="row-title">О приложении</div>
-        <div class="row-sub">ФЛОРИССАНТ v3.0</div></div>
+        <div class="row-info"><div class="row-title" data-i18n="about">О приложении</div>
+        <div class="row-sub">ФЛОРИССАНТ v4.0</div></div>
         <div class="chev">›</div>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -992,13 +1056,210 @@ const UNAME = user.username || '';
 
 let player = {};
 let isAdmin = false;
-let lastAppsCheck = [];
+let isMainAdmin = false;
+let myPerms = {};
 let currentChatUser = null;
 let chatRefreshTimer = null;
 let currentProfileUid = null;
 let searchTimer = null;
+let lastAppsCheck = [];
+let lastUnreadCount = 0;
 
-const SETTINGS_KEY = 'fl_settings_v4';
+// ============ TRANSLATIONS ============
+const I18N = {
+  ru: {
+    header_sub: 'принять участие',
+    nav_feed: 'Лента', nav_contests: 'Конкурсы', nav_chats: 'Чаты',
+    nav_myapps: 'Мои', nav_profile: 'Профиль', nav_admin: 'Админ',
+    feed: 'Лента', contests: 'Конкурсы', chats: 'Чаты',
+    myapps: 'Мои заявки', profile: 'Профиль', admin: 'Админка',
+    back: 'Назад', settings: 'Настройки', write_message: 'Написать сообщение',
+    sec_appearance: 'Внешний вид', sec_language: 'Язык', sec_icons: 'Иконки',
+    sec_chat_settings: 'Настройки чатов', sec_behavior: 'Поведение', sec_about: 'О приложении',
+    theme: 'Тема', font_size: 'Размер текста', accent: 'Акцент',
+    transparent_icons: 'Прозрачный фон', round_icons: 'Круглые иконки',
+    hide_labels: 'Скрыть подписи', chat_wallpaper: 'Обои чата', chat_font: 'Шрифт чата',
+    chat_color: 'Цвет сообщений', chat_notif: 'Уведомления о сообщениях',
+    read_receipts: 'Галочки прочтения', animations: 'Анимации', haptic: 'Вибрация',
+    about: 'О приложении', language: 'Язык',
+    font_small: 'Маленький', font_medium: 'Средний', font_large: 'Большой', font_huge: 'Огромный',
+    wallpaper_default: 'По умолчанию', wallpaper_set: 'Установлены',
+    font_system: 'Системный',
+    no_posts: 'Постов пока нет', no_contests: 'Конкурсов пока нет',
+    no_chats: 'Нет чатов', no_search: 'Никого не найдено',
+    no_chats_desc: 'Найди пользователя через поиск выше и напиши ему',
+    no_search_desc: 'Попробуй другой @username или ID',
+    no_apps: 'У тебя пока нет заявок',
+    comment: 'Комментировать', comments: 'Комментарии',
+    write_comment: 'Написать комментарий...', send: 'Отправить',
+    no_comments: 'Комментариев пока нет', reply: 'Ответить',
+    pinned_message: 'Закреплённое сообщение',
+    blocked: 'Заблокирован', block: 'Заблокировать', unblock: 'Разблокировать',
+    pin_chat: 'Закрепить чат', unpin_chat: 'Открепить чат',
+    add_contact: 'Добавить в контакты', remove_contact: 'Удалить из контактов',
+    clear_history: 'Очистить историю',
+    delete_message: 'Удалить', pin_message: 'Закрепить',
+    admin_panel: 'Админ-панель',
+    write_post: 'Написать пост', create_contest: 'Создать конкурс',
+    statistics: 'Статистика', applications: 'Заявки', admins: 'Админы',
+    add_admin: 'Добавить админа', edit_perms: 'Права',
+    users: 'Пользователей', posts: 'Постов', active_contests: 'Активных конкурсов',
+    pending_apps: 'Заявок ожидает', messages: 'Сообщений', comments_count: 'Комментариев',
+    no_new_apps: 'Нет новых заявок', main_admin: 'главный',
+    accept: 'Принять', reject: 'Отклонить', reason_prompt: 'Причина отказа:',
+    add_photo: 'Добавить фото', tap_to_upload: 'Нажми, чтобы загрузить',
+    submit: 'Отправить', publish: 'Опубликовать', create: 'Создать',
+    title: 'Название', description: 'Описание', cover: 'Обложка (опционально)',
+    contest_title_ph: 'Например: Массарт осень 2026',
+    contest_desc_ph: 'Правила, условия, призы...',
+    post_text_ph: 'Что нового?',
+    set_cover: 'Нажми, чтобы загрузить обложку',
+    name: 'Имя', message: 'Сообщение',
+    copied: 'Скопировано', sent: 'Отправлено',
+    error: 'Ошибка', success: 'Готово',
+    loading: 'Загрузка',
+    sec_permissions: 'Права админа',
+    perm_posts: 'Писать посты', perm_contests: 'Создавать конкурсы',
+    perm_applications: 'Принимать заявки', perm_delete: 'Удалять',
+    perm_stats: 'Видеть статистику', perm_admins: 'Выдавать админку',
+    save: 'Сохранить', cancel: 'Отмена', delete: 'Удалить',
+    about_desc: 'Платформа для проведения конкурсов и творческих мероприятий. Участвуй в конкурсах, общайся с другими участниками, следи за результатами и твори.',
+    about_features: 'Возможности',
+    support: 'Поддержка', developer: 'Разработчик',
+    made_with: 'Сделано для тебя', copyright: 'ФЛОРИССАНТ',
+    write_btn: 'Написать', you_blocked: 'Ты заблокировал пользователя',
+    delete_confirm: 'Удалить сообщение?', clear_confirm: 'Очистить всю историю?',
+    chat_cleared: 'История очищена', message_deleted: 'Сообщение удалено',
+    chat_pinned: 'Чат закреплён', chat_unpinned: 'Чат откреплён',
+    user_blocked: 'Пользователь заблокирован', user_unblocked: 'Пользователь разблокирован',
+    contact_added: 'Контакт добавлен', contact_removed: 'Контакт удалён',
+    back_btn: 'Назад'
+  },
+  en: {
+    header_sub: 'take part',
+    nav_feed: 'Feed', nav_contests: 'Contests', nav_chats: 'Chats',
+    nav_myapps: 'Mine', nav_profile: 'Profile', nav_admin: 'Admin',
+    feed: 'Feed', contests: 'Contests', chats: 'Chats',
+    myapps: 'My applications', profile: 'Profile', admin: 'Admin',
+    back: 'Back', settings: 'Settings', write_message: 'Send message',
+    sec_appearance: 'Appearance', sec_language: 'Language', sec_icons: 'Icons',
+    sec_chat_settings: 'Chat settings', sec_behavior: 'Behavior', sec_about: 'About',
+    theme: 'Theme', font_size: 'Text size', accent: 'Accent',
+    transparent_icons: 'Transparent icons', round_icons: 'Round icons',
+    hide_labels: 'Hide labels', chat_wallpaper: 'Chat wallpaper', chat_font: 'Chat font',
+    chat_color: 'Message color', chat_notif: 'Message notifications',
+    read_receipts: 'Read receipts', animations: 'Animations', haptic: 'Haptic',
+    about: 'About', language: 'Language',
+    font_small: 'Small', font_medium: 'Medium', font_large: 'Large', font_huge: 'Huge',
+    wallpaper_default: 'Default', wallpaper_set: 'Set',
+    font_system: 'System',
+    no_posts: 'No posts yet', no_contests: 'No contests yet',
+    no_chats: 'No chats', no_search: 'Nothing found',
+    no_chats_desc: 'Find a user via search above and write to them',
+    no_search_desc: 'Try another @username or ID',
+    no_apps: 'You have no applications yet',
+    comment: 'Comment', comments: 'Comments',
+    write_comment: 'Write a comment...', send: 'Send',
+    no_comments: 'No comments yet', reply: 'Reply',
+    pinned_message: 'Pinned message',
+    blocked: 'Blocked', block: 'Block', unblock: 'Unblock',
+    pin_chat: 'Pin chat', unpin_chat: 'Unpin chat',
+    add_contact: 'Add to contacts', remove_contact: 'Remove from contacts',
+    clear_history: 'Clear history',
+    delete_message: 'Delete', pin_message: 'Pin',
+    admin_panel: 'Admin panel',
+    write_post: 'Write post', create_contest: 'Create contest',
+    statistics: 'Statistics', applications: 'Applications', admins: 'Admins',
+    add_admin: 'Add admin', edit_perms: 'Permissions',
+    users: 'Users', posts: 'Posts', active_contests: 'Active contests',
+    pending_apps: 'Pending apps', messages: 'Messages', comments_count: 'Comments',
+    no_new_apps: 'No new applications', main_admin: 'main',
+    accept: 'Accept', reject: 'Reject', reason_prompt: 'Reject reason:',
+    add_photo: 'Add photo', tap_to_upload: 'Tap to upload',
+    submit: 'Submit', publish: 'Publish', create: 'Create',
+    title: 'Title', description: 'Description', cover: 'Cover (optional)',
+    contest_title_ph: 'For example: Art contest 2026',
+    contest_desc_ph: 'Rules, conditions, prizes...',
+    post_text_ph: 'What\'s new?',
+    set_cover: 'Tap to upload cover',
+    name: 'Name', message: 'Message',
+    copied: 'Copied', sent: 'Sent',
+    error: 'Error', success: 'Done',
+    loading: 'Loading',
+    sec_permissions: 'Admin permissions',
+    perm_posts: 'Write posts', perm_contests: 'Create contests',
+    perm_applications: 'Decide applications', perm_delete: 'Delete',
+    perm_stats: 'View statistics', perm_admins: 'Grant admin',
+    save: 'Save', cancel: 'Cancel', delete: 'Delete',
+    about_desc: 'Platform for contests and creative events. Take part in contests, chat with other participants, follow results and create.',
+    about_features: 'Features',
+    support: 'Support', developer: 'Developer',
+    made_with: 'Made for you', copyright: 'FLORISSANT',
+    write_btn: 'Write', you_blocked: 'You blocked this user',
+    delete_confirm: 'Delete message?', clear_confirm: 'Clear all history?',
+    chat_cleared: 'History cleared', message_deleted: 'Message deleted',
+    chat_pinned: 'Chat pinned', chat_unpinned: 'Chat unpinned',
+    user_blocked: 'User blocked', user_unblocked: 'User unblocked',
+    contact_added: 'Contact added', contact_removed: 'Contact removed',
+    back_btn: 'Back'
+  }
+};
+
+let lang = 'ru';
+
+function t(key){
+  return (I18N[lang] && I18N[lang][key]) || (I18N.ru[key]) || key;
+}
+
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.dataset.i18n;
+    const translated = t(k);
+    if (translated) el.textContent = translated;
+  });
+  document.getElementById('headerSub').textContent = t('header_sub');
+  document.getElementById('avatarHint').textContent = lang === 'ru' ? 'Нажми на аватар, чтобы изменить' : 'Tap avatar to change';
+  document.getElementById('bgSectionHeader').textContent = lang === 'ru' ? 'Фон профиля' : 'Profile background';
+  document.getElementById('accountSectionHeader').textContent = lang === 'ru' ? 'Аккаунт' : 'Account';
+  document.getElementById('statsSectionHeader').textContent = lang === 'ru' ? 'Статистика' : 'Statistics';
+  document.getElementById('searchInput').placeholder = lang === 'ru' ? '@username или ID' : '@username or ID';
+  document.getElementById('chatInput').placeholder = lang === 'ru' ? 'Сообщение...' : 'Message...';
+  updateFontLabels();
+  updateLangCheck();
+  updateNavTitles();
+  updatePageTitle();
+}
+
+function updateLangCheck(){
+  const ru = document.getElementById('lang-check-ru');
+  const en = document.getElementById('lang-check-en');
+  if (ru) ru.style.opacity = lang === 'ru' ? '1' : '0.3';
+  if (en) en.style.opacity = lang === 'en' ? '1' : '0.3';
+}
+
+function updateNavTitles(){
+  document.querySelectorAll('.nav-item').forEach(el => {
+    const k = el.dataset.titleKey;
+    if (k) el.dataset.title = t(k);
+  });
+}
+
+function updatePageTitle(){
+  const active = document.querySelector('.nav-item.active');
+  if (active) document.getElementById('pageTitle').textContent = active.dataset.title || '';
+}
+
+function updateFontLabels(){
+  const fl = document.getElementById('fontLabel');
+  if (fl) fl.textContent = t('font_' + settings.font) || settings.font;
+  const flc = document.getElementById('fontChatLabel');
+  if (flc) flc.textContent = settings.chatFont === 'sf' ? t('font_system') : (FONTS.find(x => x.id === settings.chatFont)?.name || t('font_system'));
+  const wl = document.getElementById('wallpaperLabel');
+  if (wl) wl.textContent = settings.chatWallpaper ? t('wallpaper_set') : t('wallpaper_default');
+}
+
+// ============ SETTINGS ============
+const SETTINGS_KEY = 'fl_settings_v5';
 let settings = {
   theme: 'dark', font: 'medium', accent: 'blue',
   anim: true, haptic: true,
@@ -1012,16 +1273,16 @@ let settings = {
 };
 
 const FONTS = [
-  { id: 'sf', name: 'Системный', sample: 'Привет' },
-  { id: 'serif', name: 'Serif', sample: 'Привет' },
-  { id: 'mono', name: 'Mono', sample: 'Привет' },
-  { id: 'rounded', name: 'Rounded', sample: 'Привет' },
-  { id: 'cursive', name: 'Cursive', sample: 'Привет' },
-  { id: 'comic', name: 'Comic', sample: 'Привет' },
-  { id: 'impact', name: 'Impact', sample: 'Привет' },
-  { id: 'georgia', name: 'Georgia', sample: 'Привет' },
-  { id: 'verdana', name: 'Verdana', sample: 'Привет' },
-  { id: 'optima', name: 'Optima', sample: 'Привет' },
+  { id: 'sf', name: 'Системный' },
+  { id: 'serif', name: 'Serif' },
+  { id: 'mono', name: 'Mono' },
+  { id: 'rounded', name: 'Rounded' },
+  { id: 'cursive', name: 'Cursive' },
+  { id: 'comic', name: 'Comic' },
+  { id: 'impact', name: 'Impact' },
+  { id: 'georgia', name: 'Georgia' },
+  { id: 'verdana', name: 'Verdana' },
+  { id: 'optima', name: 'Optima' },
 ];
 
 const WALLPAPERS = {
@@ -1035,12 +1296,8 @@ const WALLPAPERS = {
 };
 
 const BUBBLE_COLORS = {
-  'blue':   '#0a84ff',
-  'green':  '#30d158',
-  'purple': '#bf5af2',
-  'orange': '#ff9f0a',
-  'red':    '#ff453a',
-  'pink':   '#ff375f',
+  'blue': '#0a84ff', 'green': '#30d158', 'purple': '#bf5af2',
+  'orange': '#ff9f0a', 'red': '#ff453a', 'pink': '#ff375f',
 };
 
 function loadSettings() {
@@ -1076,19 +1333,9 @@ function applySettings() {
   document.documentElement.style.setProperty('--accent', a1);
   document.documentElement.style.setProperty('--accent-2', a2);
 
-  const fl = document.getElementById('fontLabel');
-  if (fl) fl.textContent = {small:'Маленький',medium:'Средний',large:'Большой',huge:'Огромный'}[settings.font];
-  const flc = document.getElementById('fontChatLabel');
-  if (flc){
-    const f = FONTS.find(x => x.id === settings.chatFont);
-    flc.textContent = f ? f.name : 'Системный';
-  }
-  const wl = document.getElementById('wallpaperLabel');
-  if (wl) wl.textContent = settings.chatWallpaper ? 'Установлены' : 'По умолчанию';
-
-  ['dark','gray','light'].forEach(t => {
-    const sw = document.getElementById('sw-'+t);
-    if (sw) sw.classList.toggle('active', settings.theme === t);
+  ['dark','gray','light'].forEach(tp => {
+    const sw = document.getElementById('sw-'+tp);
+    if (sw) sw.classList.toggle('active', settings.theme === tp);
   });
   document.querySelectorAll('.color-dot[data-color]').forEach(d => {
     d.classList.toggle('active', d.dataset.color === settings.accent);
@@ -1106,8 +1353,9 @@ function applySettings() {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('on', !!settings[key]);
   });
+  updateFontLabels();
 }
-function setTheme(t){settings.theme=t;saveSettings();applySettings();haptic('light');}
+function setTheme(x){settings.theme=x;saveSettings();applySettings();haptic('light');}
 function cycleFont(){
   const o=['small','medium','large','huge'];
   settings.font=o[(o.indexOf(settings.font)+1)%o.length];
@@ -1125,6 +1373,7 @@ function toggleChatNotif(){settings.chatNotifications=!settings.chatNotification
   saveSettings();applySettings();api('/api/save_profile', {chat_notifications: settings.chatNotifications});}
 function toggleReadReceipts(){settings.readReceipts=!settings.readReceipts;
   saveSettings();applySettings();api('/api/save_profile', {chat_read_receipts: settings.readReceipts});}
+
 function haptic(type){
   if (!settings.haptic) return;
   try {
@@ -1140,6 +1389,14 @@ function openSettings(){document.getElementById('settingsScreen').classList.add(
 function closeSettings(){document.getElementById('settingsScreen').classList.remove('open');haptic('light');}
 
 loadSettings();
+
+async function setLanguage(l){
+  lang = l;
+  saveSettings();
+  applyLang();
+  await api('/api/save_profile', { language: l });
+  haptic('success');
+}
 
 function verifyIcon(){
   return '<span class="verify-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>';
@@ -1165,31 +1422,29 @@ function showNotification(title, desc, type){
 }
 
 function toast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('show'), 2000);
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2000);
 }
 
 function timeAgo(ts){
   const d = Math.floor(Date.now()/1000) - ts;
-  if (d < 60) return 'только что';
-  if (d < 3600) return Math.floor(d/60) + ' мин назад';
-  if (d < 86400) return Math.floor(d/3600) + ' ч назад';
-  if (d < 604800) return Math.floor(d/86400) + ' дн назад';
-  return new Date(ts*1000).toLocaleDateString('ru');
+  if (d < 60) return lang === 'ru' ? 'только что' : 'just now';
+  if (d < 3600) return Math.floor(d/60) + (lang === 'ru' ? ' мин назад' : 'm ago');
+  if (d < 86400) return Math.floor(d/3600) + (lang === 'ru' ? ' ч назад' : 'h ago');
+  if (d < 604800) return Math.floor(d/86400) + (lang === 'ru' ? ' дн назад' : 'd ago');
+  return new Date(ts*1000).toLocaleDateString(lang === 'ru' ? 'ru' : 'en');
 }
-
 function fmtTime(sec){
-  if (sec < 60) return sec + ' сек';
-  if (sec < 3600) return Math.floor(sec/60) + ' мин';
-  if (sec < 86400) return Math.floor(sec/3600) + ' ч ' + Math.floor((sec%3600)/60) + ' мин';
-  return Math.floor(sec/86400) + ' дн';
+  if (sec < 60) return sec + (lang === 'ru' ? ' сек' : 's');
+  if (sec < 3600) return Math.floor(sec/60) + (lang === 'ru' ? ' мин' : 'm');
+  if (sec < 86400) return Math.floor(sec/3600) + (lang === 'ru' ? ' ч ' : 'h ') + Math.floor((sec%3600)/60) + (lang === 'ru' ? ' мин' : 'm');
+  return Math.floor(sec/86400) + (lang === 'ru' ? ' дн' : 'd');
 }
-
 function timeShort(ts){
-  return new Date(ts * 1000).toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit'});
+  return new Date(ts * 1000).toLocaleTimeString(lang === 'ru' ? 'ru' : 'en', {hour:'2-digit',minute:'2-digit'});
 }
 
 async function api(path, body){
@@ -1212,21 +1467,23 @@ async function loadPlayer(){
   if (!r || r.error) return;
   player = r;
   isAdmin = r.is_admin;
+  isMainAdmin = r.is_main_admin;
+  myPerms = r.perms || {};
   if (isAdmin){
-    const btn = document.getElementById('adminNavBtn');
-    if (btn) btn.style.display = 'flex';
+    document.getElementById('adminNavBtn').style.display = 'flex';
+  }
+  if (r.language && (r.language === 'ru' || r.language === 'en') && r.language !== lang){
+    lang = r.language;
+    saveSettings(); applyLang();
   }
   if (r.chat_font && FONTS.some(f => f.id === r.chat_font)) {
-    settings.chatFont = r.chat_font;
-    saveSettings(); applySettings();
+    settings.chatFont = r.chat_font; saveSettings(); applySettings();
   }
   if (r.chat_bubble_color) {
-    settings.chatBubbleColor = r.chat_bubble_color;
-    saveSettings(); applySettings();
+    settings.chatBubbleColor = r.chat_bubble_color; saveSettings(); applySettings();
   }
   if (r.chat_wallpaper !== undefined) {
-    settings.chatWallpaper = r.chat_wallpaper;
-    saveSettings(); applySettings();
+    settings.chatWallpaper = r.chat_wallpaper; saveSettings(); applySettings();
   }
   renderProfile();
   checkNotifications();
@@ -1278,29 +1535,29 @@ function renderProfile(){
     '</div>' +
     '<div class="row has-icon">' +
       '<div class="ic teal"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Регистрация</div></div>' +
-      '<div class="row-value">' + new Date((player.joined || 0) * 1000).toLocaleDateString('ru') + '</div>' +
+      '<div class="row-info"><div class="row-title">' + (lang === 'ru' ? 'Регистрация' : 'Registered') + '</div></div>' +
+      '<div class="row-value">' + new Date((player.joined || 0) * 1000).toLocaleDateString(lang === 'ru' ? 'ru' : 'en') + '</div>' +
     '</div>';
 
   document.getElementById('statsCard').innerHTML =
     '<div class="row has-icon">' +
       '<div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Время в приложении</div></div>' +
+      '<div class="row-info"><div class="row-title">' + (lang === 'ru' ? 'Время в приложении' : 'Time in app') + '</div></div>' +
       '<div class="row-value">' + fmtTime(player.total_time || 0) + '</div>' +
     '</div>' +
     '<div class="row has-icon">' +
       '<div class="ic green"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Всего заявок</div></div>' +
+      '<div class="row-info"><div class="row-title">' + (lang === 'ru' ? 'Всего заявок' : 'Total applications') + '</div></div>' +
       '<div class="row-value">' + (player.applications_count || 0) + '</div>' +
     '</div>' +
     '<div class="row has-icon">' +
       '<div class="ic gold"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Принято</div></div>' +
+      '<div class="row-info"><div class="row-title">' + (lang === 'ru' ? 'Принято' : 'Accepted') + '</div></div>' +
       '<div class="row-value green">' + (player.accepted || 0) + '</div>' +
     '</div>' +
     '<div class="row has-icon">' +
       '<div class="ic red"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Отклонено</div></div>' +
+      '<div class="row-info"><div class="row-title">' + (lang === 'ru' ? 'Отклонено' : 'Rejected') + '</div></div>' +
       '<div class="row-value">' + (player.rejected || 0) + '</div>' +
     '</div>';
 
@@ -1327,7 +1584,7 @@ async function removeBg(){
 
 function copyText(text){
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => { toast('Скопировано'); haptic('success'); });
+    navigator.clipboard.writeText(text).then(() => { toast(t('copied')); haptic('success'); });
   } else {
     const ta = document.createElement('textarea');
     ta.value = text;
@@ -1335,7 +1592,7 @@ function copyText(text){
     ta.select();
     document.execCommand('copy');
     document.body.removeChild(ta);
-    toast('Скопировано');
+    toast(t('copied'));
   }
 }
 
@@ -1345,7 +1602,7 @@ function openAvatarPicker(){
   input.onchange = function(e){
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 3 * 1024 * 1024){ toast('Фото слишком большое'); return; }
+    if (file.size > 3 * 1024 * 1024){ toast(t('error')); return; }
     const reader = new FileReader();
     reader.onload = function(ev){
       const img = new Image();
@@ -1357,8 +1614,7 @@ function openAvatarPicker(){
         else { w = w * max / h; h = max; }
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-        saveAvatar(dataUrl);
+        saveAvatar(canvas.toDataURL('image/jpeg', 0.8));
       };
       img.src = ev.target.result;
     };
@@ -1372,11 +1628,10 @@ async function saveAvatar(dataUrl){
   renderProfile();
   await api('/api/save_profile', { avatar: dataUrl });
   haptic('success');
-  toast('Аватарка обновлена');
 }
 
 async function uploadCustomBg(file){
-  if (file.size > 3 * 1024 * 1024){ toast('Фото слишком большое'); return; }
+  if (file.size > 3 * 1024 * 1024){ toast(t('error')); return; }
   const reader = new FileReader();
   reader.onload = function(e){
     const img = new Image();
@@ -1407,8 +1662,8 @@ async function checkNotifications(){
   const newDecided = decided.filter(a => !lastAppsCheck.includes(a.id + '_' + a.status));
   if (newDecided.length > 0){
     newDecided.forEach(a => {
-      if (a.status === 'accepted') showNotification('🎉 Заявка принята!', a.contest_title);
-      else if (a.status === 'rejected') showNotification('❌ Заявка отклонена', 'Причина: ' + (a.reason || 'не указана'), 'reject');
+      if (a.status === 'accepted') showNotification(lang === 'ru' ? 'Заявка принята!' : 'Application accepted!', a.contest_title);
+      else if (a.status === 'rejected') showNotification(lang === 'ru' ? 'Заявка отклонена' : 'Application rejected', t('reason_prompt') + ' ' + (a.reason || '—'), 'reject');
     });
   }
   lastAppsCheck = decided.map(a => a.id + '_' + a.status);
@@ -1418,12 +1673,15 @@ async function loadUnread(){
   const r = await fetch('/api/chat/unread?uid=' + UID);
   const d = await r.json();
   const nav = document.getElementById('chatsNavBtn');
-  if (!nav) return;
   let badge = nav.querySelector('.nav-badge');
   if (d.count > 0){
     if (!badge){ badge = document.createElement('div'); badge.className = 'nav-badge'; nav.appendChild(badge); }
     badge.textContent = d.count;
+    if (d.count > lastUnreadCount && settings.chatNotifications){
+      showNotification(lang === 'ru' ? 'Новое сообщение' : 'New message', '');
+    }
   } else if (badge) badge.remove();
+  lastUnreadCount = d.count;
 }
 
 // ============ FEED ============
@@ -1432,11 +1690,11 @@ async function loadFeed(){
   const posts = await r.json();
   const el = document.getElementById('postsList');
   if (!posts.length){
-    el.innerHTML = '<div class="card" style="padding:40px 20px;text-align:center;color:var(--muted)">Постов пока нет</div>';
+    el.innerHTML = '<div class="empty-state"><div class="ic blue xl icon-wrap"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div class="empty-title">' + t('no_posts') + '</div></div>';
     return;
   }
   el.innerHTML = posts.map(p => {
-    let html = '<div class="post-card">' +
+    let html = '<div class="post-card" data-post-id="' + p.id + '">' +
       '<div class="post-head">' +
         '<div class="ic blue lg"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>' +
         '<div style="flex:1;min-width:0">' +
@@ -1447,40 +1705,129 @@ async function loadFeed(){
     html += '</div>';
     if (p.text) html += '<div class="post-text">' + esc(p.text) + '</div>';
     if (p.image) html += '<img class="post-image" src="' + p.image + '">';
-    html += '</div>';
+    html += '<div class="post-actions">' +
+      '<button class="post-action" onclick="toggleComments(' + p.id + ')">' +
+        '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>' +
+        '<span id="cmt-count-' + p.id + '">' + (p.comments_count || 0) + '</span>' +
+      '</button>' +
+    '</div>' +
+    '<div id="comments-' + p.id + '"></div>' +
+    '</div>';
     return html;
   }).join('');
 }
 
 async function deletePost(pid){
-  if (!confirm('Удалить пост?')) return;
+  if (!confirm(t('delete') + '?')) return;
   await api('/api/posts/delete', { post_id: pid });
-  toast('Удалено');
+  toast(t('success'));
   loadFeed();
 }
 
+let openComments = {};
+
+async function toggleComments(postId){
+  const el = document.getElementById('comments-' + postId);
+  if (!el) return;
+  if (openComments[postId]){
+    openComments[postId] = false;
+    el.innerHTML = '';
+    return;
+  }
+  openComments[postId] = true;
+  await loadComments(postId);
+}
+
+async function loadComments(postId){
+  const el = document.getElementById('comments-' + postId);
+  if (!el) return;
+  const r = await fetch('/api/comments/' + postId);
+  const comments = await r.json();
+  let html = '<div class="comments-list">';
+  if (!comments.length){
+    html += '<div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">' + t('no_comments') + '</div>';
+  } else {
+    html += comments.map(c => renderComment(c, postId)).join('');
+  }
+  html += '<div style="display:flex;gap:8px;margin-top:8px;padding-top:12px;border-top:.5px solid var(--line)">' +
+    '<input id="cmt-input-' + postId + '" placeholder="' + t('write_comment') + '" style="flex:1;background:var(--card-2);border:none;border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none">' +
+    '<button class="btn small" onclick="sendComment(' + postId + ')" style="padding:10px 16px;border-radius:8px">' +
+      '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>' +
+    '</button>' +
+  '</div>';
+  html += '</div>';
+  el.innerHTML = html;
+  const inp = document.getElementById('cmt-input-' + postId);
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') sendComment(postId); });
+}
+
+function renderComment(c, postId){
+  const firstLetter = (c.user_name || 'Г').charAt(0).toUpperCase();
+  const avatarStyle = c.user_avatar ? 'background-image:url(' + c.user_avatar + ');background-size:cover;background-position:center;' : '';
+  const vIcon = c.is_admin ? verifyIcon() : '';
+  const canDelete = String(c.user_id) === String(UID) || hasPerm('delete');
+  return '<div class="comment">' +
+    '<div class="comment-avatar" style="' + avatarStyle + '" onclick="openUserProfile(' + c.user_id + ')">' + (c.user_avatar ? '' : firstLetter) + '</div>' +
+    '<div class="comment-info">' +
+      '<div class="comment-name" onclick="openUserProfile(' + c.user_id + ')">' + esc(c.user_name || 'Гость') + vIcon +
+        '<span class="comment-time">' + timeAgo(c.created) + '</span>' +
+      '</div>' +
+      '<div class="comment-text">' + esc(c.text) + '</div>' +
+    '</div>' +
+    (canDelete ? '<button class="comment-delete" onclick="deleteComment(' + postId + ',' + c.id + ')">✕</button>' : '') +
+  '</div>';
+}
+
+function hasPerm(perm){
+  if (isMainAdmin) return true;
+  return !!myPerms[perm];
+}
+
+async function sendComment(postId){
+  const inp = document.getElementById('cmt-input-' + postId);
+  if (!inp) return;
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = '';
+  const r = await api('/api/comments/add', { post_id: postId, text: text });
+  if (r.error){ toast(t('error')); return; }
+  haptic('success');
+  await loadComments(postId);
+  const cnt = document.getElementById('cmt-count-' + postId);
+  if (cnt) cnt.textContent = parseInt(cnt.textContent || 0) + 1;
+}
+
+async function deleteComment(postId, cid){
+  if (!confirm(t('delete') + '?')) return;
+  await api('/api/comments/delete', { post_id: postId, comment_id: cid });
+  await loadComments(postId);
+  const cnt = document.getElementById('cmt-count-' + postId);
+  if (cnt) cnt.textContent = Math.max(0, parseInt(cnt.textContent || 0) - 1);
+}
+
+// ============ CONTESTS ============
 async function loadContests(){
   const r = await fetch('/api/contests');
   const contests = await r.json();
   const el = document.getElementById('contestsList');
   if (!contests.length){
-    el.innerHTML = '<div class="card" style="padding:40px 20px;text-align:center;color:var(--muted)">Конкурсов пока нет</div>';
+    el.innerHTML = '<div class="empty-state"><div class="ic purple xl icon-wrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/></svg></div><div class="empty-title">' + t('no_contests') + '</div></div>';
     return;
   }
   el.innerHTML = contests.map(c => {
     const closed = c.closed;
+    const coverStyle = c.cover ? 'background-image:url(' + c.cover + ');background-size:cover;background-position:center;' : '';
+    const coverSVG = c.cover ? '' : '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>';
     let html = '<div class="contest-card ' + (c.active && !closed ? 'active' : '') + '">' +
-      '<div class="contest-head">' +
-        '<div class="contest-emoji">' + (c.emoji || '🎨') + '</div>' +
-        '<div style="flex:1">' +
-          '<div class="contest-title">' + esc(c.title) + '</div>' +
-          '<div class="contest-status ' + (closed ? 'closed' : '') + '">' +
-            (closed ? '● Набор закрыт' : '● Идёт набор') + '</div>' +
-        '</div>' +
-      '</div>';
+      '<div class="contest-cover" style="' + coverStyle + '">' + coverSVG + '</div>' +
+      '<div class="contest-content">' +
+        '<div class="contest-title">' + esc(c.title) + '</div>' +
+        '<div class="contest-status ' + (closed ? 'closed' : '') + '">' +
+          (closed ? '● ' + (lang === 'ru' ? 'Набор закрыт' : 'Closed') : '● ' + (lang === 'ru' ? 'Идёт набор' : 'Open')) +
+        '</div>';
     if (c.description) html += '<div class="contest-desc">' + esc(c.description) + '</div>';
-    if (!closed) html += '<button class="btn green" onclick="openApplyModal(' + c.id + ')">Принять участие</button>';
-    html += '</div>';
+    if (!closed) html += '<button class="btn green" onclick="openApplyModal(' + c.id + ')">' + (lang === 'ru' ? 'Принять участие' : 'Take part') + '</button>';
+    html += '</div></div>';
     return html;
   }).join('');
 }
@@ -1490,7 +1837,7 @@ async function loadMyApps(){
   const apps = Array.isArray(r) ? r : [];
   const el = document.getElementById('myAppsList');
   if (!apps.length){
-    el.innerHTML = '<div class="card" style="padding:40px 20px;text-align:center;color:var(--muted)">У тебя пока нет заявок</div>';
+    el.innerHTML = '<div class="empty-state"><div class="ic green xl icon-wrap"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div><div class="empty-title">' + t('no_apps') + '</div></div>';
     return;
   }
   el.innerHTML = apps.map(a => renderAppCard(a, false)).join('');
@@ -1498,14 +1845,14 @@ async function loadMyApps(){
 
 function renderAppCard(a, adminView){
   const statusMap = {
-    pending: {label:'⏳ На рассмотрении', cls:'pending'},
-    accepted: {label:'✅ Принят', cls:'accepted'},
-    rejected: {label:'❌ Отклонён', cls:'rejected'},
+    pending: {label: '● ' + (lang === 'ru' ? 'На рассмотрении' : 'Pending'), cls: 'pending'},
+    accepted: {label: '● ' + (lang === 'ru' ? 'Принят' : 'Accepted'), cls: 'accepted'},
+    rejected: {label: '● ' + (lang === 'ru' ? 'Отклонён' : 'Rejected'), cls: 'rejected'},
   };
   const st = statusMap[a.status] || statusMap.pending;
   let html = '<div class="app-card">' +
     '<div class="app-head">' +
-      '<div class="contest-emoji" style="font-size:24px">' + (a.contest_emoji || '🎨') + '</div>' +
+      '<div class="ic purple lg"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/></svg></div>' +
       '<div class="app-user-info">' +
         '<div class="app-user-name">' + esc(a.contest_title) + '</div>' +
         '<div class="app-user-username">' + timeAgo(a.created) + '</div>' +
@@ -1523,11 +1870,11 @@ function renderAppCard(a, adminView){
   }
   if (a.photo) html += '<img class="app-photo" src="' + a.photo + '">';
   if (a.comment) html += '<div class="app-comment">' + esc(a.comment) + '</div>';
-  if (a.reason) html += '<div class="app-reason">Причина отказа: ' + esc(a.reason) + '</div>';
+  if (a.reason) html += '<div class="app-reason">' + t('reason_prompt') + ' ' + esc(a.reason) + '</div>';
   if (adminView && a.status === 'pending'){
     html += '<div style="display:flex;gap:8px;margin-top:12px">' +
-      '<button class="btn green" onclick="decideApp(' + a.id + ', \'accepted\')">Принять</button>' +
-      '<button class="btn red" onclick="decideApp(' + a.id + ', \'rejected\')">Отклонить</button>' +
+      '<button class="btn green" onclick="decideApp(' + a.id + ', \'accepted\')">' + t('accept') + '</button>' +
+      '<button class="btn red" onclick="decideApp(' + a.id + ', \'rejected\')">' + t('reject') + '</button>' +
     '</div>';
   }
   html += '</div>';
@@ -1536,28 +1883,18 @@ function renderAppCard(a, adminView){
 
 // ============ USER PROFILE ============
 async function openUserProfile(uid){
-  if (!uid){
+  if (!uid || String(uid) === String(UID)){
     document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
     document.querySelector('[data-tab="profile"]').classList.add('active');
     document.getElementById('tab-profile').classList.add('active');
-    document.getElementById('pageTitle').textContent = 'Профиль';
-    return;
-  }
-  if (String(uid) === String(UID)){
-    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-    document.querySelector('[data-tab="profile"]').classList.add('active');
-    document.getElementById('tab-profile').classList.add('active');
-    document.getElementById('pageTitle').textContent = 'Профиль';
-    haptic('light');
+    document.getElementById('pageTitle').textContent = t('profile');
     return;
   }
   currentProfileUid = uid;
   const r = await fetch('/api/user/' + uid);
   const u = await r.json();
-  if (u.error){ toast('Профиль не найден'); return; }
-
+  if (u.error){ toast(t('error')); return; }
   const firstLetter = (u.name || 'Гость').charAt(0).toUpperCase();
   const avatarEl = document.getElementById('userProfileAvatar');
   if (u.avatar){
@@ -1567,10 +1904,8 @@ async function openUserProfile(uid){
     avatarEl.style.backgroundImage = '';
     avatarEl.textContent = firstLetter;
   }
-
   const vIcon = u.is_admin ? verifyIcon() : '';
   document.getElementById('userProfileName').innerHTML = esc(u.name || 'Гость') + vIcon;
-
   document.getElementById('userProfileInfo').innerHTML =
     '<div class="row has-icon">' +
       '<div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 006 0v-1a10 10 0 00-20 0"/></svg></div>' +
@@ -1584,10 +1919,9 @@ async function openUserProfile(uid){
     '</div>' +
     '<div class="row has-icon">' +
       '<div class="ic teal"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Регистрация</div></div>' +
-      '<div class="row-value">' + new Date((u.joined || 0) * 1000).toLocaleDateString('ru') + '</div>' +
+      '<div class="row-info"><div class="row-title">' + (lang === 'ru' ? 'Регистрация' : 'Registered') + '</div></div>' +
+      '<div class="row-value">' + new Date((u.joined || 0) * 1000).toLocaleDateString(lang === 'ru' ? 'ru' : 'en') + '</div>' +
     '</div>';
-
   document.getElementById('userProfileModal').classList.add('open');
   haptic('light');
 }
@@ -1609,11 +1943,8 @@ function startChatWith(){
 function onSearchInput(value){
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => {
-    if (!value.trim()){
-      loadChats();
-    } else {
-      searchUsers(value.trim());
-    }
+    if (!value.trim()) loadChats();
+    else searchUsers(value.trim());
   }, 300);
 }
 
@@ -1624,20 +1955,19 @@ async function searchUsers(q){
   if (!users.length){
     el.innerHTML = '<div class="empty-state">' +
       '<div class="ic gray xl icon-wrap"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>' +
-      '<div class="empty-title">Никого не найдено</div>' +
-      '<div class="empty-desc">Попробуй другой @username или ID</div>' +
-    '</div>';
+      '<div class="empty-title">' + t('no_search') + '</div>' +
+      '<div class="empty-desc">' + t('no_search_desc') + '</div></div>';
     return;
   }
   el.innerHTML = '<div class="card" style="padding:0">' +
     users.map(u => {
-      const firstLetter = (u.name || 'Гость').charAt(0).toUpperCase();
-      const avatarStyle = u.avatar ? 'background-image:url(' + u.avatar + ');background-size:cover;background-position:center;' : '';
-      const vIcon = u.is_admin ? verifyIcon() : '';
+      const fl = (u.name || 'Г').charAt(0).toUpperCase();
+      const st = u.avatar ? 'background-image:url(' + u.avatar + ');background-size:cover;background-position:center;' : '';
+      const vi = u.is_admin ? verifyIcon() : '';
       return '<div class="chat-list-item" onclick="openUserProfile(' + u.uid + ')">' +
-        '<div class="chat-avatar" style="' + avatarStyle + '">' + (u.avatar ? '' : firstLetter) + '</div>' +
+        '<div class="chat-avatar" style="' + st + '">' + (u.avatar ? '' : fl) + '</div>' +
         '<div class="chat-list-info">' +
-          '<div class="chat-list-name">' + esc(u.name || 'Гость') + vIcon + '</div>' +
+          '<div class="chat-list-name">' + esc(u.name || 'Гость') + vi + '</div>' +
           '<div class="chat-list-preview">' + (u.username ? '@' + esc(u.username) : 'ID: ' + u.uid) + '</div>' +
         '</div>' +
         '<div class="chat-list-meta"><span class="chev">›</span></div>' +
@@ -1654,20 +1984,21 @@ async function loadChats(){
   if (!chats.length){
     el.innerHTML = '<div class="empty-state">' +
       '<div class="ic blue xl icon-wrap"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>' +
-      '<div class="empty-title">Нет чатов</div>' +
-      '<div class="empty-desc">Найди пользователя через поиск выше и напиши ему</div>' +
-    '</div>';
+      '<div class="empty-title">' + t('no_chats') + '</div>' +
+      '<div class="empty-desc">' + t('no_chats_desc') + '</div></div>';
     return;
   }
   el.innerHTML = '<div class="card" style="padding:0">' +
     chats.map(c => {
-      const firstLetter = (c.other.name || 'Гость').charAt(0).toUpperCase();
-      const avatarStyle = c.other.avatar ? 'background-image:url(' + c.other.avatar + ');background-size:cover;background-position:center;' : '';
-      const vIcon = c.other.is_admin ? verifyIcon() : '';
+      const fl = (c.other.name || 'Г').charAt(0).toUpperCase();
+      const st = c.other.avatar ? 'background-image:url(' + c.other.avatar + ');background-size:cover;background-position:center;' : '';
+      const vi = c.other.is_admin ? verifyIcon() : '';
+      const pin = c.pinned ? '<div class="chat-list-pin"><svg viewBox="0 0 24 24"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14V9l-3-3V2H8v4L5 9z"/></svg></div>' : '';
       return '<div class="chat-list-item" onclick="openChat(' + c.other.uid + ')">' +
-        '<div class="chat-avatar" style="' + avatarStyle + '">' + (c.other.avatar ? '' : firstLetter) + '</div>' +
+        pin +
+        '<div class="chat-avatar" style="' + st + '">' + (c.other.avatar ? '' : fl) + '</div>' +
         '<div class="chat-list-info">' +
-          '<div class="chat-list-name">' + esc(c.other.name || 'Гость') + vIcon + '</div>' +
+          '<div class="chat-list-name">' + esc(c.other.name || 'Гость') + vi + '</div>' +
           '<div class="chat-list-preview">' + esc(c.last_message) + '</div>' +
         '</div>' +
         '<div class="chat-list-meta">' +
@@ -1682,26 +2013,42 @@ async function loadChats(){
 async function openChat(otherUid){
   const r = await fetch('/api/chat/get?uid=' + UID + '&other=' + otherUid);
   const d = await r.json();
-  if (d.error){ toast('Ошибка'); return; }
+  if (d.error){ toast(t('error')); return; }
   currentChatUser = d.other;
-
-  const vIcon = d.other.is_admin ? verifyIcon() : '';
-  document.getElementById('chatHeaderName').innerHTML = esc(d.other.name || 'Гость') + vIcon;
+  currentChatUser.is_blocked = d.is_blocked;
+  currentChatUser.in_contacts = d.in_contacts;
+  currentChatUser.chat_pinned = d.chat_pinned;
+  const vi = d.other.is_admin ? verifyIcon() : '';
+  document.getElementById('chatHeaderName').innerHTML = esc(d.other.name || 'Гость') + vi;
   document.getElementById('chatHeaderSub').textContent = d.other.username ? '@' + d.other.username : 'ID: ' + d.other.uid;
-
   renderMessages(d.messages);
+  renderPinnedBanner(d.pinned_msg);
   applyChatWallpaper();
-
   document.getElementById('chatScreen').classList.add('open');
   haptic('light');
   setTimeout(() => {
     const body = document.getElementById('chatBody');
     body.scrollTop = body.scrollHeight;
   }, 100);
-  loadUnread();
-
   if (chatRefreshTimer) clearInterval(chatRefreshTimer);
   chatRefreshTimer = setInterval(refreshChat, 3000);
+}
+
+function renderPinnedBanner(msg){
+  const el = document.getElementById('chatPinnedBanner');
+  if (!msg){ el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="chat-pinned-banner">' +
+    '<svg viewBox="0 0 24 24"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14V9l-3-3V2H8v4L5 9z"/></svg>' +
+    '<div class="chat-pinned-text">' + esc(msg.text) + '</div>' +
+    '<button class="chat-pinned-close" onclick="unpinMessage()">✕</button>' +
+  '</div>';
+}
+
+async function unpinMessage(){
+  if (!currentChatUser) return;
+  await api('/api/chat/pin_message', { other: currentChatUser.uid, msg_id: null });
+  renderPinnedBanner(null);
+  haptic('success');
 }
 
 function applyChatWallpaper(){
@@ -1711,18 +2058,15 @@ function applyChatWallpaper(){
       body.style.background = 'url(' + settings.chatWallpaper + ') center/cover';
     } else if (WALLPAPERS[settings.chatWallpaper]){
       body.style.background = WALLPAPERS[settings.chatWallpaper];
-    } else {
-      body.style.background = '';
-    }
-  } else {
-    body.style.background = '';
-  }
+    } else body.style.background = '';
+  } else body.style.background = '';
 }
 
 function renderMessages(messages){
   const body = document.getElementById('chatBody');
   if (!messages.length){
-    body.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 20px;font-size:14px">Начни переписку — отправь первое сообщение</div>';
+    body.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 20px;font-size:14px">' +
+      (lang === 'ru' ? 'Начни переписку' : 'Start the conversation') + '</div>';
     return;
   }
   body.innerHTML = messages.map(m => renderMessage(m)).join('');
@@ -1730,9 +2074,9 @@ function renderMessages(messages){
 
 function renderMessage(m){
   const mine = String(m.from) === String(UID);
-  const bubbleColor = BUBBLE_COLORS[settings.chatBubbleColor] || BUBBLE_COLORS.blue;
-  const style = mine ? 'background:' + bubbleColor + ';color:#fff;' : '';
-  return '<div class="chat-msg ' + (mine ? 'mine' : 'theirs') + '" style="' + style + '">' +
+  const bc = BUBBLE_COLORS[settings.chatBubbleColor] || BUBBLE_COLORS.blue;
+  const style = mine ? 'background:' + bc + ';color:#fff;' : '';
+  return '<div class="chat-msg ' + (mine ? 'mine' : 'theirs') + '" style="' + style + '" onclick="openMsgMenu(' + m.id + ')">' +
     esc(m.text) +
     '<div class="chat-msg-time">' + timeShort(m.created) + (mine && settings.readReceipts ? (m.read ? ' ✓✓' : ' ✓') : '') + '</div>' +
   '</div>';
@@ -1754,6 +2098,7 @@ async function refreshChat(){
   const body = document.getElementById('chatBody');
   const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 60;
   renderMessages(d.messages);
+  renderPinnedBanner(d.pinned_msg);
   if (atBottom) setTimeout(() => { body.scrollTop = body.scrollHeight; }, 50);
 }
 
@@ -1764,7 +2109,11 @@ async function sendMessage(){
   input.value = '';
   input.style.height = 'auto';
   const r = await api('/api/chat/send', { to: currentChatUser.uid, text: text });
-  if (r.error){ toast('Ошибка'); return; }
+  if (r.error){
+    toast(r.error === 'blocked' ? t('you_blocked') : t('error'));
+    haptic('error');
+    return;
+  }
   haptic('light');
   await refreshChat();
   const body = document.getElementById('chatBody');
@@ -1779,11 +2128,122 @@ document.getElementById('chatInput').addEventListener('keydown', function(e){
   if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
 });
 
+// ============ MESSAGE MENU ============
+function openMsgMenu(msgId){
+  if (!currentChatUser) return;
+  haptic('light');
+  const modal = document.getElementById('modalContent');
+  modal.innerHTML =
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<div class="modal-title">' + t('message') + '</div>' +
+    '<div style="margin-top:-8px">' +
+      '<div class="action-sheet-item" onclick="pinMsg(' + msgId + ')">' +
+        '<svg viewBox="0 0 24 24"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14V9l-3-3V2H8v4L5 9z"/></svg>' +
+        '<span class="action-label">' + t('pin_message') + '</span>' +
+      '</div>' +
+      '<div class="action-sheet-item danger" onclick="deleteMsg(' + msgId + ')">' +
+        '<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 01-2 2H9a2 2 0 01-2-2L5 6"/></svg>' +
+        '<span class="action-label">' + t('delete_message') + '</span>' +
+      '</div>' +
+    '</div>';
+  document.getElementById('modalBack').classList.add('open');
+}
+
+async function pinMsg(msgId){
+  if (!currentChatUser) return;
+  const r = await api('/api/chat/pin_message', { other: currentChatUser.uid, msg_id: msgId });
+  if (r.error){ closeModal(); return; }
+  renderPinnedBanner(r.pinned_msg);
+  closeModal();
+  toast(lang === 'ru' ? 'Сообщение закреплено' : 'Message pinned');
+  haptic('success');
+}
+
+async function deleteMsg(msgId){
+  if (!currentChatUser) return;
+  if (!confirm(t('delete_confirm'))) return;
+  await api('/api/chat/delete_message', { other: currentChatUser.uid, msg_id: msgId });
+  closeModal();
+  await refreshChat();
+  toast(t('message_deleted'));
+}
+
+// ============ CHAT MENU ============
+function openChatMenu(){
+  if (!currentChatUser) return;
+  const isBlocked = currentChatUser.is_blocked;
+  const inContacts = currentChatUser.in_contacts;
+  const isPinned = currentChatUser.chat_pinned;
+  const modal = document.getElementById('modalContent');
+  modal.innerHTML =
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<div class="modal-title">' + esc(currentChatUser.name || '') + '</div>' +
+    '<div style="margin-top:-8px">' +
+      '<div class="action-sheet-item" onclick="toggleBlock()">' +
+        '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>' +
+        '<span class="action-label">' + (isBlocked ? t('unblock') : t('block')) + '</span>' +
+      '</div>' +
+      '<div class="action-sheet-item" onclick="togglePinChat()">' +
+        '<svg viewBox="0 0 24 24"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14V9l-3-3V2H8v4L5 9z"/></svg>' +
+        '<span class="action-label">' + (isPinned ? t('unpin_chat') : t('pin_chat')) + '</span>' +
+      '</div>' +
+      '<div class="action-sheet-item" onclick="toggleContact()">' +
+        '<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>' +
+        '<span class="action-label">' + (inContacts ? t('remove_contact') : t('add_contact')) + '</span>' +
+      '</div>' +
+      '<div class="action-sheet-item danger" onclick="clearHistory()">' +
+        '<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 01-2 2H9a2 2 0 01-2-2L5 6"/></svg>' +
+        '<span class="action-label">' + t('clear_history') + '</span>' +
+      '</div>' +
+    '</div>';
+  document.getElementById('modalBack').classList.add('open');
+  haptic('light');
+}
+
+async function toggleBlock(){
+  if (!currentChatUser) return;
+  const r = await api('/api/block', { target: currentChatUser.uid });
+  if (r.error){ closeModal(); return; }
+  currentChatUser.is_blocked = r.action === 'blocked';
+  closeModal();
+  toast(r.action === 'blocked' ? t('user_blocked') : t('user_unblocked'));
+  haptic('success');
+}
+
+async function togglePinChat(){
+  if (!currentChatUser) return;
+  const r = await api('/api/pin_chat', { target: currentChatUser.uid });
+  if (r.error){ closeModal(); return; }
+  currentChatUser.chat_pinned = r.action === 'pinned';
+  closeModal();
+  toast(r.action === 'pinned' ? t('chat_pinned') : t('chat_unpinned'));
+  haptic('success');
+}
+
+async function toggleContact(){
+  if (!currentChatUser) return;
+  const r = await api('/api/contact', { target: currentChatUser.uid });
+  if (r.error){ closeModal(); return; }
+  currentChatUser.in_contacts = r.action === 'added';
+  closeModal();
+  toast(r.action === 'added' ? t('contact_added') : t('contact_removed'));
+  haptic('success');
+}
+
+async function clearHistory(){
+  if (!currentChatUser) return;
+  if (!confirm(t('clear_confirm'))) return;
+  await api('/api/chat/clear', { other: currentChatUser.uid });
+  closeModal();
+  await refreshChat();
+  toast(t('chat_cleared'));
+}
+
 // ============ CHAT SETTINGS ============
 function openChatWallpaper(){
   const modal = document.getElementById('modalContent');
   let html = '<button class="modal-close" onclick="closeModal()">✕</button>' +
-    '<div class="modal-title">Обои чата</div>' +
+    '<div class="modal-title">' + t('chat_wallpaper') + '</div>' +
     '<div class="wallpaper-grid">';
   Object.entries(WALLPAPERS).forEach(([k, v]) => {
     const active = settings.chatWallpaper === k ? 'active' : '';
@@ -1796,7 +2256,7 @@ function openChatWallpaper(){
   html += '<div class="wallpaper-item ' + noneActive + '" style="background:#1c1c1e;border:2px solid var(--line)" onclick="setWallpaper(\'none\')">✕</div>';
   html += '</div>';
   if (isCustom) {
-    html += '<div class="btn-row" style="padding:8px 0 0"><button class="btn red" onclick="setWallpaper(\'none\')">Удалить обои</button></div>';
+    html += '<div class="btn-row" style="padding:8px 0 0"><button class="btn red" onclick="setWallpaper(\'none\')">' + t('delete') + '</button></div>';
   }
   modal.innerHTML = html;
   document.getElementById('modalBack').classList.add('open');
@@ -1810,19 +2270,18 @@ async function setWallpaper(key){
   closeModal();
   await api('/api/save_profile', { chat_wallpaper: settings.chatWallpaper });
   haptic('success');
-  toast('Обои обновлены');
 }
 
 function openChatFonts(){
   const modal = document.getElementById('modalContent');
   let html = '<button class="modal-close" onclick="closeModal()">✕</button>' +
-    '<div class="modal-title">Шрифт чата</div>' +
+    '<div class="modal-title">' + t('chat_font') + '</div>' +
     '<div class="font-list">';
   FONTS.forEach(f => {
     const active = settings.chatFont === f.id ? 'active' : '';
     html += '<div class="font-item ' + active + '" onclick="setChatFont(\'' + f.id + '\')">' +
       '<span class="font-name">' + f.name + '</span>' +
-      '<span class="font-preview chatfont-' + f.id + '" style="font-family:var(--chat-font)">' + f.sample + '</span>' +
+      '<span class="font-preview chatfont-' + f.id + '" style="font-family:var(--chat-font)">Abc</span>' +
     '</div>';
   });
   html += '</div>';
@@ -1837,17 +2296,6 @@ async function setChatFont(id){
   closeModal();
   await api('/api/save_profile', { chat_font: id });
   haptic('success');
-  toast('Шрифт обновлён');
-}
-
-function openChatSettings(){
-  openSettings();
-  setTimeout(() => {
-    const headers = document.querySelectorAll('#settingsScreen .section-header');
-    for (const h of headers){
-      if (h.textContent.includes('Настройки чатов')) { h.scrollIntoView({behavior:'smooth'}); break; }
-    }
-  }, 200);
 }
 
 // ============ ABOUT ============
@@ -1860,34 +2308,22 @@ function openAbout(){
         '<svg viewBox="0 0 24 24"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/></svg>' +
       '</div>' +
       '<div class="about-app-name">ФЛОРИССАНТ</div>' +
-      '<div class="about-version">Версия 3.0.0</div>' +
+      '<div class="about-version">' + (lang === 'ru' ? 'Версия' : 'Version') + ' 4.0.0</div>' +
     '</div>' +
     '<div class="card">' +
-      '<div class="about-text">' +
-        '<b>ФЛОРИССАНТ</b> — платформа для проведения конкурсов и творческих мероприятий. ' +
-        'Участвуй в конкурсах, общайся с другими участниками, следи за результатами и твори.<br><br>' +
-        '<b>Возможности:</b><br>' +
-        '• Участие в конкурсах<br>' +
-        '• Личные сообщения<br>' +
-        '• Профили участников<br>' +
-        '• Загрузка работ<br>' +
-        '• Кастомизация интерфейса<br>' +
-        '• Тёмная и светлая темы<br><br>' +
-        'Спасибо, что ты с нами! ❤️' +
-      '</div>' +
-    '</div>' +
-    '<div class="card">' +
-      '<div class="row has-icon tappable" onclick="copyText(\'@FlorissantBot\')">' +
-        '<div class="ic purple"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>' +
-        '<div class="row-info"><div class="row-title">Поддержка</div>' +
-        '<div class="row-sub">@FlorissantBot</div></div>' +
-        '<div class="chev">›</div>' +
+      '<div class="about-text">' + t('about_desc') + '<br><br>' +
+        '<b>' + t('about_features') + ':</b><br>' +
+        '• ' + (lang === 'ru' ? 'Участие в конкурсах' : 'Contest participation') + '<br>' +
+        '• ' + (lang === 'ru' ? 'Личные сообщения' : 'Private messages') + '<br>' +
+        '• ' + (lang === 'ru' ? 'Комментарии' : 'Comments') + '<br>' +
+        '• ' + (lang === 'ru' ? 'Кастомизация' : 'Customization') + '<br>' +
+        '• ' + (lang === 'ru' ? 'Тёмная тема' : 'Dark theme') +
       '</div>' +
     '</div>' +
     '<div class="card">' +
       '<div class="about-text" style="text-align:center">' +
-        'Сделано с ❤️ для тебя<br>' +
-        '© 2026 ФЛОРИССАНТ' +
+        t('made_with') + '<br>' +
+        '© 2026 ' + t('copyright') +
       '</div>' +
     '</div>';
   document.getElementById('modalBack').classList.add('open');
@@ -1907,25 +2343,24 @@ async function openApplyModal(contestId){
   const modal = document.getElementById('modalContent');
   modal.innerHTML =
     '<button class="modal-close" onclick="closeModal()">✕</button>' +
-    '<div class="modal-title">Заявка на конкурс</div>' +
+    '<div class="modal-title">' + (lang === 'ru' ? 'Заявка на конкурс' : 'Contest application') + '</div>' +
     '<div style="text-align:center;margin-bottom:16px">' +
-      '<div style="font-size:36px">' + (currentContest.emoji || '🎨') + '</div>' +
-      '<div style="font-size:18px;font-weight:700;margin-top:8px">' + esc(currentContest.title) + '</div>' +
+      '<div style="font-size:18px;font-weight:700">' + esc(currentContest.title) + '</div>' +
     '</div>' +
-    '<div class="field"><label>Имя (авто)</label>' +
+    '<div class="field"><label>' + t('name') + '</label>' +
       '<input value="' + esc(user.first_name || '') + '" readonly style="opacity:.7"></div>' +
-    '<div class="field"><label>@username (авто)</label>' +
-      '<input value="' + esc(UNAME ? '@' + UNAME : 'нет') + '" readonly style="opacity:.7"></div>' +
-    '<div class="field"><label>Фотография</label>' +
+    '<div class="field"><label>@username</label>' +
+      '<input value="' + esc(UNAME ? '@' + UNAME : '—') + '" readonly style="opacity:.7"></div>' +
+    '<div class="field"><label>' + t('add_photo') + '</label>' +
       '<div class="upload-photo" id="photoBox" onclick="document.getElementById(\'photoInput\').click()">' +
         '<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>' +
-        '<span>Нажми, чтобы загрузить</span>' +
+        '<span>' + t('tap_to_upload') + '</span>' +
       '</div>' +
       '<input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(this)"></div>' +
-    '<div class="field"><label>Комментарий</label>' +
-      '<textarea id="applyComment" rows="3" placeholder="Почему ты хочешь участвовать?"></textarea></div>' +
+    '<div class="field"><label>' + (lang === 'ru' ? 'Комментарий' : 'Comment') + '</label>' +
+      '<textarea id="applyComment" rows="3"></textarea></div>' +
     '<div class="btn-row" style="padding:16px 0 0">' +
-      '<button class="btn green" onclick="submitApplication()">Отправить</button></div>';
+      '<button class="btn green" onclick="submitApplication()">' + t('submit') + '</button></div>';
   document.getElementById('modalBack').classList.add('open');
   haptic('light');
 }
@@ -1933,7 +2368,7 @@ async function openApplyModal(contestId){
 function handlePhoto(input){
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 3 * 1024 * 1024){ toast('Фото слишком большое'); return; }
+  if (file.size > 3 * 1024 * 1024){ toast(t('error')); return; }
   const reader = new FileReader();
   reader.onload = function(e){
     const img = new Image();
@@ -1959,13 +2394,13 @@ function handlePhoto(input){
 
 async function submitApplication(){
   const comment = document.getElementById('applyComment').value.trim();
-  if (!currentPhoto){ toast('Загрузи фото'); return; }
+  if (!currentPhoto){ toast(t('error')); return; }
   const r = await api('/api/applications/create', {
     contest_id: currentContest.id, photo: currentPhoto, comment: comment,
   });
   if (r.error){ toast(r.error); haptic('error'); return; }
   closeModal();
-  toast('Заявка отправлена!');
+  toast(t('sent'));
   haptic('success');
   loadMyApps();
   loadPlayer();
@@ -1975,7 +2410,7 @@ async function submitApplication(){
 async function loadAdmin(){
   if (!isAdmin){
     document.getElementById('adminContent').innerHTML =
-      '<div class="card" style="padding:40px 20px;text-align:center;color:var(--muted)">Нет доступа</div>';
+      '<div class="card" style="padding:40px 20px;text-align:center;color:var(--muted)">' + t('error') + '</div>';
     return;
   }
   const stats = await (await fetch('/api/stats')).json();
@@ -1983,48 +2418,59 @@ async function loadAdmin(){
   const admins = await (await fetch('/api/admins')).json();
   const pending = (Array.isArray(apps) ? apps : []).filter(a => a.status === 'pending');
 
-  let html = '<div class="section-header">Статистика</div><div class="card">' +
+  let html = '<div class="section-header">' + t('statistics') + '</div><div class="card">' +
     '<div class="row has-icon"><div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Пользователей</div></div><div class="row-value">' + stats.users_total + '</div></div>' +
+      '<div class="row-info"><div class="row-title">' + t('users') + '</div></div><div class="row-value">' + stats.users_total + '</div></div>' +
     '<div class="row has-icon"><div class="ic green"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Постов</div></div><div class="row-value">' + stats.posts_total + '</div></div>' +
+      '<div class="row-info"><div class="row-title">' + t('posts') + '</div></div><div class="row-value">' + stats.posts_total + '</div></div>' +
     '<div class="row has-icon"><div class="ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Активных конкурсов</div></div><div class="row-value">' + stats.contests_active + '</div></div>' +
+      '<div class="row-info"><div class="row-title">' + t('active_contests') + '</div></div><div class="row-value">' + stats.contests_active + '</div></div>' +
     '<div class="row has-icon"><div class="ic gold"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Заявок ожидает</div></div><div class="row-value gold">' + stats.pending + '</div></div>' +
+      '<div class="row-info"><div class="row-title">' + t('pending_apps') + '</div></div><div class="row-value gold">' + stats.pending + '</div></div>' +
     '<div class="row has-icon"><div class="ic teal"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Сообщений</div></div><div class="row-value">' + (stats.messages_total || 0) + '</div></div>' +
+      '<div class="row-info"><div class="row-title">' + t('messages') + '</div></div><div class="row-value">' + (stats.messages_total || 0) + '</div></div>' +
+    '<div class="row has-icon"><div class="ic pink"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>' +
+      '<div class="row-info"><div class="row-title">' + t('comments_count') + '</div></div><div class="row-value">' + (stats.comments_total || 0) + '</div></div>' +
     '</div>';
 
-  html += '<div class="section-header">Действия</div><div class="card">' +
+  let actionsHtml = '';
+  if (hasPerm('posts')) actionsHtml +=
     '<div class="row has-icon tappable" onclick="openPostModal()">' +
       '<div class="ic blue"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Написать пост</div></div><div class="chev">›</div></div>' +
+      '<div class="row-info"><div class="row-title">' + t('write_post') + '</div></div><div class="chev">›</div></div>';
+  if (hasPerm('contests')) actionsHtml +=
     '<div class="row has-icon tappable" onclick="openContestModal()">' +
       '<div class="ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Создать конкурс</div></div><div class="chev">›</div></div>' +
-    '</div>';
+      '<div class="row-info"><div class="row-title">' + t('create_contest') + '</div></div><div class="chev">›</div></div>';
 
-  html += '<div class="section-header">Заявки (ожидают: ' + pending.length + ')</div>';
-  if (!pending.length){
-    html += '<div class="card" style="padding:40px 20px;text-align:center;color:var(--muted)">Нет новых заявок</div>';
-  } else {
-    html += pending.map(a => renderAppCard(a, true)).join('');
+  if (actionsHtml){
+    html += '<div class="section-header">' + (lang === 'ru' ? 'Действия' : 'Actions') + '</div><div class="card">' + actionsHtml + '</div>';
   }
 
-  html += '<div class="section-header">Админы</div><div class="card">' +
-    Object.entries(admins).map(([aid, a]) =>
-      '<div class="row has-icon">' +
-        '<div class="ic gold"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3 9-8 10-5-1-8-5-8-10V6z"/></svg></div>' +
-        '<div class="row-info"><div class="row-title">' + esc(a.name || 'Админ') + verifyIcon() + '</div>' +
-        '<div class="row-sub">ID: ' + aid + (a.main ? ' · главный' : '') + '</div></div>' +
-        (a.main ? '' : '<button class="btn small red" onclick="removeAdmin(\'' + aid + '\')">✕</button>') +
-      '</div>'
-    ).join('') +
-    '<div class="row has-icon tappable" onclick="openAddAdminModal()">' +
-      '<div class="ic green"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>' +
-      '<div class="row-info"><div class="row-title">Добавить админа</div></div><div class="chev">›</div></div>' +
-    '</div>';
+  if (hasPerm('applications')){
+    html += '<div class="section-header">' + t('applications') + ' (' + pending.length + ')</div>';
+    if (!pending.length){
+      html += '<div class="card" style="padding:40px 20px;text-align:center;color:var(--muted)">' + t('no_new_apps') + '</div>';
+    } else {
+      html += pending.map(a => renderAppCard(a, true)).join('');
+    }
+  }
+
+  if (hasPerm('admins') || isMainAdmin){
+    html += '<div class="section-header">' + t('admins') + '</div><div class="card">' +
+      Object.entries(admins).map(([aid, a]) =>
+        '<div class="row has-icon tappable" onclick="' + (a.main ? '' : 'openEditPerms(\'' + aid + '\')') + '">' +
+          '<div class="ic gold"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3 9-8 10-5-1-8-5-8-10V6z"/></svg></div>' +
+          '<div class="row-info"><div class="row-title">' + esc(a.name || 'Админ') + verifyIcon() + '</div>' +
+          '<div class="row-sub">ID: ' + aid + (a.main ? ' · ' + t('main_admin') : ' · ' + t('edit_perms')) + '</div></div>' +
+          (a.main ? '' : '<button class="btn small red" onclick="event.stopPropagation();removeAdmin(\'' + aid + '\')">✕</button>') +
+        '</div>'
+      ).join('') +
+      '<div class="row has-icon tappable" onclick="openAddAdminModal()">' +
+        '<div class="ic green"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>' +
+        '<div class="row-info"><div class="row-title">' + t('add_admin') + '</div></div><div class="chev">›</div></div>' +
+      '</div>';
+  }
 
   document.getElementById('adminContent').innerHTML = html;
 }
@@ -2033,15 +2479,16 @@ function openPostModal(){
   const modal = document.getElementById('modalContent');
   modal.innerHTML =
     '<button class="modal-close" onclick="closeModal()">✕</button>' +
-    '<div class="modal-title">Написать пост</div>' +
-    '<div class="field"><label>Текст</label><textarea id="postText" rows="5" placeholder="Что нового?"></textarea></div>' +
-    '<div class="field"><label>Фото</label>' +
+    '<div class="modal-title">' + t('write_post') + '</div>' +
+    '<div class="field"><label>' + (lang === 'ru' ? 'Текст' : 'Text') + '</label>' +
+      '<textarea id="postText" rows="5" placeholder="' + t('post_text_ph') + '"></textarea></div>' +
+    '<div class="field"><label>' + t('add_photo') + '</label>' +
       '<div class="upload-photo" id="postPhotoBox" onclick="document.getElementById(\'postPhotoInput\').click()">' +
         '<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>' +
-        '<span>Добавить фото</span>' +
+        '<span>' + t('add_photo') + '</span>' +
       '</div>' +
       '<input type="file" id="postPhotoInput" accept="image/*" style="display:none" onchange="handlePostPhoto(this)"></div>' +
-    '<div class="btn-row" style="padding:16px 0 0"><button class="btn" onclick="submitPost()">Опубликовать</button></div>';
+    '<div class="btn-row" style="padding:16px 0 0"><button class="btn" onclick="submitPost()">' + t('publish') + '</button></div>';
   currentPhoto = null;
   document.getElementById('modalBack').classList.add('open');
   haptic('light');
@@ -2050,7 +2497,7 @@ function openPostModal(){
 function handlePostPhoto(input){
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 3 * 1024 * 1024){ toast('Фото слишком большое'); return; }
+  if (file.size > 3 * 1024 * 1024){ toast(t('error')); return; }
   const reader = new FileReader();
   reader.onload = function(e){
     const img = new Image();
@@ -2076,50 +2523,70 @@ function handlePostPhoto(input){
 
 async function submitPost(){
   const text = document.getElementById('postText').value.trim();
-  if (!text && !currentPhoto){ toast('Напиши текст или добавь фото'); return; }
+  if (!text && !currentPhoto){ toast(t('error')); return; }
   const r = await api('/api/posts/create', { text: text, image: currentPhoto });
   if (r.error){ toast(r.error); return; }
   closeModal();
-  toast('Пост опубликован');
+  toast(t('success'));
   haptic('success');
   loadFeed();
   loadAdmin();
 }
 
 function openContestModal(){
-  const emojis = ['🎨','📸','🎵','💃','✍️','🏆','🎭','🎬','🧩','🌟'];
   const modal = document.getElementById('modalContent');
   modal.innerHTML =
     '<button class="modal-close" onclick="closeModal()">✕</button>' +
-    '<div class="modal-title">Создать конкурс</div>' +
-    '<div class="field"><label>Эмодзи</label>' +
-      '<div class="emoji-picker" id="emojiPicker">' +
-        emojis.map((e,i) => '<div class="emoji-opt ' + (i===0?'active':'') + '" onclick="pickEmoji(\'' + e + '\', this)">' + e + '</div>').join('') +
-      '</div></div>' +
-    '<div class="field"><label>Название</label>' +
-      '<input id="contestTitle" placeholder="Например: Массарт осень 2026"></div>' +
-    '<div class="field"><label>Описание</label>' +
-      '<textarea id="contestDesc" rows="4" placeholder="Правила, условия, призы..."></textarea></div>' +
-    '<div class="btn-row" style="padding:16px 0 0"><button class="btn green" onclick="submitContest()">Выпустить набор</button></div>';
-  currentPhoto = emojis[0];
+    '<div class="modal-title">' + t('create_contest') + '</div>' +
+    '<div class="field"><label>' + t('title') + '</label>' +
+      '<input id="contestTitle" placeholder="' + t('contest_title_ph') + '"></div>' +
+    '<div class="field"><label>' + t('description') + '</label>' +
+      '<textarea id="contestDesc" rows="4" placeholder="' + t('contest_desc_ph') + '"></textarea></div>' +
+    '<div class="field"><label>' + t('cover') + '</label>' +
+      '<div class="upload-photo" id="coverBox" onclick="document.getElementById(\'coverInput\').click()">' +
+        '<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>' +
+        '<span>' + t('set_cover') + '</span>' +
+      '</div>' +
+      '<input type="file" id="coverInput" accept="image/*" style="display:none" onchange="handleCover(this)"></div>' +
+    '<div class="btn-row" style="padding:16px 0 0"><button class="btn green" onclick="submitContest()">' + t('create') + '</button></div>';
+  currentPhoto = null;
   document.getElementById('modalBack').classList.add('open');
   haptic('light');
 }
 
-function pickEmoji(e, el){
-  document.querySelectorAll('.emoji-opt').forEach(x => x.classList.remove('active'));
-  el.classList.add('active');
-  currentPhoto = e;
+function handleCover(input){
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 3 * 1024 * 1024){ toast(t('error')); return; }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      const max = 800;
+      if (w > h){ h = h * max / w; w = max; }
+      else { w = w * max / h; h = max; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      currentPhoto = canvas.toDataURL('image/jpeg', 0.75);
+      const box = document.getElementById('coverBox');
+      box.classList.add('has-photo');
+      box.innerHTML = '<img src="' + currentPhoto + '">';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 async function submitContest(){
   const title = document.getElementById('contestTitle').value.trim();
   const desc = document.getElementById('contestDesc').value.trim();
-  if (!title){ toast('Введи название'); return; }
-  const r = await api('/api/contests/create', { title: title, description: desc, emoji: currentPhoto || '🎨' });
+  if (!title){ toast(t('error')); return; }
+  const r = await api('/api/contests/create', { title: title, description: desc, cover: currentPhoto });
   if (r.error){ toast(r.error); return; }
   closeModal();
-  toast('Конкурс выпущен');
+  toast(t('success'));
   haptic('success');
   loadContests();
   loadAdmin();
@@ -2128,12 +2595,12 @@ async function submitContest(){
 async function decideApp(aid, status){
   let reason = '';
   if (status === 'rejected'){
-    reason = prompt('Причина отказа:');
+    reason = prompt(t('reason_prompt'));
     if (!reason) return;
   }
   const r = await api('/api/applications/decide', { application_id: aid, status: status, reason: reason });
   if (r.error){ toast(r.error); return; }
-  toast(status === 'accepted' ? 'Принят' : 'Отклонён');
+  toast(t('success'));
   haptic('success');
   loadAdmin();
 }
@@ -2142,30 +2609,103 @@ function openAddAdminModal(){
   const modal = document.getElementById('modalContent');
   modal.innerHTML =
     '<button class="modal-close" onclick="closeModal()">✕</button>' +
-    '<div class="modal-title">Добавить админа</div>' +
-    '<div class="field"><label>ID пользователя</label><input id="addAdminId" placeholder="123456789" inputmode="numeric"></div>' +
-    '<div class="field"><label>Имя</label><input id="addAdminName" placeholder="Имя"></div>' +
-    '<div class="btn-row" style="padding:16px 0 0"><button class="btn green" onclick="submitAddAdmin()">Добавить</button></div>';
+    '<div class="modal-title">' + t('add_admin') + '</div>' +
+    '<div class="field"><label>ID</label><input id="addAdminId" placeholder="123456789" inputmode="numeric"></div>' +
+    '<div class="field"><label>' + t('name') + '</label><input id="addAdminName" placeholder=""></div>' +
+    '<div class="section-header" style="padding:16px 4px 8px">' + t('sec_permissions') + '</div>' +
+    '<div class="card" style="margin-bottom:16px">' +
+      renderPermsList(DEFAULT_PERMS_JS(), 'new-admin-perms') +
+    '</div>' +
+    '<div class="btn-row" style="padding:0"><button class="btn green" onclick="submitAddAdmin()">' + t('add_admin') + '</button></div>';
   document.getElementById('modalBack').classList.add('open');
   haptic('light');
+}
+
+function DEFAULT_PERMS_JS(){
+  return {posts:true, contests:true, applications:true, delete:true, stats:true, admins:false};
+}
+
+function renderPermsList(perms, prefix){
+  const keys = [
+    {k:'posts', label:t('perm_posts')},
+    {k:'contests', label:t('perm_contests')},
+    {k:'applications', label:t('perm_applications')},
+    {k:'delete', label:t('perm_delete')},
+    {k:'stats', label:t('perm_stats')},
+    {k:'admins', label:t('perm_admins'), danger:true},
+  ];
+  return keys.map(x => 
+    '<div class="perm-item">' +
+      '<div><div class="perm-label">' + x.label + '</div></div>' +
+      '<div class="switch ' + (perms[x.k] ? 'on' : '') + '" id="' + prefix + '-' + x.k + '" onclick="togglePerm(\'' + prefix + '\',\'' + x.k + '\')"></div>' +
+    '</div>'
+  ).join('');
+}
+
+function togglePerm(prefix, key){
+  const el = document.getElementById(prefix + '-' + key);
+  el.classList.toggle('on');
+  haptic('light');
+}
+
+function collectPerms(prefix){
+  const keys = ['posts','contests','applications','delete','stats','admins'];
+  const result = {};
+  keys.forEach(k => {
+    const el = document.getElementById(prefix + '-' + k);
+    result[k] = el ? el.classList.contains('on') : false;
+  });
+  return result;
 }
 
 async function submitAddAdmin(){
   const target = document.getElementById('addAdminId').value.trim();
   const name = document.getElementById('addAdminName').value.trim() || 'Админ';
-  if (!target){ toast('Введи ID'); return; }
-  const r = await api('/api/admins/add', { target_uid: target, target_name: name });
+  if (!target){ toast(t('error')); return; }
+  const perms = collectPerms('new-admin-perms');
+  const r = await api('/api/admins/add', { target_uid: target, target_name: name, perms: perms });
   if (r.error){ toast(r.error); return; }
   closeModal();
-  toast('Админ добавлен');
+  toast(t('success'));
+  haptic('success');
+  loadAdmin();
+}
+
+async function openEditPerms(aid){
+  const admins = await (await fetch('/api/admins')).json();
+  const a = admins[aid];
+  if (!a){ toast(t('error')); return; }
+  const perms = a.perms || DEFAULT_PERMS_JS();
+  const modal = document.getElementById('modalContent');
+  modal.innerHTML =
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<div class="modal-title">' + esc(a.name || 'Админ') + '</div>' +
+    '<div style="text-align:center;color:var(--dim);font-size:13px;margin-top:-8px">ID: ' + aid + '</div>' +
+    '<div class="section-header" style="padding:16px 4px 8px">' + t('sec_permissions') + '</div>' +
+    '<div class="card" style="margin-bottom:16px">' +
+      renderPermsList(perms, 'edit-perms-' + aid) +
+    '</div>' +
+    '<div class="btn-row" style="padding:0;display:flex;gap:8px">' +
+      '<button class="btn" style="flex:1" onclick="savePerms(\'' + aid + '\')">' + t('save') + '</button>' +
+    '</div>';
+  document.getElementById('modalBack').classList.add('open');
+  haptic('light');
+}
+
+async function savePerms(aid){
+  const perms = collectPerms('edit-perms-' + aid);
+  const r = await api('/api/admins/update_perms', { target_uid: aid, perms: perms });
+  if (r.error){ toast(r.error); return; }
+  closeModal();
+  toast(t('success'));
   haptic('success');
   loadAdmin();
 }
 
 async function removeAdmin(aid){
-  if (!confirm('Убрать админа?')) return;
+  if (!confirm(t('delete') + '?')) return;
   await api('/api/admins/remove', { target_uid: aid });
-  toast('Удалён');
+  toast(t('success'));
   loadAdmin();
 }
 
@@ -2181,23 +2721,23 @@ document.querySelectorAll('.nav-item').forEach(el => {
     document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
     el.classList.add('active');
     document.getElementById('tab-' + el.dataset.tab).classList.add('active');
-    document.getElementById('pageTitle').textContent = el.dataset.title;
+    document.getElementById('pageTitle').textContent = el.dataset.title || '';
     haptic('light');
-    const t = el.dataset.tab;
-    if (t === 'feed') loadFeed();
-    if (t === 'contests') loadContests();
-    if (t === 'chats') { document.getElementById('searchInput').value = ''; loadChats(); }
-    if (t === 'myapps') loadMyApps();
-    if (t === 'profile') loadPlayer();
-    if (t === 'admin') loadAdmin();
+    const tt = el.dataset.tab;
+    if (tt === 'feed') loadFeed();
+    if (tt === 'contests') loadContests();
+    if (tt === 'chats') { document.getElementById('searchInput').value = ''; loadChats(); }
+    if (tt === 'myapps') loadMyApps();
+    if (tt === 'profile') loadPlayer();
+    if (tt === 'admin') loadAdmin();
   };
 });
 
 window.addEventListener('scroll', () => {
-  const t = document.getElementById('pageTitle');
-  if (!t) return;
-  if (window.scrollY > 20) t.classList.add('compact');
-  else t.classList.remove('compact');
+  const el = document.getElementById('pageTitle');
+  if (!el) return;
+  if (window.scrollY > 20) el.classList.add('compact');
+  else el.classList.remove('compact');
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -2216,7 +2756,7 @@ document.addEventListener('DOMContentLoaded', () => {
   wallInput.onchange = function(e){
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 3 * 1024 * 1024){ toast('Фото слишком большое'); return; }
+    if (file.size > 3 * 1024 * 1024){ toast(t('error')); return; }
     const reader = new FileReader();
     reader.onload = function(ev){
       const img = new Image();
@@ -2233,7 +2773,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveSettings(); applySettings(); applyChatWallpaper();
         closeModal();
         api('/api/save_profile', { chat_wallpaper: dataUrl });
-        toast('Обои установлены');
+        toast(t('success'));
         haptic('success');
       };
       img.src = ev.target.result;
@@ -2241,6 +2781,8 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.readAsDataURL(file);
   };
   document.body.appendChild(wallInput);
+
+  applyLang();
 });
 
 async function ping(){ await api('/api/ping', {}); }
@@ -2263,11 +2805,11 @@ async function loadOnline(){
   setInterval(loadUnread, 10000);
   setInterval(async () => {
     await loadPlayer();
-    const t = document.querySelector('.nav-item.active')?.dataset.tab;
-    if (t === 'myapps') loadMyApps();
-    if (t === 'feed') loadFeed();
-    if (t === 'admin') loadAdmin();
-    if (t === 'chats') loadChats();
+    const tt = document.querySelector('.nav-item.active')?.dataset.tab;
+    if (tt === 'myapps') loadMyApps();
+    if (tt === 'feed') loadFeed();
+    if (tt === 'admin') loadAdmin();
+    if (tt === 'chats') loadChats();
   }, 30000);
 })();
 </script>
