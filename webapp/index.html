@@ -194,14 +194,6 @@ body.theme-light .nav{background:rgba(255,255,255,0.85)}
 stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .nav-item span{font-size:10px;letter-spacing:-.1px;font-weight:500;
 white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.nav-badge{
-  position:absolute;top:0;right:calc(50% - 18px);
-  min-width:16px;height:16px;padding:0 4px;
-  background:var(--red);color:#fff;
-  border-radius:8px;font-size:10px;font-weight:700;
-  display:flex;align-items:center;justify-content:center;
-  border:2px solid var(--bg);
-}
 
 .tab{display:none}
 .tab.active{display:block;animation:fade .3s cubic-bezier(0.32,0.72,0,1)}
@@ -260,28 +252,50 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
 
 /* ============ PROFILE ============ */
 .profile-header{
-  text-align:center;padding:24px 16px 24px;
-  background:var(--card);border-radius:var(--radius);margin-bottom:14px;
-  position:relative;overflow:hidden;
+  text-align:center;
+  padding:30px 16px 26px;
+  background:var(--card);
+  border-radius:var(--radius);
+  margin-bottom:14px;
+  position:relative;
+  overflow:hidden;
+  min-height:260px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
 }
-.profile-avatar-wrap{
-  position:relative;width:100px;height:100px;
-  margin:0 auto 14px;
+.profile-header.has-bg::before{
+  content:'';
+  position:absolute;inset:0;
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  z-index:0;
 }
-.profile-avatar-bg{
-  position:absolute;inset:0;border-radius:50%;
-  background:#2c2c2e;overflow:hidden;
+.profile-header.has-bg::after{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.75) 100%);
+  z-index:1;
 }
-.profile-avatar-bg img{width:100%;height:100%;object-fit:cover}
+.profile-header > *{
+  position:relative;
+  z-index:2;
+}
 .profile-avatar{
-  position:absolute;inset:4px;border-radius:50%;
+  position:relative;
+  width:100px;height:100px;
+  border-radius:50%;
   background:#1c1c1e;
   display:flex;align-items:center;justify-content:center;
   font-size:36px;font-weight:700;color:#fff;
   cursor:pointer;overflow:hidden;
   background-size:cover;background-position:center;
+  border:3px solid rgba(255,255,255,0.2);
+  margin:0 auto 14px;
+  box-shadow:0 6px 24px rgba(0,0,0,0.4);
+  transition:.15s;
 }
-.profile-avatar:active{opacity:.85}
+.profile-avatar:active{transform:scale(.95);opacity:.9}
 .profile-avatar .avatar-placeholder{
   width:100%;height:100%;display:flex;align-items:center;justify-content:center;
   background:#1c1c1e;
@@ -290,6 +304,8 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
   font-size:22px;font-weight:700;letter-spacing:-.5px;
   display:inline-flex;align-items:center;gap:5px;
   justify-content:center;
+  color:#fff;
+  text-shadow:0 2px 8px rgba(0,0,0,0.6);
 }
 .verify-badge{
   display:inline-flex;align-items:center;justify-content:center;
@@ -303,7 +319,10 @@ color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6p
   stroke-linecap:round;stroke-linejoin:round;
 }
 .avatar-hint{
-  font-size:12px;color:var(--muted);margin-top:10px;
+  font-size:12px;
+  color:rgba(255,255,255,0.65);
+  margin-top:12px;
+  text-shadow:0 1px 4px rgba(0,0,0,0.6);
 }
 
 .bg-grid{
@@ -326,7 +345,6 @@ stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .bg-item.active{border-color:var(--accent);transform:scale(1.05)}
 .bg-item:active{transform:scale(.92)}
 
-/* ============ POST ============ */
 .post-card{
   background:var(--card);border-radius:var(--radius);
   padding:16px;margin-bottom:12px;
@@ -342,7 +360,6 @@ white-space:pre-wrap;word-wrap:break-word}
 .post-image{width:100%;border-radius:10px;margin-top:12px;
 display:block;max-height:400px;object-fit:cover}
 
-/* ============ CONTEST ============ */
 .contest-card{
   background:var(--card);border-radius:var(--radius);
   padding:16px;margin-bottom:12px;
@@ -356,7 +373,6 @@ display:block;max-height:400px;object-fit:cover}
 .contest-status.closed{color:var(--red)}
 .contest-desc{font-size:14px;color:var(--dim);line-height:1.5;margin-bottom:12px;white-space:pre-wrap}
 
-/* ============ APPLICATION ============ */
 .app-card{
   background:var(--card);border-radius:var(--radius);
   padding:14px;margin-bottom:10px;
@@ -379,7 +395,6 @@ font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px}
 background:rgba(255,69,58,0.1);padding:8px 12px;
 border-radius:8px;margin-top:8px}
 
-/* ============ SETTINGS ============ */
 .settings-screen{
   position:fixed;top:0;left:0;right:0;bottom:0;
   background:var(--bg);z-index:200;overflow-y:auto;
@@ -530,18 +545,15 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   </div>
 
   <div class="tab" id="tab-profile">
-    <div class="profile-header">
-      <div class="profile-avatar-wrap">
-        <div class="profile-avatar-bg" id="avatarBg"></div>
-        <div class="profile-avatar" id="avatarBox" onclick="openAvatarPicker()">
-          <div class="avatar-placeholder" id="avatarInner">?</div>
-        </div>
+    <div class="profile-header" id="profileHeader">
+      <div class="profile-avatar" id="avatarBox" onclick="openAvatarPicker()">
+        <div class="avatar-placeholder" id="avatarInner">?</div>
       </div>
       <div class="profile-name" id="profileName">Загрузка...</div>
       <div class="avatar-hint">Нажми на аватар, чтобы изменить</div>
     </div>
 
-    <div class="section-header">Фон аватарки</div>
+    <div class="section-header">Фон профиля</div>
     <div class="card">
       <div class="bg-grid" id="bgGrid"></div>
     </div>
@@ -703,7 +715,7 @@ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
       <div class="row has-icon">
         <div class="ic indigo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
         <div class="row-info"><div class="row-title">ФЛОРИССАНТ</div>
-        <div class="row-sub">Версия 2.2.0</div></div>
+        <div class="row-sub">Версия 2.3.0</div></div>
       </div>
       <div class="about-text">
         <b>Платформа конкурсов</b> — участвуй, побеждай, твори.<br><br>
@@ -952,15 +964,22 @@ function renderProfile(){
     avatarInner.textContent = firstLetter;
   }
 
-  const bg = document.getElementById('avatarBg');
+  // ФОН НА ВСЮ КАРТОЧКУ
+  const header = document.getElementById('profileHeader');
+  let styleEl = document.getElementById('profileBgStyle');
+  if (!styleEl){
+    styleEl = document.createElement('style');
+    styleEl.id = 'profileBgStyle';
+    document.head.appendChild(styleEl);
+  }
   if (player.avatar_bg && player.avatar_bg.startsWith('data:')){
-    bg.innerHTML = '<img src="' + player.avatar_bg + '">';
+    header.classList.add('has-bg');
+    styleEl.textContent = '.profile-header.has-bg::before{background-image:url("' + player.avatar_bg + '");}';
   } else {
-    bg.innerHTML = '';
-    bg.style.background = '#2c2c2e';
+    header.classList.remove('has-bg');
+    styleEl.textContent = '';
   }
 
-  // ACCOUNT (с @ и ID)
   document.getElementById('accountCard').innerHTML =
     '<div class="row has-icon tappable" onclick="copyText(\'@' + esc(player.username || '') + '\')">' +
       '<div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 006 0v-1a10 10 0 10-4 8"/></svg></div>' +
@@ -978,7 +997,6 @@ function renderProfile(){
       '<div class="row-value">' + new Date((player.joined || 0) * 1000).toLocaleDateString('ru') + '</div>' +
     '</div>';
 
-  // STATS
   document.getElementById('statsCard').innerHTML =
     '<div class="row has-icon">' +
       '<div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>' +
@@ -1090,12 +1108,12 @@ async function uploadCustomBg(file){
     img.onload = function(){
       const canvas = document.createElement('canvas');
       let w = img.width, h = img.height;
-      const max = 300;
+      const max = 800;
       if (w > h){ h = h * max / w; w = max; }
       else { w = w * max / h; h = max; }
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
       player.avatar_bg = dataUrl;
       renderProfile();
       api('/api/save_profile', { avatar_bg: dataUrl });
@@ -1124,7 +1142,6 @@ async function checkNotifications(){
   lastAppsCheck = decided.map(a => a.id + '_' + a.status);
 }
 
-// ============ FEED ============
 async function loadFeed(){
   const r = await fetch('/api/posts');
   const posts = await r.json();
@@ -1159,7 +1176,6 @@ async function deletePost(pid){
   loadFeed();
 }
 
-// ============ CONTESTS ============
 async function loadContests(){
   const r = await fetch('/api/contests');
   const contests = await r.json();
@@ -1189,7 +1205,6 @@ async function loadContests(){
   }).join('');
 }
 
-// ============ MY APPS ============
 async function loadMyApps(){
   const r = await api('/api/applications', {});
   const apps = Array.isArray(r) ? r : [];
@@ -1220,7 +1235,6 @@ function renderAppCard(a, adminView){
     '</div>';
 
   if (adminView){
-    const isUserAdmin = false;
     html += '<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-top:.5px solid var(--line);border-bottom:.5px solid var(--line)">' +
       '<div class="ic purple lg"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>' +
       '<div style="flex:1;min-width:0">' +
@@ -1245,7 +1259,6 @@ function renderAppCard(a, adminView){
   return html;
 }
 
-// ============ APPLY ============
 let currentContest = null;
 let currentPhoto = null;
 
@@ -1324,7 +1337,6 @@ async function submitApplication(){
   loadPlayer();
 }
 
-// ============ ADMIN ============
 async function loadAdmin(){
   if (!isAdmin){
     document.getElementById('adminContent').innerHTML =
