@@ -17,7 +17,7 @@ CONTESTS_FILE = 'contests.json'
 APPS_FILE = 'applications.json'
 ADMINS_FILE = 'admins.json'
 
-ADMIN_IDS = [8907438590]  # твой ID — сюда впиши СВОЙ
+ADMIN_IDS = [8907438590] # твой ID — сюда впиши СВОЙ
 
 ONLINE = {}
 ONLINE_LOCK = threading.Lock()
