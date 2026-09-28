@@ -15,52 +15,7 @@ HISTORY_FILE = 'search_history.json'
 
 START_TOKENS = 1000
 DAILY_BONUS = 50
-
-# Режимы поиска
-SEARCH_MODES = {
-    'turbo': {
-        'name': 'Очень быстрый',
-        'model': 'openai-fast',
-        'tokens': 1,
-        'sources': 2,
-        'depth': 'basic',
-        'prompt_extra': 'Отвечай максимально кратко, одним предложением.'
-    },
-    'fast': {
-        'name': 'Быстрый',
-        'model': 'openai',
-        'tokens': 2,
-        'sources': 3,
-        'depth': 'basic',
-        'prompt_extra': 'Отвечай кратко, 2-3 предложения.'
-    },
-    'balanced': {
-        'name': 'Балансированный',
-        'model': 'openai',
-        'tokens': 3,
-        'sources': 5,
-        'depth': 'basic',
-        'prompt_extra': 'Отвечай нормально, 3-5 предложений.'
-    },
-    'standard': {
-        'name': 'Стандартный',
-        'model': 'openai-large',
-        'tokens': 5,
-        'sources': 5,
-        'depth': 'advanced',
-        'prompt_extra': 'Дай развёрнутый ответ с фактами.'
-    },
-    'smart': {
-        'name': 'Умный',
-        'model': 'openai-large',
-        'tokens': 8,
-        'sources': 10,
-        'depth': 'advanced',
-        'prompt_extra': 'Дай глубокий анализ, рассмотри разные стороны вопроса.'
-    },
-}
-
-DEFAULT_MODE = 'balanced'
+SEARCH_TOKENS = 1
 
 
 def load_json(path, default):
@@ -89,11 +44,12 @@ def get_user(uid):
             'total_spent': 0,
             'joined': int(time.time()),
             'last_bonus': 0,
-            'search_mode': DEFAULT_MODE,
             'history_enabled': True,
             'vibration': True,
             'theme': 'dark',
-            'accent': 'blue',
+            'accent': 'purple',
+            'font': 'medium',
+            'radius': 'md',
         }
         save_json(USERS_FILE, users)
     return users[key]
@@ -120,7 +76,6 @@ def api_player():
         uid = request.args.get('uid')
     if not uid: return jsonify({'error': 'no uid'}), 400
     u = get_user(uid)
-    # Ежедневный бонус
     now = int(time.time())
     last_bonus = u.get('last_bonus', 0)
     bonus_given = False
@@ -142,11 +97,12 @@ def api_player():
         'total_requests': u.get('total_requests', 0),
         'total_spent': u.get('total_spent', 0),
         'joined': u.get('joined', 0),
-        'search_mode': u.get('search_mode', DEFAULT_MODE),
         'history_enabled': u.get('history_enabled', True),
         'vibration': u.get('vibration', True),
         'theme': u.get('theme', 'dark'),
-        'accent': u.get('accent', 'blue'),
+        'accent': u.get('accent', 'purple'),
+        'font': u.get('font', 'medium'),
+        'radius': u.get('radius', 'md'),
         'daily_bonus': DAILY_BONUS if bonus_given else 0,
     })
 
@@ -157,7 +113,7 @@ def api_save_settings():
     uid = d.get('uid')
     if not uid: return jsonify({'error': 'no uid'}), 400
     u = get_user(uid)
-    for field in ['search_mode', 'history_enabled', 'vibration', 'theme', 'accent']:
+    for field in ['history_enabled', 'vibration', 'theme', 'accent', 'font', 'radius']:
         if field in d:
             u[field] = d[field]
     save_user(uid, u)
@@ -165,18 +121,18 @@ def api_save_settings():
 
 
 # ============ SEARCH ============
-def tavily_search(query, max_results=5, depth='basic'):
+def tavily_search(query, max_results=3):
     start = time.time()
     try:
         r = requests.post(
             'https://api.tavily.com/search',
             json={
                 'query': query,
-                'search_depth': depth,
+                'search_depth': 'basic',
                 'max_results': max_results,
                 'include_answer': False
             },
-            timeout=20
+            timeout=15
         )
         if r.status_code == 200:
             data = r.json()
@@ -194,7 +150,8 @@ def tavily_search(query, max_results=5, depth='basic'):
         return [], time.time() - start
 
 
-def ai_answer(query, sources, mode_cfg):
+def ai_answer(query, sources):
+    """Стабильная модель openai через Pollinations."""
     start = time.time()
     try:
         context = ''
@@ -203,28 +160,34 @@ def ai_answer(query, sources, mode_cfg):
 
         prompt = f"""Вопрос: {query}
 
-Найденные источники:
+Источники:
 {context}
 
-{mode_cfg['prompt_extra']}
-Отвечай на русском. Если уместно — укажи источники в формате [1], [2]."""
+Дай краткий и точный ответ на русском, 2-4 предложения. Используй источники."""
 
-        r = requests.post(
-            'https://text.pollinations.ai/openai',
-            json={
-                'model': mode_cfg['model'],
-                'messages': [
-                    {'role': 'system', 'content': 'Ты — AI-поисковик DeepSeek Darkgram. Отвечай чётко и по делу.'},
-                    {'role': 'user', 'content': prompt}
-                ]
-            },
-            timeout=60
-        )
+        # Пробуем 2 раза
+        for attempt in range(2):
+            try:
+                r = requests.post(
+                    'https://text.pollinations.ai/openai',
+                    json={
+                        'model': 'openai',
+                        'messages': [
+                            {'role': 'system', 'content': 'Ты — AI-помощник DeepSeek Darkgram. Отвечай кратко на русском.'},
+                            {'role': 'user', 'content': prompt}
+                        ]
+                    },
+                    timeout=45
+                )
+                if r.status_code == 200:
+                    data = r.json()
+                    answer = data.get('choices', [{}])[0].get('message', {}).get('content', '')
+                    if answer and len(answer) > 5:
+                        return answer, time.time() - start
+            except Exception as e:
+                print(f'ai attempt {attempt+1} err:', e)
+                time.sleep(1)
 
-        if r.status_code == 200:
-            data = r.json()
-            answer = data.get('choices', [{}])[0].get('message', {}).get('content', '')
-            return answer, time.time() - start
         return None, time.time() - start
     except Exception as e:
         print('ai err:', e)
@@ -240,26 +203,21 @@ def api_search():
     if not query: return jsonify({'error': 'Пустой запрос'}), 400
 
     u = get_user(uid)
-    mode = u.get('search_mode', DEFAULT_MODE)
-    if mode not in SEARCH_MODES:
-        mode = DEFAULT_MODE
-    cfg = SEARCH_MODES[mode]
+    cost = SEARCH_TOKENS
 
-    cost = cfg['tokens']
     if u.get('tokens', 0) < cost:
         return jsonify({
             'error': 'tokens',
-            'message': f'Недостаточно токенов. Нужно {cost}, у тебя {u.get("tokens", 0)}.',
+            'message': f'Недостаточно токенов. Нужно {cost}.',
             'tokens': u.get('tokens', 0),
             'cost': cost,
         }), 400
 
     total_start = time.time()
-    sources, search_time = tavily_search(query, cfg['sources'], cfg['depth'])
-    answer, ai_time = ai_answer(query, sources, cfg)
+    sources, search_time = tavily_search(query, 3)
+    answer, ai_time = ai_answer(query, sources)
     total_time = time.time() - total_start
 
-    # Списываем токены
     u['tokens'] = u.get('tokens', 0) - cost
     u['total_requests'] = u.get('total_requests', 0) + 1
     u['total_spent'] = u.get('total_spent', 0) + cost
@@ -275,7 +233,6 @@ def api_search():
         'total_time': round(total_time, 2),
         'cost': cost,
         'tokens_left': u['tokens'],
-        'mode': mode,
         'timestamp': int(time.time()),
     }
 
@@ -287,7 +244,6 @@ def api_search():
             'answer': result['answer'][:300],
             'time': result['timestamp'],
             'cost': cost,
-            'mode': mode,
         })
         history[str(uid)] = user_hist[:50]
         save_json(HISTORY_FILE, history)
@@ -314,7 +270,6 @@ def api_history_clear():
     return jsonify({'ok': True})
 
 
-# ============ STATS / CHART ============
 @app.route('/api/stats')
 def api_stats():
     uid = request.args.get('uid')
@@ -322,7 +277,6 @@ def api_stats():
     history = load_json(HISTORY_FILE, {})
     user_hist = history.get(str(uid), [])
 
-    # График за 7 дней
     days = []
     today = datetime.now().date()
     for i in range(6, -1, -1):
@@ -341,13 +295,6 @@ def api_stats():
         })
 
     return jsonify({'days': days})
-
-
-@app.route('/api/modes')
-def api_modes():
-    return jsonify({k: {'name': v['name'], 'tokens': v['tokens'],
-                         'sources': v['sources']}
-                    for k, v in SEARCH_MODES.items()})
 
 
 @app.route('/api/ping')
