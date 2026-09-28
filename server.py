@@ -1,10 +1,9 @@
 import json
 import os
 import time
-import threading
 import requests
 from datetime import datetime, timedelta
-from flask import Flask, request, jsonify, send_from_directory, Response
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder='webapp')
@@ -131,11 +130,11 @@ def tavily_search(query, max_results=10):
             'https://api.tavily.com/search',
             json={
                 'query': query,
-                'search_depth': 'advanced',
+                'search_depth': 'basic',
                 'max_results': max_results,
                 'include_answer': False
             },
-            timeout=20
+            timeout=15
         )
         if r.status_code == 200:
             data = r.json()
@@ -144,7 +143,7 @@ def tavily_search(query, max_results=10):
                 results.append({
                     'title': item.get('title', ''),
                     'url': item.get('url', ''),
-                    'content': item.get('content', '')[:500],
+                    'content': item.get('content', '')[:400],
                 })
             return results, time.time() - start
         return [], time.time() - start
@@ -154,42 +153,35 @@ def tavily_search(query, max_results=10):
 
 
 def ai_answer(query, sources):
-    """AI с HTML-форматом, БЕЗ упоминания источников."""
     start = time.time()
     try:
-        # Для AI — топ-5 источников
+        # только топ-3 источника для скорости
         context = ''
-        for i, s in enumerate(sources[:5], 1):
-            context += f"{s['title']}\n{s['content']}\n\n"
+        for s in sources[:3]:
+            context += f"{s.get('title', '')}\n{s.get('content', '')}\n\n"
 
         prompt = f"""Вопрос: {query}
 
 Информация:
 {context}
 
-Дай полный ответ на русском языке.
+Дай ответ на русском, 3-5 предложений. Оформляй HTML: <b>жирный</b> для заголовков, <code>код</code> для кода.
 
 ПРАВИЛА:
-- НЕ упоминай источники, ссылки, сайты
-- НЕ пиши "согласно источнику", "[1]", "по данным сайта"
-- Просто дай ответ, как будто ты сам знаешь
-- Оформляй красиво: <b>жирный</b> для заголовков, <code>код</code> для кода
-- Используй абзацы и списки где нужно
-- Никаких вводных фраз типа "Конечно!", "Отличный вопрос!"
+- НЕ упоминай источники и сайты
+- Не пиши "согласно источнику", "[1]"
+- Без вводных фраз
 - Сразу к делу"""
 
-        for attempt in range(3):
+        for attempt in range(2):
             try:
                 r = requests.post(
                     'https://text.pollinations.ai/openai',
-                    json={
-                        'model': 'openai',
-                        'messages': [
-                            {'role': 'system', 'content': 'Ты — умный AI-ассистент. Отвечай чётко, красиво, на русском. Оформляй HTML-тегами <b>, <i>, <code>.'},
-                            {'role': 'user', 'content': prompt}
-                        ]
-                    },
-                    timeout=60
+                    json={'model': 'openai', 'messages': [
+                        {'role': 'system', 'content': 'Ты — AI-ассистент. Отвечай на русском, оформляй HTML.'},
+                        {'role': 'user', 'content': prompt}
+                    ]},
+                    timeout=30
                 )
                 if r.status_code == 200:
                     data = r.json()
@@ -197,8 +189,7 @@ def ai_answer(query, sources):
                     if answer and len(answer) > 10:
                         return answer, time.time() - start
             except Exception as e:
-                print(f'ai attempt {attempt+1} err:', e)
-                time.sleep(1)
+                print(f'ai err {attempt+1}:', e)
         return None, time.time() - start
     except Exception as e:
         print('ai err:', e)
@@ -214,12 +205,11 @@ def api_search():
     if not query: return jsonify({'error': 'Пустой запрос'}), 400
 
     u = get_user(uid)
-    cost = SEARCH_TOKENS
-    if u.get('tokens', 0) < cost:
+    if u.get('tokens', 0) < SEARCH_TOKENS:
         return jsonify({
             'error': 'tokens',
-            'message': f'Недостаточно токенов. Нужно {cost}.',
-            'tokens': u.get('tokens', 0), 'cost': cost,
+            'message': f'Недостаточно токенов.',
+            'tokens': u.get('tokens', 0),
         }), 400
 
     total_start = time.time()
@@ -227,9 +217,9 @@ def api_search():
     answer, ai_time = ai_answer(query, sources)
     total_time = time.time() - total_start
 
-    u['tokens'] = u.get('tokens', 0) - cost
+    u['tokens'] = u.get('tokens', 0) - SEARCH_TOKENS
     u['total_requests'] = u.get('total_requests', 0) + 1
-    u['total_spent'] = u.get('total_spent', 0) + cost
+    u['total_spent'] = u.get('total_spent', 0) + SEARCH_TOKENS
     save_user(uid, u)
 
     result = {
@@ -239,7 +229,8 @@ def api_search():
         'search_time': round(search_time, 2),
         'ai_time': round(ai_time, 2),
         'total_time': round(total_time, 2),
-        'cost': cost, 'tokens_left': u['tokens'],
+        'cost': SEARCH_TOKENS,
+        'tokens_left': u['tokens'],
         'timestamp': int(time.time()),
     }
 
@@ -248,79 +239,12 @@ def api_search():
         user_hist = history.get(str(uid), [])
         user_hist.insert(0, {
             'query': query, 'answer': result['answer'][:300],
-            'time': result['timestamp'], 'cost': cost,
+            'time': result['timestamp'], 'cost': SEARCH_TOKENS,
         })
         history[str(uid)] = user_hist[:50]
         save_json(HISTORY_FILE, history)
 
     return jsonify(result)
-
-
-@app.route('/api/search/stream', methods=['POST'])
-def api_search_stream():
-    """SSE — отдаёт чанки постепенно."""
-    d = request.json or {}
-    uid = d.get('uid')
-    query = (d.get('query') or '').strip()
-    if not uid or not query:
-        return jsonify({'error': 'bad'}), 400
-
-    def generate():
-        try:
-            # Этап 1 — поиск
-            yield f"data: {json.dumps({'type': 'phase', 'phase': 1, 'text': 'Поиск в интернете...'})}\n\n"
-
-            u = get_user(uid)
-            if u.get('tokens', 0) < SEARCH_TOKENS:
-                yield f"data: {json.dumps({'type': 'error', 'message': 'Недостаточно токенов'})}\n\n"
-                return
-
-            total_start = time.time()
-            sources, search_time = tavily_search(query, 10)
-
-            yield f"data: {json.dumps({'type': 'phase', 'phase': 2, 'text': 'AI обрабатывает...'})}\n\n"
-
-            answer, ai_time = ai_answer(query, sources)
-            total_time = time.time() - total_start
-
-            if not answer:
-                yield f"data: {json.dumps({'type': 'error', 'message': 'AI не ответил'})}\n\n"
-                return
-
-            # Списываем токены
-            u['tokens'] = u.get('tokens', 0) - SEARCH_TOKENS
-            u['total_requests'] = u.get('total_requests', 0) + 1
-            u['total_spent'] = u.get('total_spent', 0) + SEARCH_TOKENS
-            save_user(uid, u)
-
-            # Этап 3 — стриминг текста
-            yield f"data: {json.dumps({'type': 'phase', 'phase': 3, 'text': 'Пишу ответ...'})}\n\n"
-
-            words = answer.split(' ')
-            chunk_size = 3
-            for i in range(0, len(words), chunk_size):
-                chunk = ' '.join(words[i:i+chunk_size])
-                if i > 0: chunk = ' ' + chunk
-                yield f"data: {json.dumps({'type': 'chunk', 'text': chunk})}\n\n"
-                time.sleep(0.15)
-
-            # Финальные данные
-            yield f"data: {json.dumps({'type': 'done', 'sources': sources, 'search_time': round(search_time, 2), 'ai_time': round(ai_time, 2), 'total_time': round(total_time, 2), 'tokens_left': u['tokens'], 'cost': SEARCH_TOKENS})}\n\n"
-
-            if u.get('history_enabled', True):
-                history = load_json(HISTORY_FILE, {})
-                user_hist = history.get(str(uid), [])
-                user_hist.insert(0, {
-                    'query': query, 'answer': answer[:300],
-                    'time': int(time.time()), 'cost': SEARCH_TOKENS,
-                })
-                history[str(uid)] = user_hist[:50]
-                save_json(HISTORY_FILE, history)
-        except Exception as e:
-            print('stream err:', e)
-            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
-
-    return Response(generate(), mimetype='text/event-stream')
 
 
 @app.route('/api/history')
