@@ -4,7 +4,7 @@ import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from telebot import types
 
-TOKEN = '8514412667:AAE3rjZDJqpHDEi5x2qNwlNYPBoFlFJcevQ'
+TOKEN = '8514412667:AAFp79hYfo3RNgtq0tBlHTWk_O7I-6xJRgA'
 WEBAPP_URL = 'https://darkgram-2.onrender.com'
 
 bot = telebot.TeleBot(TOKEN)
@@ -36,7 +36,7 @@ threading.Thread(target=run_http, daemon=True).start()
 def webapp_kb():
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton(
-        text='🌺 Открыть Флориссант',
+        text='🔍 Открыть поиск',
         web_app=types.WebAppInfo(url=WEBAPP_URL)
     ))
     return kb
@@ -45,14 +45,16 @@ def webapp_kb():
 @bot.message_handler(commands=['start'])
 def cmd_start(m):
     text = (
-        '🌸 ФЛОРИССАНТ\n'
+        '🔍 DeepSeek Darkgram\n'
         '━━━━━━━━━━━━━━━\n\n'
         'Привет, ' + (m.from_user.first_name or 'друг') + '!\n\n'
-        'Это платформа конкурсов и творчества.\n\n'
-        '🎨 Участвуй в конкурсах\n'
-        '📸 Отправляй свои работы\n'
-        '🏆 Побеждай\n\n'
-        '👇 Открой приложение:'
+        'Это AI-поисковик с интернетом.\n\n'
+        'Задай вопрос — найду ответ:\n'
+        '• Новости\n'
+        '• Факты\n'
+        '• Рецепты\n'
+        '• Что угодно\n\n'
+        '👇 Открой поиск:'
     )
     bot.send_message(m.chat.id, text, reply_markup=webapp_kb())
 
@@ -60,19 +62,12 @@ def cmd_start(m):
 @bot.message_handler(commands=['help'])
 def cmd_help(m):
     bot.send_message(m.chat.id,
-        '🌸 ФЛОРИССАНТ — помощь\n\n'
-        '• Открой приложение кнопкой ниже\n'
-        '• Выбери конкурс и участвуй\n'
-        '• Следи за своими заявками\n\n'
-        'Разработка: Флориссант',
+        '🔍 DeepSeek Darkgram — помощь\n\n'
+        'Открой Mini App кнопкой ниже.\n'
+        'Задай вопрос → получишь AI-ответ + источники.',
         reply_markup=webapp_kb())
 
 
-@bot.message_handler(commands=['app'])
-def cmd_app(m):
-    bot.send_message(m.chat.id, '🌸 Открой Флориссант:', reply_markup=webapp_kb())
-
-
 if __name__ == '__main__':
-    print('Florissant bot started')
+    print('DeepSeek Darkgram bot started')
     bot.infinity_polling(timeout=30, long_polling_timeout=30)
