@@ -3,12 +3,13 @@ import os
 import threading
 import requests
 import time
+import re
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from telebot import types
 
-TOKEN = '8514412667:AAESgBP9dC3VWpuJLQVXGWbqJ8vyq58V-SQ'  # токен бота
-WEBAPP_URL = 'https://darkgram-2.onrender.com'
-API_URL = 'https://darkgram-2.onrender.com'
+TOKEN = '8514412667:AAFR0fwoa0CTvTdFJZSK65-4isUDJB7_o50'  # токен бота от @BotFather
+WEBAPP_URL = 'https://darkgram-2.onrender.com'  # адрес Mini App
+API_URL = 'https://darkgram-2.onrender.com'  # для API запросов
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -37,9 +38,9 @@ threading.Thread(target=run_http, daemon=True).start()
 
 
 def webapp_kb():
-    kb = types.InlineKeyboardMarkup()
+    kb = types.InlineKeyboardMarkup(row_width=1)
     kb.add(types.InlineKeyboardButton(
-        text='Открыть поиск',
+        text='Открыть Mini App',
         web_app=types.WebAppInfo(url=WEBAPP_URL)
     ))
     return kb
@@ -64,41 +65,76 @@ def do_search(query, uid, name):
         return {'error': 'Не удалось связаться с сервером'}
 
 
-def format_answer(text):
-    """Проверка HTML — если сломан, убираем теги."""
-    # Telegram не любит некоторые теги. Проверим баланс.
-    if '<b>' in text or '<code>' in text or '<i>' in text:
-        return text
-    return text
-
-
+# ==================== /start ====================
 @bot.message_handler(commands=['start'])
 def cmd_start(m):
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    kb.add(types.InlineKeyboardButton(
+        text='Открыть Mini App',
+        web_app=types.WebAppInfo(url=WEBAPP_URL)
+    ))
+
     text = (
         'DeepSeek Darkgram\n'
         '━━━━━━━━━━━━━━━\n\n'
         'Привет, ' + (m.from_user.first_name or 'друг') + '!\n\n'
         'AI-поиск с интернетом.\n\n'
         'Просто напиши вопрос — отвечу.\n'
-        'Или открой Mini App кнопкой.'
+        'Или открой Mini App кнопкой ниже.\n\n'
+        '/help — подробнее'
     )
-    bot.send_message(m.chat.id, text, reply_markup=webapp_kb())
+    bot.send_message(m.chat.id, text, reply_markup=kb)
 
 
+# ==================== /help ====================
 @bot.message_handler(commands=['help'])
 def cmd_help(m):
-    bot.send_message(m.chat.id,
-        'Помощь\n\n'
-        'Пиши вопрос — отвечу через AI + поиск.\n'
-        'Mini App — кнопкой ниже.',
-        reply_markup=webapp_kb())
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    kb.add(types.InlineKeyboardButton(
+        text='Открыть Mini App',
+        web_app=types.WebAppInfo(url=WEBAPP_URL)
+    ))
+
+    text = (
+        'DeepSeek Darkgram\n'
+        '━━━━━━━━━━━━━━━\n\n'
+        '<b>ЧТО ЭТО</b>\n\n'
+        'AI-поисковик с интернетом.\n'
+        'Задаёшь вопрос → ищет в интернете → '
+        'даёт умный ответ через нейросеть.\n\n'
+        '<b>ВОЗМОЖНОСТИ AI</b>\n\n'
+        '• Ищет в интернете\n'
+        '• Отвечает через нейросеть\n'
+        '• Оформляет ответ: <b>жирный</b>, <code>код</code>\n'
+        '• Не упоминает источники — просто ответ\n'
+        '• 10 источников за запрос\n\n'
+        '<b>КАК ПОЛЬЗОВАТЬСЯ</b>\n\n'
+        '<b>В боте:</b>\n'
+        '• Напиши вопрос в личке\n'
+        '• Или упомяни @бот в группе\n'
+        '• Или ответь на моё сообщение\n\n'
+        '<b>В Mini App:</b>\n'
+        '• Открой кнопкой ниже\n'
+        '• Больше функций: топ, профиль, графики\n\n'
+        '<b>КОМАНДЫ</b>\n\n'
+        '/start — начать\n'
+        '/help — эта справка\n'
+        '/app — открыть Mini App\n\n'
+        '<b>ТОКЕНЫ</b>\n\n'
+        '• 1000 при старте\n'
+        '• +50 каждый день\n'
+        '• 1 токен = 1 запрос'
+    )
+    bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=kb)
 
 
+# ==================== /app ====================
 @bot.message_handler(commands=['app'])
 def cmd_app(m):
-    bot.send_message(m.chat.id, 'Открой поиск:', reply_markup=webapp_kb())
+    bot.send_message(m.chat.id, 'Открой Mini App:', reply_markup=webapp_kb())
 
 
+# ==================== ПОИСК ====================
 def handle_query(m, query):
     uid = m.from_user.id
     name = m.from_user.first_name or 'Гость'
@@ -128,7 +164,6 @@ def handle_query(m, query):
 
     answer = data.get('answer', '')
 
-    # Telegram HTML
     try:
         bot.edit_message_text(
             answer,
@@ -139,10 +174,7 @@ def handle_query(m, query):
         )
     except Exception as e:
         print('html err:', e)
-        # если HTML сломан — отправляем как текст
         try:
-            # убираем теги
-            import re
             clean = re.sub(r'<[^>]+>', '', answer)
             bot.edit_message_text(
                 clean,
@@ -177,6 +209,7 @@ def handle_group(m):
     handle_query(m, text)
 
 
+# ==================== ЗАПУСК ====================
 if __name__ == '__main__':
     print('DeepSeek Darkgram bot started')
     bot.infinity_polling(timeout=30, long_polling_timeout=30)
