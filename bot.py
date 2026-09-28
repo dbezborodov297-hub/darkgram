@@ -7,9 +7,9 @@ import re
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from telebot import types
 
-TOKEN = '8514412667:AAFR0fwoa0CTvTdFJZSK65-4isUDJB7_o50'  # токен бота от @BotFather
-WEBAPP_URL = 'https://darkgram-2.onrender.com'  # адрес Mini App
-API_URL = 'https://darkgram-2.onrender.com'  # для API запросов
+TOKEN = '8514412667:AAHsRz3sZ2ns5we_AjoTs4j3wS9G3f_eeX0'
+WEBAPP_URL = 'https://darkgram-2.onrender.com'
+API_URL = 'https://darkgram-2.onrender.com'
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -47,12 +47,11 @@ def webapp_kb():
 
 
 def do_search(query, uid, name):
-    """Вызов API сервера."""
     try:
         r = requests.post(
             f'{API_URL}/api/search',
             json={'uid': uid, 'name': name, 'query': query},
-            timeout=60
+            timeout=90
         )
         if r.status_code == 200:
             return r.json()
@@ -65,7 +64,6 @@ def do_search(query, uid, name):
         return {'error': 'Не удалось связаться с сервером'}
 
 
-# ==================== /start ====================
 @bot.message_handler(commands=['start'])
 def cmd_start(m):
     kb = types.InlineKeyboardMarkup(row_width=1)
@@ -75,7 +73,7 @@ def cmd_start(m):
     ))
 
     text = (
-        'DeepSeek Darkgram\n'
+        'Darkgram AI\n'
         '━━━━━━━━━━━━━━━\n\n'
         'Привет, ' + (m.from_user.first_name or 'друг') + '!\n\n'
         'AI-поиск с интернетом.\n\n'
@@ -86,7 +84,6 @@ def cmd_start(m):
     bot.send_message(m.chat.id, text, reply_markup=kb)
 
 
-# ==================== /help ====================
 @bot.message_handler(commands=['help'])
 def cmd_help(m):
     kb = types.InlineKeyboardMarkup(row_width=1)
@@ -96,18 +93,19 @@ def cmd_help(m):
     ))
 
     text = (
-        'DeepSeek Darkgram\n'
+        'Darkgram AI\n'
         '━━━━━━━━━━━━━━━\n\n'
         '<b>ЧТО ЭТО</b>\n\n'
         'AI-поисковик с интернетом.\n'
         'Задаёшь вопрос → ищет в интернете → '
         'даёт умный ответ через нейросеть.\n\n'
         '<b>ВОЗМОЖНОСТИ AI</b>\n\n'
-        '• Ищет в интернете\n'
+        '• Ищет в интернете (12 источников)\n'
         '• Отвечает через нейросеть\n'
         '• Оформляет ответ: <b>жирный</b>, <code>код</code>\n'
         '• Не упоминает источники — просто ответ\n'
-        '• 10 источников за запрос\n\n'
+        '• Отвечает на любые вопросы\n'
+        '• Не отказывает\n\n'
         '<b>КАК ПОЛЬЗОВАТЬСЯ</b>\n\n'
         '<b>В боте:</b>\n'
         '• Напиши вопрос в личке\n'
@@ -128,13 +126,11 @@ def cmd_help(m):
     bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=kb)
 
 
-# ==================== /app ====================
 @bot.message_handler(commands=['app'])
 def cmd_app(m):
     bot.send_message(m.chat.id, 'Открой Mini App:', reply_markup=webapp_kb())
 
 
-# ==================== ПОИСК ====================
 def handle_query(m, query):
     uid = m.from_user.id
     name = m.from_user.first_name or 'Гость'
@@ -209,7 +205,6 @@ def handle_group(m):
     handle_query(m, text)
 
 
-# ==================== ЗАПУСК ====================
 if __name__ == '__main__':
-    print('DeepSeek Darkgram bot started')
+    print('Darkgram AI bot started')
     bot.infinity_polling(timeout=30, long_polling_timeout=30)
