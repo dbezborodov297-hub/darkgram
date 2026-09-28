@@ -4,7 +4,7 @@ import time
 import threading
 import requests
 from datetime import datetime, timedelta
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, Response
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder='webapp')
@@ -67,19 +67,15 @@ def index():
 def api_player():
     if request.method == 'POST':
         d = request.json or {}
-        uid = d.get('uid')
-        name = d.get('name', '')
+        uid = d.get('uid'); name = d.get('name', '')
     else:
-        uid = request.args.get('uid')
-        name = request.args.get('name', '')
+        uid = request.args.get('uid'); name = request.args.get('name', '')
     if not uid: return jsonify({'error': 'no uid'}), 400
     u = get_user(uid)
     if name: u['name'] = name
 
     now = int(time.time())
     today = datetime.now().date()
-
-    # Ежедневный бонус + стрик
     bonus_given = False
     last_bonus = u.get('last_bonus', 0)
     last_seen_day = u.get('last_seen_day', '')
@@ -87,13 +83,10 @@ def api_player():
     yesterday_str = (today - timedelta(days=1)).isoformat()
 
     if last_bonus == 0:
-        u['last_bonus'] = now
-        u['last_seen_day'] = today_str
-        u['streak'] = 1
+        u['last_bonus'] = now; u['last_seen_day'] = today_str; u['streak'] = 1
     elif last_seen_day != today_str:
         u['tokens'] = u.get('tokens', 0) + DAILY_BONUS
-        u['last_bonus'] = now
-        bonus_given = True
+        u['last_bonus'] = now; bonus_given = True
         if last_seen_day == yesterday_str:
             u['streak'] = u.get('streak', 0) + 1
         else:
@@ -102,8 +95,7 @@ def api_player():
     save_user(uid, u)
 
     return jsonify({
-        'uid': u['uid'],
-        'name': u.get('name', ''),
+        'uid': u['uid'], 'name': u.get('name', ''),
         'tokens': u.get('tokens', 0),
         'total_requests': u.get('total_requests', 0),
         'total_spent': u.get('total_spent', 0),
@@ -126,14 +118,13 @@ def api_save_settings():
     if not uid: return jsonify({'error': 'no uid'}), 400
     u = get_user(uid)
     for field in ['history_enabled', 'vibration', 'theme', 'accent', 'font', 'radius']:
-        if field in d:
-            u[field] = d[field]
+        if field in d: u[field] = d[field]
     save_user(uid, u)
     return jsonify({'ok': True})
 
 
 # ============ SEARCH ============
-def tavily_search(query, max_results=5):
+def tavily_search(query, max_results=10):
     start = time.time()
     try:
         r = requests.post(
@@ -153,7 +144,7 @@ def tavily_search(query, max_results=5):
                 results.append({
                     'title': item.get('title', ''),
                     'url': item.get('url', ''),
-                    'content': item.get('content', '')[:400],
+                    'content': item.get('content', '')[:500],
                 })
             return results, time.time() - start
         return [], time.time() - start
@@ -163,24 +154,29 @@ def tavily_search(query, max_results=5):
 
 
 def ai_answer(query, sources):
-    """Умный AI с структурой ответа."""
+    """AI с HTML-форматом, БЕЗ упоминания источников."""
     start = time.time()
     try:
+        # Для AI — топ-5 источников
         context = ''
-        for i, s in enumerate(sources, 1):
-            context += f"[{i}] {s['title']}\n{s['content']}\n\n"
+        for i, s in enumerate(sources[:5], 1):
+            context += f"{s['title']}\n{s['content']}\n\n"
 
         prompt = f"""Вопрос: {query}
 
-Найденные источники:
+Информация:
 {context}
 
-Структурируй ответ так:
-1. Краткий ответ (1-2 предложения)
-2. Подробнее (3-5 предложений с фактами)
-3. Источники: [1], [2] в конце
+Дай полный ответ на русском языке.
 
-Отвечай на русском, чётко и по делу."""
+ПРАВИЛА:
+- НЕ упоминай источники, ссылки, сайты
+- НЕ пиши "согласно источнику", "[1]", "по данным сайта"
+- Просто дай ответ, как будто ты сам знаешь
+- Оформляй красиво: <b>жирный</b> для заголовков, <code>код</code> для кода
+- Используй абзацы и списки где нужно
+- Никаких вводных фраз типа "Конечно!", "Отличный вопрос!"
+- Сразу к делу"""
 
         for attempt in range(3):
             try:
@@ -189,11 +185,11 @@ def ai_answer(query, sources):
                     json={
                         'model': 'openai',
                         'messages': [
-                            {'role': 'system', 'content': 'Ты — умный AI-поисковик DeepSeek Darkgram. Даёшь структурированные ответы.'},
+                            {'role': 'system', 'content': 'Ты — умный AI-ассистент. Отвечай чётко, красиво, на русском. Оформляй HTML-тегами <b>, <i>, <code>.'},
                             {'role': 'user', 'content': prompt}
                         ]
                     },
-                    timeout=50
+                    timeout=60
                 )
                 if r.status_code == 200:
                     data = r.json()
@@ -203,7 +199,6 @@ def ai_answer(query, sources):
             except Exception as e:
                 print(f'ai attempt {attempt+1} err:', e)
                 time.sleep(1)
-
         return None, time.time() - start
     except Exception as e:
         print('ai err:', e)
@@ -220,17 +215,15 @@ def api_search():
 
     u = get_user(uid)
     cost = SEARCH_TOKENS
-
     if u.get('tokens', 0) < cost:
         return jsonify({
             'error': 'tokens',
             'message': f'Недостаточно токенов. Нужно {cost}.',
-            'tokens': u.get('tokens', 0),
-            'cost': cost,
+            'tokens': u.get('tokens', 0), 'cost': cost,
         }), 400
 
     total_start = time.time()
-    sources, search_time = tavily_search(query, 5)
+    sources, search_time = tavily_search(query, 10)
     answer, ai_time = ai_answer(query, sources)
     total_time = time.time() - total_start
 
@@ -240,15 +233,13 @@ def api_search():
     save_user(uid, u)
 
     result = {
-        'ok': True,
-        'query': query,
-        'answer': answer or 'Не удалось получить ответ. Попробуй ещё раз.',
+        'ok': True, 'query': query,
+        'answer': answer or 'Не удалось получить ответ.',
         'sources': sources,
         'search_time': round(search_time, 2),
         'ai_time': round(ai_time, 2),
         'total_time': round(total_time, 2),
-        'cost': cost,
-        'tokens_left': u['tokens'],
+        'cost': cost, 'tokens_left': u['tokens'],
         'timestamp': int(time.time()),
     }
 
@@ -256,15 +247,80 @@ def api_search():
         history = load_json(HISTORY_FILE, {})
         user_hist = history.get(str(uid), [])
         user_hist.insert(0, {
-            'query': query,
-            'answer': result['answer'][:300],
-            'time': result['timestamp'],
-            'cost': cost,
+            'query': query, 'answer': result['answer'][:300],
+            'time': result['timestamp'], 'cost': cost,
         })
         history[str(uid)] = user_hist[:50]
         save_json(HISTORY_FILE, history)
 
     return jsonify(result)
+
+
+@app.route('/api/search/stream', methods=['POST'])
+def api_search_stream():
+    """SSE — отдаёт чанки постепенно."""
+    d = request.json or {}
+    uid = d.get('uid')
+    query = (d.get('query') or '').strip()
+    if not uid or not query:
+        return jsonify({'error': 'bad'}), 400
+
+    def generate():
+        try:
+            # Этап 1 — поиск
+            yield f"data: {json.dumps({'type': 'phase', 'phase': 1, 'text': 'Поиск в интернете...'})}\n\n"
+
+            u = get_user(uid)
+            if u.get('tokens', 0) < SEARCH_TOKENS:
+                yield f"data: {json.dumps({'type': 'error', 'message': 'Недостаточно токенов'})}\n\n"
+                return
+
+            total_start = time.time()
+            sources, search_time = tavily_search(query, 10)
+
+            yield f"data: {json.dumps({'type': 'phase', 'phase': 2, 'text': 'AI обрабатывает...'})}\n\n"
+
+            answer, ai_time = ai_answer(query, sources)
+            total_time = time.time() - total_start
+
+            if not answer:
+                yield f"data: {json.dumps({'type': 'error', 'message': 'AI не ответил'})}\n\n"
+                return
+
+            # Списываем токены
+            u['tokens'] = u.get('tokens', 0) - SEARCH_TOKENS
+            u['total_requests'] = u.get('total_requests', 0) + 1
+            u['total_spent'] = u.get('total_spent', 0) + SEARCH_TOKENS
+            save_user(uid, u)
+
+            # Этап 3 — стриминг текста
+            yield f"data: {json.dumps({'type': 'phase', 'phase': 3, 'text': 'Пишу ответ...'})}\n\n"
+
+            words = answer.split(' ')
+            chunk_size = 3
+            for i in range(0, len(words), chunk_size):
+                chunk = ' '.join(words[i:i+chunk_size])
+                if i > 0: chunk = ' ' + chunk
+                yield f"data: {json.dumps({'type': 'chunk', 'text': chunk})}\n\n"
+                time.sleep(0.15)
+
+            # Финальные данные
+            yield f"data: {json.dumps({'type': 'done', 'sources': sources, 'search_time': round(search_time, 2), 'ai_time': round(ai_time, 2), 'total_time': round(total_time, 2), 'tokens_left': u['tokens'], 'cost': SEARCH_TOKENS})}\n\n"
+
+            if u.get('history_enabled', True):
+                history = load_json(HISTORY_FILE, {})
+                user_hist = history.get(str(uid), [])
+                user_hist.insert(0, {
+                    'query': query, 'answer': answer[:300],
+                    'time': int(time.time()), 'cost': SEARCH_TOKENS,
+                })
+                history[str(uid)] = user_hist[:50]
+                save_json(HISTORY_FILE, history)
+        except Exception as e:
+            print('stream err:', e)
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+
+    return Response(generate(), mimetype='text/event-stream')
 
 
 @app.route('/api/history')
@@ -292,71 +348,48 @@ def api_stats():
     if not uid: return jsonify({'error': 'no uid'}), 400
     history = load_json(HISTORY_FILE, {})
     user_hist = history.get(str(uid), [])
-
     days = []
     today = datetime.now().date()
     for i in range(6, -1, -1):
         day = today - timedelta(days=i)
         day_start = int(datetime.combine(day, datetime.min.time()).timestamp())
         day_end = day_start + 86400
-        spent = sum(h.get('cost', 0) for h in user_hist
-                    if day_start <= h.get('time', 0) < day_end)
-        count = sum(1 for h in user_hist
-                    if day_start <= h.get('time', 0) < day_end)
+        spent = sum(h.get('cost', 0) for h in user_hist if day_start <= h.get('time', 0) < day_end)
+        count = sum(1 for h in user_hist if day_start <= h.get('time', 0) < day_end)
         days.append({
             'date': day.strftime('%d.%m'),
             'day_short': ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][day.weekday()],
-            'spent': spent,
-            'count': count,
+            'spent': spent, 'count': count,
         })
-
     return jsonify({'days': days})
 
 
-# ============ TOP ============
 @app.route('/api/top')
 def api_top():
     category = request.args.get('category', 'requests')
     uid = request.args.get('uid')
-
     users = load_json(USERS_FILE, {})
     arr = []
     for k, u in users.items():
         if not u.get('name') and not u.get('username'): continue
         arr.append({
-            'uid': u.get('uid'),
-            'name': u.get('name', 'Гость'),
+            'uid': u.get('uid'), 'name': u.get('name', 'Гость'),
             'username': u.get('username', ''),
             'requests': u.get('total_requests', 0),
             'spent': u.get('total_spent', 0),
             'streak': u.get('streak', 0),
             'tokens': u.get('tokens', 0),
         })
-
-    if category == 'tokens':
-        arr.sort(key=lambda x: x['spent'], reverse=True)
-    elif category == 'streak':
-        arr.sort(key=lambda x: x['streak'], reverse=True)
-    else:
-        arr.sort(key=lambda x: x['requests'], reverse=True)
-
+    if category == 'tokens': arr.sort(key=lambda x: x['spent'], reverse=True)
+    elif category == 'streak': arr.sort(key=lambda x: x['streak'], reverse=True)
+    else: arr.sort(key=lambda x: x['requests'], reverse=True)
     top = arr[:30]
-
-    my_place = None
-    my_data = None
+    my_place = None; my_data = None
     if uid:
         for i, u in enumerate(arr, 1):
             if str(u['uid']) == str(uid):
-                my_place = i
-                my_data = u
-                break
-
-    return jsonify({
-        'top': top,
-        'my_place': my_place,
-        'my_data': my_data,
-        'category': category,
-    })
+                my_place = i; my_data = u; break
+    return jsonify({'top': top, 'my_place': my_place, 'my_data': my_data, 'category': category})
 
 
 @app.route('/api/ping')
