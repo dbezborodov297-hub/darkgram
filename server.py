@@ -38,18 +38,14 @@ def get_user(uid):
     key = str(uid)
     if key not in users:
         users[key] = {
-            'uid': uid,
+            'uid': uid, 'name': '', 'username': '',
             'tokens': START_TOKENS,
-            'total_requests': 0,
-            'total_spent': 0,
-            'joined': int(time.time()),
-            'last_bonus': 0,
-            'history_enabled': True,
-            'vibration': True,
-            'theme': 'dark',
-            'accent': 'purple',
-            'font': 'medium',
-            'radius': 'md',
+            'total_requests': 0, 'total_spent': 0,
+            'joined': int(time.time()), 'last_bonus': 0,
+            'history_enabled': True, 'vibration': True,
+            'theme': 'dark', 'accent': 'purple',
+            'font': 'medium', 'radius': 'md',
+            'streak': 0, 'last_seen_day': '',
         }
         save_json(USERS_FILE, users)
     return users[key]
@@ -72,31 +68,47 @@ def api_player():
     if request.method == 'POST':
         d = request.json or {}
         uid = d.get('uid')
+        name = d.get('name', '')
     else:
         uid = request.args.get('uid')
+        name = request.args.get('name', '')
     if not uid: return jsonify({'error': 'no uid'}), 400
     u = get_user(uid)
+    if name: u['name'] = name
+
     now = int(time.time())
-    last_bonus = u.get('last_bonus', 0)
+    today = datetime.now().date()
+
+    # Ежедневный бонус + стрик
     bonus_given = False
+    last_bonus = u.get('last_bonus', 0)
+    last_seen_day = u.get('last_seen_day', '')
+    today_str = today.isoformat()
+    yesterday_str = (today - timedelta(days=1)).isoformat()
+
     if last_bonus == 0:
         u['last_bonus'] = now
-        save_user(uid, u)
-    else:
-        last_date = datetime.fromtimestamp(last_bonus).date()
-        today = datetime.now().date()
-        if last_date < today:
-            u['tokens'] = u.get('tokens', 0) + DAILY_BONUS
-            u['last_bonus'] = now
-            bonus_given = True
-            save_user(uid, u)
+        u['last_seen_day'] = today_str
+        u['streak'] = 1
+    elif last_seen_day != today_str:
+        u['tokens'] = u.get('tokens', 0) + DAILY_BONUS
+        u['last_bonus'] = now
+        bonus_given = True
+        if last_seen_day == yesterday_str:
+            u['streak'] = u.get('streak', 0) + 1
+        else:
+            u['streak'] = 1
+        u['last_seen_day'] = today_str
+    save_user(uid, u)
 
     return jsonify({
         'uid': u['uid'],
+        'name': u.get('name', ''),
         'tokens': u.get('tokens', 0),
         'total_requests': u.get('total_requests', 0),
         'total_spent': u.get('total_spent', 0),
         'joined': u.get('joined', 0),
+        'streak': u.get('streak', 0),
         'history_enabled': u.get('history_enabled', True),
         'vibration': u.get('vibration', True),
         'theme': u.get('theme', 'dark'),
@@ -121,18 +133,18 @@ def api_save_settings():
 
 
 # ============ SEARCH ============
-def tavily_search(query, max_results=3):
+def tavily_search(query, max_results=5):
     start = time.time()
     try:
         r = requests.post(
             'https://api.tavily.com/search',
             json={
                 'query': query,
-                'search_depth': 'basic',
+                'search_depth': 'advanced',
                 'max_results': max_results,
                 'include_answer': False
             },
-            timeout=15
+            timeout=20
         )
         if r.status_code == 200:
             data = r.json()
@@ -141,7 +153,7 @@ def tavily_search(query, max_results=3):
                 results.append({
                     'title': item.get('title', ''),
                     'url': item.get('url', ''),
-                    'content': item.get('content', '')[:300],
+                    'content': item.get('content', '')[:400],
                 })
             return results, time.time() - start
         return [], time.time() - start
@@ -151,7 +163,7 @@ def tavily_search(query, max_results=3):
 
 
 def ai_answer(query, sources):
-    """Стабильная модель openai через Pollinations."""
+    """Умный AI с структурой ответа."""
     start = time.time()
     try:
         context = ''
@@ -160,29 +172,33 @@ def ai_answer(query, sources):
 
         prompt = f"""Вопрос: {query}
 
-Источники:
+Найденные источники:
 {context}
 
-Дай краткий и точный ответ на русском, 2-4 предложения. Используй источники."""
+Структурируй ответ так:
+1. Краткий ответ (1-2 предложения)
+2. Подробнее (3-5 предложений с фактами)
+3. Источники: [1], [2] в конце
 
-        # Пробуем 2 раза
-        for attempt in range(2):
+Отвечай на русском, чётко и по делу."""
+
+        for attempt in range(3):
             try:
                 r = requests.post(
                     'https://text.pollinations.ai/openai',
                     json={
                         'model': 'openai',
                         'messages': [
-                            {'role': 'system', 'content': 'Ты — AI-помощник DeepSeek Darkgram. Отвечай кратко на русском.'},
+                            {'role': 'system', 'content': 'Ты — умный AI-поисковик DeepSeek Darkgram. Даёшь структурированные ответы.'},
                             {'role': 'user', 'content': prompt}
                         ]
                     },
-                    timeout=45
+                    timeout=50
                 )
                 if r.status_code == 200:
                     data = r.json()
                     answer = data.get('choices', [{}])[0].get('message', {}).get('content', '')
-                    if answer and len(answer) > 5:
+                    if answer and len(answer) > 10:
                         return answer, time.time() - start
             except Exception as e:
                 print(f'ai attempt {attempt+1} err:', e)
@@ -214,7 +230,7 @@ def api_search():
         }), 400
 
     total_start = time.time()
-    sources, search_time = tavily_search(query, 3)
+    sources, search_time = tavily_search(query, 5)
     answer, ai_time = ai_answer(query, sources)
     total_time = time.time() - total_start
 
@@ -295,6 +311,52 @@ def api_stats():
         })
 
     return jsonify({'days': days})
+
+
+# ============ TOP ============
+@app.route('/api/top')
+def api_top():
+    category = request.args.get('category', 'requests')
+    uid = request.args.get('uid')
+
+    users = load_json(USERS_FILE, {})
+    arr = []
+    for k, u in users.items():
+        if not u.get('name') and not u.get('username'): continue
+        arr.append({
+            'uid': u.get('uid'),
+            'name': u.get('name', 'Гость'),
+            'username': u.get('username', ''),
+            'requests': u.get('total_requests', 0),
+            'spent': u.get('total_spent', 0),
+            'streak': u.get('streak', 0),
+            'tokens': u.get('tokens', 0),
+        })
+
+    if category == 'tokens':
+        arr.sort(key=lambda x: x['spent'], reverse=True)
+    elif category == 'streak':
+        arr.sort(key=lambda x: x['streak'], reverse=True)
+    else:
+        arr.sort(key=lambda x: x['requests'], reverse=True)
+
+    top = arr[:30]
+
+    my_place = None
+    my_data = None
+    if uid:
+        for i, u in enumerate(arr, 1):
+            if str(u['uid']) == str(uid):
+                my_place = i
+                my_data = u
+                break
+
+    return jsonify({
+        'top': top,
+        'my_place': my_place,
+        'my_data': my_data,
+        'category': category,
+    })
 
 
 @app.route('/api/ping')
