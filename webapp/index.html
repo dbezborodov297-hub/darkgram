@@ -11,7 +11,7 @@
 :root{
   --bg:#000;--card:#1c1c1e;--card-2:#2c2c2e;--line:#38383a;
   --text:#fff;--dim:#98989f;--muted:#636366;
-  --accent:#0a84ff;--accent-2:#409cff;
+  --accent:#bf5af2;--accent-2:#5e5ce6;
   --green:#30d158;--gold:#ffd60a;--red:#ff453a;
   --orange:#ff9f0a;--purple:#bf5af2;--pink:#ff375f;
   --teal:#5ac8fa;--indigo:#5e5ce6;
@@ -50,21 +50,32 @@ body{
   min-height:44px;
 }
 body.theme-light .header{background:rgba(242,242,247,0.85)}
-.header-left{display:flex;align-items:center;gap:8px}
-.header .logo{
+.header-left{display:flex;align-items:center;gap:10px}
+.logo-icon{
+  width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 4px 12px rgba(191,90,242,0.3);
+}
+.logo-icon svg{
+  width:20px;height:20px;stroke:#fff;fill:none;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+}
+.header-text .logo{
   font-size:16px;font-weight:700;letter-spacing:-.3px;
-  background:linear-gradient(90deg,#0a84ff,#bf5af2);
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
 }
-.header .sub{font-size:11px;color:var(--muted);letter-spacing:.3px;margin-top:1px}
+.header-text .sub{font-size:11px;color:var(--muted);letter-spacing:.3px;margin-top:1px}
 .header-right{display:flex;align-items:center;gap:8px}
 .tokens-badge{
   display:flex;align-items:center;gap:5px;
   font-size:13px;font-weight:600;
-  color:var(--gold);
-  background:rgba(255,214,10,0.12);
-  border:1px solid rgba(255,214,10,0.25);
+  color:var(--accent-2);
+  background:rgba(191,90,242,0.12);
+  border:1px solid rgba(191,90,242,0.25);
   padding:5px 10px;border-radius:20px;
 }
 .tokens-badge svg{
@@ -109,8 +120,8 @@ stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 }
 .search-input::placeholder{color:var(--muted)}
 .search-btn{
-  background:var(--accent);color:#fff;
-  border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:#fff;border:none;border-radius:12px;
   padding:14px;width:100%;
   font-size:16px;font-weight:600;
   font-family:inherit;cursor:pointer;
@@ -123,16 +134,7 @@ stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   width:18px;height:18px;stroke:#fff;fill:none;
   stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;
 }
-.mode-indicator{
-  display:flex;align-items:center;gap:6px;
-  font-size:12px;color:var(--dim);
-  padding:8px 16px 0;
-}
-.mode-indicator svg{
-  width:14px;height:14px;stroke:currentColor;fill:none;
-  stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
-}
-.mode-indicator b{color:var(--accent-2);font-weight:600}
+.search-btn:disabled svg{stroke:var(--muted)}
 
 /* TIMER + ANIMATED ICON */
 .searching-box{
@@ -157,58 +159,29 @@ stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .searching-icon .icon-layer.active{opacity:1}
 .searching-icon .icon-layer svg{
   width:44px;height:44px;
-  stroke:var(--accent);fill:none;
+  stroke:var(--accent-2);fill:none;
   stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
 }
-.icon-pulse{
-  animation:pulseIcon 1.5s ease-in-out infinite;
-}
-@keyframes pulseIcon{
-  0%,100%{transform:scale(1);opacity:1}
-  50%{transform:scale(1.15);opacity:.7}
-}
-.icon-spin{
-  animation:spinIcon 2s linear infinite;
-}
-@keyframes spinIcon{
-  from{transform:rotate(0)}
-  to{transform:rotate(360deg)}
-}
-.icon-bounce{
-  animation:bounceIcon 1s ease-in-out infinite;
-}
-@keyframes bounceIcon{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-8px)}
-}
-.icon-dots{
-  display:flex;gap:6px;
-}
+.icon-pulse{animation:pulseIcon 1.5s ease-in-out infinite}
+@keyframes pulseIcon{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.7}}
+.icon-spin{animation:spinIcon 2s linear infinite}
+@keyframes spinIcon{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.icon-dots{display:flex;gap:6px}
 .icon-dots span{
   width:10px;height:10px;border-radius:50%;
-  background:var(--accent);
+  background:var(--accent-2);
   animation:dotBounce 1.2s infinite;
 }
 .icon-dots span:nth-child(2){animation-delay:.15s}
 .icon-dots span:nth-child(3){animation-delay:.3s}
-@keyframes dotBounce{
-  0%,100%{transform:translateY(0);opacity:.4}
-  50%{transform:translateY(-10px);opacity:1}
-}
-.timer-progress{
-  position:absolute;inset:0;
-}
+@keyframes dotBounce{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-10px);opacity:1}}
+.timer-progress{position:absolute;inset:0}
 .timer-progress svg{transform:rotate(-90deg)}
 .timer-progress .bg{stroke:var(--card-2);fill:none;stroke-width:3}
 .timer-progress .fg{stroke:var(--accent);fill:none;stroke-width:3;
 stroke-linecap:round;transition:stroke-dashoffset .1s linear}
-.searching-status{
-  font-size:15px;font-weight:600;
-  margin-bottom:4px;letter-spacing:-.3px;
-}
-.searching-time{
-  font-size:13px;color:var(--dim);
-}
+.searching-status{font-size:15px;font-weight:600;margin-bottom:4px;letter-spacing:-.3px}
+.searching-time{font-size:13px;color:var(--dim)}
 .searching-time b{color:var(--text);font-weight:600}
 
 .result-box{padding:0;display:none}
@@ -241,8 +214,8 @@ stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .source-item:active{background:var(--card-2)}
 .source-num{
   width:24px;height:24px;border-radius:6px;
-  background:var(--accent);color:#fff;
-  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:#fff;display:flex;align-items:center;justify-content:center;
   font-size:12px;font-weight:700;flex-shrink:0;
 }
 .source-info{flex:1;min-width:0}
@@ -253,7 +226,7 @@ stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   -webkit-box-orient:vertical;line-height:1.3;
 }
 .source-url{
-  font-size:11px;color:var(--accent);
+  font-size:11px;color:var(--accent-2);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 .result-meta{
@@ -263,21 +236,17 @@ stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   font-size:12px;color:var(--dim);
   justify-content:center;
 }
-.result-meta .m-item{
-  display:flex;align-items:center;gap:4px;
-}
-.result-meta .m-item svg{
-  width:12px;height:12px;stroke:currentColor;fill:none;
-  stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;
-}
+.result-meta .m-item{display:flex;align-items:center;gap:4px}
+.result-meta .m-item svg{width:12px;height:12px;stroke:currentColor;fill:none;
+stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .result-meta b{color:var(--text);font-weight:600}
 .empty-state{text-align:center;padding:60px 30px}
 .empty-icon{
   width:80px;height:80px;border-radius:24px;
-  background:linear-gradient(135deg,#0a84ff,#bf5af2);
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
   display:flex;align-items:center;justify-content:center;
   margin:0 auto 18px;
-  box-shadow:0 8px 32px rgba(10,132,255,0.35);
+  box-shadow:0 8px 32px rgba(191,90,242,0.35);
 }
 .empty-icon svg{
   width:40px;height:40px;stroke:#fff;fill:none;
@@ -294,10 +263,10 @@ stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 }
 .profile-avatar{
   width:84px;height:84px;border-radius:50%;
-  background:linear-gradient(135deg,#0a84ff,#bf5af2);
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
   display:flex;align-items:center;justify-content:center;
   margin:0 auto 14px;
-  box-shadow:0 8px 24px rgba(10,132,255,0.35);
+  box-shadow:0 8px 24px rgba(191,90,242,0.35);
 }
 .profile-avatar svg{
   width:42px;height:42px;stroke:#fff;fill:none;
@@ -307,26 +276,27 @@ stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .profile-sub{font-size:13px;color:var(--dim);margin-top:4px}
 
 .tokens-card{
-  background:linear-gradient(135deg,rgba(255,214,10,0.15),rgba(255,159,10,0.08));
-  border:1px solid rgba(255,214,10,0.25);
+  background:linear-gradient(135deg,rgba(191,90,242,0.18),rgba(94,92,230,0.08));
+  border:1px solid rgba(191,90,242,0.3);
   border-radius:var(--radius);
   padding:20px;margin-bottom:14px;
   display:flex;align-items:center;gap:16px;
 }
 .tokens-icon{
   width:56px;height:56px;border-radius:16px;
-  background:linear-gradient(135deg,#ffd60a,#ff9f0a);
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
+  box-shadow:0 6px 20px rgba(191,90,242,0.4);
 }
 .tokens-icon svg{
-  width:28px;height:28px;stroke:#1a1408;fill:none;
+  width:28px;height:28px;stroke:#fff;fill:none;
   stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
 }
 .tokens-info{flex:1;min-width:0}
 .tokens-label{font-size:12px;color:var(--dim);font-weight:600;
 text-transform:uppercase;letter-spacing:.8px}
-.tokens-value{font-size:32px;font-weight:800;color:var(--gold);
+.tokens-value{font-size:32px;font-weight:800;color:var(--text);
 letter-spacing:-1.2px;line-height:1;margin-top:4px}
 .tokens-hint{font-size:12px;color:var(--dim);margin-top:4px}
 
@@ -343,15 +313,12 @@ letter-spacing:-1.2px;line-height:1;margin-top:4px}
 .stat-ic svg{width:20px;height:20px;stroke:#fff;fill:none;
 stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .stat-ic.blue{background:#0a84ff}
-.stat-ic.green{background:#30d158}
-.stat-ic.purple{background:#bf5af2}
-.stat-ic.orange{background:#ff9f0a}
+.stat-ic.purple{background:linear-gradient(135deg,var(--accent),var(--accent-2))}
 .stat-k{font-size:11px;color:var(--dim);text-transform:uppercase;
 letter-spacing:.5px;font-weight:600}
 .stat-v{font-size:20px;font-weight:700;letter-spacing:-.5px;line-height:1;
 margin-top:3px}
 
-/* CHART */
 .chart-card{
   background:var(--card);border-radius:var(--radius);
   padding:16px;margin-bottom:14px;
@@ -373,26 +340,16 @@ stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .chart-col{
   flex:1;display:flex;flex-direction:column;
   align-items:center;gap:4px;
-  height:100%;
-  justify-content:flex-end;
+  height:100%;justify-content:flex-end;
 }
 .chart-bar{
-  width:100%;
-  border-radius:6px 6px 2px 2px;
+  width:100%;border-radius:6px 6px 2px 2px;
   background:linear-gradient(180deg,var(--accent),var(--accent-2));
-  min-height:4px;
-  transition:.3s;
-  position:relative;
+  min-height:4px;transition:.3s;
 }
 .chart-bar.zero{background:var(--card-2)}
-.chart-val{
-  font-size:10px;font-weight:700;
-  color:var(--text);
-  margin-bottom:2px;
-}
-.chart-day{
-  font-size:10px;color:var(--muted);font-weight:600;
-}
+.chart-val{font-size:10px;font-weight:700;color:var(--text);margin-bottom:2px}
+.chart-day{font-size:10px;color:var(--muted);font-weight:600}
 .chart-summary{
   display:flex;justify-content:space-between;
   padding-top:12px;border-top:.5px solid var(--line);
@@ -400,7 +357,6 @@ stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 }
 .chart-summary b{color:var(--text);font-weight:600}
 
-/* HISTORY */
 .section-header{
   font-size:13px;font-weight:600;color:var(--muted);
   text-transform:uppercase;letter-spacing:.5px;
@@ -425,7 +381,7 @@ stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .history-meta{font-size:11px;color:var(--muted);
 display:flex;gap:8px;align-items:center}
-.history-cost{color:var(--gold);font-weight:600}
+.history-cost{color:var(--accent-2);font-weight:600}
 
 /* SETTINGS */
 .settings-screen{
@@ -448,10 +404,10 @@ display:flex;gap:8px;align-items:center}
 }
 body.theme-light .settings-header{background:rgba(242,242,247,0.85)}
 .back-btn{background:none;border:none;cursor:pointer;
-color:var(--accent);font-size:17px;font-weight:400;
+color:var(--accent-2);font-size:17px;font-weight:400;
 font-family:inherit;display:flex;align-items:center;gap:2px;
 padding:6px 6px 6px 0}
-.back-btn svg{width:11px;height:19px;stroke:var(--accent);fill:none;
+.back-btn svg{width:11px;height:19px;stroke:var(--accent-2);fill:none;
 stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .settings-title{font-size:17px;font-weight:600;
 flex:1;text-align:center;margin-right:60px}
@@ -470,7 +426,6 @@ flex:1;text-align:center;margin-right:60px}
 .row .row-info{flex:1;min-width:0}
 .row .row-title{font-size:17px;font-weight:400;letter-spacing:-.4px;line-height:1.3}
 .row .row-sub{font-size:13px;color:var(--dim);margin-top:2px}
-.row .row-value{font-size:17px;color:var(--dim);white-space:nowrap}
 .row .chev{color:var(--muted);font-size:20px;font-weight:300;margin-left:auto}
 .ic{
   width:29px;height:29px;border-radius:7px;
@@ -484,15 +439,12 @@ flex:1;text-align:center;margin-right:60px}
 }
 .ic svg{width:17px;height:17px;stroke:#fff;fill:none;
 stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;position:relative;z-index:1}
+.ic.purple{background:linear-gradient(135deg,var(--accent),var(--accent-2))}
 .ic.blue{background:#0a84ff}
-.ic.purple{background:#bf5af2}
-.ic.teal{background:#5ac8fa}
 .ic.green{background:#30d158}
 .ic.orange{background:#ff9f0a}
-.ic.gray{background:#8e8e93}
 .ic.red{background:#ff453a}
-.ic.gold{background:#ffd60a}
-.ic.gold svg{stroke:#1a1408}
+.ic.gray{background:#8e8e93}
 .switch{width:51px;height:31px;background:var(--card-2);
 border-radius:20px;position:relative;cursor:pointer;
 transition:background .2s;flex-shrink:0}
@@ -507,7 +459,7 @@ background:var(--card-2);border-radius:10px}
 border:2px solid transparent;cursor:pointer;
 display:flex;align-items:center;justify-content:center;
 font-size:11px;font-weight:700}
-.theme-swatch.active{border-color:var(--accent)}
+.theme-swatch.active{border-color:var(--accent-2)}
 .theme-swatch.dark{background:#000;color:#fff}
 .theme-swatch.light{background:#f2f2f7;color:#000}
 .color-dots{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
@@ -521,41 +473,6 @@ border-radius:6px;cursor:pointer;color:var(--dim);
 font-weight:500;font-family:inherit;background:none;border:none}
 .seg-btn.active{background:var(--card);color:var(--text);
 box-shadow:0 1px 3px rgba(0,0,0,0.15)}
-
-/* MODE PICKER */
-.mode-list{padding:0}
-.mode-item{
-  display:flex;align-items:center;gap:14px;
-  padding:14px 16px;
-  border-top:.5px solid var(--line);
-  cursor:pointer;transition:.12s;
-}
-.mode-item:first-child{border-top:none}
-.mode-item:active{background:var(--card-2)}
-.mode-item.active{background:rgba(10,132,255,0.08)}
-.mode-ic{
-  width:36px;height:36px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-}
-.mode-ic svg{width:20px;height:20px;stroke:#fff;fill:none;
-stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.mode-ic.turbo{background:linear-gradient(135deg,#ff453a,#ff9f0a)}
-.mode-ic.fast{background:linear-gradient(135deg,#ff9f0a,#ffd60a)}
-.mode-ic.balanced{background:linear-gradient(135deg,#0a84ff,#5ac8fa)}
-.mode-ic.standard{background:linear-gradient(135deg,#bf5af2,#5e5ce6)}
-.mode-ic.smart{background:linear-gradient(135deg,#30d158,#63e6e2)}
-.mode-info{flex:1;min-width:0}
-.mode-name{font-size:16px;font-weight:600;letter-spacing:-.3px}
-.mode-desc{font-size:12px;color:var(--dim);margin-top:2px}
-.mode-cost{
-  font-size:13px;font-weight:700;color:var(--gold);
-  display:flex;align-items:center;gap:4px;flex-shrink:0;
-}
-.mode-cost svg{width:12px;height:12px;stroke:currentColor;fill:none;
-stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-.mode-check{color:var(--accent);font-size:18px;font-weight:600;
-margin-left:6px}
 
 /* BOTTOM NAV */
 .nav{
@@ -606,7 +523,10 @@ padding:14px 16px;line-height:1.55}
 
 <div class="header">
   <div class="header-left">
-    <div>
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 01-4.96.44 2.5 2.5 0 01-2.96-3.08 3 3 0 01-.34-5.58 2.5 2.5 0 011.32-4.24 2.5 2.5 0 011.98-3A2.5 2.5 0 019.5 2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44 2.5 2.5 0 002.96-3.08 3 3 0 00.34-5.58 2.5 2.5 0 00-1.32-4.24 2.5 2.5 0 00-1.98-3A2.5 2.5 0 0014.5 2z"/></svg>
+    </div>
+    <div class="header-text">
       <div class="logo">DeepSeek Darkgram</div>
       <div class="sub">AI + поиск</div>
     </div>
@@ -638,11 +558,6 @@ padding:14px 16px;line-height:1.55}
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span id="searchBtnText">Найти</span>
         </button>
-      </div>
-      <div class="mode-indicator">
-        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        Режим: <b id="modeLabel">Балансированный</b>
-        <span style="margin-left:auto" id="costLabel">3 токена</span>
       </div>
     </div>
 
@@ -683,7 +598,7 @@ padding:14px 16px;line-height:1.55}
 
     <div id="emptyState" class="empty-state">
       <div class="empty-icon">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 01-4.96.44 2.5 2.5 0 01-2.96-3.08 3 3 0 01-.34-5.58 2.5 2.5 0 011.32-4.24 2.5 2.5 0 011.98-3A2.5 2.5 0 019.5 2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44 2.5 2.5 0 002.96-3.08 3 3 0 00.34-5.58 2.5 2.5 0 00-1.32-4.24 2.5 2.5 0 00-1.98-3A2.5 2.5 0 0014.5 2z"/></svg>
       </div>
       <div class="empty-title">AI-Поиск</div>
       <div class="empty-desc">Задай вопрос — найду в интернете и дам ответ</div>
@@ -712,11 +627,11 @@ padding:14px 16px;line-height:1.55}
 
     <div class="stats-grid">
       <div class="stat-box">
-        <div class="stat-ic blue"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <div class="stat-ic purple"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
         <div><div class="stat-k">Запросов</div><div class="stat-v" id="statRequests">0</div></div>
       </div>
       <div class="stat-box">
-        <div class="stat-ic orange"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/></svg></div>
+        <div class="stat-ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/></svg></div>
         <div><div class="stat-k">Потрачено</div><div class="stat-v" id="statSpent">0</div></div>
       </div>
     </div>
@@ -728,7 +643,7 @@ padding:14px 16px;line-height:1.55}
       </div>
       <div class="chart-bars" id="chartBars"></div>
       <div class="chart-summary">
-        <span>Всего за неделю: <b id="chartTotal">0</b></span>
+        <span>Всего: <b id="chartTotal">0</b></span>
         <span>Запросов: <b id="chartRequests">0</b></span>
       </div>
     </div>
@@ -758,15 +673,10 @@ padding:14px 16px;line-height:1.55}
   </div>
   <div class="settings-container">
 
-    <div class="section-header">Система поиска</div>
-    <div class="card">
-      <div class="mode-list" id="modeList"></div>
-    </div>
-
     <div class="section-header">Внешний вид</div>
     <div class="card">
       <div class="row">
-        <div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 000 18 4.5 4.5 0 000-9 4.5 4.5 0 010-9z"/></svg></div>
+        <div class="ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 000 18 4.5 4.5 0 000-9 4.5 4.5 0 010-9z"/></svg></div>
         <div class="row-info"><div class="row-title">Тема</div></div>
         <div class="theme-preview">
           <div class="theme-swatch dark" onclick="setTheme('dark')" id="sw-dark">◐</div>
@@ -779,7 +689,7 @@ padding:14px 16px;line-height:1.55}
         <div class="color-dots" id="accentDots"></div>
       </div>
       <div class="row">
-        <div class="ic teal"><svg viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M12 4v16"/></svg></div>
+        <div class="ic blue"><svg viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M12 4v16"/></svg></div>
         <div class="row-info"><div class="row-title">Размер текста</div></div>
         <div class="seg-control">
           <button class="seg-btn" onclick="setFont('small')" data-f="small">S</button>
@@ -807,7 +717,7 @@ padding:14px 16px;line-height:1.55}
         <div class="switch" id="sw-history"></div>
       </div>
       <div class="row tappable" onclick="toggleVibration()">
-        <div class="ic indigo"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 9h14"/><path d="M5 15h14"/></svg></div>
+        <div class="ic blue"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 9h14"/><path d="M5 15h14"/></svg></div>
         <div class="row-info"><div class="row-title">Вибрация</div></div>
         <div class="switch" id="sw-vibration"></div>
       </div>
@@ -826,16 +736,16 @@ padding:14px 16px;line-height:1.55}
     <div class="section-header">О приложении</div>
     <div class="card">
       <div class="row">
-        <div class="ic indigo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
+        <div class="ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
         <div class="row-info">
           <div class="row-title">DeepSeek Darkgram</div>
-          <div class="row-sub">v1.0.0</div>
+          <div class="row-sub">v1.1.0</div>
         </div>
       </div>
       <div class="about-text">
         <b>AI-поиск с интернетом.</b><br><br>
         Задавай вопросы — бот ищет в интернете и отвечает через AI.<br><br>
-        Использует Tavily Search + Pollinations AI.
+        Стоимость запроса: 1 токен.
       </div>
     </div>
 
@@ -852,36 +762,18 @@ const user = tg?.initDataUnsafe?.user || { id: 0, first_name: 'Гость', user
 const UID = user.id;
 
 let player = { tokens: 0, total_requests: 0, total_spent: 0, joined: 0 };
-let modes = {};
-let currentMode = 'balanced';
 let settings = {
-  theme: 'dark', accent: 'blue', font: 'medium', radius: 'md',
+  theme: 'dark', accent: 'purple', font: 'medium', radius: 'md',
   historyEnabled: true, vibration: true,
 };
 
 const ACCENTS = {
-  blue:['#0a84ff','#409cff'], purple:['#bf5af2','#bf5af2'],
-  green:['#30d158','#30d158'], orange:['#ff9f0a','#ff9f0a'],
-  red:['#ff453a','#ff453a'], pink:['#ff375f','#ff375f'],
+  blue:['#0a84ff','#409cff'], purple:['#bf5af2','#5e5ce6'],
+  green:['#30d158','#63e6e2'], orange:['#ff9f0a','#ffd60a'],
+  red:['#ff453a','#ff375f'], pink:['#ff375f','#bf5af2'],
 };
 
-const MODE_ICONS = {
-  turbo: '<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
-  fast: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
-  balanced: '<svg viewBox="0 0 24 24"><path d="M12 2v20"/><path d="M2 12h20"/></svg>',
-  standard: '<svg viewBox="0 0 24 24"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/></svg>',
-  smart: '<svg viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 01-4.96.44 2.5 2.5 0 01-2.96-3.08 3 3 0 01-.34-5.58 2.5 2.5 0 011.32-4.24 2.5 2.5 0 011.98-3A2.5 2.5 0 019.5 2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44 2.5 2.5 0 002.96-3.08 3 3 0 00.34-5.58 2.5 2.5 0 00-1.32-4.24 2.5 2.5 0 00-1.98-3A2.5 2.5 0 0014.5 2z"/></svg>',
-};
-
-const MODE_DESCS = {
-  turbo: 'Мгновенный ответ',
-  fast: 'Быстрый, кратко',
-  balanced: 'Оптимальный',
-  standard: 'Развёрнуто',
-  smart: 'Глубокий анализ',
-};
-
-const SETTINGS_KEY = 'ds_settings_v2';
+const SETTINGS_KEY = 'ds_settings_v3';
 
 function loadSettings(){
   try {
@@ -900,7 +792,7 @@ function applySettings(){
   document.body.classList.add('font-' + settings.font);
   document.body.classList.remove('radius-sm','radius-md','radius-lg');
   document.body.classList.add('radius-' + settings.radius);
-  const [a1,a2] = ACCENTS[settings.accent] || ACCENTS.blue;
+  const [a1,a2] = ACCENTS[settings.accent] || ACCENTS.purple;
   document.documentElement.style.setProperty('--accent', a1);
   document.documentElement.style.setProperty('--accent-2', a2);
   ['dark','light'].forEach(tp => {
@@ -913,17 +805,16 @@ function applySettings(){
   document.querySelectorAll('.seg-btn[data-r]').forEach(b => {
     b.classList.toggle('active', b.dataset.r === settings.radius);
   });
-  const map = {'sw-history':'historyEnabled','sw-vibration':'vibration'};
-  Object.entries(map).forEach(([id,key]) => {
-    const el = document.getElementById(id);
-    if (el) el.classList.toggle('on', !!settings[key]);
-  });
+  const swH = document.getElementById('sw-history');
+  const swV = document.getElementById('sw-vibration');
+  if (swH) swH.classList.toggle('on', settings.historyEnabled);
+  if (swV) swV.classList.toggle('on', settings.vibration);
   renderAccentDots();
 }
-function setTheme(x){settings.theme=x;saveSettings();applySettings();api('/api/save_settings',{theme:x});}
+function setTheme(x){settings.theme=x;saveSettings();applySettings();api('/api/save_settings',{theme:x});haptic('light');}
 function setAccent(x){settings.accent=x;saveSettings();applySettings();api('/api/save_settings',{accent:x});haptic('light');}
-function setFont(f){settings.font=f;saveSettings();applySettings();haptic('light');}
-function setRadius(r){settings.radius=r;saveSettings();applySettings();haptic('light');}
+function setFont(f){settings.font=f;saveSettings();applySettings();api('/api/save_settings',{font:f});haptic('light');}
+function setRadius(r){settings.radius=r;saveSettings();applySettings();api('/api/save_settings',{radius:r});haptic('light');}
 function toggleHistory(){settings.historyEnabled=!settings.historyEnabled;saveSettings();applySettings();api('/api/save_settings',{history_enabled:settings.historyEnabled});haptic('light');}
 function toggleVibration(){settings.vibration=!settings.vibration;saveSettings();applySettings();api('/api/save_settings',{vibration:settings.vibration});}
 
@@ -931,7 +822,7 @@ function renderAccentDots(){
   const el = document.getElementById('accentDots');
   if (!el) return;
   el.innerHTML = Object.entries(ACCENTS).map(([k,v]) =>
-    '<div class="color-dot" style="background:' + v[0] + ';' +
+    '<div class="color-dot" style="background:linear-gradient(135deg,' + v[0] + ',' + v[1] + ');' +
     (settings.accent === k ? 'border-color:var(--text);transform:scale(1.12);' : '') +
     '" onclick="setAccent(\'' + k + '\')"></div>'
   ).join('');
@@ -984,25 +875,22 @@ async function api(path, body){
   } catch(e){ return null; }
 }
 
-// ============ PLAYER ============
 async function loadPlayer(){
   const r = await api('/api/player', {});
   if (!r || r.error) return;
   player = r;
   if (r.daily_bonus > 0){
-    toast('+' + r.daily_bonus + ' токенов (ежедневный бонус)');
+    toast('+' + r.daily_bonus + ' токенов!');
     haptic('success');
-  }
-  if (r.search_mode && modes[r.search_mode]){
-    currentMode = r.search_mode;
   }
   if (r.history_enabled !== undefined) settings.historyEnabled = r.history_enabled;
   if (r.vibration !== undefined) settings.vibration = r.vibration;
   if (r.theme) settings.theme = r.theme;
   if (r.accent) settings.accent = r.accent;
+  if (r.font) settings.font = r.font;
+  if (r.radius) settings.radius = r.radius;
   saveSettings(); applySettings();
   renderProfile();
-  renderModeIndicator();
 }
 
 function renderProfile(){
@@ -1018,52 +906,6 @@ function renderProfile(){
   }
 }
 
-function renderModeIndicator(){
-  const m = modes[currentMode];
-  if (!m) return;
-  document.getElementById('modeLabel').textContent = m.name;
-  document.getElementById('costLabel').textContent = m.tokens + ' токен' + (m.tokens > 1 ? 'а' : '');
-}
-
-// ============ MODES ============
-async function loadModes(){
-  const r = await fetch('/api/modes');
-  modes = await r.json();
-  renderModeList();
-  renderModeIndicator();
-}
-
-function renderModeList(){
-  const el = document.getElementById('modeList');
-  if (!el) return;
-  const order = ['turbo', 'fast', 'balanced', 'standard', 'smart'];
-  el.innerHTML = order.map(key => {
-    const m = modes[key];
-    if (!m) return '';
-    const active = currentMode === key ? 'active' : '';
-    return '<div class="mode-item ' + active + '" onclick="selectMode(\'' + key + '\')">' +
-      '<div class="mode-ic ' + key + '">' + MODE_ICONS[key] + '</div>' +
-      '<div class="mode-info">' +
-        '<div class="mode-name">' + m.name + '</div>' +
-        '<div class="mode-desc">' + (MODE_DESCS[key] || '') + '</div>' +
-      '</div>' +
-      '<div class="mode-cost">' +
-        '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/></svg>' +
-        m.tokens +
-      '</div>' +
-      (currentMode === key ? '<div class="mode-check">✓</div>' : '') +
-    '</div>';
-  }).join('');
-}
-
-async function selectMode(key){
-  currentMode = key;
-  renderModeList();
-  renderModeIndicator();
-  haptic('success');
-  await api('/api/save_settings', { search_mode: key });
-}
-
 // ============ SEARCH ============
 let timerInterval = null;
 let startTime = 0;
@@ -1075,9 +917,8 @@ async function doSearch(){
   const query = inp.value.trim();
   if (!query || searchInProgress) return;
 
-  const m = modes[currentMode];
-  if (m && player.tokens < m.tokens){
-    toast('Недостаточно токенов. Нужно ' + m.tokens, true);
+  if (player.tokens < 1){
+    toast('Недостаточно токенов', true);
     haptic('error');
     return;
   }
@@ -1193,7 +1034,7 @@ function renderResult(data){
     '<div class="m-item"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/></svg>Поиск: <b>' + data.search_time + 'с</b></div>' +
     '<div class="m-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/></svg>AI: <b>' + data.ai_time + 'с</b></div>' +
     '<div class="m-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Всего: <b>' + data.total_time + 'с</b></div>' +
-    '<div class="m-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/></svg>-' + data.cost + ' токенов</div>';
+    '<div class="m-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/></svg>-' + data.cost + ' токен</div>';
 
   document.getElementById('resultBox').classList.add('show');
   document.getElementById('emptyState').style.display = 'none';
@@ -1237,7 +1078,7 @@ async function clearHistory(){
   loadStats();
 }
 
-// ============ STATS / CHART ============
+// ============ STATS ============
 async function loadStats(){
   const r = await api('/api/stats', {});
   if (!r || !r.days) return;
@@ -1283,7 +1124,6 @@ document.getElementById('searchInput').addEventListener('keydown', e => {
 });
 
 (async () => {
-  await loadModes();
   await loadPlayer();
   await loadHistory();
   await loadStats();
