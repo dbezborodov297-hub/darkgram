@@ -56,7 +56,6 @@ body.theme-light .header{background:rgba(242,242,247,0.85)}
   background:linear-gradient(135deg,var(--accent),var(--accent-2));
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
-  box-shadow:0 4px 12px rgba(191,90,242,0.3);
 }
 .logo-icon svg{
   width:20px;height:20px;stroke:#fff;fill:none;
@@ -100,7 +99,6 @@ stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .card{
   background:var(--card);border-radius:var(--radius);
   margin-bottom:14px;overflow:hidden;
-  box-shadow:0 1px 2px rgba(0,0,0,0.08);
 }
 .search-box{padding:16px}
 .search-input-wrap{
@@ -136,7 +134,6 @@ stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 }
 .search-btn:disabled svg{stroke:var(--muted)}
 
-/* TIMER + ANIMATED ICON */
 .searching-box{
   display:none;
   padding:28px 16px;
@@ -186,7 +183,7 @@ stroke-linecap:round;transition:stroke-dashoffset .1s linear}
 
 .result-box{padding:0;display:none}
 .result-box.show{display:block}
-.answer-block{padding:16px;border-bottom:.5px solid var(--line)}
+.answer-block{padding:16px;border-bottom:.5px solid var(--line);position:relative}
 .answer-label{
   font-size:11px;font-weight:700;color:var(--muted);
   text-transform:uppercase;letter-spacing:1.2px;
@@ -198,7 +195,26 @@ stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   font-size:15px;line-height:1.55;
   white-space:pre-wrap;word-wrap:break-word;
   letter-spacing:-.2px;
+  padding-right:40px;
 }
+.copy-btn{
+  position:absolute;
+  top:16px;right:16px;
+  width:32px;height:32px;
+  border-radius:8px;
+  background:var(--card-2);
+  border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:.15s;
+}
+.copy-btn:active{transform:scale(.92);opacity:.8}
+.copy-btn svg{
+  width:16px;height:16px;
+  stroke:var(--dim);fill:none;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+}
+.copy-btn.copied svg{stroke:var(--green)}
+
 .sources-label{
   font-size:11px;font-weight:700;color:var(--muted);
   text-transform:uppercase;letter-spacing:1.2px;
@@ -246,7 +262,6 @@ stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   background:linear-gradient(135deg,var(--accent),var(--accent-2));
   display:flex;align-items:center;justify-content:center;
   margin:0 auto 18px;
-  box-shadow:0 8px 32px rgba(191,90,242,0.35);
 }
 .empty-icon svg{
   width:40px;height:40px;stroke:#fff;fill:none;
@@ -266,7 +281,6 @@ stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   background:linear-gradient(135deg,var(--accent),var(--accent-2));
   display:flex;align-items:center;justify-content:center;
   margin:0 auto 14px;
-  box-shadow:0 8px 24px rgba(191,90,242,0.35);
 }
 .profile-avatar svg{
   width:42px;height:42px;stroke:#fff;fill:none;
@@ -287,7 +301,6 @@ stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   background:linear-gradient(135deg,var(--accent),var(--accent-2));
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
-  box-shadow:0 6px 20px rgba(191,90,242,0.4);
 }
 .tokens-icon svg{
   width:28px;height:28px;stroke:#fff;fill:none;
@@ -312,7 +325,6 @@ letter-spacing:-1.2px;line-height:1;margin-top:4px}
 }
 .stat-ic svg{width:20px;height:20px;stroke:#fff;fill:none;
 stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.stat-ic.blue{background:#0a84ff}
 .stat-ic.purple{background:linear-gradient(135deg,var(--accent),var(--accent-2))}
 .stat-k{font-size:11px;color:var(--dim);text-transform:uppercase;
 letter-spacing:.5px;font-weight:600}
@@ -357,6 +369,49 @@ stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 }
 .chart-summary b{color:var(--text);font-weight:600}
 
+/* TOP */
+.top-tabs{
+  display:flex;gap:6px;margin-bottom:14px;
+  background:var(--card);padding:5px;border-radius:12px;
+}
+.top-tab{
+  flex:1;text-align:center;padding:10px;
+  font-size:13px;font-weight:600;
+  color:var(--muted);cursor:pointer;
+  border-radius:8px;transition:.15s;
+  user-select:none;
+}
+.top-tab.active{background:var(--bg);color:var(--text)}
+.top-item{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;position:relative;
+}
+.top-item + .top-item::before{
+  content:'';position:absolute;top:0;left:60px;right:16px;
+  height:.5px;background:var(--line);
+}
+.top-item.me{
+  background:rgba(191,90,242,0.08);
+}
+.top-rank{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;
+  background:var(--card-2);color:var(--muted);
+  flex-shrink:0;
+}
+.top-rank.gold{background:linear-gradient(135deg,#ffd60a,#ff9f0a);color:#1a1408}
+.top-rank.silver{background:linear-gradient(135deg,#e0e0e0,#a8a8a8);color:#1a1408}
+.top-rank.bronze{background:linear-gradient(135deg,#cd7f32,#a05a1c);color:#fff}
+.top-info{flex:1;min-width:0}
+.top-name{font-size:15px;font-weight:600;
+overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top-sub{font-size:12px;color:var(--dim);margin-top:2px}
+.top-value{
+  font-size:15px;font-weight:700;
+  color:var(--accent-2);flex-shrink:0;
+}
+
 .section-header{
   font-size:13px;font-weight:600;color:var(--muted);
   text-transform:uppercase;letter-spacing:.5px;
@@ -383,7 +438,6 @@ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 display:flex;gap:8px;align-items:center}
 .history-cost{color:var(--accent-2);font-weight:600}
 
-/* SETTINGS */
 .settings-screen{
   position:fixed;top:0;left:0;right:0;bottom:0;
   background:var(--bg);z-index:200;overflow-y:auto;
@@ -451,7 +505,7 @@ transition:background .2s;flex-shrink:0}
 .switch.on{background:var(--green)}
 .switch::after{content:'';position:absolute;top:2px;left:2px;
 width:27px;height:27px;border-radius:50%;background:#fff;
-transition:transform .2s;box-shadow:0 2px 4px rgba(0,0,0,0.2)}
+transition:transform .2s}
 .switch.on::after{transform:translateX(20px)}
 .theme-preview{display:inline-flex;gap:8px;padding:6px;
 background:var(--card-2);border-radius:10px}
@@ -471,10 +525,8 @@ border-radius:8px;padding:2px}
 .seg-btn{padding:5px 10px;font-size:13px;
 border-radius:6px;cursor:pointer;color:var(--dim);
 font-weight:500;font-family:inherit;background:none;border:none}
-.seg-btn.active{background:var(--card);color:var(--text);
-box-shadow:0 1px 3px rgba(0,0,0,0.15)}
+.seg-btn.active{background:var(--card);color:var(--text)}
 
-/* BOTTOM NAV */
 .nav{
   position:fixed;bottom:0;left:0;right:0;
   background:rgba(20,20,22,0.78);
@@ -591,6 +643,9 @@ padding:14px 16px;line-height:1.55}
           Ответ AI
         </div>
         <div class="answer-text" id="answerText"></div>
+        <button class="copy-btn" id="copyBtn" onclick="copyAnswer()">
+          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        </button>
       </div>
       <div id="sourcesBlock"></div>
       <div class="result-meta" id="resultMeta"></div>
@@ -603,6 +658,16 @@ padding:14px 16px;line-height:1.55}
       <div class="empty-title">AI-Поиск</div>
       <div class="empty-desc">Задай вопрос — найду в интернете и дам ответ</div>
     </div>
+  </div>
+
+  <div class="tab" id="tab-top">
+    <div class="top-tabs">
+      <div class="top-tab active" data-cat="requests" onclick="setTopCat('requests')">Запросы</div>
+      <div class="top-tab" data-cat="tokens" onclick="setTopCat('tokens')">Токены</div>
+      <div class="top-tab" data-cat="streak" onclick="setTopCat('streak')">Стрик</div>
+    </div>
+    <div class="card" id="topList"><div style="text-align:center;padding:40px;color:var(--muted)">Загрузка...</div></div>
+    <div id="myRankBlock"></div>
   </div>
 
   <div class="tab" id="tab-profile">
@@ -631,8 +696,8 @@ padding:14px 16px;line-height:1.55}
         <div><div class="stat-k">Запросов</div><div class="stat-v" id="statRequests">0</div></div>
       </div>
       <div class="stat-box">
-        <div class="stat-ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/></svg></div>
-        <div><div class="stat-k">Потрачено</div><div class="stat-v" id="statSpent">0</div></div>
+        <div class="stat-ic purple"><svg viewBox="0 0 24 24"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/></svg></div>
+        <div><div class="stat-k">Стрик</div><div class="stat-v" id="statStreak">0</div></div>
       </div>
     </div>
 
@@ -656,6 +721,10 @@ padding:14px 16px;line-height:1.55}
   <div class="nav-item active" data-tab="search" data-title="Поиск">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <span>Поиск</span>
+  </div>
+  <div class="nav-item" data-tab="top" data-title="Топ">
+    <svg viewBox="0 0 24 24"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/></svg>
+    <span>Топ</span>
   </div>
   <div class="nav-item" data-tab="profile" data-title="Профиль">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
@@ -739,7 +808,7 @@ padding:14px 16px;line-height:1.55}
         <div class="ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
         <div class="row-info">
           <div class="row-title">DeepSeek Darkgram</div>
-          <div class="row-sub">v1.1.0</div>
+          <div class="row-sub">v1.2.0</div>
         </div>
       </div>
       <div class="about-text">
@@ -761,11 +830,12 @@ if (tg) { tg.ready(); tg.expand(); }
 const user = tg?.initDataUnsafe?.user || { id: 0, first_name: 'Гость', username: '' };
 const UID = user.id;
 
-let player = { tokens: 0, total_requests: 0, total_spent: 0, joined: 0 };
+let player = { tokens: 0, total_requests: 0, total_spent: 0, joined: 0, streak: 0 };
 let settings = {
   theme: 'dark', accent: 'purple', font: 'medium', radius: 'md',
   historyEnabled: true, vibration: true,
 };
+let topCat = 'requests';
 
 const ACCENTS = {
   blue:['#0a84ff','#409cff'], purple:['#bf5af2','#5e5ce6'],
@@ -773,7 +843,7 @@ const ACCENTS = {
   red:['#ff453a','#ff375f'], pink:['#ff375f','#bf5af2'],
 };
 
-const SETTINGS_KEY = 'ds_settings_v3';
+const SETTINGS_KEY = 'ds_settings_v4';
 
 function loadSettings(){
   try {
@@ -897,7 +967,7 @@ function renderProfile(){
   document.getElementById('tokensHeader').textContent = player.tokens || 0;
   document.getElementById('tokensValue').textContent = player.tokens || 0;
   document.getElementById('statRequests').textContent = player.total_requests || 0;
-  document.getElementById('statSpent').textContent = player.total_spent || 0;
+  document.getElementById('statStreak').textContent = player.streak || 0;
   document.getElementById('profileName').textContent = user.first_name || 'Гость';
   if (player.joined){
     const d = new Date(player.joined * 1000);
@@ -911,6 +981,7 @@ let timerInterval = null;
 let startTime = 0;
 let searchInProgress = false;
 let currentPhase = 0;
+let lastAnswer = '';
 
 async function doSearch(){
   const inp = document.getElementById('searchInput');
@@ -943,8 +1014,8 @@ async function doSearch(){
     circle.setAttribute('stroke-dashoffset', offset);
 
     let phase = 0;
-    if (elapsed > 2 && elapsed < 6) phase = 1;
-    else if (elapsed >= 6) phase = 2;
+    if (elapsed > 2 && elapsed < 7) phase = 1;
+    else if (elapsed >= 7) phase = 2;
 
     if (phase !== currentPhase){
       currentPhase = phase;
@@ -1011,7 +1082,9 @@ function updatePhase(phase){
 }
 
 function renderResult(data){
-  document.getElementById('answerText').textContent = data.answer || '—';
+  lastAnswer = data.answer || '';
+  document.getElementById('answerText').textContent = lastAnswer;
+  document.getElementById('copyBtn').classList.remove('copied');
 
   let sourcesHtml = '';
   if (data.sources && data.sources.length){
@@ -1038,6 +1111,29 @@ function renderResult(data){
 
   document.getElementById('resultBox').classList.add('show');
   document.getElementById('emptyState').style.display = 'none';
+}
+
+function copyAnswer(){
+  if (!lastAnswer) return;
+  const btn = document.getElementById('copyBtn');
+  if (navigator.clipboard){
+    navigator.clipboard.writeText(lastAnswer).then(() => {
+      btn.classList.add('copied');
+      toast('Скопировано');
+      haptic('success');
+      setTimeout(() => btn.classList.remove('copied'), 2000);
+    });
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = lastAnswer;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.classList.add('copied');
+    toast('Скопировано');
+    setTimeout(() => btn.classList.remove('copied'), 2000);
+  }
 }
 
 // ============ HISTORY ============
@@ -1100,6 +1196,76 @@ async function loadStats(){
   document.getElementById('chartRequests').textContent = totalReq;
 }
 
+// ============ TOP ============
+function setTopCat(cat){
+  topCat = cat;
+  document.querySelectorAll('.top-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.cat === cat);
+  });
+  haptic('light');
+  loadTop();
+}
+
+async function loadTop(){
+  const r = await api('/api/top?category=' + topCat);
+  if (!r || !r.top) return;
+  const el = document.getElementById('topList');
+  const top = r.top;
+
+  if (!top.length){
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Пока пусто</div>';
+    document.getElementById('myRankBlock').innerHTML = '';
+    return;
+  }
+
+  el.innerHTML = top.map((u, i) => {
+    const rank = i + 1;
+    let rankCls = '';
+    if (rank === 1) rankCls = 'gold';
+    else if (rank === 2) rankCls = 'silver';
+    else if (rank === 3) rankCls = 'bronze';
+    const isMe = String(u.uid) === String(UID) ? 'me' : '';
+    const name = u.username ? '@' + u.username : u.name;
+    let value = '';
+    let sub = '';
+    if (topCat === 'requests'){
+      value = u.requests;
+      sub = u.requests + ' запрос' + (u.requests % 10 === 1 && u.requests % 100 !== 11 ? '' : 'ов');
+    } else if (topCat === 'tokens'){
+      value = u.spent;
+      sub = 'потрачено ' + u.spent + ' 🪙';
+    } else {
+      value = u.streak;
+      sub = u.streak + ' дн подряд';
+    }
+    return '<div class="top-item ' + isMe + '">' +
+      '<div class="top-rank ' + rankCls + '">' + rank + '</div>' +
+      '<div class="top-info">' +
+        '<div class="top-name">' + esc(name) + '</div>' +
+        '<div class="top-sub">' + sub + '</div>' +
+      '</div>' +
+      '<div class="top-value">' + value + '</div>' +
+    '</div>';
+  }).join('');
+
+  const myEl = document.getElementById('myRankBlock');
+  if (r.my_place && r.my_place > 30){
+    let value = topCat === 'requests' ? r.my_data.requests :
+                topCat === 'tokens' ? r.my_data.spent : r.my_data.streak;
+    myEl.innerHTML = '<div class="section-header">Твоё место</div>' +
+      '<div class="card"><div class="top-item me">' +
+        '<div class="top-rank">' + r.my_place + '</div>' +
+        '<div class="top-info"><div class="top-name">' + esc(user.first_name || 'Ты') + '</div>' +
+        '<div class="top-sub">вне топ-30</div></div>' +
+        '<div class="top-value">' + value + '</div>' +
+      '</div></div>';
+  } else if (r.my_place){
+    myEl.innerHTML = '<div style="text-align:center;padding:14px;color:var(--accent-2);font-size:13px">Ты на ' + r.my_place + ' месте</div>';
+  } else {
+    myEl.innerHTML = '';
+  }
+}
+
 // ============ NAV ============
 document.querySelectorAll('.nav-item').forEach(el => {
   el.onclick = () => {
@@ -1113,6 +1279,9 @@ document.querySelectorAll('.nav-item').forEach(el => {
       loadPlayer();
       loadHistory();
       loadStats();
+    }
+    if (el.dataset.tab === 'top'){
+      loadTop();
     }
   };
 });
