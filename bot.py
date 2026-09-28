@@ -4,7 +4,7 @@ import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from telebot import types
 
-TOKEN = '8514412667:AAFp79hYfo3RNgtq0tBlHTWk_O7I-6xJRgA'
+TOKEN = '8514412667:AAHs9FkULevjs2N7z2037OX1BbB97P3YQhE'
 WEBAPP_URL = 'https://darkgram-2.onrender.com'
 
 bot = telebot.TeleBot(TOKEN)
