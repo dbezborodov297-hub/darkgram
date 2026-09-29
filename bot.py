@@ -6,7 +6,7 @@ import random
 import threading
 from telebot import types
 
-TOKEN = '8624166568:AAEUeRtgRqGzyET3sAj6H0qfZTSzty-I75A'
+TOKEN = '8514412667:AAEBoRMZ6ADcqCFqMIoftu7IaunnOQDQnUM'
 bot = telebot.TeleBot(TOKEN)
 DB = 'rp_countries.db'
 
