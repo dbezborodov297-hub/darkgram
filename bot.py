@@ -1,250 +1,428 @@
 import telebot
+import sqlite3
 import json
-import os
 import time
-from datetime import datetime, timedelta
-from collections import defaultdict
+import random
+import threading
+from datetime import datetime
 
-TOKEN = '8514412667:AAHT9MHWYVDjIOn6m9IIHH5by9V12QvqmGU'
-DATA_FILE = 'messages_data.json'
-
+TOKEN = '8514412667:AAEBoRMZ6ADcqCFqMIoftu7IaunnOQDQnUM'
 bot = telebot.TeleBot(TOKEN)
-
-# Структура: { chat_id: { user_id: { name, messages: [timestamp1, timestamp2, ...] } } }
-data = {}
+DB = 'rp_countries.db'
 
 
-def load_data():
-    global data
-    if os.path.exists(DATA_FILE):
+# ============================================================
+# БАЗА ДАННЫХ
+# ============================================================
+def init_db():
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS countries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE,
+        flag TEXT,
+        owner INTEGER,
+        population INTEGER DEFAULT 1000000,
+        treasury INTEGER DEFAULT 5000,
+        army INTEGER DEFAULT 1000,
+        tech INTEGER DEFAULT 1,
+        stability INTEGER DEFAULT 70,
+        food INTEGER DEFAULT 5000,
+        metal INTEGER DEFAULT 2000,
+        oil INTEGER DEFAULT 1000,
+        is_npc INTEGER DEFAULT 1
+    )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS cities (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        country_id INTEGER,
+        name TEXT,
+        population INTEGER DEFAULT 100000,
+        buildings TEXT DEFAULT '[]'
+    )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS news (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        time INTEGER,
+        text TEXT
+    )''')
+    conn.commit()
+    conn.close()
+
+
+def get_country_by_owner(uid):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute('SELECT * FROM countries WHERE owner=?', (uid,))
+    row = c.fetchone()
+    conn.close()
+    return row
+
+
+def get_country_by_id(cid):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute('SELECT * FROM countries WHERE id=?', (cid,))
+    row = c.fetchone()
+    conn.close()
+    return row
+
+
+def get_country_by_name(name):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute('SELECT * FROM countries WHERE name LIKE ?', (f'%{name}%',))
+    row = c.fetchone()
+    conn.close()
+    return row
+
+
+# ============================================================
+# 25 СТРАН
+# ============================================================
+COUNTRIES_25 = [
+    # (название, флаг, население, казна, армия, технологии)
+    ('Россия', '🇷🇺', 146000000, 50000, 1000000, 5),
+    ('США', '🇺🇸', 330000000, 80000, 1500000, 7),
+    ('Китай', '🇨🇳', 1400000000, 70000, 2000000, 6),
+    ('Германия', '🇩🇪', 83000000, 60000, 300000, 6),
+    ('Франция', '🇫🇷', 67000000, 55000, 350000, 6),
+    ('Великобритания', '🇬🇧', 67000000, 58000, 300000, 6),
+    ('Япония', '🇯🇵', 125000000, 65000, 250000, 7),
+    ('Индия', '🇮🇳', 1380000000, 40000, 1400000, 4),
+    ('Бразилия', '🇧🇷', 213000000, 35000, 400000, 4),
+    ('Канада', '🇨🇦', 38000000, 50000, 150000, 6),
+    ('Италия', '🇮🇹', 60000000, 48000, 200000, 5),
+    ('Испания', '🇪🇸', 47000000, 40000, 150000, 5),
+    ('Турция', '🇹🇷', 84000000, 30000, 500000, 4),
+    ('Южная Корея', '🇰🇷', 51000000, 55000, 600000, 7),
+    ('Иран', '🇮🇷', 85000000, 30000, 600000, 4),
+    ('Польша', '🇵🇱', 38000000, 35000, 200000, 5),
+    ('Украина', '🇺🇦', 44000000, 25000, 300000, 4),
+    ('Саудовская Аравия', '🇸🇦', 34000000, 70000, 200000, 5),
+    ('Австралия', '🇦🇺', 26000000, 45000, 100000, 6),
+    ('Мексика', '🇲🇽', 129000000, 25000, 250000, 3),
+    ('Индонезия', '🇮🇩', 274000000, 22000, 400000, 3),
+    ('Нигерия', '🇳🇬', 206000000, 15000, 200000, 2),
+    ('Египет', '🇪🇬', 104000000, 20000, 450000, 3),
+    ('ЮАР', '🇿🇦', 59000000, 25000, 100000, 4),
+    ('Аргентина', '🇦🇷', 45000000, 28000, 150000, 4),
+]
+
+
+def init_countries():
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    for name, flag, pop, treas, army, tech in COUNTRIES_25:
+        c.execute('''INSERT OR IGNORE INTO countries 
+            (name, flag, population, treasury, army, tech) 
+            VALUES (?, ?, ?, ?, ?, ?)''',
+            (name, flag, pop, treas, army, tech))
+    conn.commit()
+    conn.close()
+
+
+# ============================================================
+# ЭКОНОМИЧЕСКИЙ ТИК (раз в час)
+# ============================================================
+def economy_tick():
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+
+    c.execute('SELECT * FROM countries')
+    countries = c.fetchall()
+
+    for country in countries:
+        cid = country[0]
+        name = country[1]
+        pop = country[4]
+        treasury = country[5]
+        army = country[6]
+        tech = country[7]
+        stability = country[8]
+        food = country[9]
+        is_npc = country[12]
+
+        # Доход
+        income = int((pop / 10000) * (1 + tech * 0.1) * (stability / 100))
+        # Расход
+        expense = int(army * 0.5)
+        # Прирост
+        treasury += income - expense
+        if treasury < 0:
+            treasury = 0
+            stability -= 5
+
+        # Рост населения (если еды хватает)
+        if food > pop / 1000:
+            growth = int((food / 100) * (stability / 100))
+            pop += growth
+            food -= growth * 10
+
+        # Стабильность
+        if stability < 100:
+            stability = min(100, stability + 1)
+        if stability < 0:
+            stability = 0
+
+        c.execute('''UPDATE countries SET 
+            treasury=?, population=?, stability=?, food=? 
+            WHERE id=?''', (treasury, pop, stability, food, cid))
+
+        # NPC логика
+        if is_npc:
+            npc_action(cid, name, treasury, army, stability)
+
+    conn.commit()
+    conn.close()
+
+
+def npc_action(cid, name, treasury, army, stability):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+
+    actions = []
+    if treasury > 1000:
+        actions.append(('build', 'Ферма'))
+    if treasury > 2000:
+        actions.append(('build', 'Завод'))
+    if treasury > 1500 and army < 50000:
+        actions.append(('recruit', 1000))
+    if stability < 40:
+        actions.append(('police', None))
+
+    if actions:
+        action = random.choice(actions)
+        if action[0] == 'build':
+            building = action[1]
+            cost = 500 if building == 'Завод' else 200
+            if treasury >= cost:
+                c.execute('UPDATE countries SET treasury = treasury - ? WHERE id=?', (cost, cid))
+                c.execute('UPDATE cities SET buildings = json_insert(buildings, "$[#]", ?) WHERE country_id=? LIMIT 1',
+                          (building, cid))
+                add_news(f'{name}: построено {building}')
+        elif action[0] == 'recruit':
+            count = action[1]
+            cost = count * 2
+            if treasury >= cost:
+                c.execute('UPDATE countries SET treasury = treasury - ?, army = army + ? WHERE id=?',
+                          (cost, count, cid))
+                add_news(f'{name}: армия увеличена на {count}')
+
+    conn.commit()
+    conn.close()
+
+
+def add_news(text):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute('INSERT INTO news (time, text) VALUES (?, ?)', (int(time.time()), text))
+    c.execute('DELETE FROM news WHERE id NOT IN (SELECT id FROM news ORDER BY id DESC LIMIT 50)')
+    conn.commit()
+    conn.close()
+
+
+# ============================================================
+# ФОНОВЫЙ ТИК
+# ============================================================
+def start_tick():
+    while True:
+        time.sleep(3600)  # раз в час
         try:
-            with open(DATA_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except:
-            data = {}
+            economy_tick()
+            print('Economy tick done')
+        except Exception as e:
+            print('tick err:', e)
 
 
-def save_data():
-    try:
-        with open(DATA_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False)
-    except Exception as e:
-        print('save err:', e)
-
-
-def track_message(chat_id, user_id, name):
-    chat_key = str(chat_id)
-    user_key = str(user_id)
-
-    if chat_key not in data:
-        data[chat_key] = {}
-    if user_key not in data[chat_key]:
-        data[chat_key][user_key] = {'name': name, 'messages': []}
-
-    data[chat_key][user_key]['name'] = name
-    data[chat_key][user_key]['messages'].append(int(time.time()))
-
-    # Ограничим историю 90 днями, чтобы файл не пух
-    cutoff = int(time.time()) - 90 * 86400
-    data[chat_key][user_key]['messages'] = [
-        t for t in data[chat_key][user_key]['messages'] if t > cutoff
-    ]
-
-
-def get_top(chat_id, period):
-    """period: 'hour', 'day', 'week', 'month'"""
-    now = int(time.time())
-    if period == 'hour':
-        cutoff = now - 3600
-    elif period == 'day':
-        cutoff = now - 86400
-    elif period == 'week':
-        cutoff = now - 7 * 86400
-    elif period == 'month':
-        cutoff = now - 30 * 86400
-    else:
-        cutoff = 0
-
-    chat_key = str(chat_id)
-    if chat_key not in data:
-        return []
-
-    result = []
-    for user_key, info in data[chat_key].items():
-        count = sum(1 for t in info['messages'] if t >= cutoff)
-        if count > 0:
-            result.append({
-                'user_id': user_key,
-                'name': info.get('name', 'Гость'),
-                'count': count
-            })
-
-    result.sort(key=lambda x: x['count'], reverse=True)
-    return result
-
-
-def get_user_stats(chat_id, user_id, period):
-    now = int(time.time())
-    if period == 'hour':
-        cutoff = now - 3600
-    elif period == 'day':
-        cutoff = now - 86400
-    elif period == 'week':
-        cutoff = now - 7 * 86400
-    elif period == 'month':
-        cutoff = now - 30 * 86400
-    else:
-        cutoff = 0
-
-    chat_key = str(chat_id)
-    user_key = str(user_id)
-
-    if chat_key not in data or user_key not in data[chat_key]:
-        return 0
-
-    return sum(1 for t in data[chat_key][user_key]['messages'] if t >= cutoff)
-
-
-def format_top(items, title, limit=10):
-    if not items:
-        return f'<b>{title}</b>\n\nПока нет данных.'
-
-    lines = [f'<b>{title}</b>\n']
-    for i, u in enumerate(items[:limit], 1):
-        medal = ''
-        if i == 1: medal = '🥇 '
-        elif i == 2: medal = '🥈 '
-        elif i == 3: medal = '🥉 '
-        lines.append(f'{medal}{i}. {u["name"]} — <b>{u["count"]}</b>')
-
-    return '\n'.join(lines)
+threading.Thread(target=start_tick, daemon=True).start()
 
 
 # ============================================================
 # КОМАНДЫ
 # ============================================================
 
-@bot.message_handler(commands=['top'])
-def cmd_top(m):
-    if m.chat.type == 'private':
-        bot.reply_to(m, 'Эта команда работает только в группах.')
-        return
-
-    args = m.text.split()
-    period = args[1] if len(args) > 1 else 'day'
-
-    if period not in ('hour', 'day', 'week', 'month'):
-        bot.reply_to(m, 'Используй: /top hour, /top day, /top week, /top month')
-        return
-
-    titles = {
-        'hour': 'Топ за час',
-        'day': 'Топ за день',
-        'week': 'Топ за неделю',
-        'month': 'Топ за месяц',
-    }
-
-    top = get_top(m.chat.id, period)
-    text = format_top(top, titles[period])
-    bot.send_message(m.chat.id, text, parse_mode='HTML')
-
-
-@bot.message_handler(commands=['me'])
-def cmd_me(m):
-    if m.chat.type == 'private':
-        bot.reply_to(m, 'Эта команда работает только в группах.')
-        return
-
-    uid = m.from_user.id
-    name = m.from_user.first_name or 'Ты'
-
-    hour = get_user_stats(m.chat.id, uid, 'hour')
-    day = get_user_stats(m.chat.id, uid, 'day')
-    week = get_user_stats(m.chat.id, uid, 'week')
-    month = get_user_stats(m.chat.id, uid, 'month')
-
-    text = (
-        f'<b>📊 {name}</b>\n\n'
-        f'За час: <b>{hour}</b>\n'
-        f'За день: <b>{day}</b>\n'
-        f'За неделю: <b>{week}</b>\n'
-        f'За месяц: <b>{month}</b>'
-    )
-    bot.send_message(m.chat.id, text, parse_mode='HTML')
-
-
-@bot.message_handler(commands=['stats'])
-def cmd_stats(m):
-    if m.chat.type == 'private':
-        bot.reply_to(m, 'Эта команда работает только в группах.')
-        return
-
-    chat_key = str(m.chat.id)
-    if chat_key not in data:
-        bot.reply_to(m, 'Пока нет данных. Начните общаться!')
-        return
-
-    total_users = len(data[chat_key])
-    total_messages = sum(len(info['messages']) for info in data[chat_key].values())
-
-    now = int(time.time())
-    day_cutoff = now - 86400
-    day_messages = sum(
-        sum(1 for t in info['messages'] if t >= day_cutoff)
-        for info in data[chat_key].values()
-    )
-
-    text = (
-        f'<b>📈 Статистика группы</b>\n\n'
-        f'Участников: <b>{total_users}</b>\n'
-        f'Всего сообщений: <b>{total_messages}</b>\n'
-        f'За последние 24 часа: <b>{day_messages}</b>'
-    )
-    bot.send_message(m.chat.id, text, parse_mode='HTML')
-
-
-@bot.message_handler(commands=['start', 'help'])
+@bot.message_handler(commands=['start'])
 def cmd_start(m):
     text = (
-        'Я считаю сообщения в группе.\n\n'
-        '<b>Команды (работают в группе):</b>\n\n'
-        '/top hour — топ за час\n'
-        '/top day — топ за день\n'
-        '/top week — топ за неделю\n'
-        '/top month — топ за месяц\n'
-        '/me — моя статистика\n'
-        '/stats — общая статистика группы'
+        '🏛️ <b>RP Countries</b>\n'
+        '━━━━━━━━━━━━━━━\n\n'
+        'Выбери страну и управляй ей.\n'
+        '⚠️ Страну можно выбрать <b>только один раз</b>!\n\n'
+        '<b>Команды:</b>\n'
+        '/countries — список стран\n'
+        '/take Россия — занять страну\n'
+        '/my — моя страна\n'
+        '/build Москва Завод — построить\n'
+        '/news — новости мира\n'
+        '/top — топ стран'
     )
     bot.send_message(m.chat.id, text, parse_mode='HTML')
 
 
-# ============================================================
-# ТРЕКЕР СООБЩЕНИЙ (в группах)
-# ============================================================
+@bot.message_handler(commands=['countries'])
+def cmd_countries(m):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute('SELECT name, flag, owner FROM countries ORDER BY name')
+    rows = c.fetchall()
+    conn.close()
 
-@bot.message_handler(
-    func=lambda m: m.chat.type in ('group', 'supergroup') and m.from_user and not m.text.startswith('/') if m.text else False,
-    content_types=['text', 'photo', 'video', 'sticker', 'voice', 'document', 'audio']
-)
-def track_group_message(m):
-    if not m.from_user or m.from_user.is_bot:
+    text = '<b>🌍 Страны мира (25)</b>\n\n'
+    for name, flag, owner in rows:
+        status = '👤' if owner else '🟢'
+        text += f'{status} {flag} {name}\n'
+
+    text += '\n🟢 — свободна, 👤 — занята'
+    bot.send_message(m.chat.id, text, parse_mode='HTML')
+
+
+@bot.message_handler(commands=['take'])
+def cmd_take(m):
+    # Проверка: игрок уже имеет страну
+    existing = get_country_by_owner(m.from_user.id)
+    if existing:
+        bot.reply_to(
+            m,
+            f'❌ Ты уже правишь {existing[2]} {existing[1]}.\n\n'
+            f'Страну нельзя поменять — выбор сделан навсегда.'
+        )
         return
 
-    name = m.from_user.first_name or 'Гость'
-    if m.from_user.last_name:
-        name += ' ' + m.from_user.last_name
-    if m.from_user.username:
-        name += f' (@{m.from_user.username})'
+    args = m.text.split(maxsplit=1)
+    if len(args) < 2:
+        bot.reply_to(m, 'Используй: /take Россия')
+        return
 
-    track_message(m.chat.id, m.from_user.id, name)
-    save_data()
+    name = args[1]
+    country = get_country_by_name(name)
+
+    if not country:
+        bot.reply_to(m, f'Страна «{name}» не найдена. Смотри /countries')
+        return
+
+    if country[3]:  # owner
+        bot.reply_to(m, f'{country[2]} {country[1]} уже занята.')
+        return
+
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute('UPDATE countries SET owner=?, is_npc=0 WHERE id=?', (m.from_user.id, country[0]))
+    c.execute('INSERT INTO cities (country_id, name, population) VALUES (?, ?, ?)',
+              (country[0], f'Столица {country[1]}', 500000))
+    conn.commit()
+    conn.close()
+
+    add_news(f'{country[2]} {country[1]}: новый правитель!')
+
+    bot.reply_to(
+        m,
+        f'✅ Ты теперь правишь {country[2]} {country[1]}!\n\n'
+        f'⚠️ Помни: страну нельзя поменять.\n'
+        f'Твоя столица создана. Смотри /my'
+    )
+
+
+@bot.message_handler(commands=['my'])
+def cmd_my(m):
+    country = get_country_by_owner(m.from_user.id)
+    if not country:
+        bot.reply_to(m, 'У тебя нет страны. Используй /take Название')
+        return
+
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute('SELECT name, population FROM cities WHERE country_id=?', (country[0],))
+    cities = c.fetchall()
+    conn.close()
+
+    text = (
+        f'<b>{country[2]} {country[1]}</b>\n'
+        f'━━━━━━━━━━━━━━━\n\n'
+        f'👥 Население: {country[4]:,}\n'
+        f'💰 Казна: {country[5]:,}\n'
+        f'⚔️ Армия: {country[6]:,}\n'
+        f'🔬 Технологии: {country[7]}\n'
+        f'📊 Стабильность: {country[8]}\n'
+        f'🌾 Еда: {country[9]:,}\n'
+        f'⛏️ Металл: {country[10]:,}\n'
+        f'🛢️ Нефть: {country[11]:,}\n\n'
+        f'🏙️ Города: {len(cities)}\n'
+    )
+    bot.send_message(m.chat.id, text, parse_mode='HTML')
+
+
+@bot.message_handler(commands=['build'])
+def cmd_build(m):
+    args = m.text.split(maxsplit=2)
+    if len(args) < 3:
+        bot.reply_to(m, 'Используй: /build Москва Завод\n\nЗдания: Ферма, Завод, Казармы, Школа, Больница, Полиция')
+        return
+
+    city_name, building = args[1], args[2]
+    country = get_country_by_owner(m.from_user.id)
+    if not country:
+        bot.reply_to(m, 'У тебя нет страны.')
+        return
+
+    costs = {'Ферма': 200, 'Завод': 500, 'Казармы': 300, 'Школа': 400, 'Больница': 350, 'Полиция': 250}
+    if building not in costs:
+        bot.reply_to(m, f'Неизвестное здание. Доступно: {", ".join(costs.keys())}')
+        return
+
+    cost = costs[building]
+    if country[5] < cost:
+        bot.reply_to(m, f'Не хватает денег. Нужно {cost}, у тебя {country[5]}.')
+        return
+
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute('UPDATE countries SET treasury = treasury - ? WHERE id=?', (cost, country[0]))
+    c.execute('UPDATE cities SET buildings = json_insert(buildings, "$[#]", ?) WHERE country_id=? AND name LIKE ?',
+              (building, country[0], f'%{city_name}%'))
+    conn.commit()
+    conn.close()
+
+    bot.reply_to(m, f'✅ {building} построено в {city_name}!')
+
+
+@bot.message_handler(commands=['news'])
+def cmd_news(m):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute('SELECT text, time FROM news ORDER BY id DESC LIMIT 15')
+    rows = c.fetchall()
+    conn.close()
+
+    if not rows:
+        bot.reply_to(m, 'Пока новостей нет.')
+        return
+
+    text = '<b>📰 Новости мира</b>\n\n'
+    for txt, ts in rows:
+        text += f'• {txt}\n'
+
+    bot.send_message(m.chat.id, text, parse_mode='HTML')
+
+
+@bot.message_handler(commands=['top'])
+def cmd_top(m):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute('SELECT name, flag, treasury, army, population FROM countries ORDER BY treasury DESC LIMIT 10')
+    rows = c.fetchall()
+    conn.close()
+
+    text = '<b>🏆 Топ стран по казне</b>\n\n'
+    for i, (name, flag, treas, army, pop) in enumerate(rows, 1):
+        text += f'{i}. {flag} {name} — 💰{treas:,}\n'
+
+    bot.send_message(m.chat.id, text, parse_mode='HTML')
 
 
 # ============================================================
 # ЗАПУСК
 # ============================================================
-
 if __name__ == '__main__':
-    load_data()
-    print('Bot started. Tracking messages...')
+    init_db()
+    init_countries()
+    print('RP Countries bot started (25 countries)')
     bot.infinity_polling(timeout=30, long_polling_timeout=30)
