@@ -5,7 +5,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from telebot import types
 
 TOKEN = '8514412667:AAEuVEW-ilqt7IHHZ7UMcnvhMYziJeIWGR0'
-WEBAPP_URL = 'https://ТВОЙ_СЕРВЕР.onrender.com'
+WEBAPP_URL = 'https://darks-xxxx.onrender.com'
 
 bot = telebot.TeleBot(TOKEN)
 
