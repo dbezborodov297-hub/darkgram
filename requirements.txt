@@ -1,4 +1,1 @@
 pyTelegramBotAPI
-flask
-flask-cors
-requests
