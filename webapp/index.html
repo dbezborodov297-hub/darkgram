@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<title>Darkgram AI</title>
+<title>RP Countries</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -12,450 +12,108 @@
   --bg:#000;--card:#1c1c1e;--card-2:#2c2c2e;--line:#38383a;
   --text:#fff;--dim:#98989f;--muted:#636366;
   --accent:#bf5af2;--accent-2:#5e5ce6;
-  --green:#30d158;--red:#ff453a;--gold:#ffd60a;
-  --radius:10px;
+  --green:#30d158;--red:#ff453a;--gold:#ffd60a;--blue:#0a84ff;
+  --radius:14px;
 }
-body.theme-light{--bg:#f2f2f7;--card:#fff;--card-2:#e5e5ea;--line:#d1d1d6;--text:#000;--dim:#8e8e93;--muted:#c7c7cc}
-body.radius-sm{--radius:6px}
-body.radius-md{--radius:10px}
-body.radius-lg{--radius:16px}
-body.font-small{font-size:15px}
-body.font-medium{font-size:17px}
-body.font-large{font-size:19px}
-body.font-huge{font-size:21px}
-html,body{height:100%;overflow-x:hidden;background:var(--bg)}
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;font-size:17px;line-height:1.4;padding-bottom:calc(100px + env(safe-area-inset-bottom));min-height:100vh;letter-spacing:-.4px}
-.header{background:rgba(0,0,0,0.72);backdrop-filter:saturate(180%) blur(30px);-webkit-backdrop-filter:saturate(180%) blur(30px);border-bottom:.5px solid var(--line);position:sticky;top:0;z-index:50;padding:8px 16px;padding-top:calc(8px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:center;min-height:44px}
-body.theme-light .header{background:rgba(242,242,247,0.85)}
-.header-left{display:flex;align-items:center;gap:10px}
-.logo-icon{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.logo-icon svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.header-text .logo{font-size:16px;font-weight:700;letter-spacing:-.3px;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.header-text .sub{font-size:11px;color:var(--muted);margin-top:1px}
-.header-right{display:flex;align-items:center;gap:8px}
-.tokens-badge{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--accent-2);background:rgba(191,90,242,0.12);border:1px solid rgba(191,90,242,0.25);padding:5px 10px;border-radius:20px}
-.tokens-badge svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-.gear-btn{width:32px;height:32px;border-radius:16px;background:var(--card-2);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.gear-btn:active{transform:scale(.92);opacity:.8}
-.gear-btn svg{width:17px;height:17px;stroke:var(--text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.large-title-wrap{padding:8px 16px 0;max-width:540px;margin:0 auto}
-.large-title{font-size:32px;font-weight:800;letter-spacing:-.8px;line-height:1.1;padding:10px 0 8px}
-.container{padding:0 16px;max-width:540px;margin:0 auto}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;font-size:16px;line-height:1.4;padding-bottom:calc(80px + env(safe-area-inset-bottom));letter-spacing:-.3px}
+.header{background:rgba(0,0,0,0.75);backdrop-filter:saturate(180%) blur(30px);-webkit-backdrop-filter:saturate(180%) blur(30px);border-bottom:.5px solid var(--line);position:sticky;top:0;z-index:50;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:17px;font-weight:700;background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header-right{display:flex;gap:8px;align-items:center}
+.badge{font-size:13px;font-weight:600;color:var(--accent-2);background:rgba(191,90,242,0.12);border:1px solid rgba(191,90,242,0.25);padding:5px 10px;border-radius:20px}
+.container{padding:16px;max-width:540px;margin:0 auto}
 .card{background:var(--card);border-radius:var(--radius);margin-bottom:14px;overflow:hidden}
-.search-box{padding:16px}
-.search-input-wrap{display:flex;align-items:center;gap:8px;background:var(--card-2);border-radius:12px;padding:0 14px}
-.search-input-wrap svg{width:20px;height:20px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.search-input{flex:1;background:none;border:none;padding:14px 0;color:var(--text);font-size:16px;font-family:inherit;outline:none}
-.search-input::placeholder{color:var(--muted)}
-.search-btn{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;border:none;border-radius:12px;padding:14px;width:100%;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px}
-.search-btn:active{transform:scale(.98);opacity:.85}
-.search-btn:disabled{background:var(--card-2);color:var(--muted);cursor:not-allowed}
-.search-btn svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-.search-btn:disabled svg{stroke:var(--muted)}
-.searching-box{display:none;padding:28px 16px;text-align:center;border-bottom:.5px solid var(--line)}
-.searching-box.show{display:block}
-.searching-icon{width:90px;height:90px;margin:0 auto 16px;position:relative;display:flex;align-items:center;justify-content:center}
-.searching-icon .icon-layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .4s}
-.searching-icon .icon-layer.active{opacity:1}
-.searching-icon .icon-layer svg{width:44px;height:44px;stroke:var(--accent-2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.icon-pulse{animation:pulseIcon 1.5s ease-in-out infinite}
-@keyframes pulseIcon{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.7}}
-.icon-spin{animation:spinIcon 2s linear infinite}
-@keyframes spinIcon{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-.icon-dots{display:flex;gap:6px}
-.icon-dots span{width:10px;height:10px;border-radius:50%;background:var(--accent-2);animation:dotBounce 1.2s infinite}
-.icon-dots span:nth-child(2){animation-delay:.15s}
-.icon-dots span:nth-child(3){animation-delay:.3s}
-@keyframes dotBounce{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-10px);opacity:1}}
-.timer-progress{position:absolute;inset:0}
-.timer-progress svg{transform:rotate(-90deg)}
-.timer-progress .bg{stroke:var(--card-2);fill:none;stroke-width:3}
-.timer-progress .fg{stroke:var(--accent);fill:none;stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .1s linear}
-.searching-status{font-size:15px;font-weight:600;margin-bottom:4px;letter-spacing:-.3px}
-.searching-time{font-size:13px;color:var(--dim)}
-.searching-time b{color:var(--text);font-weight:600}
-.result-box{padding:0;display:none}
-.result-box.show{display:block}
-.answer-block{padding:16px;border-bottom:.5px solid var(--line);position:relative}
-.answer-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.answer-label svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.answer-text{font-size:15px;line-height:1.55;white-space:pre-wrap;word-wrap:break-word;letter-spacing:-.2px;padding-right:40px}
-.answer-text b{color:var(--text);font-weight:700}
-.answer-text code{background:var(--card-2);padding:2px 6px;border-radius:5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}
-.answer-text i{font-style:italic;color:var(--dim)}
-.copy-btn{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:8px;background:var(--card-2);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.copy-btn:active{transform:scale(.92);opacity:.8}
-.copy-btn svg{width:16px;height:16px;stroke:var(--dim);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.copy-btn.copied svg{stroke:var(--green)}
-.sources-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;padding:16px 16px 8px;display:flex;align-items:center;gap:6px}
-.sources-label svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.source-item{display:flex;gap:10px;padding:12px 16px;text-decoration:none;color:inherit;border-top:.5px solid var(--line)}
-.source-item:active{background:var(--card-2)}
-.source-num{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
-.source-info{flex:1;min-width:0}
-.source-title{font-size:14px;font-weight:600;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.3}
-.source-url{font-size:11px;color:var(--accent-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.result-meta{padding:12px 16px;border-top:.5px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--dim);justify-content:center}
-.result-meta .m-item{display:flex;align-items:center;gap:4px}
-.result-meta .m-item svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.result-meta b{color:var(--text);font-weight:600}
-.empty-state{text-align:center;padding:60px 30px}
-.empty-icon{width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
-.empty-icon svg{width:40px;height:40px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.empty-title{font-size:19px;font-weight:700;margin-bottom:6px;letter-spacing:-.4px}
-.empty-desc{font-size:14px;color:var(--dim);line-height:1.5}
-.profile-header{text-align:center;padding:28px 16px 24px;background:var(--card);border-radius:var(--radius);margin-bottom:14px}
-.profile-avatar{width:84px;height:84px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
-.profile-avatar svg{width:42px;height:42px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.profile-name{font-size:22px;font-weight:700;letter-spacing:-.5px}
-.profile-sub{font-size:13px;color:var(--dim);margin-top:4px}
-.tokens-card{background:linear-gradient(135deg,rgba(191,90,242,0.18),rgba(94,92,230,0.08));border:1px solid rgba(191,90,242,0.3);border-radius:var(--radius);padding:20px;margin-bottom:14px;display:flex;align-items:center;gap:16px}
-.tokens-icon{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.tokens-icon svg{width:28px;height:28px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.tokens-info{flex:1;min-width:0}
-.tokens-label{font-size:12px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.8px}
-.tokens-value{font-size:32px;font-weight:800;color:var(--text);letter-spacing:-1.2px;line-height:1;margin-top:4px}
-.tokens-hint{font-size:12px;color:var(--dim);margin-top:4px}
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
-.stat-box{background:var(--card);border-radius:var(--radius);padding:14px;display:flex;align-items:center;gap:12px}
-.stat-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.stat-ic svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.stat-ic.purple{background:linear-gradient(135deg,var(--accent),var(--accent-2))}
-.stat-k{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
-.stat-v{font-size:20px;font-weight:700;letter-spacing:-.5px;line-height:1;margin-top:3px}
-.chart-card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:14px}
-.chart-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;display:flex;align-items:center;gap:6px}
-.chart-title svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.chart-bars{display:flex;align-items:flex-end;justify-content:space-between;gap:6px;height:100px;margin-bottom:8px}
-.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
-.chart-bar{width:100%;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,var(--accent),var(--accent-2));min-height:4px;transition:.3s}
-.chart-bar.zero{background:var(--card-2)}
-.chart-val{font-size:10px;font-weight:700;color:var(--text);margin-bottom:2px}
-.chart-day{font-size:10px;color:var(--muted);font-weight:600}
-.chart-summary{display:flex;justify-content:space-between;padding-top:12px;border-top:.5px solid var(--line);font-size:12px;color:var(--dim)}
-.chart-summary b{color:var(--text);font-weight:600}
-.top-tabs{display:flex;gap:6px;margin-bottom:14px;background:var(--card);padding:5px;border-radius:12px}
-.top-tab{flex:1;text-align:center;padding:10px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-radius:8px;user-select:none}
-.top-tab.active{background:var(--bg);color:var(--text)}
-.top-item{display:flex;align-items:center;gap:12px;padding:12px 16px;position:relative}
-.top-item + .top-item::before{content:'';position:absolute;top:0;left:60px;right:16px;height:.5px;background:var(--line)}
-.top-item.me{background:rgba(191,90,242,0.08)}
-.top-rank{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;background:var(--card-2);color:var(--muted);flex-shrink:0}
-.top-rank.gold{background:linear-gradient(135deg,#ffd60a,#ff9f0a);color:#1a1408}
-.top-rank.silver{background:linear-gradient(135deg,#e0e0e0,#a8a8a8);color:#1a1408}
-.top-rank.bronze{background:linear-gradient(135deg,#cd7f32,#a05a1c);color:#fff}
-.top-info{flex:1;min-width:0}
-.top-name{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.top-sub{font-size:12px;color:var(--dim);margin-top:2px}
-.top-value{font-size:15px;font-weight:700;color:var(--accent-2);flex-shrink:0}
-.section-header{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:22px 4px 8px}
-.history-item{padding:12px 16px;border-top:.5px solid var(--line);cursor:pointer;display:flex;gap:10px;align-items:center}
-.history-item:active{background:var(--card-2)}
-.history-ic{width:32px;height:32px;border-radius:9px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.history-ic svg{width:16px;height:16px;stroke:var(--dim);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.history-content{flex:1;min-width:0}
-.history-q{font-size:14px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.history-meta{font-size:11px;color:var(--muted);display:flex;gap:8px;align-items:center}
-.history-cost{color:var(--accent-2);font-weight:600}
-.settings-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:200;overflow-y:auto;transform:translateX(100%);transition:transform .35s cubic-bezier(0.32,0.72,0,1);padding-bottom:calc(40px + env(safe-area-inset-bottom))}
-.settings-screen.open{transform:translateX(0)}
-.settings-header{background:rgba(0,0,0,0.72);backdrop-filter:saturate(180%) blur(30px);-webkit-backdrop-filter:saturate(180%) blur(30px);border-bottom:.5px solid var(--line);position:sticky;top:0;z-index:50;padding:8px 16px;padding-top:calc(8px + env(safe-area-inset-top));display:flex;align-items:center;min-height:44px;gap:8px}
-body.theme-light .settings-header{background:rgba(242,242,247,0.85)}
-.back-btn{background:none;border:none;cursor:pointer;color:var(--accent-2);font-size:17px;font-family:inherit;display:flex;align-items:center;gap:2px;padding:6px 6px 6px 0}
-.back-btn svg{width:11px;height:19px;stroke:var(--accent-2);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-.settings-title{font-size:17px;font-weight:600;flex:1;text-align:center;margin-right:60px}
-.settings-container{padding:0 16px;max-width:540px;margin:0 auto}
-.row{display:flex;align-items:center;gap:12px;padding:11px 16px;min-height:44px;position:relative}
-.row.tappable{cursor:pointer}
-.row.tappable:active{background:var(--card-2)}
-.row + .row::before{content:'';position:absolute;top:0;left:60px;right:0;height:.5px;background:var(--line)}
-.row .row-info{flex:1;min-width:0}
-.row .row-title{font-size:17px;font-weight:400;letter-spacing:-.4px}
-.row .row-sub{font-size:13px;color:var(--dim);margin-top:2px}
-.row .chev{color:var(--muted);font-size:20px;font-weight:300;margin-left:auto}
-.ic{width:29px;height:29px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;overflow:hidden}
-.ic::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.14) 0%,rgba(255,255,255,0) 55%);pointer-events:none}
-.ic svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;position:relative;z-index:1}
-.ic.purple{background:linear-gradient(135deg,var(--accent),var(--accent-2))}
-.ic.blue{background:#0a84ff}
-.ic.green{background:#30d158}
-.ic.orange{background:#ff9f0a}
-.ic.red{background:#ff453a}
-.ic.gray{background:#8e8e93}
-.switch{width:51px;height:31px;background:var(--card-2);border-radius:20px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
-.switch.on{background:var(--green)}
-.switch::after{content:'';position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;transition:transform .2s}
-.switch.on::after{transform:translateX(20px)}
-.theme-preview{display:inline-flex;gap:8px;padding:6px;background:var(--card-2);border-radius:10px}
-.theme-swatch{width:42px;height:30px;border-radius:6px;border:2px solid transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
-.theme-swatch.active{border-color:var(--accent-2)}
-.theme-swatch.dark{background:#000;color:#fff}
-.theme-swatch.light{background:#f2f2f7;color:#000}
-.color-dots{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-.color-dot{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:.15s}
-.color-dot.active{border-color:var(--text);transform:scale(1.12)}
-.seg-control{display:inline-flex;background:var(--card-2);border-radius:8px;padding:2px}
-.seg-btn{padding:5px 10px;font-size:13px;border-radius:6px;cursor:pointer;color:var(--dim);font-weight:500;font-family:inherit;background:none;border:none}
-.seg-btn.active{background:var(--card);color:var(--text)}
-.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(20,20,22,0.78);backdrop-filter:saturate(180%) blur(30px);-webkit-backdrop-filter:saturate(180%) blur(30px);border-top:.5px solid var(--line);display:flex;padding:4px 4px calc(8px + env(safe-area-inset-bottom));z-index:100;max-width:540px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%}
-body.theme-light .nav{background:rgba(255,255,255,0.85)}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;color:var(--muted);cursor:pointer;user-select:none}
-.nav-item.active{color:var(--accent-2)}
-.nav-item svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.nav-item span{font-size:10px;font-weight:500}
-.tab{display:none}
-.tab.active{display:block;animation:fade .3s cubic-bezier(0.32,0.72,0,1)}
-@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.toast{position:fixed;bottom:calc(130px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(120%);background:rgba(44,44,46,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:.5px solid var(--line);color:var(--text);padding:12px 20px;border-radius:14px;font-size:15px;font-weight:500;z-index:999;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
+.card-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;padding:14px 16px 8px}
+.btn{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;border:none;border-radius:12px;padding:14px 18px;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;width:100%;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{transform:scale(.98);opacity:.85}
+.btn.secondary{background:var(--card-2);color:var(--text)}
+.btn.small{padding:10px 14px;font-size:14px;margin-bottom:0}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-top:.5px solid var(--line);cursor:pointer}
+.row:active{background:var(--card-2)}
+.row:first-child{border-top:none}
+.row-icon{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.row-info{flex:1;min-width:0}
+.row-title{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-sub{font-size:12px;color:var(--dim);margin-top:2px}
+.row-chev{color:var(--muted);font-size:20px}
+.flag{font-size:24px;margin-right:4px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border-radius:var(--radius);padding:14px}
+.stat-k{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.stat-v{font-size:20px;font-weight:700;margin-top:4px;letter-spacing:-.5px}
+.stat-v.gold{color:var(--gold)}
+.stat-v.green{color:var(--green)}
+.stat-v.blue{color:var(--blue)}
+.stat-v.purple{color:var(--accent-2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.grid2 .btn{margin-bottom:0;padding:14px 10px;font-size:14px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:540px;max-height:85vh;overflow-y:auto;padding-bottom:calc(20px + env(safe-area-inset-bottom));animation:slideUp .3s cubic-bezier(0.32,0.72,0,1)}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:.5px solid var(--line);position:sticky;top:0;background:var(--card);z-index:1}
+.modal-title{font-size:18px;font-weight:700}
+.modal-close{background:var(--card-2);border:none;width:30px;height:30px;border-radius:15px;cursor:pointer;color:var(--text);font-size:16px}
+.modal-body{padding:16px 20px}
+.building-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:.5px solid var(--line)}
+.building-row:last-child{border:none}
+.building-info{flex:1}
+.building-name{font-size:15px;font-weight:600}
+.building-desc{font-size:12px;color:var(--dim);margin-top:2px}
+.building-cost{font-size:14px;font-weight:700;color:var(--gold);margin-right:10px}
+.empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
+.toast{position:fixed;bottom:calc(100px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(120%);background:rgba(44,44,46,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:.5px solid var(--line);color:var(--text);padding:12px 20px;border-radius:14px;font-size:14px;font-weight:500;z-index:999;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.error{background:rgba(255,69,58,0.96)}
-.about-text{font-size:14px;color:var(--dim);padding:14px 16px;line-height:1.55}
-.about-text b{color:var(--text);font-weight:600}
+.toast.success{background:rgba(48,209,88,0.96)}
+.confirm{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.confirm.open{display:flex;animation:fadeIn .2s}
+.confirm-box{background:var(--card);border-radius:16px;padding:20px;max-width:340px;width:100%;text-align:center}
+.confirm-title{font-size:17px;font-weight:700;margin-bottom:8px}
+.confirm-text{font-size:14px;color:var(--dim);margin-bottom:18px}
+.confirm-btns{display:flex;gap:10px}
+.confirm-btns .btn{margin:0}
+.loader{width:20px;height:20px;border:2px solid var(--card-2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.progress{height:6px;background:var(--card-2);border-radius:3px;overflow:hidden;margin-top:6px}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .3s}
+.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(20,20,22,0.85);backdrop-filter:saturate(180%) blur(30px);-webkit-backdrop-filter:saturate(180%) blur(30px);border-top:.5px solid var(--line);display:flex;padding:6px 4px calc(8px + env(safe-area-inset-bottom));z-index:100;max-width:540px;margin:0 auto}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;color:var(--muted);cursor:pointer;font-size:10px;font-weight:500}
+.tab-item.active{color:var(--accent-2)}
+.tab-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
-<body class="theme-dark font-medium radius-md">
+<body>
 
 <div class="header">
-  <div class="header-left">
-    <div class="logo-icon">
-      <svg viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 01-4.96.44 2.5 2.5 0 01-2.96-3.08 3 3 0 01-.34-5.58 2.5 2.5 0 011.32-4.24 2.5 2.5 0 011.98-3A2.5 2.5 0 019.5 2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44 2.5 2.5 0 002.96-3.08 3 3 0 00.34-5.58 2.5 2.5 0 00-1.32-4.24 2.5 2.5 0 00-1.98-3A2.5 2.5 0 0014.5 2z"/></svg>
-    </div>
-    <div class="header-text">
-      <div class="logo">Darkgram AI</div>
-      <div class="sub">AI + поиск</div>
-    </div>
-  </div>
+  <div class="logo">🏛️ RP Countries</div>
   <div class="header-right">
-    <div class="tokens-badge">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M9 10h4.5a2.5 2.5 0 010 5H9"/></svg>
-      <span id="tokensHeader">0</span>
-    </div>
-    <button class="gear-btn" onclick="openSettings()">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-    </button>
+    <div class="badge" id="headerBadge">—</div>
   </div>
 </div>
 
-<div class="large-title-wrap">
-  <div class="large-title" id="pageTitle">Поиск</div>
+<div class="container" id="app">
+  <div class="loader" style="margin-top:80px"></div>
 </div>
 
-<div class="container">
-  <div class="tab active" id="tab-search">
-    <div class="card">
-      <div class="search-box">
-        <div class="search-input-wrap">
-          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input class="search-input" id="searchInput" placeholder="Задай вопрос..." autocomplete="off">
-        </div>
-        <button class="search-btn" id="searchBtn" onclick="doSearch()">
-          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <span id="searchBtnText">Найти</span>
-        </button>
-      </div>
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">—</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-
-    <div class="searching-box" id="searchingBox">
-      <div class="searching-icon">
-        <div class="timer-progress">
-          <svg width="90" height="90">
-            <circle class="bg" cx="45" cy="45" r="40"/>
-            <circle class="fg" id="timerCircle" cx="45" cy="45" r="40" stroke-dasharray="251.3" stroke-dashoffset="0"/>
-          </svg>
-        </div>
-        <div class="icon-layer active" id="iconSearch">
-          <svg class="icon-pulse" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        </div>
-        <div class="icon-layer" id="iconBrain">
-          <svg class="icon-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6"/><path d="M4.22 4.22l4.24 4.24m7.07 7.07l4.24 4.24"/><path d="M1 12h6m10 0h6"/><path d="M4.22 19.78l4.24-4.24m7.07-7.07l4.24-4.24"/></svg>
-        </div>
-        <div class="icon-layer" id="iconDots">
-          <div class="icon-dots"><span></span><span></span><span></span></div>
-        </div>
-      </div>
-      <div class="searching-status" id="searchingStatus">Поиск в интернете...</div>
-      <div class="searching-time"><b id="timerNum">0.0</b> сек</div>
-    </div>
-
-    <div class="result-box" id="resultBox">
-      <div class="answer-block">
-        <div class="answer-label">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-          Ответ AI
-        </div>
-        <div class="answer-text" id="answerText"></div>
-        <button class="copy-btn" id="copyBtn" onclick="copyAnswer()">
-          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-        </button>
-      </div>
-      <div id="sourcesBlock"></div>
-      <div class="result-meta" id="resultMeta"></div>
-    </div>
-
-    <div id="emptyState" class="empty-state">
-      <div class="empty-icon">
-        <svg viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 01-4.96.44 2.5 2.5 0 01-2.96-3.08 3 3 0 01-.34-5.58 2.5 2.5 0 011.32-4.24 2.5 2.5 0 011.98-3A2.5 2.5 0 019.5 2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44 2.5 2.5 0 002.96-3.08 3 3 0 00.34-5.58 2.5 2.5 0 00-1.32-4.24 2.5 2.5 0 00-1.98-3A2.5 2.5 0 0014.5 2z"/></svg>
-      </div>
-      <div class="empty-title">Darkgram AI</div>
-      <div class="empty-desc">Задай вопрос — найду в интернете и дам ответ</div>
-    </div>
-  </div>
-
-  <div class="tab" id="tab-top">
-    <div class="top-tabs">
-      <div class="top-tab active" data-cat="requests" onclick="setTopCat('requests')">Запросы</div>
-      <div class="top-tab" data-cat="tokens" onclick="setTopCat('tokens')">Токены</div>
-      <div class="top-tab" data-cat="streak" onclick="setTopCat('streak')">Стрик</div>
-    </div>
-    <div class="card" id="topList"><div style="text-align:center;padding:40px;color:var(--muted)">Загрузка...</div></div>
-    <div id="myRankBlock"></div>
-  </div>
-
-  <div class="tab" id="tab-profile">
-    <div class="profile-header">
-      <div class="profile-avatar">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-      </div>
-      <div class="profile-name" id="profileName">Гость</div>
-      <div class="profile-sub" id="profileSub">с нами с —</div>
-    </div>
-
-    <div class="tokens-card">
-      <div class="tokens-icon">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M9 10h4.5a2.5 2.5 0 010 5H9"/></svg>
-      </div>
-      <div class="tokens-info">
-        <div class="tokens-label">Баланс токенов</div>
-        <div class="tokens-value" id="tokensValue">0</div>
-        <div class="tokens-hint">+50 каждый день</div>
-      </div>
-    </div>
-
-    <div class="stats-grid">
-      <div class="stat-box">
-        <div class="stat-ic purple"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
-        <div><div class="stat-k">Запросов</div><div class="stat-v" id="statRequests">0</div></div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-ic purple"><svg viewBox="0 0 24 24"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/></svg></div>
-        <div><div class="stat-k">Стрик</div><div class="stat-v" id="statStreak">0</div></div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-title">
-        <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg>
-        Траты за неделю
-      </div>
-      <div class="chart-bars" id="chartBars"></div>
-      <div class="chart-summary">
-        <span>Всего: <b id="chartTotal">0</b></span>
-        <span>Запросов: <b id="chartRequests">0</b></span>
-      </div>
-    </div>
-
-    <div id="historyBlock"></div>
+    <div class="modal-body" id="modalBody"></div>
   </div>
 </div>
 
-<div class="nav">
-  <div class="nav-item active" data-tab="search" data-title="Поиск">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <span>Поиск</span>
-  </div>
-  <div class="nav-item" data-tab="top" data-title="Топ">
-    <svg viewBox="0 0 24 24"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/></svg>
-    <span>Топ</span>
-  </div>
-  <div class="nav-item" data-tab="profile" data-title="Профиль">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-    <span>Профиль</span>
-  </div>
-</div>
-
-<div class="settings-screen" id="settingsScreen">
-  <div class="settings-header">
-    <button class="back-btn" onclick="closeSettings()">
-      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      Назад
-    </button>
-    <div class="settings-title">Настройки</div>
-  </div>
-  <div class="settings-container">
-    <div class="section-header">Внешний вид</div>
-    <div class="card">
-      <div class="row">
-        <div class="ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 000 18 4.5 4.5 0 000-9 4.5 4.5 0 010-9z"/></svg></div>
-        <div class="row-info"><div class="row-title">Тема</div></div>
-        <div class="theme-preview">
-          <div class="theme-swatch dark" onclick="setTheme('dark')" id="sw-dark">◐</div>
-          <div class="theme-swatch light" onclick="setTheme('light')" id="sw-light">◯</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></div>
-        <div class="row-info"><div class="row-title">Акцент</div></div>
-        <div class="color-dots" id="accentDots"></div>
-      </div>
-      <div class="row">
-        <div class="ic blue"><svg viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M12 4v16"/></svg></div>
-        <div class="row-info"><div class="row-title">Размер текста</div></div>
-        <div class="seg-control">
-          <button class="seg-btn" onclick="setFont('small')" data-f="small">S</button>
-          <button class="seg-btn" onclick="setFont('medium')" data-f="medium">M</button>
-          <button class="seg-btn" onclick="setFont('large')" data-f="large">L</button>
-          <button class="seg-btn" onclick="setFont('huge')" data-f="huge">XL</button>
-        </div>
-      </div>
-      <div class="row">
-        <div class="ic orange"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/></svg></div>
-        <div class="row-info"><div class="row-title">Радиус карточек</div></div>
-        <div class="seg-control">
-          <button class="seg-btn" onclick="setRadius('sm')" data-r="sm">S</button>
-          <button class="seg-btn" onclick="setRadius('md')" data-r="md">M</button>
-          <button class="seg-btn" onclick="setRadius('lg')" data-r="lg">L</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="section-header">Поведение</div>
-    <div class="card">
-      <div class="row tappable" onclick="toggleHistory()">
-        <div class="ic green"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
-        <div class="row-info"><div class="row-title">Сохранять историю</div></div>
-        <div class="switch" id="sw-history"></div>
-      </div>
-      <div class="row tappable" onclick="toggleVibration()">
-        <div class="ic blue"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 9h14"/><path d="M5 15h14"/></svg></div>
-        <div class="row-info"><div class="row-title">Вибрация</div></div>
-        <div class="switch" id="sw-vibration"></div>
-      </div>
-    </div>
-
-    <div class="section-header">Данные</div>
-    <div class="card">
-      <div class="row tappable" onclick="clearHistory()">
-        <div class="ic red"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 01-2 2H9a2 2 0 01-2-2L5 6"/></svg></div>
-        <div class="row-info"><div class="row-title">Очистить историю</div>
-        <div class="row-sub">Удалить все запросы</div></div>
-        <div class="chev">›</div>
-      </div>
-    </div>
-
-    <div class="section-header">О приложении</div>
-    <div class="card">
-      <div class="row">
-        <div class="ic purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
-        <div class="row-info">
-          <div class="row-title">Darkgram AI</div>
-          <div class="row-sub">v1.4.0</div>
-        </div>
-      </div>
-      <div class="about-text">
-        <b>Darkgram AI</b> — умный AI-поиск с интернетом.<br><br>
-        Работает в боте и Mini App.<br><br>
-        Стоимость запроса: 1 токен.
-      </div>
+<div class="confirm" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirmTitle">Подтверждение</div>
+    <div class="confirm-text" id="confirmText">Вы уверены?</div>
+    <div class="confirm-btns">
+      <button class="btn secondary" onclick="cancelConfirm()">Отмена</button>
+      <button class="btn" id="confirmOk">ОК</button>
     </div>
   </div>
 </div>
@@ -465,160 +123,476 @@ body.theme-light .nav{background:rgba(255,255,255,0.85)}
 <script>
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
-const user = tg?.initDataUnsafe?.user || { id: 0, first_name: 'Гость', username: '' };
-const UID = user.id;
-let player = { tokens: 0, total_requests: 0, total_spent: 0, joined: 0, streak: 0 };
-let settings = { theme: 'dark', accent: 'purple', font: 'medium', radius: 'md', historyEnabled: true, vibration: true };
-let topCat = 'requests';
-let lastAnswer = '';
-const ACCENTS = { blue:['#0a84ff','#409cff'], purple:['#bf5af2','#5e5ce6'], green:['#30d158','#63e6e2'], orange:['#ff9f0a','#ffd60a'], red:['#ff453a','#ff375f'], pink:['#ff375f','#bf5af2'] };
-const SETTINGS_KEY = 'ds_settings_v6';
-function loadSettings(){try{const s=localStorage.getItem(SETTINGS_KEY);if(s)settings={...settings,...JSON.parse(s)}}catch(e){}applySettings()}
-function saveSettings(){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings))}catch(e){}}
-function applySettings(){
-  document.body.classList.remove('theme-dark','theme-light');
-  document.body.classList.add('theme-'+settings.theme);
-  document.body.classList.remove('font-small','font-medium','font-large','font-huge');
-  document.body.classList.add('font-'+settings.font);
-  document.body.classList.remove('radius-sm','radius-md','radius-lg');
-  document.body.classList.add('radius-'+settings.radius);
-  const a=ACCENTS[settings.accent]||ACCENTS.purple;
-  document.documentElement.style.setProperty('--accent',a[0]);
-  document.documentElement.style.setProperty('--accent-2',a[1]);
-  ['dark','light'].forEach(tp=>{const sw=document.getElementById('sw-'+tp);if(sw)sw.classList.toggle('active',settings.theme===tp)});
-  document.querySelectorAll('.seg-btn[data-f]').forEach(b=>b.classList.toggle('active',b.dataset.f===settings.font));
-  document.querySelectorAll('.seg-btn[data-r]').forEach(b=>b.classList.toggle('active',b.dataset.r===settings.radius));
-  const swH=document.getElementById('sw-history'),swV=document.getElementById('sw-vibration');
-  if(swH)swH.classList.toggle('on',settings.historyEnabled);
-  if(swV)swV.classList.toggle('on',settings.vibration);
-  renderAccentDots();
+
+const STORAGE_KEY = 'rp_countries_v1';
+
+// ============================================================
+// ДАННЫЕ (в localStorage, чтобы работало без сервера)
+// ============================================================
+const COUNTRIES_25 = [
+  {name:'Россия', flag:'🇷🇺', pop:146000000, treas:50000, army:1000000, tech:5},
+  {name:'США', flag:'🇺🇸', pop:330000000, treas:80000, army:1500000, tech:7},
+  {name:'Китай', flag:'🇨🇳', pop:1400000000, treas:70000, army:2000000, tech:6},
+  {name:'Германия', flag:'🇩🇪', pop:83000000, treas:60000, army:300000, tech:6},
+  {name:'Франция', flag:'🇫🇷', pop:67000000, treas:55000, army:350000, tech:6},
+  {name:'Великобритания', flag:'🇬🇧', pop:67000000, treas:58000, army:300000, tech:6},
+  {name:'Япония', flag:'🇯🇵', pop:125000000, treas:65000, army:250000, tech:7},
+  {name:'Индия', flag:'🇮🇳', pop:1380000000, treas:40000, army:1400000, tech:4},
+  {name:'Бразилия', flag:'🇧🇷', pop:213000000, treas:35000, army:400000, tech:4},
+  {name:'Канада', flag:'🇨🇦', pop:38000000, treas:50000, army:150000, tech:6},
+  {name:'Италия', flag:'🇮🇹', pop:60000000, treas:48000, army:200000, tech:5},
+  {name:'Испания', flag:'🇪🇸', pop:47000000, treas:40000, army:150000, tech:5},
+  {name:'Турция', flag:'🇹🇷', pop:84000000, treas:30000, army:500000, tech:4},
+  {name:'Южная Корея', flag:'🇰🇷', pop:51000000, treas:55000, army:600000, tech:7},
+  {name:'Иран', flag:'🇮🇷', pop:85000000, treas:30000, army:600000, tech:4},
+  {name:'Польша', flag:'🇵🇱', pop:38000000, treas:35000, army:200000, tech:5},
+  {name:'Украина', flag:'🇺🇦', pop:44000000, treas:25000, army:300000, tech:4},
+  {name:'Саудовская Аравия', flag:'🇸🇦', pop:34000000, treas:70000, army:200000, tech:5},
+  {name:'Австралия', flag:'🇦🇺', pop:26000000, treas:45000, army:100000, tech:6},
+  {name:'Мексика', flag:'🇲🇽', pop:129000000, treas:25000, army:250000, tech:3},
+  {name:'Индонезия', flag:'🇮🇩', pop:274000000, treas:22000, army:400000, tech:3},
+  {name:'Нигерия', flag:'🇳🇬', pop:206000000, treas:15000, army:200000, tech:2},
+  {name:'Египет', flag:'🇪🇬', pop:104000000, treas:20000, army:450000, tech:3},
+  {name:'ЮАР', flag:'🇿🇦', pop:59000000, treas:25000, army:100000, tech:4},
+  {name:'Аргентина', flag:'🇦🇷', pop:45000000, treas:28000, army:150000, tech:4},
+];
+
+const BUILDINGS = {
+  farm:     {name:'🌾 Ферма',      cost:200, desc:'+500 еды/час'},
+  factory:  {name:'🏭 Завод',      cost:500, desc:'+300 💰/час'},
+  barracks: {name:'⚔️ Казармы',    cost:300, desc:'+200 армии/час'},
+  school:   {name:'🎓 Школа',      cost:400, desc:'+1 технология/час'},
+  hospital: {name:'🏥 Больница',   cost:350, desc:'+2 стабильности/час'},
+  police:   {name:'🚔 Полиция',    cost:250, desc:'+3 стабильности/час'},
+  mine:     {name:'⛏️ Шахта',      cost:400, desc:'+300 металла/час'},
+  oilrig:   {name:'🛢️ Нефтевышка', cost:600, desc:'+200 нефти/час'},
+};
+
+// ============================================================
+// СОСТОЯНИЕ
+// ============================================================
+let state = null;
+
+function loadState() {
+  try {
+    const s = localStorage.getItem(STORAGE_KEY);
+    if (s) state = JSON.parse(s);
+  } catch(e) {}
+  if (!state) {
+    state = {
+      countries: COUNTRIES_25.map((c, i) => ({
+        id: i,
+        ...c,
+        owner: null,
+        stability: 70,
+        food: 5000,
+        metal: 2000,
+        oil: 1000,
+        cities: [],
+        isNpc: true,
+      })),
+      myCountryId: null,
+      news: [],
+      lastTick: Date.now(),
+    };
+  }
 }
-function setTheme(x){settings.theme=x;saveSettings();applySettings();api('/api/save_settings',{theme:x})}
-function setAccent(x){settings.accent=x;saveSettings();applySettings();api('/api/save_settings',{accent:x});haptic('light')}
-function setFont(f){settings.font=f;saveSettings();applySettings();api('/api/save_settings',{font:f});haptic('light')}
-function setRadius(r){settings.radius=r;saveSettings();applySettings();api('/api/save_settings',{radius:r});haptic('light')}
-function toggleHistory(){settings.historyEnabled=!settings.historyEnabled;saveSettings();applySettings();api('/api/save_settings',{history_enabled:settings.historyEnabled});haptic('light')}
-function toggleVibration(){settings.vibration=!settings.vibration;saveSettings();applySettings();api('/api/save_settings',{vibration:settings.vibration})}
-function renderAccentDots(){const el=document.getElementById('accentDots');if(!el)return;el.innerHTML=Object.entries(ACCENTS).map(([k,v])=>'<div class="color-dot" style="background:linear-gradient(135deg,'+v[0]+','+v[1]+');'+(settings.accent===k?'border-color:var(--text);transform:scale(1.12);':'')+'" onclick="setAccent(\''+k+'\')"></div>').join('')}
-function haptic(type){if(!settings.vibration)return;try{if(tg&&tg.HapticFeedback){if(type==='light')tg.HapticFeedback.impactOccurred('light');else if(type==='success')tg.HapticFeedback.notificationOccurred('success');else if(type==='error')tg.HapticFeedback.notificationOccurred('error')}}catch(e){}}
-function toast(msg,err){const el=document.getElementById('toast');el.textContent=msg;el.classList.toggle('error',!!err);el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2500)}
-function openSettings(){document.getElementById('settingsScreen').classList.add('open');haptic('light')}
-function closeSettings(){document.getElementById('settingsScreen').classList.remove('open');haptic('light')}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function timeAgo(ts){const d=Math.floor(Date.now()/1000)-ts;if(d<60)return'только что';if(d<3600)return Math.floor(d/60)+' мин назад';if(d<86400)return Math.floor(d/3600)+' ч назад';return Math.floor(d/86400)+' дн назад'}
-async function api(path,body){try{const r=await fetch(path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json'},body:body?JSON.stringify({uid:UID,name:user.first_name,...body}):undefined});return await r.json()}catch(e){return null}}
-async function loadPlayer(){const r=await api('/api/player',{});if(!r||r.error)return;player=r;if(r.daily_bonus>0){toast('+'+r.daily_bonus+' токенов!');haptic('success')}if(r.history_enabled!==undefined)settings.historyEnabled=r.history_enabled;if(r.vibration!==undefined)settings.vibration=r.vibration;if(r.theme)settings.theme=r.theme;if(r.accent)settings.accent=r.accent;if(r.font)settings.font=r.font;if(r.radius)settings.radius=r.radius;saveSettings();applySettings();renderProfile()}
-function renderProfile(){document.getElementById('tokensHeader').textContent=player.tokens||0;document.getElementById('tokensValue').textContent=player.tokens||0;document.getElementById('statRequests').textContent=player.total_requests||0;document.getElementById('statStreak').textContent=player.streak||0;document.getElementById('profileName').textContent=user.first_name||'Гость';if(player.joined){const d=new Date(player.joined*1000);document.getElementById('profileSub').textContent='с нами с '+d.toLocaleDateString('ru')}}
-let timerInterval=null,startTime=0,searchInProgress=false,currentPhase=0;
-async function doSearch(){
-  const inp=document.getElementById('searchInput');const query=inp.value.trim();
-  if(!query||searchInProgress)return;
-  if(player.tokens<1){toast('Недостаточно токенов',true);haptic('error');return}
-  searchInProgress=true;
-  document.getElementById('searchBtn').disabled=true;
-  document.getElementById('searchBtnText').textContent='Поиск...';
-  document.getElementById('resultBox').classList.remove('show');
-  document.getElementById('emptyState').style.display='none';
-  document.getElementById('searchingBox').classList.add('show');
-  startTime=Date.now();currentPhase=0;updatePhase(0);
-  if(timerInterval)clearInterval(timerInterval);
-  timerInterval=setInterval(()=>{const e=(Date.now()-startTime)/1000;document.getElementById('timerNum').textContent=e.toFixed(1);const c=document.getElementById('timerCircle');c.setAttribute('stroke-dashoffset',251.3*Math.min(1,e/15));let p=0;if(e>2&&e<5)p=1;else if(e>=5)p=2;if(p!==currentPhase){currentPhase=p;updatePhase(p)}},100);
-  try{
-    const r=await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:UID,query:query})});
-    const data=await r.json();
-    clearInterval(timerInterval);
-    document.getElementById('searchingBox').classList.remove('show');
-    if(data.error){
-      if(data.error==='tokens'){toast(data.message,true);player.tokens=data.tokens;document.getElementById('tokensHeader').textContent=data.tokens}else toast(data.error,true);
-      document.getElementById('emptyState').style.display='block';
-      searchInProgress=false;document.getElementById('searchBtn').disabled=false;document.getElementById('searchBtnText').textContent='Найти';return;
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+// ============================================================
+// ЭКОНОМИКА (тик раз в секунду)
+// ============================================================
+function cityIncomePerHour(city) {
+  let inc = city.pop * 0.0005 * 3600 + 50; // базовый налог + базовая доходность
+  if (city.buildings) {
+    for (const [k, cnt] of Object.entries(city.buildings)) {
+      if (k === 'factory') inc += 300 * cnt;
     }
-    renderResult(data);
-    player.tokens=data.tokens_left;
-    player.total_requests=(player.total_requests||0)+1;
-    player.total_spent=(player.total_spent||0)+data.cost;
-    document.getElementById('tokensHeader').textContent=player.tokens;
-    renderProfile();loadHistory();loadStats();haptic('success');
-  }catch(e){
-    clearInterval(timerInterval);
-    document.getElementById('searchingBox').classList.remove('show');
-    toast('Ошибка. Попробуй ещё раз.',true);
-    document.getElementById('emptyState').style.display='block';
   }
-  searchInProgress=false;document.getElementById('searchBtn').disabled=false;document.getElementById('searchBtnText').textContent='Найти';
+  return inc;
 }
-function updatePhase(p){['iconSearch','iconBrain','iconDots'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.classList.toggle('active',i===p)});const s=document.getElementById('searchingStatus');if(p===0)s.textContent='Поиск в интернете...';else if(p===1)s.textContent='AI обрабатывает...';else s.textContent='Формирую ответ...'}
-function renderResult(data){
-  lastAnswer=data.answer||'';
-  document.getElementById('answerText').innerHTML=lastAnswer;
-  document.getElementById('copyBtn').classList.remove('copied');
-  let sh='';
-  if(data.sources&&data.sources.length){
-    sh='<div class="sources-label"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>Источники ('+data.sources.length+')</div>'+data.sources.map((s,i)=>'<a class="source-item" href="'+esc(s.url)+'" target="_blank" rel="noopener"><div class="source-num">'+(i+1)+'</div><div class="source-info"><div class="source-title">'+esc(s.title)+'</div><div class="source-url">'+esc(s.url)+'</div></div></a>').join('');
+
+function countryIncomePerHour(country) {
+  let total = 0;
+  for (const city of country.cities) total += cityIncomePerHour(city);
+  return total;
+}
+
+function tick() {
+  const now = Date.now();
+  const dt = (now - state.lastTick) / 1000; // секунд прошло
+  if (dt < 1) return;
+  state.lastTick = now;
+
+  for (const country of state.countries) {
+    // Доход с городов
+    const incomePerHour = countryIncomePerHour(country);
+    const incomePerSec = incomePerHour / 3600;
+
+    // Расход на армию
+    const expensePerSec = country.army * 0.5 / 3600;
+
+    country.treas += (incomePerSec - expensePerSec) * dt;
+    if (country.treas < 0) country.treas = 0;
+
+    // Стабильность восстанавливается
+    if (country.stability < 100) country.stability = Math.min(100, country.stability + 0.001 * dt);
+
+    // Рост населения от еды
+    if (country.food > country.pop / 1000) {
+      const growth = (country.food * 0.001) * (country.stability / 100) * dt;
+      country.pop += growth;
+      country.food -= growth * 10;
+    }
+
+    // Доход от зданий в ресурсах
+    for (const city of country.cities) {
+      if (!city.buildings) continue;
+      for (const [k, cnt] of Object.entries(city.buildings)) {
+        if (k === 'farm') country.food += (500 / 3600) * cnt * dt;
+        else if (k === 'mine') country.metal += (300 / 3600) * cnt * dt;
+        else if (k === 'oilrig') country.oil += (200 / 3600) * cnt * dt;
+        else if (k === 'barracks') country.army += (200 / 3600) * cnt * dt;
+        else if (k === 'school') country.tech += (1 / 3600) * cnt * dt;
+        else if (k === 'hospital') country.stability += (2 / 3600) * cnt * dt;
+        else if (k === 'police') country.stability += (3 / 3600) * cnt * dt;
+      }
+    }
+    country.stability = Math.max(0, Math.min(100, country.stability));
   }
-  document.getElementById('sourcesBlock').innerHTML=sh;
-  document.getElementById('resultMeta').innerHTML='<div class="m-item"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/></svg>Поиск: <b>'+data.search_time+'с</b></div><div class="m-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/></svg>AI: <b>'+data.ai_time+'с</b></div><div class="m-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Всего: <b>'+data.total_time+'с</b></div><div class="m-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/></svg>-'+data.cost+' токен</div>';
-  document.getElementById('resultBox').classList.add('show');
-  document.getElementById('emptyState').style.display='none';
-}
-function copyAnswer(){
-  if(!lastAnswer)return;
-  const btn=document.getElementById('copyBtn');
-  const tmp=document.createElement('div');tmp.innerHTML=lastAnswer;
-  const clean=tmp.textContent||tmp.innerText||'';
-  if(navigator.clipboard){navigator.clipboard.writeText(clean).then(()=>{btn.classList.add('copied');toast('Скопировано');haptic('success');setTimeout(()=>btn.classList.remove('copied'),2000)})}
-  else{const ta=document.createElement('textarea');ta.value=clean;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);btn.classList.add('copied');toast('Скопировано');setTimeout(()=>btn.classList.remove('copied'),2000)}
-}
-async function loadHistory(){
-  const r=await api('/api/history');const h=Array.isArray(r)?r:[];const el=document.getElementById('historyBlock');
-  if(!h.length){el.innerHTML='';return}
-  el.innerHTML='<div class="section-header">История</div><div class="card">'+h.slice(0,10).map(x=>'<div class="history-item" onclick="reSearch(\''+esc(x.query).replace(/'/g,"\\'")+'\')"><div class="history-ic"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/></svg></div><div class="history-content"><div class="history-q">'+esc(x.query)+'</div><div class="history-meta"><span>'+timeAgo(x.time)+'</span><span class="history-cost">-'+(x.cost||1)+'</span></div></div></div>').join('')+'</div>';
-}
-function reSearch(q){document.getElementById('searchInput').value=q;document.querySelector('[data-tab="search"]').click();doSearch()}
-async function clearHistory(){if(!confirm('Очистить всю историю?'))return;await api('/api/history/clear',{});toast('История очищена');haptic('success');loadHistory();loadStats()}
-async function loadStats(){
-  const r=await api('/api/stats',{});if(!r||!r.days)return;
-  const days=r.days;const max=Math.max(...days.map(d=>d.spent),1);
-  let ts=0,tr=0;
-  document.getElementById('chartBars').innerHTML=days.map(d=>{ts+=d.spent;tr+=d.count;const hh=d.spent>0?Math.max(8,(d.spent/max)*90):4;const z=d.spent===0?'zero':'';return'<div class="chart-col"><div class="chart-val">'+(d.spent||'')+'</div><div class="chart-bar '+z+'" style="height:'+hh+'%"></div><div class="chart-day">'+d.day_short+'</div></div>'}).join('');
-  document.getElementById('chartTotal').textContent=ts;
-  document.getElementById('chartRequests').textContent=tr;
-}
-function setTopCat(c){topCat=c;document.querySelectorAll('.top-tab').forEach(t=>t.classList.toggle('active',t.dataset.cat===c));haptic('light');loadTop()}
-async function loadTop(){
-  const r=await api('/api/top?category='+topCat);if(!r||!r.top)return;
-  const el=document.getElementById('topList');const top=r.top;
-  if(!top.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">Пока пусто</div>';document.getElementById('myRankBlock').innerHTML='';return}
-  el.innerHTML=top.map((u,i)=>{
-    const rank=i+1;let rc='';if(rank===1)rc='gold';else if(rank===2)rc='silver';else if(rank===3)rc='bronze';
-    const me=String(u.uid)===String(UID)?'me':'';const name=u.username?'@'+u.username:u.name;
-    let v='',s='';
-    if(topCat==='requests'){v=u.requests;s=u.requests+' запрос'+(u.requests%10===1&&u.requests%100!==11?'':'ов')}
-    else if(topCat==='tokens'){v=u.spent;s='потрачено'}
-    else{v=u.streak;s=u.streak+' дн подряд'}
-    return'<div class="top-item '+me+'"><div class="top-rank '+rc+'">'+rank+'</div><div class="top-info"><div class="top-name">'+esc(name)+'</div><div class="top-sub">'+s+'</div></div><div class="top-value">'+v+'</div></div>';
-  }).join('');
-  const myEl=document.getElementById('myRankBlock');
-  if(r.my_place&&r.my_place>30){
-    let v=topCat==='requests'?r.my_data.requests:topCat==='tokens'?r.my_data.spent:r.my_data.streak;
-    myEl.innerHTML='<div class="section-header">Твоё место</div><div class="card"><div class="top-item me"><div class="top-rank">'+r.my_place+'</div><div class="top-info"><div class="top-name">'+esc(user.first_name||'Ты')+'</div><div class="top-sub">вне топ-30</div></div><div class="top-value">'+v+'</div></div></div>';
-  }else if(r.my_place){myEl.innerHTML='<div style="text-align:center;padding:14px;color:var(--accent-2);font-size:13px">Ты на '+r.my_place+' месте</div>'}else{myEl.innerHTML=''}
-}
-document.querySelectorAll('.nav-item').forEach(el=>{
-  el.onclick=()=>{
-    document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('tab-'+el.dataset.tab).classList.add('active');
-    document.getElementById('pageTitle').textContent=el.dataset.title||'';
-    haptic('light');
-    if(el.dataset.tab==='profile'){loadPlayer();loadHistory();loadStats()}
-    if(el.dataset.tab==='top'){loadTop()}
+
+  // NPC действия — раз в 5 минут реального времени
+  if (Math.floor(now / 300000) !== Math.floor((now - dt * 1000) / 300000)) {
+    npcTick();
   }
+
+  saveState();
+}
+
+function npcTick() {
+  for (const country of state.countries) {
+    if (!country.isNpc) continue;
+    if (country.treas < 500) continue;
+    if (Math.random() < 0.3) {
+      const bkey = ['farm', 'factory', 'barracks', 'police'][Math.floor(Math.random() * 4)];
+      const cost = BUILDINGS[bkey].cost;
+      if (country.treas >= cost && country.cities.length > 0) {
+        country.treas -= cost;
+        const city = country.cities[0];
+        if (!city.buildings) city.buildings = {};
+        city.buildings[bkey] = (city.buildings[bkey] || 0) + 1;
+        addNews(`${country.flag} ${country.name}: построено ${BUILDINGS[bkey].name}`);
+      }
+    }
+  }
+}
+
+function addNews(text) {
+  state.news.unshift({time: Date.now(), text});
+  if (state.news.length > 50) state.news = state.news.slice(0, 50);
+}
+
+setInterval(tick, 1000);
+
+// ============================================================
+// UI
+// ============================================================
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + type;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function fmt(n) {
+  if (n >= 1000000000) return (n / 1000000000).toFixed(1) + ' млрд';
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + ' млн';
+  if (n >= 1000) return (n / 1000).toFixed(1) + ' тыс';
+  return Math.floor(n).toString();
+}
+
+function render() {
+  const app = document.getElementById('app');
+  const myCountry = state.myCountryId !== null
+    ? state.countries.find(c => c.id === state.myCountryId)
+    : null;
+
+  // Badge
+  const badge = document.getElementById('headerBadge');
+  if (myCountry) {
+    badge.textContent = `${myCountry.flag} ${fmt(myCountry.treas)}💰`;
+  } else {
+    badge.textContent = '🌍 Выбор страны';
+  }
+
+  if (!myCountry) {
+    renderChooseCountry();
+  } else {
+    renderMain(myCountry);
+  }
+}
+
+function renderChooseCountry() {
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div style="text-align:center;padding:30px 0 20px">
+      <div style="font-size:64px;margin-bottom:10px">🏛️</div>
+      <div style="font-size:22px;font-weight:700;margin-bottom:6px">Выбери страну</div>
+      <div style="font-size:14px;color:var(--dim)">⚠️ Выбор — навсегда!</div>
+    </div>
+    <div class="card">
+      ${state.countries.map(c => `
+        <div class="row" onclick="tryTake(${c.id})">
+          <div class="row-icon">${c.flag}</div>
+          <div class="row-info">
+            <div class="row-title">${c.name}</div>
+            <div class="row-sub">${fmt(c.pop)} чел · ${fmt(c.treas)}💰 · ${fmt(c.army)}⚔️</div>
+          </div>
+          <div class="row-chev">${c.owner ? '🔒' : '›'}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderMain(country) {
+  const app = document.getElementById('app');
+  const incomeHour = countryIncomePerHour(country);
+  const cities = country.cities;
+
+  app.innerHTML = `
+    <div class="card" style="background:linear-gradient(135deg,rgba(191,90,242,0.15),rgba(94,92,230,0.05));border:1px solid rgba(191,90,242,0.25)">
+      <div style="padding:18px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="font-size:42px">${country.flag}</div>
+          <div>
+            <div style="font-size:20px;font-weight:700">${country.name}</div>
+            <div style="font-size:12px;color:var(--dim);margin-top:2px">Твоя страна</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;font-weight:600">Казна</div>
+        <div style="font-size:34px;font-weight:800;color:var(--gold);letter-spacing:-1px;line-height:1.1;margin-top:4px">${fmt(country.treas)} 💰</div>
+        <div style="font-size:13px;color:var(--green);margin-top:6px">+${fmt(incomeHour)} 💰/час · +${(incomeHour/3600).toFixed(2)}/сек</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="stat"><div class="stat-k">👥 Население</div><div class="stat-v">${fmt(country.pop)}</div></div>
+      <div class="stat"><div class="stat-k">⚔️ Армия</div><div class="stat-v">${fmt(country.army)}</div></div>
+      <div class="stat"><div class="stat-k">🔬 Технологии</div><div class="stat-v purple">${Math.floor(country.tech)}</div></div>
+      <div class="stat"><div class="stat-k">📊 Стабильность</div><div class="stat-v green">${Math.floor(country.stability)}%</div></div>
+      <div class="stat"><div class="stat-k">🌾 Еда</div><div class="stat-v">${fmt(country.food)}</div></div>
+      <div class="stat"><div class="stat-k">⛏️ Металл</div><div class="stat-v">${fmt(country.metal)}</div></div>
+      <div class="stat"><div class="stat-k">🛢️ Нефть</div><div class="stat-v">${fmt(country.oil)}</div></div>
+      <div class="stat"><div class="stat-k">🏙️ Города</div><div class="stat-v blue">${cities.length}</div></div>
+    </div>
+
+    <div class="card-title">Действия</div>
+    <button class="btn" onclick="openBuildings()">🏗️ Строительство</button>
+    <button class="btn secondary" onclick="openCities()">🏙️ Города (${cities.length})</button>
+    <button class="btn secondary" onclick="openNews()">📰 Новости мира</button>
+    <button class="btn secondary" onclick="openTop()">🏆 Топ стран</button>
+    <button class="btn secondary" onclick="openAllCountries()">🌍 Все страны</button>
+    <button class="btn secondary" onclick="openHelp()">❓ Помощь</button>
+  `;
+}
+
+// ============================================================
+// ДЕЙСТВИЯ
+// ============================================================
+function tryTake(cid) {
+  const c = state.countries.find(x => x.id === cid);
+  if (!c) return;
+  if (c.owner) { toast('🔒 Занята', 'error'); return; }
+  if (state.myCountryId !== null) { toast('У тебя уже есть страна', 'error'); return; }
+
+  showConfirm(
+    `Выбрать ${c.flag} ${c.name}?`,
+    'Страну нельзя будет поменять!',
+    () => {
+      c.owner = tg?.initDataUnsafe?.user?.id || 'me';
+      c.isNpc = false;
+      c.cities.push({ name: 'Столица', pop: 500000, buildings: {} });
+      state.myCountryId = cid;
+      addNews(`${c.flag} ${c.name}: новый правитель!`);
+      saveState();
+      toast('✅ Страна твоя!', 'success');
+      render();
+    }
+  );
+}
+
+function openBuildings() {
+  const c = state.countries.find(x => x.id === state.myCountryId);
+  if (!c.cities.length) { toast('Нет городов', 'error'); return; }
+  const city = c.cities[0];
+  openModal('🏗️ Строительство', `
+    <div style="font-size:13px;color:var(--dim);margin-bottom:12px">Город: <b style="color:var(--text)">${city.name}</b></div>
+    <div style="font-size:13px;color:var(--dim);margin-bottom:12px">Казна: <b style="color:var(--gold)">${fmt(c.treas)}💰</b></div>
+    ${Object.entries(BUILDINGS).map(([k, b]) => `
+      <div class="building-row">
+        <div class="building-info">
+          <div class="building-name">${b.name}</div>
+          <div class="building-desc">${b.desc}</div>
+        </div>
+        <div class="building-cost">${b.cost}💰</div>
+        <button class="btn small" onclick="buildInCity(0, '${k}')" ${c.treas < b.cost ? 'disabled' : ''}>+</button>
+      </div>
+    `).join('')}
+  `);
+}
+
+function buildInCity(cityIdx, bkey) {
+  const c = state.countries.find(x => x.id === state.myCountryId);
+  const city = c.cities[cityIdx];
+  const b = BUILDINGS[bkey];
+  if (c.treas < b.cost) { toast('Не хватает денег', 'error'); return; }
+  c.treas -= b.cost;
+  if (!city.buildings) city.buildings = {};
+  city.buildings[bkey] = (city.buildings[bkey] || 0) + 1;
+  addNews(`${c.flag} ${c.name}: построено ${b.name}`);
+  saveState();
+  toast(`✅ ${b.name}`, 'success');
+  openBuildings();
+  render();
+}
+
+function openCities() {
+  const c = state.countries.find(x => x.id === state.myCountryId);
+  openModal('🏙️ Города', `
+    ${c.cities.length === 0 ? '<div class="empty">Пока нет городов</div>' : ''}
+    ${c.cities.map((city, i) => `
+      <div class="row" onclick="openCity(${i})">
+        <div class="row-icon">🏙️</div>
+        <div class="row-info">
+          <div class="row-title">${city.name}</div>
+          <div class="row-sub">${fmt(city.pop)} чел · ${fmt(cityIncomePerHour(city))}💰/час</div>
+        </div>
+        <div class="row-chev">›</div>
+      </div>
+    `).join('')}
+    <button class="btn" style="margin-top:14px" onclick="foundCity()">➕ Основать город (5000💰)</button>
+  `);
+}
+
+function openCity(idx) {
+  const c = state.countries.find(x => x.id === state.myCountryId);
+  const city = c.cities[idx];
+  const buildings = city.buildings || {};
+  const rows = Object.entries(buildings).map(([k, cnt]) => 
+    `<div class="building-row"><div class="building-info"><div class="building-name">${BUILDINGS[k].name}</div></div><div style="font-weight:700">×${cnt}</div></div>`
+  ).join('');
+  openModal(`🏙️ ${city.name}`, `
+    <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:.5px solid var(--line)">
+      <span style="color:var(--dim)">Население</span>
+      <b>${fmt(city.pop)}</b>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:.5px solid var(--line)">
+      <span style="color:var(--dim)">Доход</span>
+      <b style="color:var(--gold)">${fmt(cityIncomePerHour(city))}💰/час</b>
+    </div>
+    <div class="card-title">Здания</div>
+    ${rows || '<div class="empty">Пока пусто</div>'}
+    <button class="btn" style="margin-top:14px" onclick="closeModal();openBuildings()">🏗️ Построить</button>
+  `);
+}
+
+function foundCity() {
+  const c = state.countries.find(x => x.id === state.myCountryId);
+  const cost = 5000;
+  if (c.treas < cost) { toast(`Нужно ${cost}💰`, 'error'); return; }
+  c.treas -= cost;
+  const name = prompt('Название города:', `Город-${c.cities.length + 1}`) || `Город-${c.cities.length + 1}`;
+  c.cities.push({ name: name.slice(0, 20), pop: 100000, buildings: {} });
+  addNews(`${c.flag} ${c.name}: основан ${name}`);
+  saveState();
+  toast('✅ Город основан', 'success');
+  openCities();
+  render();
+}
+
+function openNews() {
+  openModal('📰 Новости мира', state.news.length === 0
+    ? '<div class="empty">Пока пусто</div>'
+    : state.news.slice(0, 20).map(n => `<div style="padding:10px 0;border-bottom:.5px solid var(--line);font-size:14px">${n.text}</div>`).join('')
+  );
+}
+
+function openTop() {
+  const sorted = [...state.countries].sort((a, b) => b.treas - a.treas).slice(0, 10);
+  openModal('🏆 Топ стран', sorted.map((c, i) => {
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+    return `<div class="row"><div style="width:34px;text-align:center;font-weight:700">${medal}</div><div class="row-info"><div class="row-title">${c.flag} ${c.name}</div><div class="row-sub">${fmt(c.pop)} чел · ${fmt(c.army)}⚔️</div></div><div style="font-weight:700;color:var(--gold)">${fmt(c.treas)}💰</div></div>`;
+  }).join(''));
+}
+
+function openAllCountries() {
+  openModal('🌍 Все страны', state.countries.map(c => 
+    `<div class="row"><div class="row-icon">${c.flag}</div><div class="row-info"><div class="row-title">${c.name}</div><div class="row-sub">${c.owner ? '👤 Занята' : '🟢 Свободна'}</div></div></div>`
+  ).join(''));
+}
+
+function openHelp() {
+  openModal('❓ Помощь', `
+    <div style="font-size:14px;line-height:1.6">
+      <p style="margin-bottom:14px"><b>🎯 Цель:</b> развивай страну — экономика, армия, города.</p>
+      <p style="margin-bottom:14px"><b>💡 Экономика:</b><br>• Каждый город приносит доход сам<br>• Доход = налоги + здания<br>• Тикает каждую секунду</p>
+      <p style="margin-bottom:14px"><b>🏗️ Здания:</b><br>Ферма → еда<br>Завод → деньги<br>Казармы → армия<br>Школа → технологии<br>Больница/Полиция → стабильность<br>Шахта → металл<br>Нефтевышка → нефть</p>
+      <p><b>🏙️ Города:</b> основывай новые за 5000💰</p>
+    </div>
+  `);
+}
+
+// ============================================================
+// МОДАЛКА
+// ============================================================
+function openModal(title, body) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target.id === 'modal') closeModal();
 });
-loadSettings();
-document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch()});
-(async()=>{await loadPlayer();await loadHistory();await loadStats()})();
+
+// ============================================================
+// CONFIRM
+// ============================================================
+let confirmCb = null;
+
+function showConfirm(title, text, cb) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmText').textContent = text;
+  document.getElementById('confirmOverlay').classList.add('open');
+  confirmCb = cb;
+}
+
+function cancelConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('open');
+  confirmCb = null;
+}
+
+document.getElementById('confirmOk').onclick = () => {
+  if (confirmCb) confirmCb();
+  cancelConfirm();
+};
+
+// ============================================================
+// СТАРТ
+// ============================================================
+loadState();
+render();
+setInterval(render, 2000); // обновление UI раз в 2 сек
 </script>
 </body>
 </html>
