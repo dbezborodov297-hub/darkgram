@@ -4,7 +4,7 @@ import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from telebot import types
 
-TOKEN = '8514412667:AAEL2Iy4ImjPNd0qhapit-Ge6k3fkfFj37I'
+TOKEN = '8514412667:AAEuVEW-ilqt7IHHZ7UMcnvhMYziJeIWGR0'
 WEBAPP_URL = 'https://ТВОЙ_СЕРВЕР.onrender.com'
 
 bot = telebot.TeleBot(TOKEN)
