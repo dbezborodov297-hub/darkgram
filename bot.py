@@ -6,7 +6,7 @@ import random
 import threading
 from telebot import types
 
-TOKEN = '8514412667:AAFkcHG9zCHAggNHT_2kjfiI4qnwrFK7lbo'
+TOKEN = '8471116013:AAHeJkkFBPx2IljpdvXjC-f8FCivTIl9g4U'
 DATA_FILE = 'rp_data.json'
 
 bot = telebot.TeleBot(TOKEN)
