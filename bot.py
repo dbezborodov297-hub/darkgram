@@ -1,7 +1,7 @@
 import telebot
 from telebot import types
 
-TOKEN = '8471116013:AAGsLHJLMavFZedKgENNHZUwPRUlpwLTaWM'
+TOKEN = '8471116013:AAFoB4xMO372jegqWPlPbu432BbkVL24ZIs'
 WEBAPP_URL = 'https://darkgram-2.onrender.com'
 
 bot = telebot.TeleBot(TOKEN)
@@ -10,15 +10,16 @@ bot = telebot.TeleBot(TOKEN)
 def cmd_start(m):
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton(
-        text='🏛️ Открыть игру',
+        text='🎮 Играть в Block Blast',
         web_app=types.WebAppInfo(url=WEBAPP_URL)
     ))
     bot.send_message(m.chat.id,
-        '🏛️ <b>RP Countries</b>\n\n'
-        'Выбери страну и правь ей.\n\n'
+        '🎮 <b>Block Blast</b>\n\n'
+        'Ставь блоки на поле.\n'
+        'Заполняй линии — они исчезают!\n\n'
         'Жми кнопку 👇',
         parse_mode='HTML', reply_markup=kb)
 
 if __name__ == '__main__':
-    print('RP bot started')
+    print('Bot started')
     bot.infinity_polling(timeout=30, long_polling_timeout=30)
