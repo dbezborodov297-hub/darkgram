@@ -1,7 +1,7 @@
 import telebot
 from telebot import types
 
-TOKEN = '8471116013:AAFoB4xMO372jegqWPlPbu432BbkVL24ZIs'
+TOKEN = '8471116013:AAGi_Pao61RP4PFWGDrNcU0YwDzAvjEYnBs'
 WEBAPP_URL = 'https://darkgram-2.onrender.com'
 
 bot = telebot.TeleBot(TOKEN)
