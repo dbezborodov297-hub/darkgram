@@ -1,78 +1,12 @@
 import json
 import os
-import time
-import random
-import threading
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
-DATA_FILE = 'rp_data.json'
-
-BUILDINGS = {
-    'farm':     {'name': 'Ферма',      'cost': 300,  'desc': '+200 еды/мин',       'icon': 'wheat',  'effect': {'food': 200}},
-    'factory':  {'name': 'Завод',      'cost': 800,  'desc': '+500💰/мин, -1 стаб.', 'icon': 'factory','effect': {'treasury': 500, 'stability': -1}},
-    'barracks': {'name': 'Казармы',    'cost': 500,  'desc': '+100 армии/мин',      'icon': 'sword',  'effect': {'army': 100}},
-    'school':   {'name': 'Школа',      'cost': 1000, 'desc': '+0.5 тех./мин',       'icon': 'book',   'effect': {'tech': 0.5}},
-    'hospital': {'name': 'Больница',   'cost': 700,  'desc': '+2 стаб./мин',        'icon': 'heart',  'effect': {'stability': 2}},
-    'police':   {'name': 'Полиция',    'cost': 400,  'desc': '+1 стаб./мин',        'icon': 'shield', 'effect': {'stability': 1}},
-    'mine':     {'name': 'Шахта',      'cost': 600,  'desc': '+150 металла/мин',    'icon': 'pickaxe','effect': {'metal': 150}},
-    'oilrig':   {'name': 'Нефтевышка', 'cost': 900,  'desc': '+100 нефти/мин',      'icon': 'oil',    'effect': {'oil': 100}},
-    'market':   {'name': 'Рынок',      'cost': 700,  'desc': '+300💰/мин',          'icon': 'cart',   'effect': {'treasury': 300}},
-    'bank':     {'name': 'Банк',       'cost': 1500, 'desc': '+800💰/мин',          'icon': 'bank',   'effect': {'treasury': 800}},
-    'wall':     {'name': 'Стена',      'cost': 1200, 'desc': '+30% защиты',         'icon': 'wall',   'effect': {'defense': 0.3}},
-    'port':     {'name': 'Порт',       'cost': 1000, 'desc': '+200💰/+100 еды',     'icon': 'anchor', 'effect': {'treasury': 200, 'food': 100}},
-}
-
-PROVINCE_TYPES = {
-    'plain':    {'name': 'Равнина',   'icon': 'plain',   'bonus': {'food': 500},    'desc': 'Много еды'},
-    'forest':   {'name': 'Лес',       'icon': 'forest',  'bonus': {'food': 200, 'metal': 100}, 'desc': 'Еда и металл'},
-    'mountain': {'name': 'Горы',      'icon': 'mountain','bonus': {'metal': 400},   'desc': 'Много металла'},
-    'desert':   {'name': 'Пустыня',   'icon': 'desert',  'bonus': {'oil': 300},     'desc': 'Нефть'},
-    'coast':    {'name': 'Побережье', 'icon': 'coast',   'bonus': {'treasury': 400},'desc': 'Торговля'},
-    'city':     {'name': 'Город',     'icon': 'city',    'bonus': {'treasury': 600},'desc': 'Экономика'},
-}
-
-COUNTRIES_25 = [
-    {'name': 'Россия', 'flag': '🇷🇺', 'pop': 146000000, 'treas': 50000, 'army': 1000000, 'tech': 5},
-    {'name': 'США', 'flag': '🇺🇸', 'pop': 330000000, 'treas': 80000, 'army': 1500000, 'tech': 7},
-    {'name': 'Китай', 'flag': '🇨🇳', 'pop': 1400000000, 'treas': 70000, 'army': 2000000, 'tech': 6},
-    {'name': 'Германия', 'flag': '🇩🇪', 'pop': 83000000, 'treas': 60000, 'army': 300000, 'tech': 6},
-    {'name': 'Франция', 'flag': '🇫🇷', 'pop': 67000000, 'treas': 55000, 'army': 350000, 'tech': 6},
-    {'name': 'Великобритания', 'flag': '🇬🇧', 'pop': 67000000, 'treas': 58000, 'army': 300000, 'tech': 6},
-    {'name': 'Япония', 'flag': '🇯🇵', 'pop': 125000000, 'treas': 65000, 'army': 250000, 'tech': 7},
-    {'name': 'Индия', 'flag': '🇮🇳', 'pop': 1380000000, 'treas': 40000, 'army': 1400000, 'tech': 4},
-    {'name': 'Бразилия', 'flag': '🇧🇷', 'pop': 213000000, 'treas': 35000, 'army': 400000, 'tech': 4},
-    {'name': 'Канада', 'flag': '🇨🇦', 'pop': 38000000, 'treas': 50000, 'army': 150000, 'tech': 6},
-    {'name': 'Италия', 'flag': '🇮🇹', 'pop': 60000000, 'treas': 48000, 'army': 200000, 'tech': 5},
-    {'name': 'Испания', 'flag': '🇪🇸', 'pop': 47000000, 'treas': 40000, 'army': 150000, 'tech': 5},
-    {'name': 'Турция', 'flag': '🇹🇷', 'pop': 84000000, 'treas': 30000, 'army': 500000, 'tech': 4},
-    {'name': 'Южная Корея', 'flag': '🇰🇷', 'pop': 51000000, 'treas': 55000, 'army': 600000, 'tech': 7},
-    {'name': 'Иран', 'flag': '🇮🇷', 'pop': 85000000, 'treas': 30000, 'army': 600000, 'tech': 4},
-    {'name': 'Польша', 'flag': '🇵🇱', 'pop': 38000000, 'treas': 35000, 'army': 200000, 'tech': 5},
-    {'name': 'Украина', 'flag': '🇺🇦', 'pop': 44000000, 'treas': 25000, 'army': 300000, 'tech': 4},
-    {'name': 'Саудовская Аравия', 'flag': '🇸🇦', 'pop': 34000000, 'treas': 70000, 'army': 200000, 'tech': 5},
-    {'name': 'Австралия', 'flag': '🇦🇺', 'pop': 26000000, 'treas': 45000, 'army': 100000, 'tech': 6},
-    {'name': 'Мексика', 'flag': '🇲🇽', 'pop': 129000000, 'treas': 25000, 'army': 250000, 'tech': 3},
-    {'name': 'Индонезия', 'flag': '🇮🇩', 'pop': 274000000, 'treas': 22000, 'army': 400000, 'tech': 3},
-    {'name': 'Нигерия', 'flag': '🇳🇬', 'pop': 206000000, 'treas': 15000, 'army': 200000, 'tech': 2},
-    {'name': 'Египет', 'flag': '🇪🇬', 'pop': 104000000, 'treas': 20000, 'army': 450000, 'tech': 3},
-    {'name': 'ЮАР', 'flag': '🇿🇦', 'pop': 59000000, 'treas': 25000, 'army': 100000, 'tech': 4},
-    {'name': 'Аргентина', 'flag': '🇦🇷', 'pop': 45000000, 'treas': 28000, 'army': 150000, 'tech': 4},
-]
-
-
-def make_provinces(pop):
-    types_pool = ['plain', 'forest', 'mountain', 'desert', 'coast', 'city']
-    random.shuffle(types_pool)
-    return [
-        {'name': f'Провинция {i+1}', 'type': types_pool[i % len(types_pool)],
-         'pop': pop // 6, 'buildings': {}}
-        for i in range(5)
-    ]
-
+DATA_FILE = 'block_data.json'
 
 def load_data():
     if os.path.exists(DATA_FILE):
@@ -81,18 +15,7 @@ def load_data():
                 return json.load(f)
         except:
             pass
-    d = {'countries': {}, 'news': [], 'alliances': [], 'wars': []}
-    for i, c in enumerate(COUNTRIES_25):
-        d['countries'][str(i)] = {
-            'id': i, 'name': c['name'], 'flag': c['flag'],
-            'owner': None, 'pop': c['pop'], 'treas': c['treas'],
-            'army': c['army'], 'tech': c['tech'], 'stability': 70,
-            'food': 5000, 'metal': 2000, 'oil': 1000,
-            'isNpc': True, 'bonus': 0,
-            'provinces': make_provinces(c['pop']),
-        }
-    return d
-
+    return {'scores': {}}
 
 def save_data():
     try:
@@ -101,679 +24,607 @@ def save_data():
     except Exception as e:
         print('save err:', e)
 
-
 data = load_data()
 
 
-def add_news(t):
-    data['news'].insert(0, {'time': int(time.time()), 'text': t})
-    data['news'] = data['news'][:50]
-
-
-def find_alliance(c1, c2):
-    for a in data.get('alliances', []):
-        if str(c1) in a['members'] and str(c2) in a['members']:
-            return a
-    return None
-
-
-def is_at_war(c1, c2):
-    for w in data.get('wars', []):
-        if {w['attacker'], w['defender']} == {str(c1), str(c2)}:
-            return True
-    return False
-
-
-def province_income(p, c):
-    inc = p['pop'] * 0.0001 + 20
-    t = p.get('type', 'plain')
-    if t in PROVINCE_TYPES:
-        inc += PROVINCE_TYPES[t]['bonus'].get('treasury', 0)
-    b = p.get('buildings', {})
-    for k, cnt in b.items():
-        if k == 'factory': inc += 500 * cnt
-        elif k == 'market': inc += 300 * cnt
-        elif k == 'bank': inc += 800 * cnt
-        elif k == 'port': inc += 200 * cnt
-    inc *= (1 + c['tech'] * 0.05) * (1 + c.get('bonus', 0))
-    return inc
-
-
-def country_income(c):
-    return sum(province_income(p, c) for p in c['provinces'])
-
-
-def tick():
-    for c in data['countries'].values():
-        income = country_income(c)
-        expense = c['army'] * 0.05
-        c['treas'] += income - expense
-        if c['treas'] < 0:
-            c['treas'] = 0
-            c['stability'] -= 2
-        for p in c['provinces']:
-            t = p.get('type', 'plain')
-            if t in PROVINCE_TYPES:
-                bonus = PROVINCE_TYPES[t]['bonus']
-                c['food'] += bonus.get('food', 0)
-                c['metal'] += bonus.get('metal', 0)
-                c['oil'] += bonus.get('oil', 0)
-            b = p.get('buildings', {})
-            for k, cnt in b.items():
-                if k == 'farm': c['food'] += 200 * cnt
-                elif k == 'mine': c['metal'] += 150 * cnt
-                elif k == 'oilrig': c['oil'] += 100 * cnt
-                elif k == 'barracks': c['army'] += 100 * cnt
-                elif k == 'school': c['tech'] += 0.5 * cnt
-                elif k == 'hospital': c['stability'] += 2 * cnt
-                elif k == 'police': c['stability'] += 1 * cnt
-                elif k == 'factory': c['stability'] -= 1 * cnt
-                elif k == 'port': c['food'] += 100 * cnt
-        c['stability'] = max(0, min(100, c['stability']))
-        if c['food'] > c['pop'] / 500:
-            growth = int((c['food'] / 500) * (c['stability'] / 100))
-            c['pop'] += growth
-            c['food'] -= growth * 5
-        if c['isNpc'] and random.random() < 0.05:
-            npc_action(c)
-    process_wars()
-    if random.random() < 0.1:
-        random_event()
-    save_data()
-
-
-def npc_action(c):
-    if not c['provinces']: return
-    actions = []
-    if c['treas'] > 500: actions.append('farm')
-    if c['treas'] > 1000: actions.append('factory')
-    if c['treas'] > 600: actions.append('barracks')
-    if c['stability'] < 50: actions.append('police')
-    if c['treas'] > 900: actions.append('mine')
-    if c['treas'] > 2000: actions.append('wall')
-    if not actions: return
-    bkey = random.choice(actions)
-    cost = BUILDINGS[bkey]['cost']
-    if c['treas'] >= cost:
-        c['treas'] -= cost
-        p = random.choice(c['provinces'])
-        p.setdefault('buildings', {})
-        p['buildings'][bkey] = p['buildings'].get(bkey, 0) + 1
-
-
-def process_wars():
-    finished = []
-    for w in data.get('wars', []):
-        w['turns'] = w.get('turns', 0) + 1
-        a = data['countries'].get(w['attacker'])
-        d = data['countries'].get(w['defender'])
-        if not a or not d:
-            finished.append(w); continue
-        a_power = a['army'] * (1 + a['tech'] * 0.1) * (a['stability'] / 100)
-        d_power = d['army'] * (1 + d['tech'] * 0.1) * (d['stability'] / 100)
-        for p in d['provinces']:
-            wall = p.get('buildings', {}).get('wall', 0)
-            d_power *= (1 + wall * 0.3)
-        if random.random() < 0.5:
-            d['army'] = max(0, d['army'] - int(d['army'] * 0.15))
-            a['army'] = max(0, a['army'] - int(a['army'] * 0.08))
-            d['stability'] -= 3
-        else:
-            a['army'] = max(0, a['army'] - int(a['army'] * 0.15))
-            d['army'] = max(0, d['army'] - int(d['army'] * 0.08))
-            a['stability'] -= 3
-        if a['army'] < a['pop'] * 0.0001 or d['army'] < d['pop'] * 0.0001 or w['turns'] >= 10:
-            winner, loser = (a, d) if a_power > d_power else (d, a)
-            loot = int(loser['treas'] * 0.3)
-            winner['treas'] += loot
-            loser['treas'] -= loot
-            add_news(f'Война {a["flag"]} {a["name"]} vs {d["flag"]} {d["name"]} окончена. Победил {winner["flag"]} {winner["name"]}')
-            finished.append(w)
-    for w in finished:
-        data['wars'].remove(w)
-
-
-def random_event():
-    events = [
-        ('Извержение вулкана в {name}!', lambda c: c.update({'stability': max(0, c['stability'] - 15)})),
-        ('Найдено золото в {name}!', lambda c: c.update({'treas': c['treas'] + 3000})),
-        ('Урожай в {name}!', lambda c: c.update({'food': c['food'] + 5000})),
-        ('Бунт в {name}!', lambda c: c.update({'stability': max(0, c['stability'] - 20)})),
-        ('Бум в {name}!', lambda c: c.update({'treas': c['treas'] + 5000})),
-    ]
-    ev, action = random.choice(events)
-    c = random.choice(list(data['countries'].values()))
-    try:
-        action(c)
-        add_news(ev.format(name=f'{c["flag"]} {c["name"]}'))
-    except: pass
-
-
-def start_tick():
-    while True:
-        time.sleep(60)
-        try:
-            tick()
-        except Exception as e:
-            print('tick err:', e)
-
-
-threading.Thread(target=start_tick, daemon=True).start()
-
-
 # ============================================================
-# HTML
+# HTML — Block Blast
 # ============================================================
 HTML = r'''<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#000000">
-<title>RP Countries</title>
+<meta name="theme-color" content="#0a0a1a">
+<title>Block Blast</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#000;--card:#1c1c1e;--card-2:#2c2c2e;--line:#2a2a2c;--text:#fff;--dim:#8e8e93;--muted:#48484a;--accent:#7c5cff;--accent-2:#5e5ce6;--green:#30d158;--red:#ff453a;--gold:#ffd60a;--blue:#0a84ff;--radius:16px}
-html{background:var(--bg)}
-body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.4;letter-spacing:-.3px;-webkit-font-smoothing:antialiased;min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
-body.theme-light{--bg:#f2f2f7;--card:#fff;--card-2:#e5e5ea;--line:#d1d1d6;--text:#000;--dim:#8e8e93;--muted:#c7c7cc}
-.header{background:rgba(0,0,0,0.85);backdrop-filter:saturate(180%) blur(30px);-webkit-backdrop-filter:saturate(180%) blur(30px);border-bottom:.5px solid var(--line);position:sticky;top:0;z-index:50;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:center;min-height:52px}
-body.theme-light .header{background:rgba(255,255,255,0.85)}
-.header-left{display:flex;align-items:center;gap:10px}
-.logo-icon{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.logo-icon svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.header-text .logo{font-size:16px;font-weight:700}
-.header-text .sub{font-size:11px;color:var(--dim);margin-top:1px}
-.badge{font-size:13px;font-weight:600;color:var(--accent);background:rgba(124,92,255,0.12);border:1px solid rgba(124,92,255,0.3);padding:5px 10px;border-radius:20px;display:flex;align-items:center;gap:5px}
-.container{padding:0 16px 30px;max-width:540px;margin:0 auto}
-.large-title{font-size:32px;font-weight:800;letter-spacing:-.8px;padding:14px 0 12px}
-.card{background:var(--card);border-radius:var(--radius);margin-bottom:14px;overflow:hidden}
-.card-title{font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:1.2px;padding:16px 16px 8px}
-.btn{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;border:none;border-radius:14px;padding:14px 18px;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;width:100%;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn:active{transform:scale(.98);opacity:.85}
-.btn.secondary{background:var(--card-2);color:var(--text)}
-.btn.small{padding:8px 14px;font-size:14px;margin:0;width:auto;border-radius:10px}
-.btn:disabled{opacity:.4}
-.row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-top:.5px solid var(--line);cursor:pointer}
-.row:active{background:var(--card-2)}
-.row:first-child{border-top:none}
-.row-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.row-icon svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.row-icon.plain{background:linear-gradient(135deg,#d4a373,#a67c52)}
-.row-icon.forest{background:linear-gradient(135deg,#2d6a4f,#1b4332)}
-.row-icon.mountain{background:linear-gradient(135deg,#6c757d,#495057)}
-.row-icon.desert{background:linear-gradient(135deg,#f4a261,#e76f51)}
-.row-icon.coast{background:linear-gradient(135deg,#48cae4,#0077b6)}
-.row-icon.city{background:linear-gradient(135deg,#8338ec,#3a86ff)}
-.row-info{flex:1;min-width:0}
-.row-title{font-size:15px;font-weight:600}
-.row-sub{font-size:12px;color:var(--dim);margin-top:2px}
-.row-chev{color:var(--muted);font-size:20px;font-weight:300}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.stat{background:var(--card);border-radius:var(--radius);padding:14px}
-.stat-k{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
-.stat-v{font-size:22px;font-weight:700;letter-spacing:-.5px;margin-top:4px}
-.stat-v.gold{color:var(--gold)}
-.stat-v.green{color:var(--green)}
-.stat-v.purple{color:var(--accent)}
-.stat-v.blue{color:var(--blue)}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:flex-end;justify-content:center}
-.modal-overlay.open{display:flex}
-.modal{background:var(--card);border-radius:22px 22px 0 0;width:100%;max-width:540px;max-height:85vh;overflow-y:auto;padding-bottom:30px}
-.modal-header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:.5px solid var(--line);position:sticky;top:0;background:var(--card);z-index:1}
-.modal-title{font-size:18px;font-weight:700}
-.modal-close{background:var(--card-2);border:none;width:32px;height:32px;border-radius:16px;cursor:pointer;color:var(--text);font-size:16px}
-.modal-body{padding:16px 20px}
-.empty{text-align:center;padding:40px 20px;color:var(--dim);font-size:14px}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(120%);background:rgba(44,44,46,0.96);color:#fff;padding:12px 20px;border-radius:14px;font-size:14px;z-index:999;opacity:0;transition:.25s;max-width:90vw;text-align:center;font-weight:500}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+:root{
+  --bg:#0a0a1a;--bg-2:#141428;--card:#1c1c3a;
+  --text:#fff;--dim:#8e8ec0;--muted:#4a4a7a;
+  --accent:#7c5cff;--accent-2:#5e5ce6;
+  --gold:#ffd60a;--green:#30d158;--red:#ff453a;
+  --c-red:#ff3b30;--c-orange:#ff9500;--c-yellow:#ffcc00;
+  --c-green:#34c759;--c-blue:#007aff;--c-purple:#af52de;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;font-size:16px;line-height:1.4;letter-spacing:-.3px;-webkit-font-smoothing:antialiased;position:fixed;width:100%}
+.app{height:100vh;height:100dvh;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);overflow:hidden}
+
+/* HEADER */
+.top-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;flex-shrink:0}
+.score-box{text-align:center}
+.score-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1.2px;font-weight:700}
+.score-value{font-size:32px;font-weight:800;letter-spacing:-1px;line-height:1;margin-top:2px}
+.score-value.best{color:var(--gold)}
+.icon-btn{width:40px;height:40px;border-radius:12px;background:var(--card);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text)}
+.icon-btn:active{transform:scale(.9)}
+.icon-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* GRID */
+.grid-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:8px;min-height:0}
+.grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;width:100%;max-width:min(92vw, 420px);aspect-ratio:1;background:var(--bg-2);padding:6px;border-radius:18px;position:relative}
+.cell{background:rgba(255,255,255,0.04);border-radius:6px;transition:background .15s;position:relative}
+.cell.filled{border-radius:6px;box-shadow:inset 0 -3px 0 rgba(0,0,0,0.25), inset 0 3px 0 rgba(255,255,255,0.25)}
+.cell.preview-ok{background:rgba(124,92,255,0.35)!important}
+.cell.preview-no{background:rgba(255,69,58,0.35)!important}
+.cell.pop{animation:pop .3s ease-out}
+@keyframes pop{0%{transform:scale(1.15);opacity:1}100%{transform:scale(0);opacity:0}}
+
+.c-red{background:linear-gradient(135deg,#ff6b5e,#ff3b30)!important}
+.c-orange{background:linear-gradient(135deg,#ffb340,#ff9500)!important}
+.c-yellow{background:linear-gradient(135deg,#ffe066,#ffcc00)!important}
+.c-green{background:linear-gradient(135deg,#4cd964,#34c759)!important}
+.c-blue{background:linear-gradient(135deg,#3d9eff,#007aff)!important}
+.c-purple{background:linear-gradient(135deg,#c77dff,#af52de)!important}
+.c-pink{background:linear-gradient(135deg,#ff6b9d,#ff2d55)!important}
+
+/* PIECES */
+.pieces-area{display:flex;justify-content:space-around;align-items:center;padding:8px 8px 16px;gap:8px;flex-shrink:0;min-height:130px}
+.piece-slot{flex:1;height:110px;display:flex;align-items:center;justify-content:center;position:relative}
+.piece{display:grid;gap:3px;touch-action:none;transition:transform .15s;cursor:grab}
+.piece.hidden{opacity:0;pointer-events:none}
+.piece.dragging{position:fixed;pointer-events:none;z-index:1000;transform:scale(1.15)}
+.piece-cell{width:32px;height:32px;border-radius:6px;box-shadow:inset 0 -2px 0 rgba(0,0,0,0.25), inset 0 2px 0 rgba(255,255,255,0.25)}
+
+/* OVERLAYS */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
+.overlay.open{display:flex;animation:fadeIn .25s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.panel{background:var(--card);border-radius:24px;padding:28px 24px;max-width:340px;width:100%;text-align:center;animation:popIn .3s cubic-bezier(0.32,0.72,0,1);max-height:85vh;overflow-y:auto}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.panel-icon{font-size:56px;margin-bottom:14px}
+.panel-title{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px}
+.panel-sub{font-size:14px;color:var(--dim);margin-bottom:20px;line-height:1.5}
+.panel-score{font-size:44px;font-weight:800;color:var(--gold);letter-spacing:-1px;line-height:1;margin-bottom:6px}
+.panel-best{font-size:13px;color:var(--dim);margin-bottom:24px}
+.btn{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;border:none;border-radius:14px;padding:15px 20px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;width:100%;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{transform:scale(.97);opacity:.9}
+.btn.secondary{background:var(--bg-2);color:var(--text)}
+.btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+
+/* TOP LIST */
+.top-list{text-align:left;margin-top:6px}
+.top-item{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:.5px solid var(--bg-2)}
+.top-item:last-child{border:none}
+.top-rank{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;background:var(--bg-2);color:var(--dim);flex-shrink:0}
+.top-rank.g1{background:linear-gradient(135deg,#ffd60a,#ff9500);color:#1a1408}
+.top-rank.g2{background:linear-gradient(135deg,#e0e0e0,#a8a8a8);color:#1a1408}
+.top-rank.g3{background:linear-gradient(135deg,#cd7f32,#a05a1c);color:#fff}
+.top-name{flex:1;font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top-score{font-weight:800;color:var(--gold);font-size:15px}
+
+/* TOAST */
+.toast{position:fixed;bottom:180px;left:50%;transform:translateX(-50%) translateY(120%);background:rgba(28,28,58,0.98);border:1px solid rgba(124,92,255,0.4);color:#fff;padding:12px 22px;border-radius:14px;font-size:15px;font-weight:600;z-index:3000;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.error{background:rgba(255,69,58,0.96)}
-.toast.success{background:rgba(48,209,88,0.96)}
-.loader{width:24px;height:24px;border:2px solid var(--card-2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:60px auto}
-@keyframes spin{to{transform:rotate(360deg)}}
-.building-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:.5px solid var(--line)}
-.building-row:last-child{border:none}
-.building-left{display:flex;align-items:center;gap:12px}
-.building-icon{width:40px;height:40px;border-radius:10px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.building-icon svg{width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.building-name{font-size:15px;font-weight:600}
-.building-desc{font-size:12px;color:var(--dim);margin-top:2px}
-.building-cost{font-size:14px;font-weight:700;color:var(--gold);margin-right:8px}
-.flag-circle{width:48px;height:48px;border-radius:50%;background:var(--card-2);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.toast.gold{border-color:var(--gold);color:var(--gold)}
+
+/* SCORE POPUP */
+.score-popup{position:fixed;pointer-events:none;font-size:22px;font-weight:800;color:var(--gold);z-index:1500;animation:scoreFloat 1s ease-out forwards;text-shadow:0 2px 8px rgba(255,214,10,0.5)}
+@keyframes scoreFloat{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-60px);opacity:0}}
 </style>
 </head>
 <body>
+<div class="app">
 
-<div class="header">
-  <div class="header-left">
-    <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
-    <div class="header-text">
-      <div class="logo">RP Countries</div>
-      <div class="sub" id="subTitle">Загрузка...</div>
+  <div class="top-bar">
+    <div style="width:40px"></div>
+    <div style="display:flex;gap:32px;align-items:center">
+      <div class="score-box">
+        <div class="score-label">Счёт</div>
+        <div class="score-value" id="score">0</div>
+      </div>
+      <div class="score-box">
+        <div class="score-label">Рекорд</div>
+        <div class="score-value best" id="best">0</div>
+      </div>
     </div>
+    <button class="icon-btn" onclick="openTop()">
+      <svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4"/><path d="M17 4h3v3a5 5 0 01-5 5h-1"/><path d="M7 4H4v3a5 5 0 005 5h1"/><path d="M7 4h10v6a5 5 0 01-10 0V4z"/></svg>
+    </button>
   </div>
-  <div class="badge" id="headerBadge" style="display:none">—</div>
+
+  <div class="grid-wrap">
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="pieces-area" id="piecesArea">
+    <div class="piece-slot" id="slot0"></div>
+    <div class="piece-slot" id="slot1"></div>
+    <div class="piece-slot" id="slot2"></div>
+  </div>
+
 </div>
 
-<div class="container">
-  <div class="large-title" id="pageTitle">Загрузка...</div>
-  <div id="content"><div class="loader"></div></div>
+<!-- GAME OVER -->
+<div class="overlay" id="gameoverOverlay">
+  <div class="panel">
+    <div class="panel-icon">💥</div>
+    <div class="panel-title">Игра окончена</div>
+    <div class="panel-sub">Ходов больше нет</div>
+    <div class="panel-score" id="finalScore">0</div>
+    <div class="panel-best" id="finalBest">Рекорд: 0</div>
+    <button class="btn" onclick="restart()">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 019-9 9 9 0 019 9 9 9 0 01-9 9"/><path d="M3 12l3-3m0 6l-3-3"/></svg>
+      Играть снова
+    </button>
+    <button class="btn secondary" onclick="closeOverlay('gameoverOverlay');openTop()">Топ игроков</button>
+  </div>
 </div>
 
-<div class="modal-overlay" id="modal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="modalTitle">—</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body" id="modalBody"></div>
+<!-- TOP -->
+<div class="overlay" id="topOverlay">
+  <div class="panel">
+    <div class="panel-icon">🏆</div>
+    <div class="panel-title">Топ игроков</div>
+    <div class="panel-sub" id="topSub">Лучшие результаты</div>
+    <div class="top-list" id="topList"><div style="text-align:center;color:var(--dim);padding:20px">Загрузка...</div></div>
+    <button class="btn secondary" style="margin-top:20px" onclick="closeOverlay('topOverlay')">Закрыть</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const ICONS = {
-  wheat:'<svg viewBox="0 0 24 24"><path d="M12 22V8"/><path d="M8 6l4-4 4 4"/><path d="M8 12l4-4 4 4"/><path d="M8 18l4-4 4 4"/></svg>',
-  factory:'<svg viewBox="0 0 24 24"><path d="M2 20h20V10l-6 4V10l-6 4V6H4v14z"/></svg>',
-  sword:'<svg viewBox="0 0 24 24"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6M16 16l4 4"/></svg>',
-  book:'<svg viewBox="0 0 24 24"><path d="M4 4h7a3 3 0 013 3v13a2 2 0 00-2-2H4V4z"/><path d="M20 4h-7a3 3 0 00-3 3v13a2 2 0 012-2h8V4z"/></svg>',
-  heart:'<svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 10-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z"/></svg>',
-  shield:'<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
-  pickaxe:'<svg viewBox="0 0 24 24"><path d="M14 10l-8 8-2 2 6-8"/><path d="M14 10l4-4 3-1-1 3-4 4"/></svg>',
-  oil:'<svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/></svg>',
-  cart:'<svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 2h3l3 12h10l3-8H6"/></svg>',
-  bank:'<svg viewBox="0 0 24 24"><path d="M3 21h18M4 21V10M20 21V10M8 21V10M16 21V10M12 21V10"/><path d="M2 10l10-7 10 7H2z"/></svg>',
-  wall:'<svg viewBox="0 0 24 24"><path d="M3 20V8h18v12"/><path d="M3 12h18M3 16h18"/></svg>',
-  anchor:'<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="M12 7v14"/><path d="M5 12H3a9 9 0 009 9 9 9 0 009-9h-2"/></svg>',
-  plain:'<svg viewBox="0 0 24 24"><path d="M2 18h20"/><path d="M6 18c2-4 4-6 6-6s4 2 6 6"/></svg>',
-  forest:'<svg viewBox="0 0 24 24"><path d="M12 2L6 12h4l-3 6h10l-3-6h4z"/><path d="M12 18v4"/></svg>',
-  mountain:'<svg viewBox="0 0 24 24"><path d="M2 20l7-12 4 6 3-4 6 10H2z"/></svg>',
-  desert:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M2 20c4-2 8-2 10 0s6 2 10 0"/></svg>',
-  coast:'<svg viewBox="0 0 24 24"><path d="M2 12c2-1 4-1 6 0s4 1 6 0 4-1 6 0"/><path d="M2 17c2-1 4-1 6 0s4 1 6 0 4-1 6 0"/><circle cx="18" cy="6" r="3"/></svg>',
-  city:'<svg viewBox="0 0 24 24"><path d="M3 21h18V7l-6 3V7l-6 3V3H3v18z"/></svg>',
-  people:'<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
-  flask:'<svg viewBox="0 0 24 24"><path d="M9 2v6L4 20h16L15 8V2"/><path d="M9 2h6"/></svg>',
-  food:'<svg viewBox="0 0 24 24"><path d="M12 22V8"/><path d="M8 6l4-4 4 4"/></svg>',
-  metal:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>',
-  map:'<svg viewBox="0 0 24 24"><path d="M9 3L3 6v15l6-3 6 3 6-3V3l-6 3z"/><path d="M9 3v15M15 6v15"/></svg>',
-};
-
 const tg = window.Telegram?.WebApp;
-if (tg) { tg.ready(); tg.expand(); }
+if (tg) { tg.ready(); tg.expand(); if (tg.setHeaderColor) tg.setHeaderColor('#0a0a1a'); }
 
-// UID — железно
 let UID = 0;
 if (tg?.initDataUnsafe?.user?.id) {
   UID = tg.initDataUnsafe.user.id;
-  localStorage.setItem('rp_uid', UID);
+  localStorage.setItem('bb_uid', UID);
 } else {
-  UID = parseInt(localStorage.getItem('rp_uid') || '0');
+  UID = parseInt(localStorage.getItem('bb_uid') || '0');
+}
+const USER_NAME = tg?.initDataUnsafe?.user?.first_name || 'Игрок';
+
+// ============================================================
+// SHAPES
+// ============================================================
+const SHAPES = [
+  // 1 cell
+  [[0,0]],
+  // 2 cells
+  [[0,0],[0,1]],
+  [[0,0],[1,0]],
+  // 3 cells
+  [[0,0],[0,1],[0,2]],
+  [[0,0],[1,0],[2,0]],
+  [[0,0],[0,1],[1,0]],
+  [[0,0],[0,1],[1,1]],
+  [[0,1],[1,0],[1,1]],
+  [[0,0],[1,0],[1,1]],
+  // 4 cells
+  [[0,0],[0,1],[0,2],[0,3]],
+  [[0,0],[1,0],[2,0],[3,0]],
+  [[0,0],[0,1],[1,0],[1,1]], // square
+  [[0,0],[0,1],[0,2],[1,0]],
+  [[0,0],[0,1],[0,2],[1,2]],
+  [[0,0],[1,0],[1,1],[1,2]],
+  [[0,2],[1,0],[1,1],[1,2]],
+  [[0,0],[1,0],[2,0],[2,1]],
+  [[0,0],[0,1],[1,1],[2,1]],
+  // 5 cells
+  [[0,0],[0,1],[0,2],[0,3],[0,4]],
+  [[0,0],[1,0],[2,0],[3,0],[4,0]],
+  [[0,0],[0,1],[0,2],[1,0],[1,1]],
+];
+
+const COLORS = ['c-red','c-orange','c-yellow','c-green','c-blue','c-purple','c-pink'];
+
+const SIZE = 8;
+let grid = [];
+let score = 0;
+let best = parseInt(localStorage.getItem('bb_best') || '0');
+let pieces = [null, null, null];
+let gameOver = false;
+
+// ============================================================
+// INIT
+// ============================================================
+function initGrid() {
+  grid = Array(SIZE).fill(null).map(() => Array(SIZE).fill(null));
 }
 
-let state = null;
+function renderGrid() {
+  const g = document.getElementById('grid');
+  g.innerHTML = '';
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.r = r;
+      cell.dataset.c = c;
+      if (grid[r][c]) cell.classList.add(grid[r][c]);
+      g.appendChild(cell);
+    }
+  }
+}
 
-async function api(path, body) {
+function renderPieces() {
+  for (let i = 0; i < 3; i++) {
+    const slot = document.getElementById('slot' + i);
+    slot.innerHTML = '';
+    if (!pieces[i]) continue;
+    const p = pieces[i];
+    const el = document.createElement('div');
+    el.className = 'piece';
+    el.dataset.idx = i;
+    const rows = Math.max(...p.shape.map(s => s[0])) + 1;
+    const cols = Math.max(...p.shape.map(s => s[1])) + 1;
+    el.style.gridTemplateColumns = `repeat(${cols}, 32px)`;
+    el.style.gridTemplateRows = `repeat(${rows}, 32px)`;
+    // set positions
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const has = p.shape.some(s => s[0] === r && s[1] === c);
+        const cell = document.createElement('div');
+        if (has) {
+          cell.className = 'piece-cell ' + p.color;
+        } else {
+          cell.style.visibility = 'hidden';
+        }
+        el.appendChild(cell);
+      }
+    }
+    attachDrag(el, i);
+    slot.appendChild(el);
+  }
+}
+
+// ============================================================
+// RANDOM PIECE
+// ============================================================
+function randomPiece() {
+  const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+  const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+  return {shape: shape.map(s => [...s]), color};
+}
+
+function refillPieces() {
+  for (let i = 0; i < 3; i++) {
+    if (!pieces[i]) pieces[i] = randomPiece();
+  }
+}
+
+function checkGameOver() {
+  // Есть ли хоть одна фигура, которую можно поставить?
+  for (const p of pieces) {
+    if (!p) continue;
+    if (canPlaceAnywhere(p)) return false;
+  }
+  return true;
+}
+
+function canPlaceAnywhere(piece) {
+  const rows = Math.max(...piece.shape.map(s => s[0])) + 1;
+  const cols = Math.max(...piece.shape.map(s => s[1])) + 1;
+  for (let r = 0; r <= SIZE - rows; r++) {
+    for (let c = 0; c <= SIZE - cols; c++) {
+      if (canPlace(piece.shape, r, c)) return true;
+    }
+  }
+  return false;
+}
+
+function canPlace(shape, row, col) {
+  for (const [r, c] of shape) {
+    const rr = row + r, cc = col + c;
+    if (rr < 0 || rr >= SIZE || cc < 0 || cc >= SIZE) return false;
+    if (grid[rr][cc]) return false;
+  }
+  return true;
+}
+
+// ============================================================
+// DRAG & DROP
+// ============================================================
+let dragState = null;
+
+function attachDrag(el, idx) {
+  el.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    if (gameOver) return;
+    const piece = pieces[idx];
+    if (!piece) return;
+
+    const rect = el.getBoundingClientRect();
+    const clone = el.cloneNode(true);
+    clone.classList.add('dragging');
+    clone.style.left = rect.left + 'px';
+    clone.style.top = rect.top + 'px';
+    clone.style.width = rect.width + 'px';
+    clone.style.height = rect.height + 'px';
+    document.body.appendChild(clone);
+    el.classList.add('hidden');
+
+    dragState = {
+      idx, piece, clone,
+      offsetX: e.clientX - rect.left,
+      offsetY: e.clientY - rect.top,
+      cellSize: 32 + 3, // cell + gap
+      originX: rect.left, originY: rect.top
+    };
+
+    document.addEventListener('pointermove', onDragMove);
+    document.addEventListener('pointerup', onDragEnd);
+  });
+}
+
+function onDragMove(e) {
+  if (!dragState) return;
+  e.preventDefault();
+  const { clone, offsetX, offsetY, piece } = dragState;
+  clone.style.left = (e.clientX - offsetX) + 'px';
+  clone.style.top = (e.clientY - offsetY) + 'px';
+
+  // Превью на сетке
+  clearPreview();
+  const gridEl = document.getElementById('grid');
+  const gridRect = gridEl.getBoundingClientRect();
+  const cellSize = gridRect.width / SIZE;
+
+  const pieceLeft = e.clientX - offsetX;
+  const pieceTop = e.clientY - offsetY;
+
+  const col = Math.round((pieceLeft - gridRect.left) / cellSize);
+  const row = Math.round((pieceTop - gridRect.top) / cellSize);
+
+  if (canPlace(piece.shape, row, col)) {
+    // Показать превью
+    for (const [r, c] of piece.shape) {
+      const idx = (row + r) * SIZE + (col + c);
+      const cell = gridEl.children[idx];
+      if (cell) cell.classList.add('preview-ok');
+    }
+    dragState.previewRow = row;
+    dragState.previewCol = col;
+  } else {
+    dragState.previewRow = null;
+    dragState.previewCol = null;
+  }
+}
+
+function onDragEnd(e) {
+  if (!dragState) return;
+  document.removeEventListener('pointermove', onDragMove);
+  document.removeEventListener('pointerup', onDragEnd);
+
+  const { idx, piece, clone, previewRow, previewCol } = dragState;
+
+  clone.remove();
+  clearPreview();
+
+  if (previewRow !== null && previewCol !== null) {
+    placePiece(idx, piece, previewRow, previewCol);
+  } else {
+    // Возврат
+    const slot = document.getElementById('slot' + idx);
+    const el = slot.querySelector('.piece');
+    if (el) el.classList.remove('hidden');
+  }
+
+  dragState = null;
+}
+
+function clearPreview() {
+  document.querySelectorAll('.cell.preview-ok, .cell.preview-no').forEach(el => {
+    el.classList.remove('preview-ok', 'preview-no');
+  });
+}
+
+// ============================================================
+// PLACE PIECE
+// ============================================================
+function placePiece(idx, piece, row, col) {
+  for (const [r, c] of piece.shape) {
+    grid[row + r][col + c] = piece.color;
+  }
+  pieces[idx] = null;
+
+  // Очки за постановку
+  addScore(piece.shape.length, row, col);
+
+  // Проверка линий
+  const cleared = clearLines();
+
+  // Анимация
+  renderGrid();
+
+  // Взрыв
+  if (cleared > 0) {
+    setTimeout(() => {
+      addScore(cleared * 10, 0, 0, true);
+      if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    }, 100);
+  } else {
+    if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+  }
+
+  // Пополнение
+  setTimeout(() => {
+    refillPieces();
+    renderPieces();
+    updateScoreUI();
+
+    // Проверка Game Over
+    if (checkGameOver()) {
+      setTimeout(() => showGameOver(), 400);
+    }
+  }, 200);
+}
+
+function addScore(n, row, col, big = false) {
+  score += n;
+  updateScoreUI();
+  if (big) {
+    showScorePopup('+' + n * 10);
+  }
+}
+
+function updateScoreUI() {
+  document.getElementById('score').textContent = score;
+  if (score > best) {
+    best = score;
+    localStorage.setItem('bb_best', best);
+    document.getElementById('best').textContent = best;
+  }
+}
+
+function showScorePopup(text) {
+  const el = document.createElement('div');
+  el.className = 'score-popup';
+  el.textContent = text;
+  el.style.left = '50%';
+  el.style.top = '40%';
+  el.style.transform = 'translateX(-50%)';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+// ============================================================
+// CLEAR LINES
+// ============================================================
+function clearLines() {
+  const toClear = new Set();
+  // Горизонтали
+  for (let r = 0; r < SIZE; r++) {
+    if (grid[r].every(c => c)) {
+      for (let c = 0; c < SIZE; c++) toClear.add(r * SIZE + c);
+    }
+  }
+  // Вертикали
+  for (let c = 0; c < SIZE; c++) {
+    let full = true;
+    for (let r = 0; r < SIZE; r++) if (!grid[r][c]) { full = false; break; }
+    if (full) {
+      for (let r = 0; r < SIZE; r++) toClear.add(r * SIZE + c);
+    }
+  }
+
+  // Анимация pop
+  const gridEl = document.getElementById('grid');
+  toClear.forEach(i => {
+    if (gridEl.children[i]) gridEl.children[i].classList.add('pop');
+  });
+
+  // Очистка
+  toClear.forEach(i => {
+    const r = Math.floor(i / SIZE);
+    const c = i % SIZE;
+    grid[r][c] = null;
+  });
+
+  return toClear.size > 0 ? toClear.size / SIZE : 0;
+}
+
+// ============================================================
+// GAME OVER
+// ============================================================
+async function showGameOver() {
+  gameOver = true;
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('finalBest').textContent = 'Рекорд: ' + best;
+  document.getElementById('gameoverOverlay').classList.add('open');
+  if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+
+  // Отправка на сервер
+  if (UID && score > 0) {
+    try {
+      await fetch('/api/score', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({uid: UID, name: USER_NAME, score: score})
+      });
+    } catch(e) {}
+  }
+}
+
+function restart() {
+  score = 0;
+  gameOver = false;
+  initGrid();
+  renderGrid();
+  pieces = [null, null, null];
+  refillPieces();
+  renderPieces();
+  updateScoreUI();
+  closeOverlay('gameoverOverlay');
+}
+
+// ============================================================
+// TOP
+// ============================================================
+async function openTop() {
+  document.getElementById('topOverlay').classList.add('open');
+  const list = document.getElementById('topList');
+  list.innerHTML = '<div style="text-align:center;color:var(--dim);padding:20px">Загрузка...</div>';
   try {
-    const r = await fetch(path, {
-      method: body ? 'POST' : 'GET',
-      headers: {'Content-Type': 'application/json'},
-      body: body ? JSON.stringify({uid: UID, ...body}) : undefined
-    });
-    return await r.json();
-  } catch(e) { return {error: 'network'}; }
+    const r = await fetch('/api/top');
+    const data = await r.json();
+    if (!data.top || data.top.length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:var(--dim);padding:20px">Пока никто не играл</div>';
+      return;
+    }
+    list.innerHTML = data.top.map((u, i) => {
+      const rc = i === 0 ? 'g1' : i === 1 ? 'g2' : i === 2 ? 'g3' : '';
+      const me = String(u.uid) === String(UID) ? ' (ты)' : '';
+      return `<div class="top-item"><div class="top-rank ${rc}">${i+1}</div><div class="top-name">${esc(u.name || 'Игрок')}${me}</div><div class="top-score">${u.score}</div></div>`;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<div style="text-align:center;color:var(--red);padding:20px">Ошибка</div>';
+  }
 }
 
-function toast(msg, type='') {
+function esc(s) {
+  return String(s || '').replace(/[<>&"]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'})[ch]);
+}
+
+// ============================================================
+// UI
+// ============================================================
+function closeOverlay(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function toast(msg, gold) {
   const el = document.getElementById('toast');
-  el.textContent = msg; el.className = 'toast ' + type; el.classList.add('show');
-  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2200);
+  el.textContent = msg;
+  el.className = 'toast' + (gold ? ' gold' : '');
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2200);
 }
 
-function fmt(n) {
-  n = Math.floor(n);
-  if (n >= 1e9) return (n/1e9).toFixed(1) + ' млрд';
-  if (n >= 1e6) return (n/1e6).toFixed(1) + ' млн';
-  if (n >= 1e3) return (n/1e3).toFixed(1) + ' тыс';
-  return n.toString();
-}
-
-async function loadState() {
-  const r = await api('/api/state');
-  if (r.error) return;
-  state = r;
-  render();
-}
-
-function getMy() {
-  if (!state || state.my_country_id === null) return null;
-  return state.countries.find(c => c.id === state.my_country_id);
-}
-
-function provIncome(p, c) {
-  let inc = p.pop * 0.0001 + 20;
-  const t = p.type || 'plain';
-  if (state.province_types[t]) inc += state.province_types[t].bonus.treasury || 0;
-  const b = p.buildings || {};
-  for (const [k, cnt] of Object.entries(b)) {
-    if (!state.buildings[k]) continue;
-    const eff = state.buildings[k].effect || {};
-    inc += (eff.treasury || 0) * cnt;
-  }
-  inc *= (1 + c.tech * 0.05) * (1 + (c.bonus || 0));
-  return inc;
-}
-
-function countryIncome(c) {
-  let t = 0;
-  for (const p of c.provinces) t += provIncome(p, c);
-  return t;
-}
-
-function render() {
-  const my = getMy();
-  const content = document.getElementById('content');
-
-  if (!my) {
-    document.getElementById('subTitle').textContent = 'Выбери страну';
-    document.getElementById('pageTitle').textContent = 'Выбор страны';
-    document.getElementById('headerBadge').style.display = 'none';
-    content.innerHTML = `
-      <div class="card" style="background:linear-gradient(135deg,rgba(124,92,255,0.15),rgba(94,92,230,0.05));border:1px solid rgba(124,92,255,0.25);padding:20px;text-align:center">
-        <div style="font-size:18px;font-weight:700;margin-bottom:6px">Выбери свою страну</div>
-        <div style="font-size:13px;color:var(--dim)">Выбор — навсегда</div>
-      </div>
-      <div class="card">
-        ${state.countries.map(c => `
-          <div class="row" onclick="${c.owner ? '' : `takeCountry(${c.id})`}">
-            <div class="flag-circle">${c.flag}</div>
-            <div class="row-info">
-              <div class="row-title">${c.name}</div>
-              <div class="row-sub">${fmt(c.pop)} чел · ${fmt(c.treas)} · ${c.provinces.length} провинций</div>
-            </div>
-            <div class="row-chev">${c.owner ? '🔒' : '›'}</div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-    return;
-  }
-
-  document.getElementById('headerBadge').style.display = 'flex';
-  document.getElementById('headerBadge').textContent = fmt(my.treas) + ' 💰';
-  document.getElementById('subTitle').textContent = my.flag + ' ' + my.name;
-  document.getElementById('pageTitle').textContent = 'Моя страна';
-
-  const income = countryIncome(my);
-  const expense = my.army * 0.05;
-
-  content.innerHTML = `
-    <div class="card" style="background:linear-gradient(135deg,rgba(124,92,255,0.18),rgba(94,92,230,0.05));border:1px solid rgba(124,92,255,0.3)">
-      <div style="padding:20px">
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
-          <div class="flag-circle">${my.flag}</div>
-          <div style="flex:1">
-            <div style="font-size:22px;font-weight:700">${my.name}</div>
-          </div>
-        </div>
-        <div style="font-size:12px;color:var(--dim);text-transform:uppercase;font-weight:600">Казна</div>
-        <div style="font-size:38px;font-weight:800;color:var(--gold);line-height:1.1;margin-top:4px">${fmt(my.treas)}</div>
-        <div style="font-size:14px;color:var(--green);margin-top:8px">+${fmt(income)} / -${fmt(expense)} = <b style="color:var(--text)">${fmt(income-expense)}/мин</b></div>
-      </div>
-    </div>
-
-    <div class="grid2">
-      <div class="stat"><div class="stat-k">Население</div><div class="stat-v">${fmt(my.pop)}</div></div>
-      <div class="stat"><div class="stat-k">Армия</div><div class="stat-v">${fmt(my.army)}</div></div>
-      <div class="stat"><div class="stat-k">Технологии</div><div class="stat-v purple">${Math.floor(my.tech)}</div></div>
-      <div class="stat"><div class="stat-k">Стабильность</div><div class="stat-v green">${Math.floor(my.stability)}%</div></div>
-      <div class="stat"><div class="stat-k">Еда</div><div class="stat-v">${fmt(my.food)}</div></div>
-      <div class="stat"><div class="stat-k">Металл</div><div class="stat-v">${fmt(my.metal)}</div></div>
-      <div class="stat"><div class="stat-k">Нефть</div><div class="stat-v">${fmt(my.oil)}</div></div>
-      <div class="stat"><div class="stat-k">Провинций</div><div class="stat-v blue">${my.provinces.length}</div></div>
-    </div>
-
-    <div class="card-title">Провинции</div>
-    <div class="card">
-      ${my.provinces.map((p, i) => {
-        const t = state.province_types[p.type] || {name:'?', icon:'plain'};
-        const inc = provIncome(p, my);
-        return `
-          <div class="row" onclick="openProvince(${i})">
-            <div class="row-icon ${t.icon}">${ICONS[t.icon] || ICONS.plain}</div>
-            <div class="row-info">
-              <div class="row-title">${p.name}</div>
-              <div class="row-sub">${t.name} · ${fmt(p.pop)} · +${fmt(inc)}/мин</div>
-            </div>
-            <div class="row-chev">›</div>
-          </div>
-        `;
-      }).join('')}
-    </div>
-
-    <div class="card-title">Действия</div>
-    <div class="card">
-      <div class="row" onclick="openArmy()">
-        <div class="row-icon">${ICONS.sword}</div>
-        <div class="row-info"><div class="row-title">Армия</div><div class="row-sub">Найм солдат</div></div>
-        <div class="row-chev">›</div>
-      </div>
-      <div class="row" onclick="openTrade()">
-        <div class="row-icon">${ICONS.cart}</div>
-        <div class="row-info"><div class="row-title">Торговля</div><div class="row-sub">Продажа ресурсов</div></div>
-        <div class="row-chev">›</div>
-      </div>
-      <div class="row" onclick="openWar()">
-        <div class="row-icon">${ICONS.sword}</div>
-        <div class="row-info"><div class="row-title">Война</div><div class="row-sub">Объявить войну</div></div>
-        <div class="row-chev">›</div>
-      </div>
-      <div class="row" onclick="openTop()">
-        <div class="row-icon">${ICONS.bank}</div>
-        <div class="row-info"><div class="row-title">Топ стран</div><div class="row-sub">Рейтинг</div></div>
-        <div class="row-chev">›</div>
-      </div>
-      <div class="row" onclick="openNews()">
-        <div class="row-icon">${ICONS.book}</div>
-        <div class="row-info"><div class="row-title">Новости</div><div class="row-sub">События мира</div></div>
-        <div class="row-chev">›</div>
-      </div>
-      <div class="row" onclick="openSettings()">
-        <div class="row-icon" style="background:var(--card-2)">${ICONS.wall}</div>
-        <div class="row-info"><div class="row-title">Настройки</div><div class="row-sub">Сброс, тема</div></div>
-        <div class="row-chev">›</div>
-      </div>
-    </div>
-  `;
-}
-
-async function takeCountry(cid) {
-  if (!confirm('Выбрать эту страну? Поменять нельзя!')) return;
-  const r = await api('/api/take', {cid});
-  if (r.error === 'taken') return toast('Занята', 'error');
-  if (r.error === 'already_have') return toast('Уже есть страна', 'error');
-  if (r.ok) { toast('Страна твоя!', 'success'); loadState(); }
-}
-
-function openProvince(i) {
-  const my = getMy();
-  const p = my.provinces[i];
-  const t = state.province_types[p.type] || {name:'?',desc:''};
-  const b = p.buildings || {};
-  const rows = Object.entries(b).map(([k, cnt]) =>
-    `<div class="building-row"><div class="building-left"><div class="building-icon">${ICONS[state.buildings[k]?.icon] || ICONS.farm}</div><div class="building-name">${state.buildings[k]?.name || k}</div></div><div style="font-weight:700">×${cnt}</div></div>`
-  ).join('');
-  openModal(p.name, `
-    <div style="font-size:14px;color:var(--dim);margin-bottom:14px">${t.name} — ${t.desc}</div>
-    <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:.5px solid var(--line)">
-      <span style="color:var(--dim)">Население</span><b>${fmt(p.pop)}</b>
-    </div>
-    <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:.5px solid var(--line)">
-      <span style="color:var(--dim)">Доход</span><b style="color:var(--gold)">${fmt(provIncome(p, my))}/мин</b>
-    </div>
-    <div class="card-title">Здания</div>
-    ${rows || '<div class="empty">Пока пусто</div>'}
-    <button class="btn" style="margin-top:14px" onclick="closeModal();openBuildMenu(${i})">Построить</button>
-  `);
-}
-
-function openBuildMenu(idx) {
-  const my = getMy();
-  openModal('Строительство', `
-    <div style="font-size:13px;color:var(--dim);margin-bottom:6px">Провинция: <b style="color:var(--text)">${my.provinces[idx].name}</b></div>
-    <div style="font-size:13px;color:var(--dim);margin-bottom:14px">Казна: <b style="color:var(--gold)">${fmt(my.treas)}</b></div>
-    ${Object.entries(state.buildings).map(([k, b]) => `
-      <div class="building-row">
-        <div class="building-left">
-          <div class="building-icon">${ICONS[b.icon] || ICONS.farm}</div>
-          <div>
-            <div class="building-name">${b.name}</div>
-            <div class="building-desc">${b.desc}</div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="building-cost">${b.cost}</div>
-          <button class="btn small" onclick="buildIn(${idx},'${k}')" ${my.treas < b.cost ? 'disabled' : ''}>+</button>
-        </div>
-      </div>
-    `).join('')}
-  `);
-}
-
-async function buildIn(idx, bkey) {
-  const my = getMy();
-  const r = await api('/api/build', {cid: my.id, prov_idx: idx, bkey});
-  if (r.error === 'no_money') return toast(`Не хватает ${r.need}`, 'error');
-  if (!r.ok) return toast('Ошибка', 'error');
-  toast('Построено', 'success');
-  await loadState();
-  openBuildMenu(idx);
-}
-
-function openArmy() {
-  const my = getMy();
-  openModal('Армия', `
-    <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:.5px solid var(--line)">
-      <span style="color:var(--dim)">Солдат</span><b>${fmt(my.army)}</b>
-    </div>
-    <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:.5px solid var(--line)">
-      <span style="color:var(--dim)">Казна</span><b style="color:var(--gold)">${fmt(my.treas)}</b>
-    </div>
-    <button class="btn" style="margin-top:14px" onclick="recruit(1000)">+1 000 солдат (2 000)</button>
-    <button class="btn" onclick="recruit(5000)">+5 000 солдат (10 000)</button>
-    <button class="btn" onclick="recruit(10000)">+10 000 солдат (20 000)</button>
-  `);
-}
-
-async function recruit(n) {
-  const my = getMy();
-  const r = await api('/api/recruit', {cid: my.id, amount: n});
-  if (r.error === 'no_money') return toast(`Нужно ${fmt(r.need)}`, 'error');
-  if (!r.ok) return toast('Ошибка', 'error');
-  toast(`+${fmt(n)} солдат`, 'success');
-  await loadState();
-  openArmy();
-}
-
-function openWar() {
-  const my = getMy();
-  const others = state.countries.filter(c => c.id !== my.id);
-  openModal('Объявить войну', others.slice(0, 15).map(c => `
-    <div class="row" onclick="declareWar(${c.id})">
-      <div class="flag-circle">${c.flag}</div>
-      <div class="row-info">
-        <div class="row-title">${c.name}</div>
-        <div class="row-sub">${fmt(c.army)} армии</div>
-      </div>
-      <div class="row-chev">›</div>
-    </div>
-  `).join(''));
-}
-
-async function declareWar(cid) {
-  if (!confirm('Объявить войну?')) return;
-  const my = getMy();
-  const r = await api('/api/war', {cid: my.id, target: cid});
-  if (r.error) return toast(r.error, 'error');
-  toast('Война объявлена', 'success');
-  await loadState();
-  closeModal();
-}
-
-function openTrade() {
-  const my = getMy();
-  openModal('Торговля', `
-    <div style="display:flex;justify-content:space-between;padding:10px 0"><span>Еда: ${fmt(my.food)}</span><span style="color:var(--gold)">1/шт</span></div>
-    <div style="display:flex;justify-content:space-between;padding:10px 0"><span>Металл: ${fmt(my.metal)}</span><span style="color:var(--gold)">3/шт</span></div>
-    <div style="display:flex;justify-content:space-between;padding:10px 0"><span>Нефть: ${fmt(my.oil)}</span><span style="color:var(--gold)">5/шт</span></div>
-    <button class="btn" style="margin-top:14px" onclick="sell('food', 1000)">Продать 1000 еды</button>
-    <button class="btn" onclick="sell('metal', 500)">Продать 500 металла</button>
-    <button class="btn" onclick="sell('oil', 300)">Продать 300 нефти</button>
-  `);
-}
-
-async function sell(res, amount) {
-  const my = getMy();
-  const r = await api('/api/sell', {cid: my.id, res, amount});
-  if (r.error === 'not_enough') return toast('Недостаточно', 'error');
-  if (r.error) return toast(r.error, 'error');
-  toast(`+${fmt(r.money)}`, 'success');
-  await loadState();
-  openTrade();
-}
-
-function openTop() {
-  const sorted = [...state.countries].sort((a, b) => b.treas - a.treas).slice(0, 10);
-  openModal('Топ стран', sorted.map((c, i) => `
-    <div class="row">
-      <div style="width:38px;text-align:center;font-weight:700;color:${i<3?'var(--gold)':'var(--dim)'}">${i+1}</div>
-      <div class="flag-circle">${c.flag}</div>
-      <div class="row-info"><div class="row-title">${c.name}</div><div class="row-sub">${c.provinces.length} провинций</div></div>
-      <div style="font-weight:700;color:var(--gold)">${fmt(c.treas)}</div>
-    </div>
-  `).join(''));
-}
-
-function openNews() {
-  openModal('Новости', state.news.length === 0
-    ? '<div class="empty">Пока пусто</div>'
-    : state.news.map(n => `<div style="padding:12px 0;border-bottom:.5px solid var(--line);font-size:14px;line-height:1.5">${n.text}</div>`).join(''));
-}
-
-function openSettings() {
-  openModal('Настройки', `
-    <div class="row" onclick="resetCountry()">
-      <div class="row-icon" style="background:linear-gradient(135deg,#ff453a,#ff375f)">${ICONS.wall}</div>
-      <div class="row-info"><div class="row-title" style="color:var(--red)">Сбросить страну</div><div class="row-sub">Выбрать заново</div></div>
-      <div class="row-chev">›</div>
-    </div>
-    <div style="padding:16px;font-size:12px;color:var(--dim);text-align:center">UID: ${UID}</div>
-  `);
-}
-
-async function resetCountry() {
-  if (!confirm('Точно сбросить? Придётся выбирать заново.')) return;
-  const my = getMy();
-  const r = await api('/api/reset', {cid: my.id});
-  if (r.error) return toast('Ошибка', 'error');
-  toast('Страна сброшена', 'success');
-  closeModal();
-  loadState();
-}
-
-function openModal(t, b) {
-  document.getElementById('modalTitle').textContent = t;
-  document.getElementById('modalBody').innerHTML = b;
-  document.getElementById('modal').classList.add('open');
-  if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-}
-
-function closeModal() { document.getElementById('modal').classList.remove('open'); }
-document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
-
-loadState();
-setInterval(loadState, 5000);
+// ============================================================
+// START
+// ============================================================
+document.getElementById('best').textContent = best;
+initGrid();
+renderGrid();
+refillPieces();
+renderPieces();
+updateScoreUI();
 </script>
 </body>
 </html>'''
@@ -787,138 +638,36 @@ def index():
     return Response(HTML, mimetype='text/html')
 
 
-@app.route('/api/state')
-def api_state():
-    uid = request.args.get('uid', type=int)
-    return jsonify({
-        'countries': list(data['countries'].values()),
-        'news': data['news'][:20],
-        'alliances': data.get('alliances', []),
-        'wars': data.get('wars', []),
-        'my_country_id': next((c['id'] for c in data['countries'].values() if c.get('owner') == uid), None),
-        'buildings': BUILDINGS,
-        'province_types': PROVINCE_TYPES,
-    })
+@app.route('/api/top')
+def api_top():
+    scores = data.get('scores', {})
+    arr = []
+    for uid, info in scores.items():
+        arr.append({
+            'uid': uid,
+            'name': info.get('name', 'Игрок'),
+            'score': info.get('score', 0),
+        })
+    arr.sort(key=lambda x: x['score'], reverse=True)
+    return jsonify({'top': arr[:20]})
 
 
-@app.route('/api/take', methods=['POST'])
-def api_take():
+@app.route('/api/score', methods=['POST'])
+def api_score():
     d = request.json or {}
     uid = d.get('uid')
-    cid = str(d.get('cid'))
-    if not uid or cid not in data['countries']:
-        return jsonify({'error': 'bad request'}), 400
-    existing = next((c for c in data['countries'].values() if c.get('owner') == uid), None)
-    if existing:
-        return jsonify({'error': 'already_have'}), 400
-    c = data['countries'][cid]
-    if c.get('owner'):
-        return jsonify({'error': 'taken'}), 400
-    c['owner'] = uid
-    c['isNpc'] = False
-    add_news(f'{c["flag"]} {c["name"]}: новый правитель!')
-    save_data()
-    return jsonify({'ok': True})
-
-
-@app.route('/api/reset', methods=['POST'])
-def api_reset():
-    d = request.json or {}
-    uid = d.get('uid')
-    cid = str(d.get('cid'))
-    c = data['countries'].get(cid)
-    if not c or c.get('owner') != uid:
-        return jsonify({'error': 'not_yours'}), 403
-    c['owner'] = None
-    c['isNpc'] = True
-    c['provinces'] = make_provinces(c['pop'])
-    save_data()
-    return jsonify({'ok': True})
-
-
-@app.route('/api/build', methods=['POST'])
-def api_build():
-    d = request.json or {}
-    uid = d.get('uid')
-    cid = str(d.get('cid'))
-    prov_idx = d.get('prov_idx', 0)
-    bkey = d.get('bkey')
-    if not uid or cid not in data['countries'] or bkey not in BUILDINGS:
-        return jsonify({'error': 'bad request'}), 400
-    c = data['countries'][cid]
-    if c.get('owner') != uid:
-        return jsonify({'error': 'not_yours'}), 403
-    if prov_idx >= len(c['provinces']):
-        return jsonify({'error': 'no_prov'}), 400
-    b = BUILDINGS[bkey]
-    if c['treas'] < b['cost']:
-        return jsonify({'error': 'no_money', 'need': b['cost'] - int(c['treas'])}), 400
-    c['treas'] -= b['cost']
-    p = c['provinces'][prov_idx]
-    p.setdefault('buildings', {})
-    p['buildings'][bkey] = p['buildings'].get(bkey, 0) + 1
-    save_data()
-    return jsonify({'ok': True})
-
-
-@app.route('/api/recruit', methods=['POST'])
-def api_recruit():
-    d = request.json or {}
-    uid = d.get('uid')
-    cid = str(d.get('cid'))
-    amount = int(d.get('amount', 0))
-    c = data['countries'].get(cid)
-    if not c or c.get('owner') != uid:
-        return jsonify({'error': 'not_yours'}), 403
-    cost = amount * 2
-    if c['treas'] < cost:
-        return jsonify({'error': 'no_money', 'need': cost - int(c['treas'])}), 400
-    c['treas'] -= cost
-    c['army'] += amount
-    save_data()
-    return jsonify({'ok': True})
-
-
-@app.route('/api/sell', methods=['POST'])
-def api_sell():
-    d = request.json or {}
-    uid = d.get('uid')
-    cid = str(d.get('cid'))
-    res = d.get('res')
-    amount = int(d.get('amount', 0))
-    c = data['countries'].get(cid)
-    if not c or c.get('owner') != uid:
-        return jsonify({'error': 'not_yours'}), 403
-    prices = {'food': 1, 'metal': 3, 'oil': 5}
-    if res not in prices:
-        return jsonify({'error': 'bad_res'}), 400
-    if c[res] < amount:
-        return jsonify({'error': 'not_enough'}), 400
-    c[res] -= amount
-    money = amount * prices[res]
-    c['treas'] += money
-    save_data()
-    return jsonify({'ok': True, 'money': money})
-
-
-@app.route('/api/war', methods=['POST'])
-def api_war():
-    d = request.json or {}
-    uid = d.get('uid')
-    cid = str(d.get('cid'))
-    target = str(d.get('target'))
-    c = data['countries'].get(cid)
-    t = data['countries'].get(target)
-    if not c or not t or c.get('owner') != uid:
-        return jsonify({'error': 'not_yours'}), 403
-    if find_alliance(cid, target):
-        return jsonify({'error': 'Нельзя атаковать союзника'}), 400
-    if is_at_war(cid, target):
-        return jsonify({'error': 'Уже в войне'}), 400
-    data.setdefault('wars', []).append({'attacker': cid, 'defender': target, 'turns': 0, 'time': int(time.time())})
-    add_news(f'{c["flag"]} {c["name"]} объявил войну {t["flag"]} {t["name"]}!')
-    save_data()
-    return jsonify({'ok': True})
+    name = d.get('name', 'Игрок')
+    score = int(d.get('score', 0))
+    if not uid:
+        return jsonify({'error': 'no uid'}), 400
+    scores = data.setdefault('scores', {})
+    key = str(uid)
+    current = scores.get(key, {}).get('score', 0)
+    if score > current:
+        scores[key] = {'name': name, 'score': score}
+        save_data()
+        return jsonify({'ok': True, 'new_record': True})
+    return jsonify({'ok': True, 'new_record': False})
 
 
 @app.route('/health')
@@ -927,6 +676,7 @@ def health():
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    print('RP server started')
+    import os as _os
+    port = int(_os.environ.get('PORT', 5000))
+    print('Block Blast server started')
     app.run(host='0.0.0.0', port=port)
