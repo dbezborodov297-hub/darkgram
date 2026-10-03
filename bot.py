@@ -5,7 +5,7 @@ import random
 import threading
 from telebot import types
 
-TOKEN = '8471116013:AAGAJDeb-6eTQjKN1RzZy_naaeZ4p2ttEJ8'
+TOKEN = '8747895563:AAERX0APsgwaQZ5NabavszixXHWeMimsVHk'
 COOLDOWN = 120
 START_STARS = 100
 
@@ -342,7 +342,7 @@ def main_menu(uid):
 
 
 # ============================================================
-# START
+# START — одно сообщение
 # ============================================================
 @bot.message_handler(commands=['start'])
 def cmd_start(m):
@@ -353,7 +353,6 @@ def cmd_start(m):
     text = (
         f'🎁 <b>Gift Bot</b>\n\n'
         f'Привет, <b>{name}</b>!\n\n'
-        f'Открывай кейсы, собирай флаги, продавай за ⭐.\n\n'
         f'🎰 Кейс — раз в 2 минуты\n'
         f'💸 Продавай по своей цене\n'
         f'🛒 Покупай у других\n'
@@ -361,7 +360,6 @@ def cmd_start(m):
         f'Выбирай 👇'
     )
     rm = types.ReplyKeyboardRemove()
-    bot.send_message(m.chat.id, '⏳', reply_markup=rm)
     bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_menu(uid))
 
 
@@ -495,7 +493,7 @@ def cb_my(c):
 
 
 # ============================================================
-# ПРОДАТЬ — СВОЯ ЦЕНА
+# ПРОДАТЬ
 # ============================================================
 sell_states = {}
 
@@ -556,7 +554,7 @@ def cb_sellpick(c):
         parse_mode='HTML')
 
 
-@bot.message_handler(func=lambda m: m.from_user.id in sell_states)
+@bot.message_handler(func=lambda m: m.from_user.id in sell_states, content_types=['text'])
 def handle_price(m):
     uid = m.from_user.id
     state = sell_states.get(uid)
@@ -723,7 +721,7 @@ def cb_listpick(c):
         parse_mode='HTML')
 
 
-@bot.message_handler(func=lambda m: m.from_user.id in list_states)
+@bot.message_handler(func=lambda m: m.from_user.id in list_states, content_types=['text'])
 def handle_list_price(m):
     uid = m.from_user.id
     state = list_states.get(uid)
@@ -792,7 +790,7 @@ def cb_balance(c):
 
 
 # ============================================================
-# ТОП — КРАСИВЫЙ В ЦИТАТЕ
+# ТОП
 # ============================================================
 @bot.callback_query_handler(func=lambda c: c.data == 'menu_top_cases')
 def cb_top_cases(c):
@@ -810,7 +808,6 @@ def cb_top_cases(c):
             elif i == 2: medal = '🥈'
             elif i == 3: medal = '🥉'
             else: medal = f'{i}.'
-            # Жирный для топ-3
             if i <= 3:
                 quote += f'{medal} <b>{name}</b> · {total} ⚡\n'
             else:
@@ -1056,6 +1053,9 @@ def cb_daily(c):
     cb_menu_main(c)
 
 
+# ============================================================
+# ЗАПУСК
+# ============================================================
 if __name__ == '__main__':
     print('Gift bot started')
     bot.infinity_polling(timeout=30, long_polling_timeout=30)
