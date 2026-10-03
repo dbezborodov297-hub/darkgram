@@ -5,7 +5,7 @@ import random
 import threading
 from telebot import types
 
-TOKEN = '7844349770:AAFvS7Na8Dsr3Kt2TRRuY3tklYrHqvjFQVY'
+TOKEN = '7844349770:AAFSAaU0P6K1mF5m7XrIz-Fkktp1M2S42DA'
 COOLDOWN = 120
 START_STARS = 100
 
@@ -77,15 +77,17 @@ SEASONS = {
 }
 SEASON_START = 1730419200
 
-POINTS_PER_CASE = 500
-POINTS_PER_SELL = 50
-POINTS_PER_BUY = 30
+# Очки
+POINTS_PER_CASE_MIN = 100
+POINTS_PER_CASE_MAX = 500
 POINTS_PER_BONUS = 2000
 
+# Уровни
 MAX_LEVEL = 20
 LEVEL_BASE = 5000
 LEVEL_STEP = 2500
 
+# Пропуск
 PASS_REWARDS = {
     1:  {'free': ('⭐', 50),   'premium': ('⭐', 200)},
     2:  {'free': ('⭐', 100),  'premium': ('🎁', 3)},
@@ -342,7 +344,7 @@ def main_menu(uid):
 
 
 # ============================================================
-# START — одно сообщение
+# START
 # ============================================================
 @bot.message_handler(commands=['start'])
 def cmd_start(m):
@@ -414,7 +416,8 @@ def cb_case(c):
         flag, rarity = roll_country()
         add_gift(uid, flag, rarity)
         update_user(uid, total=user[3] + 1)
-        leveled_up, new_level = add_xp(uid, POINTS_PER_CASE)
+        points_gain = random.randint(POINTS_PER_CASE_MIN, POINTS_PER_CASE_MAX)
+        leveled_up, new_level = add_xp(uid, points_gain)
 
         mn = min_price(rarity)
         mx = max_price(rarity)
@@ -429,7 +432,7 @@ def cb_case(c):
             f'<b>{flag} {flag} {flag}</b>\n\n'
             f'{RARITY_NAMES[rarity]}\n'
             f'💰 Цена: <b>{mn}-{mx} ⭐</b>\n'
-            f'🎁 Очки: <b>+{POINTS_PER_CASE}</b>'
+            f'🎯 Очки: <b>+{points_gain}</b>'
         )
         try:
             bot.edit_message_text(result, msg.chat.id, msg.message_id, parse_mode='HTML', reply_markup=kb)
@@ -586,7 +589,7 @@ def handle_price(m):
     user = get_user(uid)
     new_stars = user[6] + price
     update_user(uid, stars=new_stars, total_earned=user[7] + price)
-    add_xp(uid, POINTS_PER_SELL * price)
+    add_xp(uid, min(500, price // 2))
     sell_states.pop(uid, None)
 
     kb = types.InlineKeyboardMarkup()
@@ -653,7 +656,7 @@ def cb_buy(c):
     conn.commit(); conn.close()
 
     update_user(uid, stars=buyer[6] - price, total_spent=buyer[8] + price)
-    add_xp(uid, POINTS_PER_BUY * price)
+    add_xp(uid, min(300, price // 3))
 
     seller = get_user(seller_uid)
     if seller:
@@ -875,9 +878,9 @@ def cb_season(c):
         f'⭐ Всего очков: <b>{points:,}</b>\n'
         f'🎫 Премиум: {"✅" if premium else "❌"}\n\n'
         f'<b>Очки:</b>\n'
-        f'🎁 Кейс — +{POINTS_PER_CASE}\n'
-        f'💸 Продажа — +{POINTS_PER_SELL} × цена\n'
-        f'🛒 Покупка — +{POINTS_PER_BUY} × цена\n'
+        f'🎁 Кейс — +{POINTS_PER_CASE_MIN}-{POINTS_PER_CASE_MAX}\n'
+        f'💸 Продажа — по цене\n'
+        f'🛒 Покупка — по цене\n'
         f'🎁 Бонус — +{POINTS_PER_BONUS}'
     )
     kb = types.InlineKeyboardMarkup(row_width=1)
@@ -991,17 +994,26 @@ def cb_stats(c):
     left = max(0, COOLDOWN - (now - user[2]))
     points, level, premium, claimed = get_season(uid)
 
+    in_lvl, need_lvl, lvl_progress = progress_in_level(points)
+    lvl_bar = '🟨' * int(lvl_progress * 10) + '⬜' * (10 - int(lvl_progress * 10))
+
     total_possible = len(set(c[0] for c in COUNTRIES))
     unique_have = len(set(flag for _, flag, _ in get_user_gifts(uid)))
     progress = int((unique_have / total_possible) * 100) if total_possible else 0
-    bar = '🟩' * int(progress / 10) + '⬜' * (10 - int(progress / 10))
+    coll_bar = '🟩' * int(progress / 10) + '⬜' * (10 - int(progress / 10))
+
+    if level >= MAX_LEVEL:
+        lvl_status = '🏆 МАКСИМУМ'
+    else:
+        lvl_status = f'{lvl_bar}\n{in_lvl:,} / {need_lvl:,} очков'
 
     text = (
         f'📊 <b>Статистика</b>\n\n'
-        f'👤 <b>{user[1]}</b>\n'
-        f'🎯 Уровень: <b>{level}/{MAX_LEVEL}</b>\n\n'
-        f'<b>Коллекция</b>\n'
-        f'{bar} {progress}%\n'
+        f'👤 <b>{user[1]}</b>\n\n'
+        f'<b>🎯 Уровень: {level}/{MAX_LEVEL}</b>\n'
+        f'{lvl_status}\n\n'
+        f'<b>📦 Коллекция</b>\n'
+        f'{coll_bar} {progress}%\n'
         f'Уникальных: {unique_have}/{total_possible}\n\n'
         f'🟡 Legendary — {stats.get("legendary", 0)}\n'
         f'🟣 Epic — {stats.get("epic", 0)}\n'
