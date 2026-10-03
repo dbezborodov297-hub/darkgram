@@ -5,7 +5,7 @@ import random
 import threading
 from telebot import types
 
-TOKEN = '8471116013:AAHdsprhDRt8cprOd9bgBeR2CMkzoBFkBRM'
+TOKEN = '8471116013:AAEXY8F8ZHnA-qTAenLdfLzWSRIQEHvRWoQ'
 COOLDOWN = 120
 
 COUNTRIES = [
