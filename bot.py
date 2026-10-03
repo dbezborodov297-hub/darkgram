@@ -3,14 +3,12 @@ import sqlite3
 import time
 import random
 import threading
-from datetime import datetime, timedelta
 from telebot import types
 
-TOKEN = '8471116013:AAFjadwY-L8b5I3zstaJ1halkLvGMRrOFtc'
+TOKEN = '8471116013:AAHdsprhDRt8cprOd9bgBeR2CMkzoBFkBRM'
 COOLDOWN = 120
 
 COUNTRIES = [
-    # ⚪ COMMON (60%)
     ('🇦🇩','common'),('🇦🇱','common'),('🇦🇲','common'),('🇦🇹','common'),
     ('🇦🇿','common'),('🇧🇦','common'),('🇧🇬','common'),('🇧🇾','common'),
     ('🇨🇭','common'),('🇨🇿','common'),('🇩🇰','common'),('🇪🇪','common'),
@@ -20,9 +18,8 @@ COUNTRIES = [
     ('🇵🇹','common'),('🇷🇴','common'),('🇷🇸','common'),('🇸🇰','common'),
     ('🇸🇮','common'),('🇸🇪','common'),('🇺🇦','common'),('🇬🇷','common'),
     ('🇨🇾','common'),('🇲🇹','common'),('🇱🇺','common'),('🇲🇨','common'),
-    ('🇱🇮','common'),('🇸🇲','common'),('🇻🇦','common'),('🇦🇩','common'),
+    ('🇱🇮','common'),('🇸🇲','common'),('🇻🇦','common'),
 
-    # 🔵 RARE (25%)
     ('🇵🇱','rare'),('🇦🇷','rare'),('🇦🇺','rare'),('🇧🇪','rare'),
     ('🇧🇷','rare'),('🇨🇦','rare'),('🇨🇱','rare'),('🇨🇴','rare'),
     ('🇪🇬','rare'),('🇮🇱','rare'),('🇮🇩','rare'),('🇮🇷','rare'),
@@ -32,12 +29,10 @@ COUNTRIES = [
     ('🇪🇸','rare'),('🇹🇭','rare'),('🇹🇷','rare'),('🇻🇳','rare'),
     ('🇦🇪','rare'),('🇲🇾','rare'),
 
-    # 🟣 EPIC (12%)
     ('🇬🇧','epic'),('🇩🇪','epic'),('🇫🇷','epic'),('🇮🇹','epic'),
     ('🇯🇵','epic'),('🇮🇳','epic'),('🇧🇷','epic'),('🇨🇦','epic'),
     ('🇦🇺','epic'),('🇪🇸','epic'),('🇲🇽','epic'),('🇰🇷','epic'),
 
-    # 🟡 LEGENDARY (3%)
     ('🇺🇸','legendary'),('🇷🇺','legendary'),('🇨🇳','legendary'),
 ]
 
@@ -47,17 +42,15 @@ RARITY_NAMES = {
     'epic': '🟣 Эпическая',
     'legendary': '🟡 Легендарная',
 }
-
 RARITY_WEIGHT = {'common': 60, 'rare': 25, 'epic': 12, 'legendary': 3}
 
-# Достижения
 ACHIEVEMENTS = {
-    'first':     {'name': '🎁 Первый флаг',    'desc': 'Открой первый кейс',       'need': 1},
-    'ten':       {'name': '🔟 Десятка',        'desc': 'Собери 10 флагов',         'need': 10},
-    'fifty':     {'name': '📦 Коллекционер',   'desc': 'Собери 50 флагов',         'need': 50},
-    'epic_first':{'name': '🟣 Эпик',           'desc': 'Выбей первый эпик',        'need': 1},
-    'legend_first':{'name':'🟡 Легенда',       'desc': 'Выбей первого легенду',    'need': 1},
-    'legend_three':{'name':'👑 Коллекционер легенд','desc':'Выбей 3 легенды',     'need': 3},
+    'first':        {'name': '🎁 Первый флаг',   'desc': 'Открой первый кейс'},
+    'ten':          {'name': '🔟 Десятка',       'desc': 'Собери 10 флагов'},
+    'fifty':        {'name': '📦 Коллекционер',  'desc': 'Собери 50 флагов'},
+    'epic_first':   {'name': '🟣 Эпик',          'desc': 'Выбей первый эпик'},
+    'legend_first': {'name': '🟡 Легенда',       'desc': 'Выбей первую легенду'},
+    'legend_three': {'name': '👑 Король легенд', 'desc': 'Выбей 3 легенды'},
 }
 
 bot = telebot.TeleBot(TOKEN)
@@ -76,8 +69,7 @@ def init_db():
         uid INTEGER, flag TEXT, rarity TEXT, time INTEGER
     )''')
     c.execute('''CREATE TABLE IF NOT EXISTS achievements (
-        uid INTEGER, key TEXT, time INTEGER,
-        PRIMARY KEY (uid, key)
+        uid INTEGER, key TEXT, time INTEGER, PRIMARY KEY (uid, key)
     )''')
     conn.commit(); conn.close()
 
@@ -149,12 +141,10 @@ def add_achievement(uid, key):
 
 
 def check_achievements(uid):
-    """Проверяет и выдаёт новые достижения. Возвращает список новых."""
     gifts = get_user_gifts(uid)
     stats = get_user_stats(uid)
     have = get_achievements(uid)
     new = []
-
     if 'first' not in have and len(gifts) >= 1:
         add_achievement(uid, 'first'); new.append('first')
     if 'ten' not in have and len(gifts) >= 10:
@@ -167,15 +157,11 @@ def check_achievements(uid):
         add_achievement(uid, 'legend_first'); new.append('legend_first')
     if 'legend_three' not in have and stats.get('legendary', 0) >= 3:
         add_achievement(uid, 'legend_three'); new.append('legend_three')
-
     return new
 
 
 def roll_country():
-    rarity = random.choices(
-        list(RARITY_WEIGHT.keys()),
-        weights=list(RARITY_WEIGHT.values())
-    )[0]
+    rarity = random.choices(list(RARITY_WEIGHT.keys()), weights=list(RARITY_WEIGHT.values()))[0]
     pool = [c for c in COUNTRIES if c[1] == rarity]
     return random.choice(pool)
 
@@ -198,18 +184,13 @@ def cmd_start(m):
     get_user(uid, name)
 
     text = (
-        f'╔═══════════════════════╗\n'
-        f'║  🎁 <b>GIFT BOT</b>       ║\n'
-        f'╚═══════════════════════╝\n\n'
-        f'👋 Привет, <b>{name}</b>!\n\n'
-        f'Это бот-кейс с флагами стран.\n\n'
-        f'<b>Как играть:</b>\n'
-        f'🎁 Открывай кейсы\n'
-        f'📦 Собирай коллекцию\n'
-        f'🏅 Получай достижения\n'
-        f'🏆 Будь в топе\n\n'
-        f'⏱️ Кулдаун: <b>2 минуты</b>\n\n'
-        f'Погнали! 👇'
+        f'🎁 <b>Gift Bot</b>\n\n'
+        f'Привет, <b>{name}</b>!\n\n'
+        f'Открывай кейсы, собирай флаги стран, соревнуйся с другими.\n\n'
+        f'🎰 Кейс — раз в 2 минуты\n'
+        f'🏅 Достижения — за коллекцию\n'
+        f'🎁 Бонус дня — каждый день\n\n'
+        f'Жми кнопку ниже 👇'
     )
     bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_kb())
 
@@ -230,59 +211,51 @@ def cmd_open_case(m):
         mins = left // 60
         secs = left % 60
         text = (
-            '╔═══════════════════════╗\n'
-            '║  ⏱️ <b>КЕЙС ОСТЫВАЕТ</b>  ║\n'
-            '╚═══════════════════════╝\n\n'
-            f'⏳ Осталось: <b>{mins} мин {secs} сек</b>\n\n'
-            f'🎁 Следующий кейс скоро!'
+            f'⏱️ <b>Кейс остывает</b>\n\n'
+            f'Осталось: <b>{mins}:{secs:02d}</b>\n\n'
+            f'Возвращайся скорее!'
         )
         bot.send_message(m.chat.id, text, parse_mode='HTML')
         return
 
     update_user(uid, last_case=now)
-    msg = bot.send_message(m.chat.id, '🎁 <b>Загрузка...</b>', parse_mode='HTML')
+    msg = bot.send_message(m.chat.id, '🎁 Открываем...')
 
     def animate():
         frames = [
-            '╔═══════════════════════╗\n║   🎰 <b>ОТКРЫТИЕ</b>      ║\n╚═══════════════════════╝\n\n┌───┬───┬───┬───┬───┐\n│ ❓ │ ❓ │ ❓ │ ❓ │ ❓ │\n└───┴───┴───┴───┴───┘',
-            '╔═══════════════════════╗\n║   🎰 <b>КРУТИМ...</b>    ║\n╚═══════════════════════╝\n\n┌───┬───┬───┬───┬───┐\n│ 🔄 │ ❓ │ ❓ │ ❓ │ ❓ │\n└───┴───┴───┴───┴───┘',
-            '╔═══════════════════════╗\n║   🎰 <b>КРУТИМ...</b>    ║\n╚═══════════════════════╝\n\n┌───┬───┬───┬───┬───┐\n│ ❓ │ 🔄 │ ❓ │ ❓ │ ❓ │\n└───┴───┴───┴───┴───┘',
-            '╔═══════════════════════╗\n║   🎰 <b>КРУТИМ...</b>    ║\n╚═══════════════════════╝\n\n┌───┬───┬───┬───┬───┐\n│ ❓ │ ❓ │ 🔄 │ ❓ │ ❓ │\n└───┴───┴───┴───┴───┘',
-            '╔═══════════════════════╗\n║   ✨ <b>ПОЧТИ...</b>     ║\n╚═══════════════════════╝\n\n┌───┬───┬───┬───┬───┐\n│ 🟨 │ 🟨 │ 🟨 │ 🟨 │ 🟨 │\n└───┴───┴───┴───┴───┘',
+            '🎰 <b>Крутим...</b>\n\n⬜⬜⬜⬜⬜',
+            '🎰 <b>Крутим...</b>\n\n🟨⬜⬜⬜⬜',
+            '🎰 <b>Крутим...</b>\n\n🟨🟨⬜⬜⬜',
+            '🎰 <b>Крутим...</b>\n\n🟨🟨🟨⬜⬜',
+            '🎰 <b>Крутим...</b>\n\n🟨🟨🟨🟨⬜',
+            '✨ <b>Почти...</b>\n\n🟨🟨🟨🟨🟨',
         ]
         for frame in frames:
             try:
                 bot.edit_message_text(frame, m.chat.id, msg.message_id, parse_mode='HTML')
             except: pass
-            time.sleep(0.7)
+            time.sleep(0.6)
 
         flag, rarity = roll_country()
         add_gift(uid, flag, rarity)
         update_user(uid, total=user[3] + 1)
 
         result = (
-            '╔═══════════════════════╗\n'
-            '║   🎉 <b>ТЕБЕ ВЫПАЛО!</b>  ║\n'
-            '╚═══════════════════════╝\n\n'
-            '┌───────────────────────┐\n'
-            '│                       │\n'
-            f'│    {flag}   {flag}   {flag}    │\n'
-            '│                       │\n'
-            '└───────────────────────┘\n\n'
-            f'🎖️ <b>{RARITY_NAMES[rarity]}</b>\n\n'
+            f'🎉 <b>Тебе выпало!</b>\n\n'
+            f'<b>{flag} {flag} {flag}</b>\n\n'
+            f'{RARITY_NAMES[rarity]}\n\n'
             f'⏱️ Следующий кейс через 2 минуты'
         )
         try:
             bot.edit_message_text(result, m.chat.id, msg.message_id, parse_mode='HTML')
         except: pass
 
-        # Проверка достижений
         new = check_achievements(uid)
         for key in new:
             ach = ACHIEVEMENTS[key]
             try:
                 bot.send_message(m.chat.id,
-                    f'🏅 <b>Новое достижение!</b>\n\n{ach["name"]}\n{ach["desc"]}',
+                    f'🏅 <b>Новое достижение!</b>\n\n{ach["name"]}\n<i>{ach["desc"]}</i>',
                     parse_mode='HTML')
             except: pass
 
@@ -290,13 +263,12 @@ def cmd_open_case(m):
 
 
 # ============================================================
-# МОИ ФЛАГИ (таблица)
+# МОИ ФЛАГИ
 # ============================================================
 @bot.message_handler(func=lambda m: m.text == '📦 Мои флаги')
 def cmd_my_gifts(m):
     uid = m.from_user.id
     gifts = get_user_gifts(uid)
-
     if not gifts:
         return bot.send_message(m.chat.id, '📦 У тебя пока нет флагов.\n\nОткрой первый кейс!', reply_markup=main_kb())
 
@@ -304,39 +276,30 @@ def cmd_my_gifts(m):
     for flag, rarity in gifts:
         by_rarity[rarity].append(flag)
 
-    text = '╔═══════════════════════╗\n'
-    text += '║  📦 <b>МОЯ КОЛЛЕКЦИЯ</b>  ║\n'
-    text += '╚═══════════════════════╝\n\n'
-    text += f'🎯 Всего флагов: <b>{len(gifts)}</b>\n\n'
+    text = f'📦 <b>Твоя коллекция</b> — {len(gifts)} флагов\n\n'
 
     for rarity in ['legendary', 'epic', 'rare', 'common']:
         flags = by_rarity[rarity]
         if not flags:
             continue
-
         unique = {}
         for f in flags:
             unique[f] = unique.get(f, 0) + 1
-
-        text += f'┌─────────────────────┐\n'
-        text += f'│ {RARITY_NAMES[rarity]} ({len(flags)})\n'
-        text += f'└─────────────────────┘\n'
-
+        text += f'<b>{RARITY_NAMES[rarity]}</b> · {len(flags)}\n'
         items = list(unique.items())
-        for i in range(0, len(items), 5):
-            row = items[i:i+5]
-            line = '  '
+        for i in range(0, len(items), 6):
+            row = items[i:i+6]
+            line = ''
             for f, cnt in row:
                 cell = f
                 if cnt > 1:
                     cell += f'×{cnt}'
                 line += f'{cell} '
-            text += f'{line}\n'
+            text += line + '\n'
         text += '\n'
 
     if len(text) > 4000:
         text = text[:3900] + '\n\n...показаны не все'
-
     bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_kb())
 
 
@@ -357,33 +320,27 @@ def cmd_stats(m):
     total_possible = len(set(c[0] for c in COUNTRIES))
     unique_have = len(set(flag for flag, _ in get_user_gifts(uid)))
     progress = int((unique_have / total_possible) * 100) if total_possible else 0
-
-    text = '╔═══════════════════════╗\n'
-    text += '║  📊 <b>СТАТИСТИКА</b>     ║\n'
-    text += '╚═══════════════════════╝\n\n'
-    text += f'👤 <b>{name}</b>\n\n'
-
-    text += '┌─────── 📈 ПРОГРЕСС ───────┐\n'
-    text += f'│ Уникальных: <b>{unique_have}/{total_possible}</b>\n'
-    text += f'│ Прогресс: <b>{progress}%</b>\n'
     bar_filled = int(progress / 10)
-    bar = '█' * bar_filled + '░' * (10 - bar_filled)
-    text += f'│ {bar}\n'
-    text += '└───────────────────────────┘\n\n'
+    bar = '🟩' * bar_filled + '⬜' * (10 - bar_filled)
 
-    text += '┌─────── 📦 ПО РЕДКОСТИ ────┐\n'
-    text += f'│ 🟡 Legendary: <b>{stats.get("legendary", 0)}</b>\n'
-    text += f'│ 🟣 Epic: <b>{stats.get("epic", 0)}</b>\n'
-    text += f'│ 🔵 Rare: <b>{stats.get("rare", 0)}</b>\n'
-    text += f'│ ⚪ Common: <b>{stats.get("common", 0)}</b>\n'
-    text += f'│ ━━━━━━━━━━━━━━━━━\n'
-    text += f'│ Всего: <b>{total}</b>\n'
-    text += '└───────────────────────────┘\n\n'
-
+    text = (
+        f'📊 <b>Статистика</b>\n\n'
+        f'👤 <b>{name}</b>\n\n'
+        f'<b>Прогресс коллекции</b>\n'
+        f'{bar} {progress}%\n'
+        f'Уникальных: {unique_have}/{total_possible}\n\n'
+        f'<b>По редкости</b>\n'
+        f'🟡 Legendary — {stats.get("legendary", 0)}\n'
+        f'🟣 Epic — {stats.get("epic", 0)}\n'
+        f'🔵 Rare — {stats.get("rare", 0)}\n'
+        f'⚪ Common — {stats.get("common", 0)}\n'
+        f'━━━━━━━━━━━━━━\n'
+        f'📦 Всего: <b>{total}</b>\n\n'
+    )
     if left == 0:
-        text += '🎁 Кейс: <b>готов ✅</b>'
+        text += '🎁 Кейс: <b>готов</b>'
     else:
-        text += f'⏱️ Кейс через: <b>{left // 60} мин {left % 60} сек</b>'
+        text += f'⏱️ Кейс через: <b>{left // 60}:{left % 60:02d}</b>'
 
     bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_kb())
 
@@ -397,20 +354,14 @@ def cmd_top(m):
     if not top:
         return bot.send_message(m.chat.id, '🏆 Пока никто не играл.', reply_markup=main_kb())
 
-    text = '╔═══════════════════════╗\n'
-    text += '║  🏆 <b>ТОП ИГРОКОВ</b>    ║\n'
-    text += '╚═══════════════════════╝\n\n'
-    text += '┌────┬──────────────┬─────┐\n'
-    text += '│ #  │ Игрок        │ 📦  │\n'
-    text += '├────┼──────────────┼─────┤\n'
-
+    text = '🏆 <b>Топ игроков</b>\n\n'
     for i, (name, total, legend, epic) in enumerate(top, 1):
-        medal = ['🥇', '🥈', '🥉'][i-1] if i <= 3 else f'{i}'
-        n = name[:12] + '..' if len(name) > 14 else name
-        text += f'│ {medal:<2} │ {n:<12} │ {total:<3} │\n'
+        medal = ['🥇', '🥈', '🥉'][i-1] if i <= 3 else f'<b>{i}.</b>'
+        extra = ''
+        if legend or epic:
+            extra = f' · 🟡{legend} 🟣{epic}'
+        text += f'{medal} <b>{name}</b> — {total} 📦{extra}\n'
 
-    text += '└────┴──────────────┴─────┘\n\n'
-    text += '🟡 — Legendary · 🟣 — Epic'
     bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_kb())
 
 
@@ -422,21 +373,17 @@ def cmd_achievements(m):
     uid = m.from_user.id
     have = get_achievements(uid)
 
-    text = '╔═══════════════════════╗\n'
-    text += '║  🏅 <b>ДОСТИЖЕНИЯ</b>    ║\n'
-    text += '╚═══════════════════════╝\n\n'
-    text += f'🎯 Прогресс: <b>{len(have)}/{len(ACHIEVEMENTS)}</b>\n\n'
-
+    text = f'🏅 <b>Достижения</b> — {len(have)}/{len(ACHIEVEMENTS)}\n\n'
     for key, ach in ACHIEVEMENTS.items():
         done = '✅' if key in have else '🔒'
         text += f'{done} <b>{ach["name"]}</b>\n'
-        text += f'     <i>{ach["desc"]}</i>\n\n'
+        text += f'    <i>{ach["desc"]}</i>\n\n'
 
     bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_kb())
 
 
 # ============================================================
-# ЕЖЕДНЕВНЫЙ БОНУС
+# БОНУС ДНЯ
 # ============================================================
 @bot.message_handler(func=lambda m: m.text == '🎁 Бонус дня')
 def cmd_daily(m):
@@ -447,49 +394,38 @@ def cmd_daily(m):
     streak = user[5]
     now = int(time.time())
 
-    # Проверка: раз в 24 часа
     if now - last_bonus < 86400:
         left = 86400 - (now - last_bonus)
         h = left // 3600
-        m_left = (left % 3600) // 60
+        mn = (left % 3600) // 60
         text = (
-            '╔═══════════════════════╗\n'
-            '║  🎁 <b>БОНУС ДНЯ</b>     ║\n'
-            '╚═══════════════════════╝\n\n'
+            f'🎁 <b>Бонус дня</b>\n\n'
             f'⏳ Уже получен!\n\n'
-            f'Осталось: <b>{h} ч {m_left} мин</b>\n\n'
+            f'Осталось: <b>{h} ч {mn} мин</b>\n'
             f'🔥 Стрик: <b>{streak} дней</b>'
         )
         bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_kb())
         return
 
-    # Проверка стрика (24-48 часов)
     if now - last_bonus < 172800:
         streak += 1
     else:
         streak = 1
 
-    # Награда: 1-3 кейса (выдаём как бесплатные открытия)
-    reward = min(streak, 5)  # до 5
+    reward = min(streak, 5)
     for _ in range(reward):
         flag, rarity = roll_country()
         add_gift(uid, flag, rarity)
-        update_user(uid, total=user[3] + reward)
-
-    update_user(uid, last_bonus=now, streak=streak)
+    update_user(uid, total=user[3] + reward, last_bonus=now, streak=streak)
 
     text = (
-        '╔═══════════════════════╗\n'
-        '║  🎁 <b>БОНУС ДНЯ</b>     ║\n'
-        '╚═══════════════════════╝\n\n'
+        f'🎁 <b>Бонус дня</b>\n\n'
         f'🎉 Ты получил <b>{reward}</b> флагов!\n\n'
         f'🔥 Стрик: <b>{streak} дней</b>\n'
         f'💡 Заходи каждый день — награда растёт!\n\n'
         f'⏰ Следующий бонус через 24 часа'
     )
     bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_kb())
-
-    # Проверка достижений
     check_achievements(uid)
 
 
