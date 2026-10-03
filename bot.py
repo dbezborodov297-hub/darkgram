@@ -5,7 +5,7 @@ import random
 import threading
 from telebot import types
 
-TOKEN = '8471116013:AAGyfHYbUONMJ0z21TrnEZAASyezbqgY-So'
+TOKEN = '8471116013:AAGAJDeb-6eTQjKN1RzZy_naaeZ4p2ttEJ8'
 COOLDOWN = 120
 START_STARS = 100
 
@@ -43,9 +43,6 @@ RARITY_WEIGHT = {'common': 60, 'rare': 25, 'epic': 12, 'legendary': 3}
 RARITY_MIN_PRICE = {'common': 5, 'rare': 25, 'epic': 100, 'legendary': 500}
 RARITY_MAX_PRICE = {'common': 50, 'rare': 200, 'epic': 1000, 'legendary': 10000}
 
-# ============================================================
-# СЕЗОНЫ
-# ============================================================
 SEASONS = {
     1:  {'name': '🍂 Осенний листопад', 'emoji': '🍁'},
     2:  {'name': '🌧️ Дождливый ноябрь', 'emoji': '🌧️'},
@@ -78,7 +75,6 @@ SEASONS = {
     29: {'name': '🎨 Краски осени',      'emoji': '🎨'},
     30: {'name': '👑 Финал сезона',      'emoji': '👑'},
 }
-
 SEASON_START = 1730419200
 
 POINTS_PER_CASE = 500
@@ -208,16 +204,10 @@ def roll_country():
     return random.choice(pool)
 
 
-def min_price(rarity):
-    return RARITY_MIN_PRICE.get(rarity, 5)
-
-def max_price(rarity):
-    return RARITY_MAX_PRICE.get(rarity, 100)
+def min_price(r): return RARITY_MIN_PRICE.get(r, 5)
+def max_price(r): return RARITY_MAX_PRICE.get(r, 100)
 
 
-# ============================================================
-# СЕЗОН
-# ============================================================
 def get_current_season():
     days = int((time.time() - SEASON_START) / 86400) % 30
     return days + 1
@@ -325,9 +315,6 @@ def claim_reward(uid, level):
     return free, prem if premium else None
 
 
-# ============================================================
-# МЕНЮ
-# ============================================================
 def main_menu(uid):
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(types.InlineKeyboardButton('🎁 Открыть кейс', callback_data='menu_case', style='primary'))
@@ -429,7 +416,6 @@ def cb_case(c):
         flag, rarity = roll_country()
         add_gift(uid, flag, rarity)
         update_user(uid, total=user[3] + 1)
-
         leveled_up, new_level = add_xp(uid, POINTS_PER_CASE)
 
         mn = min_price(rarity)
@@ -566,7 +552,7 @@ def cb_sellpick(c):
         f'{RARITY_NAMES[rarity]}\n\n'
         f'💰 Мин: <b>{mn} ⭐</b>\n'
         f'💰 Макс: <b>{mx} ⭐</b>\n\n'
-        f'✍️ Отправь число — за сколько продать:',
+        f'✍️ Отправь число:',
         parse_mode='HTML')
 
 
@@ -588,16 +574,14 @@ def handle_price(m):
 
     gid = state['gid']
     flag = state['flag']
-    rarity = state['rarity']
 
     conn = sqlite3.connect(DB); cur = conn.cursor()
     cur.execute('SELECT id FROM gifts WHERE id=? AND uid=?', (gid, uid))
     if not cur.fetchone():
         conn.close()
         sell_states.pop(uid, None)
-        return bot.send_message(m.chat.id, '❌ Флаг уже продан')
+        return bot.send_message(m.chat.id, '❌ Флаг продан')
 
-    # Продажа
     cur.execute('DELETE FROM gifts WHERE id=?', (gid,))
     conn.commit(); conn.close()
 
@@ -608,13 +592,10 @@ def handle_price(m):
     sell_states.pop(uid, None)
 
     kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton('💸 Ещё продать', callback_data='menu_sell', style='success'))
+    kb.add(types.InlineKeyboardButton('💸 Ещё', callback_data='menu_sell', style='success'))
     kb.add(types.InlineKeyboardButton('◀️ В меню', callback_data='menu_main'))
     bot.send_message(m.chat.id,
-        f'✅ <b>Продано!</b>\n\n'
-        f'{flag} {flag} {flag}\n'
-        f'💰 +<b>{price} ⭐</b>\n'
-        f'💼 Баланс: <b>{new_stars} ⭐</b>',
+        f'✅ <b>Продано!</b>\n\n{flag} {flag} {flag}\n💰 +<b>{price} ⭐</b>\n💼 Баланс: <b>{new_stars} ⭐</b>',
         parse_mode='HTML', reply_markup=kb)
 
 
@@ -689,9 +670,6 @@ def cb_buy(c):
     cb_auction(c)
 
 
-# ============================================================
-# ВЫСТАВИТЬ ЛОТ (своя цена)
-# ============================================================
 list_states = {}
 
 @bot.callback_query_handler(func=lambda c: c.data == 'menu_list')
@@ -717,7 +695,7 @@ def cb_list_menu(c):
     kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='menu_auction'))
 
     try:
-        bot.edit_message_text('💸 <b>Выставить на аукцион</b>\n\nВыбери флаг:',
+        bot.edit_message_text('📤 <b>Выставить на аукцион</b>\n\nВыбери флаг:',
             c.message.chat.id, c.message.message_id, parse_mode='HTML', reply_markup=kb)
     except: pass
 
@@ -737,16 +715,11 @@ def cb_listpick(c):
     flag, rarity = row
     mn = min_price(rarity)
     mx = max_price(rarity)
-
     list_states[uid] = {'gid': gid, 'flag': flag, 'rarity': rarity}
     bot.answer_callback_query(c.id)
     bot.send_message(c.message.chat.id,
-        f'📤 <b>Установи цену лота</b>\n\n'
-        f'{flag} {flag} {flag}\n'
-        f'{RARITY_NAMES[rarity]}\n\n'
-        f'💰 Мин: <b>{mn} ⭐</b>\n'
-        f'💰 Макс: <b>{mx} ⭐</b>\n\n'
-        f'✍️ Отправь число:',
+        f'📤 <b>Цена лота</b>\n\n{flag} {flag} {flag}\n{RARITY_NAMES[rarity]}\n\n'
+        f'💰 Мин: <b>{mn} ⭐</b>\n💰 Макс: <b>{mx} ⭐</b>\n\n✍️ Отправь число:',
         parse_mode='HTML')
 
 
@@ -788,9 +761,7 @@ def handle_list_price(m):
     kb.add(types.InlineKeyboardButton('🛒 Аукцион', callback_data='menu_auction', style='primary'))
     kb.add(types.InlineKeyboardButton('◀️ В меню', callback_data='menu_main'))
     bot.send_message(m.chat.id,
-        f'✅ <b>Выставлено!</b>\n\n'
-        f'{flag} {flag} {flag}\n'
-        f'💰 Цена: <b>{price} ⭐</b>',
+        f'✅ <b>Выставлено!</b>\n\n{flag} {flag} {flag}\n💰 Цена: <b>{price} ⭐</b>',
         parse_mode='HTML', reply_markup=kb)
 
 
@@ -821,23 +792,30 @@ def cb_balance(c):
 
 
 # ============================================================
-# ТОП
+# ТОП — КРАСИВЫЙ В ЦИТАТЕ
 # ============================================================
 @bot.callback_query_handler(func=lambda c: c.data == 'menu_top_cases')
 def cb_top_cases(c):
     uid = c.from_user.id
     bot.answer_callback_query(c.id)
     top = get_top_cases(20)
+
     text = '🏆 <b>Топ по кейсам</b>\n\n'
-    for i, (name, total) in enumerate(top, 1):
-        if i == 1: medal = '🥇'
-        elif i == 2: medal = '🥈'
-        elif i == 3: medal = '🥉'
-        else: medal = f'{i}.'
-        if i <= 3:
-            text += f'{medal} <b>{name}</b> · {total} ⚡\n'
-        else:
-            text += f'{medal} {name} · {total} ⚡\n'
+    if not top:
+        text += '<i>Пока пусто</i>'
+    else:
+        quote = ''
+        for i, (name, total) in enumerate(top, 1):
+            if i == 1: medal = '🥇'
+            elif i == 2: medal = '🥈'
+            elif i == 3: medal = '🥉'
+            else: medal = f'{i}.'
+            # Жирный для топ-3
+            if i <= 3:
+                quote += f'{medal} <b>{name}</b> · {total} ⚡\n'
+            else:
+                quote += f'{medal} {name} · {total} ⚡\n'
+        text += f'<blockquote>{quote}</blockquote>'
 
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton('💎 Топ трат', callback_data='menu_top_spent', style='primary'))
@@ -851,16 +829,22 @@ def cb_top_spent(c):
     uid = c.from_user.id
     bot.answer_callback_query(c.id)
     top = get_top_spent(20)
+
     text = '💎 <b>Топ по тратам</b>\n\n'
-    for i, (name, spent) in enumerate(top, 1):
-        if i == 1: medal = '🥇'
-        elif i == 2: medal = '🥈'
-        elif i == 3: medal = '🥉'
-        else: medal = f'{i}.'
-        if i <= 3:
-            text += f'{medal} <b>{name}</b> · {spent} ⭐\n'
-        else:
-            text += f'{medal} {name} · {spent} ⭐\n'
+    if not top:
+        text += '<i>Пока пусто</i>'
+    else:
+        quote = ''
+        for i, (name, spent) in enumerate(top, 1):
+            if i == 1: medal = '🥇'
+            elif i == 2: medal = '🥈'
+            elif i == 3: medal = '🥉'
+            else: medal = f'{i}.'
+            if i <= 3:
+                quote += f'{medal} <b>{name}</b> · {spent} ⭐\n'
+            else:
+                quote += f'{medal} {name} · {spent} ⭐\n'
+        text += f'<blockquote>{quote}</blockquote>'
 
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton('🏆 Топ кейсов', callback_data='menu_top_cases', style='primary'))
@@ -906,9 +890,6 @@ def cb_season(c):
                           parse_mode='HTML', reply_markup=kb)
 
 
-# ============================================================
-# ПРОПУСК
-# ============================================================
 @bot.callback_query_handler(func=lambda c: c.data == 'menu_pass')
 def cb_pass(c):
     uid = c.from_user.id
@@ -974,7 +955,7 @@ def cb_claim(c):
     result = claim_reward(uid, lvl)
 
     if result == 'already':
-        return bot.answer_callback_query(c.id, '✅ Уже забрано', show_alert=True)
+        return bot.answer_callback_query(c.id, '✅ Уже', show_alert=True)
     if result is None:
         return bot.answer_callback_query(c.id, '❌ Нельзя', show_alert=True)
 
@@ -992,7 +973,7 @@ def cb_buy_premium(c):
     if premium:
         return bot.answer_callback_query(c.id, '✅ Куплен', show_alert=True)
     if user[6] < 500:
-        return bot.answer_callback_query(c.id, f'❌ Нужно 500 ⭐', show_alert=True)
+        return bot.answer_callback_query(c.id, '❌ Нужно 500 ⭐', show_alert=True)
 
     update_user(uid, stars=user[6] - 500, total_spent=user[8] + 500)
     update_season(uid, premium=1)
@@ -1075,9 +1056,6 @@ def cb_daily(c):
     cb_menu_main(c)
 
 
-# ============================================================
-# ЗАПУСК
-# ============================================================
 if __name__ == '__main__':
     print('Gift bot started')
     bot.infinity_polling(timeout=30, long_polling_timeout=30)
