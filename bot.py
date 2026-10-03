@@ -5,8 +5,9 @@ import random
 import threading
 from telebot import types
 
-TOKEN = '8471116013:AAEXY8F8ZHnA-qTAenLdfLzWSRIQEHvRWoQ'
+TOKEN = '8471116013:AAHUG9lA0Euq8h7KKJnWjWt8VaLcTfcj-Gc'
 COOLDOWN = 120
+START_STARS = 100
 
 COUNTRIES = [
     ('🇦🇩','common'),('🇦🇱','common'),('🇦🇲','common'),('🇦🇹','common'),
@@ -19,7 +20,6 @@ COUNTRIES = [
     ('🇸🇮','common'),('🇸🇪','common'),('🇺🇦','common'),('🇬🇷','common'),
     ('🇨🇾','common'),('🇲🇹','common'),('🇱🇺','common'),('🇲🇨','common'),
     ('🇱🇮','common'),('🇸🇲','common'),('🇻🇦','common'),
-
     ('🇵🇱','rare'),('🇦🇷','rare'),('🇦🇺','rare'),('🇧🇪','rare'),
     ('🇧🇷','rare'),('🇨🇦','rare'),('🇨🇱','rare'),('🇨🇴','rare'),
     ('🇪🇬','rare'),('🇮🇱','rare'),('🇮🇩','rare'),('🇮🇷','rare'),
@@ -28,11 +28,8 @@ COUNTRIES = [
     ('🇵🇭','rare'),('🇸🇦','rare'),('🇿🇦','rare'),('🇰🇷','rare'),
     ('🇪🇸','rare'),('🇹🇭','rare'),('🇹🇷','rare'),('🇻🇳','rare'),
     ('🇦🇪','rare'),('🇲🇾','rare'),
-
     ('🇬🇧','epic'),('🇩🇪','epic'),('🇫🇷','epic'),('🇮🇹','epic'),
-    ('🇯🇵','epic'),('🇮🇳','epic'),('🇧🇷','epic'),('🇨🇦','epic'),
-    ('🇦🇺','epic'),('🇪🇸','epic'),('🇲🇽','epic'),('🇰🇷','epic'),
-
+    ('🇯🇵','epic'),('🇮🇳','epic'),
     ('🇺🇸','legendary'),('🇷🇺','legendary'),('🇨🇳','legendary'),
 ]
 
@@ -43,14 +40,77 @@ RARITY_NAMES = {
     'legendary': '🟡 Легендарная',
 }
 RARITY_WEIGHT = {'common': 60, 'rare': 25, 'epic': 12, 'legendary': 3}
+RARITY_MIN_PRICE = {'common': 5, 'rare': 25, 'epic': 100, 'legendary': 500}
+RARITY_MAX_PRICE = {'common': 50, 'rare': 200, 'epic': 1000, 'legendary': 10000}
 
-ACHIEVEMENTS = {
-    'first':        {'name': '🎁 Первый флаг',   'desc': 'Открой первый кейс'},
-    'ten':          {'name': '🔟 Десятка',       'desc': 'Собери 10 флагов'},
-    'fifty':        {'name': '📦 Коллекционер',  'desc': 'Собери 50 флагов'},
-    'epic_first':   {'name': '🟣 Эпик',          'desc': 'Выбей первый эпик'},
-    'legend_first': {'name': '🟡 Легенда',       'desc': 'Выбей первую легенду'},
-    'legend_three': {'name': '👑 Король легенд', 'desc': 'Выбей 3 легенды'},
+# ============================================================
+# СЕЗОНЫ
+# ============================================================
+SEASONS = {
+    1:  {'name': '🍂 Осенний листопад', 'emoji': '🍁'},
+    2:  {'name': '🌧️ Дождливый ноябрь', 'emoji': '🌧️'},
+    3:  {'name': '🌫️ Туманы',           'emoji': '🌫️'},
+    4:  {'name': '❄️ Первый снег',       'emoji': '❄️'},
+    5:  {'name': '🎃 Хэллоуин',          'emoji': '🎃'},
+    6:  {'name': '🕸️ Тёмная осень',      'emoji': '🕸️'},
+    7:  {'name': '🍄 Грибной сезон',     'emoji': '🍄'},
+    8:  {'name': '🌰 Урожай',            'emoji': '🌰'},
+    9:  {'name': '🍷 Виноград',          'emoji': '🍷'},
+    10: {'name': '🦔 Ёжики',             'emoji': '🦔'},
+    11: {'name': '🐿️ Белки',             'emoji': '🐿️'},
+    12: {'name': '🦌 Олени',             'emoji': '🦌'},
+    13: {'name': '🐺 Волки',             'emoji': '🐺'},
+    14: {'name': '🦉 Совы',              'emoji': '🦉'},
+    15: {'name': '🐻 Медведи',           'emoji': '🐻'},
+    16: {'name': '🦊 Лисы',              'emoji': '🦊'},
+    17: {'name': '🐇 Зайцы',             'emoji': '🐇'},
+    18: {'name': '🦇 Летучие мыши',      'emoji': '🦇'},
+    19: {'name': '🕷️ Пауки',            'emoji': '🕷️'},
+    20: {'name': '🍁 Клён',              'emoji': '🍁'},
+    21: {'name': '🌲 Хвойный лес',       'emoji': '🌲'},
+    22: {'name': '🌳 Дуб',               'emoji': '🌳'},
+    23: {'name': '🍂 Листва',            'emoji': '🍂'},
+    24: {'name': '🥧 Пироги',            'emoji': '🥧'},
+    25: {'name': '☕ Чай',               'emoji': '☕'},
+    26: {'name': '🍵 Какао',             'emoji': '🍵'},
+    27: {'name': '🕯️ Свечи',            'emoji': '🕯️'},
+    28: {'name': '📚 Книги',             'emoji': '📚'},
+    29: {'name': '🎨 Краски осени',      'emoji': '🎨'},
+    30: {'name': '👑 Финал сезона',      'emoji': '👑'},
+}
+
+SEASON_START = 1730419200
+
+POINTS_PER_CASE = 500
+POINTS_PER_SELL = 50
+POINTS_PER_BUY = 30
+POINTS_PER_BONUS = 2000
+
+MAX_LEVEL = 20
+LEVEL_BASE = 5000
+LEVEL_STEP = 2500
+
+PASS_REWARDS = {
+    1:  {'free': ('⭐', 50),   'premium': ('⭐', 200)},
+    2:  {'free': ('⭐', 100),  'premium': ('🎁', 3)},
+    3:  {'free': ('🎁', 2),   'premium': ('⭐', 300)},
+    4:  {'free': ('⭐', 200),  'premium': ('🟣', 1)},
+    5:  {'free': ('🟣', 1),   'premium': ('⭐', 500)},
+    6:  {'free': ('⭐', 300),  'premium': ('🟣', 2)},
+    7:  {'free': ('🎁', 3),   'premium': ('🟡', 1)},
+    8:  {'free': ('⭐', 500),  'premium': ('🟡', 2)},
+    9:  {'free': ('🟣', 1),   'premium': ('💎', 1)},
+    10: {'free': ('🟡', 1),   'premium': ('👑', 2)},
+    11: {'free': ('⭐', 700),  'premium': ('⭐', 1500)},
+    12: {'free': ('🎁', 4),   'premium': ('🟣', 3)},
+    13: {'free': ('⭐', 900),  'premium': ('🟡', 2)},
+    14: {'free': ('🟣', 2),   'premium': ('💎', 2)},
+    15: {'free': ('🟡', 1),   'premium': ('👑', 3)},
+    16: {'free': ('⭐', 1200), 'premium': ('🟡', 3)},
+    17: {'free': ('🎁', 5),   'premium': ('💎', 2)},
+    18: {'free': ('🟣', 2),   'premium': ('👑', 3)},
+    19: {'free': ('🟡', 2),   'premium': ('💎', 3)},
+    20: {'free': ('💎', 1),   'premium': ('👑', 5)},
 }
 
 bot = telebot.TeleBot(TOKEN)
@@ -62,14 +122,26 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS users (
         uid INTEGER PRIMARY KEY, name TEXT,
         last_case INTEGER DEFAULT 0, total INTEGER DEFAULT 0,
-        last_bonus INTEGER DEFAULT 0, streak INTEGER DEFAULT 0
+        last_bonus INTEGER DEFAULT 0, streak INTEGER DEFAULT 0,
+        stars INTEGER DEFAULT 100,
+        total_earned INTEGER DEFAULT 0,
+        total_spent INTEGER DEFAULT 0
     )''')
     c.execute('''CREATE TABLE IF NOT EXISTS gifts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         uid INTEGER, flag TEXT, rarity TEXT, time INTEGER
     )''')
-    c.execute('''CREATE TABLE IF NOT EXISTS achievements (
-        uid INTEGER, key TEXT, time INTEGER, PRIMARY KEY (uid, key)
+    c.execute('''CREATE TABLE IF NOT EXISTS auctions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        seller_uid INTEGER, seller_name TEXT,
+        flag TEXT, rarity TEXT, price INTEGER, time INTEGER
+    )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS season (
+        uid INTEGER PRIMARY KEY,
+        xp INTEGER DEFAULT 0,
+        level INTEGER DEFAULT 1,
+        premium INTEGER DEFAULT 0,
+        claimed TEXT DEFAULT ''
     )''')
     conn.commit(); conn.close()
 
@@ -78,12 +150,12 @@ init_db()
 
 def get_user(uid, name='Игрок'):
     conn = sqlite3.connect(DB); c = conn.cursor()
-    c.execute('SELECT uid, name, last_case, total, last_bonus, streak FROM users WHERE uid=?', (uid,))
+    c.execute('SELECT uid, name, last_case, total, last_bonus, streak, stars, total_earned, total_spent FROM users WHERE uid=?', (uid,))
     row = c.fetchone()
     if not row:
-        c.execute('INSERT INTO users (uid, name) VALUES (?, ?)', (uid, name))
+        c.execute('INSERT INTO users (uid, name, stars) VALUES (?, ?, ?)', (uid, name, START_STARS))
         conn.commit()
-        row = (uid, name, 0, 0, 0, 0)
+        row = (uid, name, 0, 0, 0, 0, START_STARS, 0, 0)
     conn.close()
     return row
 
@@ -104,7 +176,7 @@ def add_gift(uid, flag, rarity):
 
 def get_user_gifts(uid):
     conn = sqlite3.connect(DB); c = conn.cursor()
-    c.execute('SELECT flag, rarity FROM gifts WHERE uid=? ORDER BY id DESC', (uid,))
+    c.execute('SELECT id, flag, rarity FROM gifts WHERE uid=? ORDER BY id DESC', (uid,))
     rows = c.fetchall(); conn.close()
     return rows
 
@@ -116,48 +188,18 @@ def get_user_stats(uid):
     return rows
 
 
-def get_top(limit=10):
+def get_top_cases(limit=20):
     conn = sqlite3.connect(DB); c = conn.cursor()
-    c.execute('''SELECT u.name, u.total,
-                 (SELECT COUNT(*) FROM gifts WHERE uid=u.uid AND rarity='legendary'),
-                 (SELECT COUNT(*) FROM gifts WHERE uid=u.uid AND rarity='epic')
-                 FROM users u ORDER BY u.total DESC LIMIT ?''', (limit,))
+    c.execute('SELECT name, total FROM users ORDER BY total DESC LIMIT ?', (limit,))
     rows = c.fetchall(); conn.close()
     return rows
 
 
-def get_achievements(uid):
+def get_top_spent(limit=20):
     conn = sqlite3.connect(DB); c = conn.cursor()
-    c.execute('SELECT key FROM achievements WHERE uid=?', (uid,))
-    rows = [r[0] for r in c.fetchall()]; conn.close()
+    c.execute('SELECT name, total_spent FROM users ORDER BY total_spent DESC LIMIT ?', (limit,))
+    rows = c.fetchall(); conn.close()
     return rows
-
-
-def add_achievement(uid, key):
-    conn = sqlite3.connect(DB); c = conn.cursor()
-    c.execute('INSERT OR IGNORE INTO achievements (uid, key, time) VALUES (?, ?, ?)',
-              (uid, key, int(time.time())))
-    conn.commit(); conn.close()
-
-
-def check_achievements(uid):
-    gifts = get_user_gifts(uid)
-    stats = get_user_stats(uid)
-    have = get_achievements(uid)
-    new = []
-    if 'first' not in have and len(gifts) >= 1:
-        add_achievement(uid, 'first'); new.append('first')
-    if 'ten' not in have and len(gifts) >= 10:
-        add_achievement(uid, 'ten'); new.append('ten')
-    if 'fifty' not in have and len(gifts) >= 50:
-        add_achievement(uid, 'fifty'); new.append('fifty')
-    if 'epic_first' not in have and stats.get('epic', 0) >= 1:
-        add_achievement(uid, 'epic_first'); new.append('epic_first')
-    if 'legend_first' not in have and stats.get('legendary', 0) >= 1:
-        add_achievement(uid, 'legend_first'); new.append('legend_first')
-    if 'legend_three' not in have and stats.get('legendary', 0) >= 3:
-        add_achievement(uid, 'legend_three'); new.append('legend_three')
-    return new
 
 
 def roll_country():
@@ -166,11 +208,149 @@ def roll_country():
     return random.choice(pool)
 
 
-def main_kb():
-    kb = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    kb.add('🎁 Открыть кейс', '📦 Мои флаги')
-    kb.add('📊 Статистика', '🏆 Топ игроков')
-    kb.add('🏅 Достижения', '🎁 Бонус дня')
+def min_price(rarity):
+    return RARITY_MIN_PRICE.get(rarity, 5)
+
+def max_price(rarity):
+    return RARITY_MAX_PRICE.get(rarity, 100)
+
+
+# ============================================================
+# СЕЗОН
+# ============================================================
+def get_current_season():
+    days = int((time.time() - SEASON_START) / 86400) % 30
+    return days + 1
+
+
+def get_season_info():
+    num = get_current_season()
+    return num, SEASONS.get(num, SEASONS[1])
+
+
+def points_for_level(level):
+    return LEVEL_BASE + (level - 1) * LEVEL_STEP
+
+
+def total_points_for_level(level):
+    total = 0
+    for i in range(1, level):
+        total += points_for_level(i)
+    return total
+
+
+def get_level_from_points(points):
+    level = 1
+    acc = 0
+    while level < MAX_LEVEL:
+        need = points_for_level(level)
+        if points < acc + need:
+            break
+        acc += need
+        level += 1
+    return level
+
+
+def progress_in_level(points):
+    level = get_level_from_points(points)
+    if level >= MAX_LEVEL:
+        return points, points, 1.0
+    prev = total_points_for_level(level)
+    in_lvl = points - prev
+    need = points_for_level(level)
+    return in_lvl, need, min(1.0, in_lvl / need)
+
+
+def get_season(uid):
+    conn = sqlite3.connect(DB); c = conn.cursor()
+    c.execute('SELECT xp, level, premium, claimed FROM season WHERE uid=?', (uid,))
+    row = c.fetchone()
+    if not row:
+        c.execute('INSERT INTO season (uid) VALUES (?)', (uid,))
+        conn.commit()
+        row = (0, 1, 0, '')
+    conn.close()
+    points = row[0]
+    level = get_level_from_points(points)
+    return points, level, row[2], row[3]
+
+
+def update_season(uid, **kwargs):
+    conn = sqlite3.connect(DB); c = conn.cursor()
+    for k, v in kwargs.items():
+        c.execute(f'UPDATE season SET {k}=? WHERE uid=?', (v, uid))
+    conn.commit(); conn.close()
+
+
+def add_xp(uid, amount):
+    points, old_level, premium, claimed = get_season(uid)
+    new_points = points + amount
+    new_level = get_level_from_points(new_points)
+    update_season(uid, xp=new_points, level=new_level)
+    return new_level > old_level, new_level
+
+
+def claim_reward(uid, level):
+    points, cur_level, premium, claimed = get_season(uid)
+    if cur_level < level:
+        return None
+    claimed_list = claimed.split(',') if claimed else []
+    if str(level) in claimed_list:
+        return 'already'
+    reward = PASS_REWARDS.get(level)
+    if not reward:
+        return None
+
+    free = reward['free']
+    if free[0] == '⭐':
+        user = get_user(uid)
+        update_user(uid, stars=user[6] + free[1])
+    elif free[0] == '🎁':
+        for _ in range(free[1]):
+            flag, rarity = roll_country()
+            add_gift(uid, flag, rarity)
+
+    if premium:
+        prem = reward['premium']
+        if prem[0] == '⭐':
+            user = get_user(uid)
+            update_user(uid, stars=user[6] + prem[1])
+        elif prem[0] in ('🟣', '🟡', '👑', '💎'):
+            for _ in range(prem[1]):
+                flag, rarity = roll_country()
+                add_gift(uid, flag, rarity)
+
+    claimed_list.append(str(level))
+    update_season(uid, claimed=','.join(claimed_list))
+    return free, prem if premium else None
+
+
+# ============================================================
+# МЕНЮ
+# ============================================================
+def main_menu(uid):
+    kb = types.InlineKeyboardMarkup(row_width=2)
+    kb.add(types.InlineKeyboardButton('🎁 Открыть кейс', callback_data='menu_case', style='primary'))
+    kb.add(
+        types.InlineKeyboardButton('📦 Мои флаги', callback_data='menu_my'),
+        types.InlineKeyboardButton('🛒 Аукцион', callback_data='menu_auction'),
+    )
+    kb.add(
+        types.InlineKeyboardButton('💸 Продать', callback_data='menu_sell', style='success'),
+        types.InlineKeyboardButton('💰 Баланс', callback_data='menu_balance'),
+    )
+    kb.add(
+        types.InlineKeyboardButton('🏆 Топ кейсов', callback_data='menu_top_cases'),
+        types.InlineKeyboardButton('💎 Топ трат', callback_data='menu_top_spent'),
+    )
+    kb.add(
+        types.InlineKeyboardButton('🍂 Сезон', callback_data='menu_season', style='primary'),
+        types.InlineKeyboardButton('🎫 Пропуск', callback_data='menu_pass', style='success'),
+    )
+    kb.add(
+        types.InlineKeyboardButton('🎁 Бонус дня', callback_data='menu_daily'),
+        types.InlineKeyboardButton('📊 Стата', callback_data='menu_stats'),
+    )
     return kb
 
 
@@ -186,40 +366,50 @@ def cmd_start(m):
     text = (
         f'🎁 <b>Gift Bot</b>\n\n'
         f'Привет, <b>{name}</b>!\n\n'
-        f'Открывай кейсы, собирай флаги стран, соревнуйся с другими.\n\n'
+        f'Открывай кейсы, собирай флаги, продавай за ⭐.\n\n'
         f'🎰 Кейс — раз в 2 минуты\n'
-        f'🏅 Достижения — за коллекцию\n'
-        f'🎁 Бонус дня — каждый день\n\n'
-        f'Жми кнопку ниже 👇'
+        f'💸 Продавай по своей цене\n'
+        f'🛒 Покупай у других\n'
+        f'🏆 Качайся в сезоне\n\n'
+        f'Выбирай 👇'
     )
-    bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_kb())
+    rm = types.ReplyKeyboardRemove()
+    bot.send_message(m.chat.id, '⏳', reply_markup=rm)
+    bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_menu(uid))
+
+
+@bot.callback_query_handler(func=lambda c: c.data == 'menu_main')
+def cb_menu_main(c):
+    uid = c.from_user.id
+    bot.answer_callback_query(c.id)
+    text = '🎁 <b>Gift Bot</b>\n\nВыбирай 👇'
+    try:
+        bot.edit_message_text(text, c.message.chat.id, c.message.message_id,
+                              parse_mode='HTML', reply_markup=main_menu(uid))
+    except:
+        bot.send_message(c.message.chat.id, text, parse_mode='HTML', reply_markup=main_menu(uid))
 
 
 # ============================================================
 # КЕЙС
 # ============================================================
-@bot.message_handler(func=lambda m: m.text == '🎁 Открыть кейс')
-def cmd_open_case(m):
-    uid = m.from_user.id
-    name = m.from_user.first_name or 'Игрок'
+@bot.callback_query_handler(func=lambda c: c.data == 'menu_case')
+def cb_case(c):
+    uid = c.from_user.id
+    name = c.from_user.first_name or 'Игрок'
     user = get_user(uid, name)
-    last_case = user[2]
     now = int(time.time())
 
-    left = COOLDOWN - (now - last_case)
+    left = COOLDOWN - (now - user[2])
     if left > 0:
         mins = left // 60
         secs = left % 60
-        text = (
-            f'⏱️ <b>Кейс остывает</b>\n\n'
-            f'Осталось: <b>{mins}:{secs:02d}</b>\n\n'
-            f'Возвращайся скорее!'
-        )
-        bot.send_message(m.chat.id, text, parse_mode='HTML')
+        bot.answer_callback_query(c.id, f'⏱️ {mins}:{secs:02d}', show_alert=True)
         return
 
+    bot.answer_callback_query(c.id)
     update_user(uid, last_case=now)
-    msg = bot.send_message(m.chat.id, '🎁 Открываем...')
+    msg = bot.send_message(c.message.chat.id, '🎁 Открываем...')
 
     def animate():
         frames = [
@@ -232,7 +422,7 @@ def cmd_open_case(m):
         ]
         for frame in frames:
             try:
-                bot.edit_message_text(frame, m.chat.id, msg.message_id, parse_mode='HTML')
+                bot.edit_message_text(frame, msg.chat.id, msg.message_id, parse_mode='HTML')
             except: pass
             time.sleep(0.6)
 
@@ -240,22 +430,31 @@ def cmd_open_case(m):
         add_gift(uid, flag, rarity)
         update_user(uid, total=user[3] + 1)
 
+        leveled_up, new_level = add_xp(uid, POINTS_PER_CASE)
+
+        mn = min_price(rarity)
+        mx = max_price(rarity)
+
+        kb = types.InlineKeyboardMarkup(row_width=1)
+        kb.add(types.InlineKeyboardButton('💸 Продать', callback_data='menu_sell', style='success'))
+        kb.add(types.InlineKeyboardButton('🎁 Ещё кейс', callback_data='menu_case', style='primary'))
+        kb.add(types.InlineKeyboardButton('◀️ В меню', callback_data='menu_main'))
+
         result = (
             f'🎉 <b>Тебе выпало!</b>\n\n'
             f'<b>{flag} {flag} {flag}</b>\n\n'
-            f'{RARITY_NAMES[rarity]}\n\n'
-            f'⏱️ Следующий кейс через 2 минуты'
+            f'{RARITY_NAMES[rarity]}\n'
+            f'💰 Цена: <b>{mn}-{mx} ⭐</b>\n'
+            f'🎁 Очки: <b>+{POINTS_PER_CASE}</b>'
         )
         try:
-            bot.edit_message_text(result, m.chat.id, msg.message_id, parse_mode='HTML')
+            bot.edit_message_text(result, msg.chat.id, msg.message_id, parse_mode='HTML', reply_markup=kb)
         except: pass
 
-        new = check_achievements(uid)
-        for key in new:
-            ach = ACHIEVEMENTS[key]
+        if leveled_up:
             try:
-                bot.send_message(m.chat.id,
-                    f'🏅 <b>Новое достижение!</b>\n\n{ach["name"]}\n<i>{ach["desc"]}</i>',
+                bot.send_message(msg.chat.id,
+                    f'🍂 <b>Новый уровень!</b>\n\n🎯 Уровень: <b>{new_level}/{MAX_LEVEL}</b>',
                     parse_mode='HTML')
             except: pass
 
@@ -265,19 +464,23 @@ def cmd_open_case(m):
 # ============================================================
 # МОИ ФЛАГИ
 # ============================================================
-@bot.message_handler(func=lambda m: m.text == '📦 Мои флаги')
-def cmd_my_gifts(m):
-    uid = m.from_user.id
+@bot.callback_query_handler(func=lambda c: c.data == 'menu_my')
+def cb_my(c):
+    uid = c.from_user.id
+    bot.answer_callback_query(c.id)
     gifts = get_user_gifts(uid)
     if not gifts:
-        return bot.send_message(m.chat.id, '📦 У тебя пока нет флагов.\n\nОткрой первый кейс!', reply_markup=main_kb())
+        kb = types.InlineKeyboardMarkup()
+        kb.add(types.InlineKeyboardButton('🎁 Открыть кейс', callback_data='menu_case', style='primary'))
+        kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='menu_main'))
+        return bot.edit_message_text('📦 Коллекция пуста.',
+            c.message.chat.id, c.message.message_id, reply_markup=kb)
 
     by_rarity = {'legendary': [], 'epic': [], 'rare': [], 'common': []}
-    for flag, rarity in gifts:
+    for _id, flag, rarity in gifts:
         by_rarity[rarity].append(flag)
 
-    text = f'📦 <b>Твоя коллекция</b> — {len(gifts)} флагов\n\n'
-
+    text = f'📦 <b>Коллекция</b> — {len(gifts)} флагов\n\n'
     for rarity in ['legendary', 'epic', 'rare', 'common']:
         flags = by_rarity[rarity]
         if not flags:
@@ -298,153 +501,583 @@ def cmd_my_gifts(m):
             text += line + '\n'
         text += '\n'
 
-    if len(text) > 4000:
-        text = text[:3900] + '\n\n...показаны не все'
-    bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_kb())
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('💸 Продать', callback_data='menu_sell', style='success'))
+    kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='menu_main'))
+    bot.edit_message_text(text[:4000], c.message.chat.id, c.message.message_id,
+                          parse_mode='HTML', reply_markup=kb)
 
 
 # ============================================================
-# СТАТИСТИКА
+# ПРОДАТЬ — СВОЯ ЦЕНА
 # ============================================================
-@bot.message_handler(func=lambda m: m.text == '📊 Статистика')
-def cmd_stats(m):
+sell_states = {}
+
+@bot.callback_query_handler(func=lambda c: c.data == 'menu_sell')
+def cb_sell_menu(c):
+    uid = c.from_user.id
+    bot.answer_callback_query(c.id)
+    gifts = get_user_gifts(uid)
+    if not gifts:
+        return bot.answer_callback_query(c.id, 'Нет флагов', show_alert=True)
+
+    unique = {}
+    for gid, flag, rarity in gifts:
+        key = (flag, rarity)
+        if key not in unique:
+            unique[key] = gid
+
+    items = list(unique.items())[:30]
+    kb = types.InlineKeyboardMarkup(row_width=4)
+    btns = []
+    for (flag, rarity), gid in items:
+        btns.append(types.InlineKeyboardButton(f'{flag}', callback_data=f'sellpick_{gid}'))
+    kb.add(*btns)
+    kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='menu_main'))
+
+    try:
+        bot.edit_message_text('💸 <b>Продажа</b>\n\nВыбери флаг:',
+            c.message.chat.id, c.message.message_id, parse_mode='HTML', reply_markup=kb)
+    except: pass
+
+
+@bot.callback_query_handler(func=lambda c: c.data.startswith('sellpick_'))
+def cb_sellpick(c):
+    uid = c.from_user.id
+    gid = int(c.data.replace('sellpick_', ''))
+
+    conn = sqlite3.connect(DB); cur = conn.cursor()
+    cur.execute('SELECT flag, rarity FROM gifts WHERE id=? AND uid=?', (gid, uid))
+    row = cur.fetchone()
+    conn.close()
+    if not row:
+        return bot.answer_callback_query(c.id, 'Не найдено', show_alert=True)
+
+    flag, rarity = row
+    mn = min_price(rarity)
+    mx = max_price(rarity)
+
+    sell_states[uid] = {'gid': gid, 'flag': flag, 'rarity': rarity}
+
+    bot.answer_callback_query(c.id)
+    bot.send_message(c.message.chat.id,
+        f'💸 <b>Установи цену</b>\n\n'
+        f'{flag} {flag} {flag}\n'
+        f'{RARITY_NAMES[rarity]}\n\n'
+        f'💰 Мин: <b>{mn} ⭐</b>\n'
+        f'💰 Макс: <b>{mx} ⭐</b>\n\n'
+        f'✍️ Отправь число — за сколько продать:',
+        parse_mode='HTML')
+
+
+@bot.message_handler(func=lambda m: m.from_user.id in sell_states)
+def handle_price(m):
     uid = m.from_user.id
-    name = m.from_user.first_name or 'Игрок'
-    user = get_user(uid, name)
-    stats = get_user_stats(uid)
-    total = user[3]
-    last_case = user[2]
-    now = int(time.time())
-    left = max(0, COOLDOWN - (now - last_case))
+    state = sell_states.get(uid)
+    if not state:
+        return
+    try:
+        price = int(m.text.strip())
+    except:
+        return bot.send_message(m.chat.id, '❌ Введи число')
 
-    total_possible = len(set(c[0] for c in COUNTRIES))
-    unique_have = len(set(flag for flag, _ in get_user_gifts(uid)))
-    progress = int((unique_have / total_possible) * 100) if total_possible else 0
-    bar_filled = int(progress / 10)
-    bar = '🟩' * bar_filled + '⬜' * (10 - bar_filled)
+    mn = min_price(state['rarity'])
+    mx = max_price(state['rarity'])
+    if price < mn or price > mx:
+        return bot.send_message(m.chat.id, f'❌ Цена: от {mn} до {mx} ⭐')
+
+    gid = state['gid']
+    flag = state['flag']
+    rarity = state['rarity']
+
+    conn = sqlite3.connect(DB); cur = conn.cursor()
+    cur.execute('SELECT id FROM gifts WHERE id=? AND uid=?', (gid, uid))
+    if not cur.fetchone():
+        conn.close()
+        sell_states.pop(uid, None)
+        return bot.send_message(m.chat.id, '❌ Флаг уже продан')
+
+    # Продажа
+    cur.execute('DELETE FROM gifts WHERE id=?', (gid,))
+    conn.commit(); conn.close()
+
+    user = get_user(uid)
+    new_stars = user[6] + price
+    update_user(uid, stars=new_stars, total_earned=user[7] + price)
+    add_xp(uid, POINTS_PER_SELL * price)
+    sell_states.pop(uid, None)
+
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('💸 Ещё продать', callback_data='menu_sell', style='success'))
+    kb.add(types.InlineKeyboardButton('◀️ В меню', callback_data='menu_main'))
+    bot.send_message(m.chat.id,
+        f'✅ <b>Продано!</b>\n\n'
+        f'{flag} {flag} {flag}\n'
+        f'💰 +<b>{price} ⭐</b>\n'
+        f'💼 Баланс: <b>{new_stars} ⭐</b>',
+        parse_mode='HTML', reply_markup=kb)
+
+
+# ============================================================
+# АУКЦИОН
+# ============================================================
+@bot.callback_query_handler(func=lambda c: c.data == 'menu_auction')
+def cb_auction(c):
+    uid = c.from_user.id
+    bot.answer_callback_query(c.id)
+    conn = sqlite3.connect(DB); cur = conn.cursor()
+    cur.execute('SELECT id, seller_name, flag, rarity, price FROM auctions WHERE seller_uid != ? ORDER BY price ASC LIMIT 30', (uid,))
+    rows = cur.fetchall(); conn.close()
+
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    if not rows:
+        kb.add(types.InlineKeyboardButton('💸 Выставить свой', callback_data='menu_list', style='success'))
+    else:
+        for aid, seller, flag, rarity, price in rows:
+            kb.add(types.InlineKeyboardButton(
+                f'{flag} {flag} — {price} ⭐ · {seller}',
+                callback_data=f'buy_{aid}'))
+        kb.add(types.InlineKeyboardButton('💸 Выставить свой', callback_data='menu_list', style='success'))
+    kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='menu_main'))
+
+    try:
+        bot.edit_message_text('🛒 <b>Аукцион</b>',
+            c.message.chat.id, c.message.message_id, parse_mode='HTML', reply_markup=kb)
+    except: pass
+
+
+@bot.callback_query_handler(func=lambda c: c.data.startswith('buy_'))
+def cb_buy(c):
+    uid = c.from_user.id
+    aid = int(c.data.replace('buy_', ''))
+
+    conn = sqlite3.connect(DB); cur = conn.cursor()
+    cur.execute('SELECT seller_uid, flag, rarity, price FROM auctions WHERE id=?', (aid,))
+    row = cur.fetchone()
+    if not row:
+        conn.close()
+        return bot.answer_callback_query(c.id, 'Продан', show_alert=True)
+
+    seller_uid, flag, rarity, price = row
+    if seller_uid == uid:
+        conn.close()
+        return bot.answer_callback_query(c.id, 'Твой лот', show_alert=True)
+
+    buyer = get_user(uid)
+    if buyer[6] < price:
+        conn.close()
+        return bot.answer_callback_query(c.id, f'Не хватает {price - buyer[6]} ⭐', show_alert=True)
+
+    cur.execute('DELETE FROM auctions WHERE id=?', (aid,))
+    cur.execute('INSERT INTO gifts (uid, flag, rarity, time) VALUES (?, ?, ?, ?)',
+                (uid, flag, rarity, int(time.time())))
+    conn.commit(); conn.close()
+
+    update_user(uid, stars=buyer[6] - price, total_spent=buyer[8] + price)
+    add_xp(uid, POINTS_PER_BUY * price)
+
+    seller = get_user(seller_uid)
+    if seller:
+        update_user(seller_uid, stars=seller[6] + price, total_earned=seller[7] + price)
+        try:
+            bot.send_message(seller_uid,
+                f'💰 <b>Флаг продан!</b>\n\n{flag} {flag} {flag}\n+{price} ⭐',
+                parse_mode='HTML')
+        except: pass
+
+    bot.answer_callback_query(c.id, f'✅ Куплено за {price} ⭐')
+    cb_auction(c)
+
+
+# ============================================================
+# ВЫСТАВИТЬ ЛОТ (своя цена)
+# ============================================================
+list_states = {}
+
+@bot.callback_query_handler(func=lambda c: c.data == 'menu_list')
+def cb_list_menu(c):
+    uid = c.from_user.id
+    bot.answer_callback_query(c.id)
+    gifts = get_user_gifts(uid)
+    if not gifts:
+        return bot.answer_callback_query(c.id, 'Нет флагов', show_alert=True)
+
+    unique = {}
+    for gid, flag, rarity in gifts:
+        key = (flag, rarity)
+        if key not in unique:
+            unique[key] = gid
+
+    items = list(unique.items())[:30]
+    kb = types.InlineKeyboardMarkup(row_width=4)
+    btns = []
+    for (flag, rarity), gid in items:
+        btns.append(types.InlineKeyboardButton(f'{flag}', callback_data=f'listpick_{gid}'))
+    kb.add(*btns)
+    kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='menu_auction'))
+
+    try:
+        bot.edit_message_text('💸 <b>Выставить на аукцион</b>\n\nВыбери флаг:',
+            c.message.chat.id, c.message.message_id, parse_mode='HTML', reply_markup=kb)
+    except: pass
+
+
+@bot.callback_query_handler(func=lambda c: c.data.startswith('listpick_'))
+def cb_listpick(c):
+    uid = c.from_user.id
+    gid = int(c.data.replace('listpick_', ''))
+
+    conn = sqlite3.connect(DB); cur = conn.cursor()
+    cur.execute('SELECT flag, rarity FROM gifts WHERE id=? AND uid=?', (gid, uid))
+    row = cur.fetchone()
+    conn.close()
+    if not row:
+        return bot.answer_callback_query(c.id, 'Не найдено', show_alert=True)
+
+    flag, rarity = row
+    mn = min_price(rarity)
+    mx = max_price(rarity)
+
+    list_states[uid] = {'gid': gid, 'flag': flag, 'rarity': rarity}
+    bot.answer_callback_query(c.id)
+    bot.send_message(c.message.chat.id,
+        f'📤 <b>Установи цену лота</b>\n\n'
+        f'{flag} {flag} {flag}\n'
+        f'{RARITY_NAMES[rarity]}\n\n'
+        f'💰 Мин: <b>{mn} ⭐</b>\n'
+        f'💰 Макс: <b>{mx} ⭐</b>\n\n'
+        f'✍️ Отправь число:',
+        parse_mode='HTML')
+
+
+@bot.message_handler(func=lambda m: m.from_user.id in list_states)
+def handle_list_price(m):
+    uid = m.from_user.id
+    state = list_states.get(uid)
+    if not state:
+        return
+    try:
+        price = int(m.text.strip())
+    except:
+        return bot.send_message(m.chat.id, '❌ Введи число')
+
+    mn = min_price(state['rarity'])
+    mx = max_price(state['rarity'])
+    if price < mn or price > mx:
+        return bot.send_message(m.chat.id, f'❌ Цена: от {mn} до {mx} ⭐')
+
+    gid = state['gid']
+    flag = state['flag']
+    rarity = state['rarity']
+
+    conn = sqlite3.connect(DB); cur = conn.cursor()
+    cur.execute('SELECT id FROM gifts WHERE id=? AND uid=?', (gid, uid))
+    if not cur.fetchone():
+        conn.close()
+        list_states.pop(uid, None)
+        return bot.send_message(m.chat.id, '❌ Флаг продан')
+
+    name = m.from_user.first_name or 'Игрок'
+    cur.execute('DELETE FROM gifts WHERE id=?', (gid,))
+    cur.execute('INSERT INTO auctions (seller_uid, seller_name, flag, rarity, price, time) VALUES (?, ?, ?, ?, ?, ?)',
+                (uid, name, flag, rarity, price, int(time.time())))
+    conn.commit(); conn.close()
+    list_states.pop(uid, None)
+
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('🛒 Аукцион', callback_data='menu_auction', style='primary'))
+    kb.add(types.InlineKeyboardButton('◀️ В меню', callback_data='menu_main'))
+    bot.send_message(m.chat.id,
+        f'✅ <b>Выставлено!</b>\n\n'
+        f'{flag} {flag} {flag}\n'
+        f'💰 Цена: <b>{price} ⭐</b>',
+        parse_mode='HTML', reply_markup=kb)
+
+
+# ============================================================
+# БАЛАНС
+# ============================================================
+@bot.callback_query_handler(func=lambda c: c.data == 'menu_balance')
+def cb_balance(c):
+    uid = c.from_user.id
+    bot.answer_callback_query(c.id)
+    user = get_user(uid)
+    gifts = get_user_gifts(uid)
+    collection = sum(min_price(r) for _, _, r in gifts)
+
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='menu_main'))
 
     text = (
-        f'📊 <b>Статистика</b>\n\n'
-        f'👤 <b>{name}</b>\n\n'
-        f'<b>Прогресс коллекции</b>\n'
-        f'{bar} {progress}%\n'
-        f'Уникальных: {unique_have}/{total_possible}\n\n'
-        f'<b>По редкости</b>\n'
-        f'🟡 Legendary — {stats.get("legendary", 0)}\n'
-        f'🟣 Epic — {stats.get("epic", 0)}\n'
-        f'🔵 Rare — {stats.get("rare", 0)}\n'
-        f'⚪ Common — {stats.get("common", 0)}\n'
-        f'━━━━━━━━━━━━━━\n'
-        f'📦 Всего: <b>{total}</b>\n\n'
+        f'💰 <b>Баланс</b>\n\n'
+        f'💵 Звёзды: <b>{user[6]} ⭐</b>\n'
+        f'📈 Заработано: <b>{user[7]} ⭐</b>\n'
+        f'📉 Потрачено: <b>{user[8]} ⭐</b>\n\n'
+        f'📦 Флагов: <b>{len(gifts)}</b>\n'
+        f'💎 Мин. стоимость: <b>{collection} ⭐</b>'
     )
-    if left == 0:
-        text += '🎁 Кейс: <b>готов</b>'
-    else:
-        text += f'⏱️ Кейс через: <b>{left // 60}:{left % 60:02d}</b>'
-
-    bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_kb())
+    bot.edit_message_text(text, c.message.chat.id, c.message.message_id,
+                          parse_mode='HTML', reply_markup=kb)
 
 
 # ============================================================
 # ТОП
 # ============================================================
-@bot.message_handler(func=lambda m: m.text == '🏆 Топ игроков')
-def cmd_top(m):
-    top = get_top(10)
-    if not top:
-        return bot.send_message(m.chat.id, '🏆 Пока никто не играл.', reply_markup=main_kb())
+@bot.callback_query_handler(func=lambda c: c.data == 'menu_top_cases')
+def cb_top_cases(c):
+    uid = c.from_user.id
+    bot.answer_callback_query(c.id)
+    top = get_top_cases(20)
+    text = '🏆 <b>Топ по кейсам</b>\n\n'
+    for i, (name, total) in enumerate(top, 1):
+        if i == 1: medal = '🥇'
+        elif i == 2: medal = '🥈'
+        elif i == 3: medal = '🥉'
+        else: medal = f'{i}.'
+        if i <= 3:
+            text += f'{medal} <b>{name}</b> · {total} ⚡\n'
+        else:
+            text += f'{medal} {name} · {total} ⚡\n'
 
-    text = '🏆 <b>Топ игроков</b>\n\n'
-    for i, (name, total, legend, epic) in enumerate(top, 1):
-        medal = ['🥇', '🥈', '🥉'][i-1] if i <= 3 else f'<b>{i}.</b>'
-        extra = ''
-        if legend or epic:
-            extra = f' · 🟡{legend} 🟣{epic}'
-        text += f'{medal} <b>{name}</b> — {total} 📦{extra}\n'
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('💎 Топ трат', callback_data='menu_top_spent', style='primary'))
+    kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='menu_main'))
+    bot.edit_message_text(text, c.message.chat.id, c.message.message_id,
+                          parse_mode='HTML', reply_markup=kb)
 
-    bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_kb())
+
+@bot.callback_query_handler(func=lambda c: c.data == 'menu_top_spent')
+def cb_top_spent(c):
+    uid = c.from_user.id
+    bot.answer_callback_query(c.id)
+    top = get_top_spent(20)
+    text = '💎 <b>Топ по тратам</b>\n\n'
+    for i, (name, spent) in enumerate(top, 1):
+        if i == 1: medal = '🥇'
+        elif i == 2: medal = '🥈'
+        elif i == 3: medal = '🥉'
+        else: medal = f'{i}.'
+        if i <= 3:
+            text += f'{medal} <b>{name}</b> · {spent} ⭐\n'
+        else:
+            text += f'{medal} {name} · {spent} ⭐\n'
+
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('🏆 Топ кейсов', callback_data='menu_top_cases', style='primary'))
+    kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='menu_main'))
+    bot.edit_message_text(text, c.message.chat.id, c.message.message_id,
+                          parse_mode='HTML', reply_markup=kb)
 
 
 # ============================================================
-# ДОСТИЖЕНИЯ
+# СЕЗОН
 # ============================================================
-@bot.message_handler(func=lambda m: m.text == '🏅 Достижения')
-def cmd_achievements(m):
-    uid = m.from_user.id
-    have = get_achievements(uid)
+@bot.callback_query_handler(func=lambda c: c.data == 'menu_season')
+def cb_season(c):
+    uid = c.from_user.id
+    bot.answer_callback_query(c.id)
+    points, level, premium, claimed = get_season(uid)
+    season_num, season = get_season_info()
+    in_lvl, need, progress = progress_in_level(points)
+    bar = '🟨' * int(progress * 10) + '⬜' * (10 - int(progress * 10))
 
-    text = f'🏅 <b>Достижения</b> — {len(have)}/{len(ACHIEVEMENTS)}\n\n'
-    for key, ach in ACHIEVEMENTS.items():
-        done = '✅' if key in have else '🔒'
-        text += f'{done} <b>{ach["name"]}</b>\n'
-        text += f'    <i>{ach["desc"]}</i>\n\n'
-
-    bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_kb())
-
-
-# ============================================================
-# БОНУС ДНЯ
-# ============================================================
-@bot.message_handler(func=lambda m: m.text == '🎁 Бонус дня')
-def cmd_daily(m):
-    uid = m.from_user.id
-    name = m.from_user.first_name or 'Игрок'
-    user = get_user(uid, name)
-    last_bonus = user[4]
-    streak = user[5]
-    now = int(time.time())
-
-    if now - last_bonus < 86400:
-        left = 86400 - (now - last_bonus)
-        h = left // 3600
-        mn = (left % 3600) // 60
-        text = (
-            f'🎁 <b>Бонус дня</b>\n\n'
-            f'⏳ Уже получен!\n\n'
-            f'Осталось: <b>{h} ч {mn} мин</b>\n'
-            f'🔥 Стрик: <b>{streak} дней</b>'
-        )
-        bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_kb())
-        return
-
-    if now - last_bonus < 172800:
-        streak += 1
+    if level >= MAX_LEVEL:
+        status = '🏆 <b>МАКСИМУМ!</b>'
     else:
-        streak = 1
-
-    reward = min(streak, 5)
-    for _ in range(reward):
-        flag, rarity = roll_country()
-        add_gift(uid, flag, rarity)
-    update_user(uid, total=user[3] + reward, last_bonus=now, streak=streak)
+        status = f'{bar}\n{in_lvl:,} / {need:,}'
 
     text = (
-        f'🎁 <b>Бонус дня</b>\n\n'
-        f'🎉 Ты получил <b>{reward}</b> флагов!\n\n'
-        f'🔥 Стрик: <b>{streak} дней</b>\n'
-        f'💡 Заходи каждый день — награда растёт!\n\n'
-        f'⏰ Следующий бонус через 24 часа'
+        f'{season["emoji"]} <b>{season["name"]}</b>\n'
+        f'📅 Сезон: <b>{season_num}/30</b>\n\n'
+        f'🎯 Уровень: <b>{level}/{MAX_LEVEL}</b>\n'
+        f'{status}\n\n'
+        f'⭐ Всего очков: <b>{points:,}</b>\n'
+        f'🎫 Премиум: {"✅" if premium else "❌"}\n\n'
+        f'<b>Очки:</b>\n'
+        f'🎁 Кейс — +{POINTS_PER_CASE}\n'
+        f'💸 Продажа — +{POINTS_PER_SELL} × цена\n'
+        f'🛒 Покупка — +{POINTS_PER_BUY} × цена\n'
+        f'🎁 Бонус — +{POINTS_PER_BONUS}'
     )
-    bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_kb())
-    check_achievements(uid)
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    kb.add(types.InlineKeyboardButton('🎫 Пропуск', callback_data='menu_pass', style='success'))
+    kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='menu_main'))
+    bot.edit_message_text(text, c.message.chat.id, c.message.message_id,
+                          parse_mode='HTML', reply_markup=kb)
 
 
 # ============================================================
-# КОМАНДЫ
+# ПРОПУСК
 # ============================================================
-@bot.message_handler(commands=['roll'])
-def cmd_roll(m): cmd_open_case(m)
+@bot.callback_query_handler(func=lambda c: c.data == 'menu_pass')
+def cb_pass(c):
+    uid = c.from_user.id
+    bot.answer_callback_query(c.id)
+    points, level, premium, claimed = get_season(uid)
+    claimed_list = claimed.split(',') if claimed else []
+    season_num, season = get_season_info()
+    in_lvl, need, progress = progress_in_level(points)
 
-@bot.message_handler(commands=['top'])
-def cmd_top_short(m): cmd_top(m)
+    text = f'🎫 <b>Боевой пропуск</b>\n'
+    text += f'{season["emoji"]} {season["name"]} · {season_num}/30\n\n'
+    text += f'🎯 Уровень: <b>{level}/{MAX_LEVEL}</b>\n'
+    if level < MAX_LEVEL:
+        text += f'📊 {in_lvl:,} / {need:,}\n'
+    text += '\n'
 
-@bot.message_handler(commands=['my'])
-def cmd_my_short(m): cmd_my_gifts(m)
+    for lvl in range(1, MAX_LEVEL + 1):
+        reward = PASS_REWARDS.get(lvl)
+        if not reward:
+            continue
+        free = reward['free']
+        prem = reward['premium']
+        f_str = f'{free[0]}×{free[1]}' if free[1] > 1 else f'{free[0]}'
+        p_str = f'{prem[0]}×{prem[1]}' if prem[1] > 1 else f'{prem[0]}'
+        need_lvl = total_points_for_level(lvl)
 
-@bot.message_handler(commands=['daily'])
-def cmd_daily_short(m): cmd_daily(m)
+        if str(lvl) in claimed_list: status = '✅'
+        elif lvl <= level: status = '🎁'
+        else: status = '🔒'
+
+        text += f'{status} <b>Ур.{lvl}</b> ({need_lvl:,}) · {f_str} / {p_str}\n'
+
+    kb = types.InlineKeyboardMarkup(row_width=5)
+    btns = []
+    for lvl in range(1, MAX_LEVEL + 1):
+        if str(lvl) in claimed_list:
+            btns.append(types.InlineKeyboardButton(f'✅{lvl}', callback_data=f'claim_{lvl}'))
+        elif lvl <= level:
+            btns.append(types.InlineKeyboardButton(f'🎁{lvl}', callback_data=f'claim_{lvl}', style='success'))
+        else:
+            btns.append(types.InlineKeyboardButton(f'🔒{lvl}', callback_data='locked'))
+    kb.add(*btns)
+    if not premium:
+        kb.add(types.InlineKeyboardButton('💎 Премиум (500 ⭐)', callback_data='buy_premium', style='primary'))
+    kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='menu_main'))
+
+    if len(text) > 4000:
+        text = text[:3900] + '...'
+
+    bot.edit_message_text(text, c.message.chat.id, c.message.message_id,
+                          parse_mode='HTML', reply_markup=kb)
 
 
+@bot.callback_query_handler(func=lambda c: c.data == 'locked')
+def cb_locked(c):
+    bot.answer_callback_query(c.id, '🔒 Не достигнут', show_alert=True)
+
+
+@bot.callback_query_handler(func=lambda c: c.data.startswith('claim_'))
+def cb_claim(c):
+    uid = c.from_user.id
+    lvl = int(c.data.replace('claim_', ''))
+    result = claim_reward(uid, lvl)
+
+    if result == 'already':
+        return bot.answer_callback_query(c.id, '✅ Уже забрано', show_alert=True)
+    if result is None:
+        return bot.answer_callback_query(c.id, '❌ Нельзя', show_alert=True)
+
+    free, prem = result
+    bot.answer_callback_query(c.id, f'🎁 +{free[0]}×{free[1]}', show_alert=True)
+    cb_pass(c)
+
+
+@bot.callback_query_handler(func=lambda c: c.data == 'buy_premium')
+def cb_buy_premium(c):
+    uid = c.from_user.id
+    user = get_user(uid)
+    points, level, premium, claimed = get_season(uid)
+
+    if premium:
+        return bot.answer_callback_query(c.id, '✅ Куплен', show_alert=True)
+    if user[6] < 500:
+        return bot.answer_callback_query(c.id, f'❌ Нужно 500 ⭐', show_alert=True)
+
+    update_user(uid, stars=user[6] - 500, total_spent=user[8] + 500)
+    update_season(uid, premium=1)
+    bot.answer_callback_query(c.id, '🎫 Активирован!', show_alert=True)
+    cb_pass(c)
+
+
+# ============================================================
+# СТАТА
+# ============================================================
+@bot.callback_query_handler(func=lambda c: c.data == 'menu_stats')
+def cb_stats(c):
+    uid = c.from_user.id
+    bot.answer_callback_query(c.id)
+    user = get_user(uid)
+    stats = get_user_stats(uid)
+    now = int(time.time())
+    left = max(0, COOLDOWN - (now - user[2]))
+    points, level, premium, claimed = get_season(uid)
+
+    total_possible = len(set(c[0] for c in COUNTRIES))
+    unique_have = len(set(flag for _, flag, _ in get_user_gifts(uid)))
+    progress = int((unique_have / total_possible) * 100) if total_possible else 0
+    bar = '🟩' * int(progress / 10) + '⬜' * (10 - int(progress / 10))
+
+    text = (
+        f'📊 <b>Статистика</b>\n\n'
+        f'👤 <b>{user[1]}</b>\n'
+        f'🎯 Уровень: <b>{level}/{MAX_LEVEL}</b>\n\n'
+        f'<b>Коллекция</b>\n'
+        f'{bar} {progress}%\n'
+        f'Уникальных: {unique_have}/{total_possible}\n\n'
+        f'🟡 Legendary — {stats.get("legendary", 0)}\n'
+        f'🟣 Epic — {stats.get("epic", 0)}\n'
+        f'🔵 Rare — {stats.get("rare", 0)}\n'
+        f'⚪ Common — {stats.get("common", 0)}\n'
+        f'━━━━━━━━━━━━━━\n'
+        f'📦 Всего: <b>{user[3]}</b>\n'
+        f'💰 Звёзды: <b>{user[6]} ⭐</b>\n\n'
+    )
+    if left == 0:
+        text += '🎁 Кейс: <b>готов</b>'
+    else:
+        text += f'⏱️ Кейс: <b>{left // 60}:{left % 60:02d}</b>'
+
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton('◀️ Назад', callback_data='menu_main'))
+    bot.edit_message_text(text, c.message.chat.id, c.message.message_id,
+                          parse_mode='HTML', reply_markup=kb)
+
+
+# ============================================================
+# БОНУС
+# ============================================================
+@bot.callback_query_handler(func=lambda c: c.data == 'menu_daily')
+def cb_daily(c):
+    uid = c.from_user.id
+    name = c.from_user.first_name or 'Игрок'
+    user = get_user(uid, name)
+    now = int(time.time())
+
+    if now - user[4] < 86400:
+        left = 86400 - (now - user[4])
+        bot.answer_callback_query(c.id, f'⏳ {left // 3600} ч {(left % 3600) // 60} мин', show_alert=True)
+        return
+
+    streak = user[5] + 1 if now - user[4] < 172800 else 1
+    rewards = min(streak, 5)
+    bonus_stars = 50 * streak
+
+    for _ in range(rewards):
+        flag, rarity = roll_country()
+        add_gift(uid, flag, rarity)
+
+    update_user(uid, total=user[3] + rewards, last_bonus=now, streak=streak,
+                stars=user[6] + bonus_stars)
+    add_xp(uid, POINTS_PER_BONUS)
+
+    bot.answer_callback_query(c.id, f'🎁 +{rewards} флагов, +{bonus_stars} ⭐', show_alert=True)
+    cb_menu_main(c)
+
+
+# ============================================================
+# ЗАПУСК
+# ============================================================
 if __name__ == '__main__':
     print('Gift bot started')
     bot.infinity_polling(timeout=30, long_polling_timeout=30)
