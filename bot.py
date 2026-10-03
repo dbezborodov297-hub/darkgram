@@ -4,29 +4,28 @@ import time
 import re
 from telebot import types
 
-TOKEN = '8471116013:AAE7-_Fhkoyjqpl9lJ_CPQdwgM-nZTndhx4'
-ADMIN_IDS = [8907438590]  # [123456789] — сюда свой ID
-CHANNEL_ID = None  # ID канала, если нужно
+TOKEN = '8641977356:AAEOuInqlZbeeS98OHzA7ChxbeedU-RvRR4'
+OWNER_ID = 6430796415 # Твой ID (узнать: /myid)
+CHANNEL_ID = 4337299468 # ID канала для публикации
 
-# ============================================================
-# ВАРНЫ: настройки автонаказаний
-# ============================================================
-WARN_MUTE = 3          # 3 варна = автомут
-WARN_BAN = 5           # 5 варнов = автобан
-WARN_MUTE_TIME = 3600  # мут на 1 час
-WARN_BAN_TIME = 86400  # бан на 1 день
+# Автонаказания
+WARN_MUTE = 3    # 3 варна = автомут
+WARN_BAN = 5     # 5 варнов = автобан
+WARN_MUTE_TIME = 3600
+WARN_BAN_TIME = 86400
 
-TOPICS = {
-    'news':     {'name': '📰 Новости'},
-    'meme':     {'name': '😂 Мемы'},
-    'question': {'name': '❓ Вопросы'},
-    'ads':      {'name': '📢 Реклама'},
-    'art':      {'name': '🎨 Арт'},
-    'idea':     {'name': '💡 Идеи'},
+# Роли
+ROLES = {
+    0: {'name': 'Обычный',       'icon': '👤', 'warn': False, 'mute': False, 'ban': False, 'post': False, 'manage': False},
+    1: {'name': 'Младший мод',   'icon': '🛡️', 'warn': True,  'mute': True,  'ban': False, 'post': False, 'manage': False},
+    2: {'name': 'Старший мод',   'icon': '⚔️', 'warn': True,  'mute': True,  'ban': True,  'post': False, 'manage': False},
+    3: {'name': 'Постер',        'icon': '📝', 'warn': False, 'mute': False, 'ban': False, 'post': True,  'manage': False},
+    4: {'name': 'Админ',         'icon': '👑', 'warn': True,  'mute': True,  'ban': True,  'post': True,  'manage': True},
+    5: {'name': 'Владелец',      'icon': '💎', 'warn': True,  'mute': True,  'ban': True,  'post': True,  'manage': True},
 }
 
 bot = telebot.TeleBot(TOKEN)
-DB = 'suggest.db'
+DB = 'roles.db'
 
 
 # ============================================================
@@ -35,15 +34,8 @@ DB = 'suggest.db'
 def init_db():
     conn = sqlite3.connect(DB)
     c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS posts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        uid INTEGER, name TEXT, topic TEXT, text TEXT,
-        status TEXT DEFAULT 'pending',
-        mod_uid INTEGER, mod_comment TEXT,
-        created INTEGER, decided INTEGER
-    )''')
-    c.execute('''CREATE TABLE IF NOT EXISTS mods (
-        uid INTEGER, topic TEXT, PRIMARY KEY (uid, topic)
+    c.execute('''CREATE TABLE IF NOT EXISTS roles (
+        uid INTEGER PRIMARY KEY, role INTEGER DEFAULT 0
     )''')
     c.execute('''CREATE TABLE IF NOT EXISTS bans (
         uid INTEGER PRIMARY KEY, until INTEGER, reason TEXT, by_uid INTEGER
@@ -55,6 +47,14 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         uid INTEGER, reason TEXT, by_uid INTEGER, time INTEGER
     )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uid INTEGER, name TEXT, text TEXT, photo TEXT,
+        created INTEGER
+    )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS personal_access (
+        uid INTEGER, command TEXT, PRIMARY KEY (uid, command)
+    )''')
     conn.commit()
     conn.close()
 
@@ -62,19 +62,42 @@ init_db()
 
 
 # ============================================================
-# ХЕЛПЕРЫ
+# РОЛИ
 # ============================================================
-def get_mod_topics(uid):
+def get_role(uid):
+    if uid == OWNER_ID: return 5
     conn = sqlite3.connect(DB)
     c = conn.cursor()
-    c.execute('SELECT topic FROM mods WHERE uid=?', (uid,))
-    rows = c.fetchall()
+    c.execute('SELECT role FROM roles WHERE uid=?', (uid,))
+    row = c.fetchone()
     conn.close()
-    return [r[0] for r in rows]
+    return row[0] if row else 0
 
-def is_admin(uid): return uid in ADMIN_IDS
-def is_mod(uid): return bool(get_mod_topics(uid)) or is_admin(uid)
+def set_role(uid, role):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute('INSERT OR REPLACE INTO roles (uid, role) VALUES (?, ?)', (uid, role))
+    conn.commit()
+    conn.close()
 
+def can(uid, action):
+    """action: warn / mute / ban / post / manage"""
+    role = get_role(uid)
+    if role == 5: return True
+    return ROLES.get(role, {}).get(action, False)
+
+def has_personal_access(uid, command):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute('SELECT 1 FROM personal_access WHERE uid=? AND command=?', (uid, command))
+    row = c.fetchone()
+    conn.close()
+    return bool(row)
+
+
+# ============================================================
+# НАКАЗАНИЯ
+# ============================================================
 def get_warns(uid):
     conn = sqlite3.connect(DB)
     c = conn.cursor()
@@ -121,6 +144,10 @@ def get_mute_until(uid):
     row = c.fetchone(); conn.close()
     return row[0] if row else None
 
+
+# ============================================================
+# ВРЕМЯ
+# ============================================================
 def parse_time(text):
     text = text.strip().lower()
     if text in ('forever', 'навсегда', '0', 'inf'): return 0
@@ -149,494 +176,402 @@ def escape_html(s):
 
 
 # ============================================================
-# КЛАВИАТУРЫ (с цветными кнопками style)
+# ПАРСИНГ ЦЕЛИ (@username или reply)
+# ============================================================
+def resolve_target(m, args):
+    """Возвращает uid цели из аргументов или reply."""
+    if m.reply_to_message and m.reply_to_message.from_user:
+        return m.reply_to_message.from_user.id
+    if args:
+        target = args[0]
+        if target.startswith('@'):
+            return None  # нельзя resolve @username без базы
+        try:
+            return int(target)
+        except:
+            return None
+    return None
+
+
+# ============================================================
+# КЛАВИАТУРЫ
 # ============================================================
 def main_kb(uid):
     kb = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    kb.add('📝 Предложить', '📋 Мои посты')
-    if is_mod(uid):
-        kb.add('🟢 Модерация', '🟡 Статистика')
-    if is_admin(uid):
-        kb.add('👑 Админ-панель')
+    role = get_role(uid)
+    if can(uid, 'post'):
+        kb.add('Опубликовать')
+    if can(uid, 'warn') or can(uid, 'mute') or can(uid, 'ban'):
+        kb.add('Модерация')
+    if can(uid, 'manage'):
+        kb.add('Роли', 'Статистика')
     return kb
 
-def topics_kb():
+
+def mod_kb(uid):
     kb = types.InlineKeyboardMarkup(row_width=2)
-    btns = []
-    for k, t in TOPICS.items():
-        btns.append(types.InlineKeyboardButton(t['name'], callback_data=f'take_topic_{k}'))
-    kb.add(*btns)
+    if can(uid, 'warn'):
+        kb.add(types.InlineKeyboardButton('Варн', callback_data='ask_warn'))
+    if can(uid, 'mute'):
+        kb.add(types.InlineKeyboardButton('Мут', callback_data='ask_mute'))
+    if can(uid, 'ban'):
+        kb.add(types.InlineKeyboardButton('Бан', callback_data='ask_ban', style='danger'))
     return kb
 
-def mod_actions_kb(post_id, author_uid):
-    """Кнопки модерации с ЦВЕТАМИ"""
-    kb = types.InlineKeyboardMarkup(row_width=2)
-    kb.add(
-        types.InlineKeyboardButton('✅ Одобрить', callback_data=f'mod_ok_{post_id}', style='success'),
-        types.InlineKeyboardButton('❌ Отклонить', callback_data=f'mod_no_{post_id}', style='danger'),
-    )
-    kb.add(
-        types.InlineKeyboardButton('🟡 Варн', callback_data=f'warn_{author_uid}'),
-        types.InlineKeyboardButton('🟠 Мут', callback_data=f'menu_mute_{author_uid}'),
-    )
-    kb.add(
-        types.InlineKeyboardButton('🔴 Бан', callback_data=f'menu_ban_{author_uid}', style='danger'),
-        types.InlineKeyboardButton('💬 Комментарий', callback_data=f'mod_cmt_{post_id}'),
-    )
-    return kb
 
-def ban_duration_kb(action, uid):
+def duration_kb(action):
     kb = types.InlineKeyboardMarkup(row_width=3)
     times = [
         ('1м', '1m'), ('5м', '5m'), ('30м', '30m'),
         ('1ч', '1h'), ('6ч', '6h'), ('1д', '1d'),
-        ('7д', '7d'), ('30д', '30d'), ('🔴∞', 'forever'),
+        ('7д', '7d'), ('30д', '30d'), ('Навсегда', 'forever'),
     ]
-    btns = [types.InlineKeyboardButton(label, callback_data=f'{action}_dur_{uid}_{val}') for label, val in times]
+    btns = [types.InlineKeyboardButton(label, callback_data=f'{action}_dur_{val}') for label, val in times]
     kb.add(*btns)
-    kb.add(types.InlineKeyboardButton('❌ Отмена', callback_data='cancel', style='danger'))
+    kb.add(types.InlineKeyboardButton('Отмена', callback_data='cancel', style='danger'))
     return kb
 
-def admin_kb():
+
+def roles_kb():
     kb = types.InlineKeyboardMarkup(row_width=1)
-    kb.add(
-        types.InlineKeyboardButton('👤 Добавить модератора', callback_data='admin_addmod'),
-        types.InlineKeyboardButton('📋 Модераторы', callback_data='admin_listmods'),
-        types.InlineKeyboardButton('🔴 Баны', callback_data='admin_bans', style='danger'),
-        types.InlineKeyboardButton('🟠 Муты', callback_data='admin_mutes'),
-        types.InlineKeyboardButton('🟡 Варны', callback_data='admin_warns'),
-    )
-    return kb
-
-def mods_topics_kb():
-    kb = types.InlineKeyboardMarkup(row_width=2)
-    btns = [types.InlineKeyboardButton(t['name'], callback_data=f'addmod_topic_{k}')
-            for k, t in TOPICS.items()]
-    kb.add(*btns)
+    for r, info in ROLES.items():
+        if r == 5: continue
+        kb.add(types.InlineKeyboardButton(f'{info["icon"]} {info["name"]}', callback_data=f'setrole_{r}'))
     return kb
 
 
 # ============================================================
-# START
+# СТАРТ
 # ============================================================
 @bot.message_handler(commands=['start'])
 def cmd_start(m):
     uid = m.from_user.id
     if is_banned(uid):
-        return bot.send_message(m.chat.id, f'🔴 Ты забанен.\nОсталось: {time_until(get_ban_until(uid))}')
+        return bot.send_message(m.chat.id, f'🚫 Ты забанен. Осталось: {time_until(get_ban_until(uid))}')
+    role = get_role(uid)
+    role_name = ROLES.get(role, {}).get('name', 'Обычный')
+    icon = ROLES.get(role, {}).get('icon', '👤')
     text = (
-        '👋 <b>Предложка</b>\n\n'
-        '📝 <b>Предложить</b> — отправить пост\n'
-        '📋 <b>Мои посты</b> — статус заявок\n'
+        f'👋 <b>Модерация-бот</b>\n\n'
+        f'Твоя роль: {icon} <b>{role_name}</b>\n\n'
+        f'Используй меню ниже.'
     )
-    if is_mod(uid):
-        text += '\n🟢 <b>Модерация</b> — очередь\n🟡 <b>Статистика</b>\n'
-    if is_admin(uid):
-        text += '\n👑 <b>Админ-панель</b>\n'
     bot.send_message(m.chat.id, text, parse_mode='HTML', reply_markup=main_kb(uid))
 
 
 @bot.message_handler(commands=['myid'])
 def cmd_myid(m):
-    warns = get_warns(m.from_user.id)
-    text = f'👤 ID: <code>{m.from_user.id}</code>\n'
-    text += f'🟡 Варнов: <b>{warns}</b>\n'
-    if is_banned(m.from_user.id):
-        text += f'🔴 Бан: {time_until(get_ban_until(m.from_user.id))}\n'
-    if is_muted(m.from_user.id):
-        text += f'🟠 Мут: {time_until(get_mute_until(m.from_user.id))}\n'
-    bot.send_message(m.chat.id, text, parse_mode='HTML')
-
-
-# ============================================================
-# ПРЕДЛОЖКА
-# ============================================================
-user_states = {}
-
-@bot.message_handler(func=lambda m: m.text in ('📝 Предложить', '📝 Предложить пост'))
-def cmd_suggest(m):
     uid = m.from_user.id
-    if is_banned(uid):
-        return bot.send_message(m.chat.id, f'🔴 Ты забанен. Осталось: {time_until(get_ban_until(uid))}')
-    if is_muted(uid):
-        return bot.send_message(m.chat.id, f'🟠 Ты в муте. Осталось: {time_until(get_mute_until(uid))}')
-    user_states[uid] = {'action': 'choose_topic'}
-    bot.send_message(m.chat.id, '🗂️ Выбери тему:', reply_markup=topics_kb())
-
-
-@bot.callback_query_handler(func=lambda c: c.data.startswith('take_topic_'))
-def cb_take_topic(c):
-    uid = c.from_user.id
-    topic = c.data.replace('take_topic_', '')
-    if topic not in TOPICS:
-        return bot.answer_callback_query(c.id, 'Ошибка')
-    user_states[uid] = {'action': 'write_post', 'topic': topic}
-    bot.answer_callback_query(c.id)
-    bot.edit_message_text(
-        f'✍️ Тема: {TOPICS[topic]["name"]}\n\nНапиши текст поста (от 5 символов).',
-        c.message.chat.id, c.message.message_id
-    )
-    bot.register_next_step_handler_by_chat_id(c.message.chat.id, handle_post_text, uid, topic)
-
-
-def handle_post_text(m, uid, topic):
-    if m.from_user.id != uid: return
-    if not m.text: return
-    text = m.text.strip()
-    if len(text) < 5:
-        return bot.send_message(m.chat.id, '❌ Слишком коротко.')
-    if len(text) > 2000: text = text[:2000]
-
-    name = m.from_user.first_name or 'Аноним'
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    c.execute('INSERT INTO posts (uid, name, topic, text, created) VALUES (?, ?, ?, ?, ?)',
-              (uid, name, topic, text, int(time.time())))
-    post_id = c.lastrowid
-    conn.commit()
-    conn.close()
-
-    bot.send_message(m.chat.id, '🟢 Пост отправлен на модерацию!', reply_markup=main_kb(uid))
-    user_states.pop(uid, None)
-    send_to_mods(post_id, uid, name, topic, text)
-
-
-def send_to_mods(post_id, author_uid, author_name, topic, text):
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    c.execute('SELECT uid FROM mods WHERE topic=?', (topic,))
-    mod_uids = [r[0] for r in c.fetchall()]
-    conn.close()
-    mod_uids.extend(ADMIN_IDS)
-    mod_uids = list(set(mod_uids))
-
-    caption = (
-        f'📬 <b>Новый пост #{post_id}</b>\n\n'
-        f'👤 От: {escape_html(author_name)} (<code>{author_uid}</code>)\n'
-        f'🗂️ Тема: {TOPICS[topic]["name"]}\n\n'
-        f'<b>Текст:</b>\n{escape_html(text)}'
-    )
-    for mod_uid in mod_uids:
-        try:
-            bot.send_message(mod_uid, caption, parse_mode='HTML',
-                             reply_markup=mod_actions_kb(post_id, author_uid))
-        except Exception as e:
-            print(f'err {mod_uid}:', e)
+    role = get_role(uid)
+    text = f'👤 ID: <code>{uid}</code>\n'
+    text += f'{ROLES[role]["icon"]} Роль: <b>{ROLES[role]["name"]}</b>\n'
+    text += f'⚠️ Варнов: <b>{get_warns(uid)}</b>\n'
+    if is_banned(uid): text += f'🚫 Бан: {time_until(get_ban_until(uid))}\n'
+    if is_muted(uid): text += f'🔇 Мут: {time_until(get_mute_until(uid))}\n'
+    bot.send_message(m.chat.id, text, parse_mode='HTML')
 
 
 # ============================================================
 # МОДЕРАЦИЯ
 # ============================================================
-@bot.message_handler(func=lambda m: m.text in ('🟢 Модерация', '🛡️ Модерация'))
+@bot.message_handler(func=lambda m: m.text == 'Модерация')
 def cmd_mod(m):
     uid = m.from_user.id
-    if not is_mod(uid):
-        return bot.send_message(m.chat.id, '🔴 Нет доступа')
-
-    conn = sqlite3.connect(DB); c = conn.cursor()
-    if is_admin(uid) and not get_mod_topics(uid):
-        c.execute('''SELECT id, uid, name, topic, text FROM posts 
-                     WHERE status='pending' ORDER BY id ASC LIMIT 10''')
-    else:
-        topics = get_mod_topics(uid)
-        placeholders = ','.join('?' * len(topics))
-        c.execute(f'''SELECT id, uid, name, topic, text FROM posts 
-                      WHERE status='pending' AND topic IN ({placeholders}) 
-                      ORDER BY id ASC LIMIT 10''', topics)
-    rows = c.fetchall(); conn.close()
-
-    if not rows:
-        return bot.send_message(m.chat.id, '📭 Очередь пуста', reply_markup=main_kb(uid))
-
-    for r in rows:
-        post_id, author_uid, name, topic, text = r
-        caption = (
-            f'📬 <b>Пост #{post_id}</b>\n\n'
-            f'👤 От: {escape_html(name)} (<code>{author_uid}</code>)\n'
-            f'🗂️ Тема: {TOPICS[topic]["name"]}\n'
-            f'🟡 Варнов у автора: {get_warns(author_uid)}\n\n'
-            f'<b>Текст:</b>\n{escape_html(text)}'
-        )
-        bot.send_message(m.chat.id, caption, parse_mode='HTML',
-                         reply_markup=mod_actions_kb(post_id, author_uid))
-
-
-# ============================================================
-# ДЕЙСТВИЯ МОДЕРАТОРА
-# ============================================================
-@bot.callback_query_handler(func=lambda c: c.data.startswith('mod_ok_'))
-def cb_ok(c):
-    uid = c.from_user.id
-    if not is_mod(uid): return bot.answer_callback_query(c.id, 'Нет доступа', show_alert=True)
-    post_id = int(c.data.replace('mod_ok_', ''))
-
-    conn = sqlite3.connect(DB); c2 = conn.cursor()
-    c2.execute('SELECT uid, topic, text FROM posts WHERE id=?', (post_id,))
-    row = c2.fetchone()
-    if not row:
-        conn.close(); return bot.answer_callback_query(c.id, 'Не найден')
-    author_uid, topic, text = row
-    if not is_admin(uid) and topic not in get_mod_topics(uid):
-        conn.close(); return bot.answer_callback_query(c.id, 'Не твоя тема', show_alert=True)
-
-    c2.execute('UPDATE posts SET status=?, mod_uid=?, decided=? WHERE id=?',
-               ('approved', uid, int(time.time()), post_id))
-    conn.commit(); conn.close()
-
-    bot.answer_callback_query(c.id, '✅ Одобрено')
-    try: bot.edit_message_reply_markup(c.message.chat.id, c.message.message_id, reply_markup=None)
-    except: pass
-    bot.send_message(c.message.chat.id, f'✅ Пост #{post_id} одобрен')
-    try: bot.send_message(author_uid, '✅ Твой пост одобрен!')
-    except: pass
-
-    if CHANNEL_ID:
-        try:
-            bot.send_message(CHANNEL_ID, f'{TOPICS[topic]["name"]}\n\n{escape_html(text)}', parse_mode='HTML')
-        except: pass
-
-
-@bot.callback_query_handler(func=lambda c: c.data.startswith('mod_no_'))
-def cb_no(c):
-    uid = c.from_user.id
-    if not is_mod(uid): return bot.answer_callback_query(c.id, 'Нет доступа', show_alert=True)
-    post_id = int(c.data.replace('mod_no_', ''))
-
-    conn = sqlite3.connect(DB); c2 = conn.cursor()
-    c2.execute('SELECT uid, topic FROM posts WHERE id=?', (post_id,))
-    row = c2.fetchone()
-    if not row:
-        conn.close(); return bot.answer_callback_query(c.id, 'Не найден')
-    author_uid, topic = row
-    if not is_admin(uid) and topic not in get_mod_topics(uid):
-        conn.close(); return bot.answer_callback_query(c.id, 'Не твоя тема', show_alert=True)
-
-    c2.execute('UPDATE posts SET status=?, mod_uid=?, decided=? WHERE id=?',
-               ('rejected', uid, int(time.time()), post_id))
-    conn.commit(); conn.close()
-
-    bot.answer_callback_query(c.id, '❌ Отклонено')
-    try: bot.edit_message_reply_markup(c.message.chat.id, c.message.message_id, reply_markup=None)
-    except: pass
-    bot.send_message(c.message.chat.id, f'❌ Пост #{post_id} отклонён')
-    try: bot.send_message(author_uid, '❌ Твой пост отклонён.')
-    except: pass
-
-
-@bot.callback_query_handler(func=lambda c: c.data.startswith('mod_cmt_'))
-def cb_cmt(c):
-    uid = c.from_user.id
-    if not is_mod(uid): return bot.answer_callback_query(c.id, 'Нет доступа', show_alert=True)
-    post_id = int(c.data.replace('mod_cmt_', ''))
-    user_states[uid] = {'action': 'comment', 'post_id': post_id}
-    bot.answer_callback_query(c.id)
-    msg = bot.send_message(c.message.chat.id, f'💬 Комментарий к посту #{post_id}:')
-    bot.register_next_step_handler(msg, handle_comment, uid, post_id)
-
-
-def handle_comment(m, uid, post_id):
-    if not m.text: return
-    comment = m.text.strip()
-    conn = sqlite3.connect(DB); c = conn.cursor()
-    c.execute('SELECT uid FROM posts WHERE id=?', (post_id,))
-    row = c.fetchone()
-    if not row:
-        conn.close(); return bot.send_message(m.chat.id, '🔴 Пост не найден')
-    author_uid = row[0]
-    c.execute('UPDATE posts SET status=?, mod_uid=?, mod_comment=?, decided=? WHERE id=?',
-              ('rejected', uid, comment, int(time.time()), post_id))
-    conn.commit(); conn.close()
-    bot.send_message(m.chat.id, '🟢 Комментарий отправлен')
-    try: bot.send_message(author_uid, f'🔴 Пост отклонён.\n\n💬 {escape_html(comment)}', parse_mode='HTML')
-    except: pass
+    if not (can(uid, 'warn') or can(uid, 'mute') or can(uid, 'ban')):
+        return
+    text = (
+        '🛡️ <b>Модерация</b>\n\n'
+        'Команды:\n'
+        '<code>/warn uid</code> — варн\n'
+        '<code>/mute uid 1h</code> — мут\n'
+        '<code>/ban uid 1d</code> — бан\n'
+        '<code>/unban uid</code>\n'
+        '<code>/unmute uid</code>\n\n'
+        'Или ответь на сообщение и напиши команду без uid.'
+    )
+    bot.send_message(m.chat.id, text, parse_mode='HTML')
 
 
 # ============================================================
 # ВАРН
 # ============================================================
-@bot.callback_query_handler(func=lambda c: c.data.startswith('warn_') and not c.data.startswith('unwarn_'))
-def cb_warn(c):
-    uid = c.from_user.id
-    if not is_mod(uid): return bot.answer_callback_query(c.id, 'Нет доступа', show_alert=True)
-    target_uid = int(c.data.replace('warn_', ''))
+@bot.message_handler(commands=['warn'])
+def cmd_warn(m):
+    uid = m.from_user.id
+    if not can(uid, 'warn'):
+        return bot.send_message(m.chat.id, '❌ Нет прав')
+    args = m.text.split()[1:]
+    target = resolve_target(m, args)
+    if not target:
+        return bot.send_message(m.chat.id, 'Использование: ответь на сообщение или <code>/warn uid</code>', parse_mode='HTML')
+    if target == uid:
+        return bot.send_message(m.chat.id, '❌ Себе нельзя')
+    if get_role(target) >= get_role(uid):
+        return bot.send_message(m.chat.id, '❌ Нельзя выдать равному или выше')
 
-    conn = sqlite3.connect(DB); c2 = conn.cursor()
-    c2.execute('INSERT INTO warns (uid, reason, by_uid, time) VALUES (?, ?, ?, ?)',
-               (target_uid, 'Нарушение', uid, int(time.time())))
+    conn = sqlite3.connect(DB); c = conn.cursor()
+    c.execute('INSERT INTO warns (uid, reason, by_uid, time) VALUES (?, ?, ?, ?)',
+              (target, 'Нарушение', uid, int(time.time())))
     conn.commit()
-    c2.execute('SELECT COUNT(*) FROM warns WHERE uid=?', (target_uid,))
-    warns = c2.fetchone()[0]
+    c.execute('SELECT COUNT(*) FROM warns WHERE uid=?', (target,))
+    warns = c.fetchone()[0]
     conn.close()
 
-    bot.answer_callback_query(c.id, f'🟡 Варн выдан ({warns}/5)')
-    auto_text = ''
+    bot.send_message(m.chat.id, f'⚠️ <code>{target}</code> получил варн ({warns}/5)', parse_mode='HTML')
+
+    # Автонаказание
+    auto = ''
     if warns >= WARN_BAN:
         until = int(time.time()) + WARN_BAN_TIME
-        conn = sqlite3.connect(DB); c2 = conn.cursor()
-        c2.execute('INSERT OR REPLACE INTO bans (uid, until, reason, by_uid) VALUES (?, ?, ?, ?)',
-                   (target_uid, until, f'{WARN_BAN} варнов', uid))
+        conn = sqlite3.connect(DB); c = conn.cursor()
+        c.execute('INSERT OR REPLACE INTO bans (uid, until, reason, by_uid) VALUES (?, ?, ?, ?)',
+                  (target, until, f'{WARN_BAN} варнов', uid))
         conn.commit(); conn.close()
-        auto_text = f'\n🔴 Автобан на {fmt_time(WARN_BAN_TIME)}'
+        auto = f'\n🚫 Автобан на {fmt_time(WARN_BAN_TIME)}'
     elif warns >= WARN_MUTE:
         until = int(time.time()) + WARN_MUTE_TIME
-        conn = sqlite3.connect(DB); c2 = conn.cursor()
-        c2.execute('INSERT OR REPLACE INTO mutes (uid, until, reason, by_uid) VALUES (?, ?, ?, ?)',
-                   (target_uid, until, f'{WARN_MUTE} варнов', uid))
+        conn = sqlite3.connect(DB); c = conn.cursor()
+        c.execute('INSERT OR REPLACE INTO mutes (uid, until, reason, by_uid) VALUES (?, ?, ?, ?)',
+                  (target, until, f'{WARN_MUTE} варнов', uid))
         conn.commit(); conn.close()
-        auto_text = f'\n🟠 Автомут на {fmt_time(WARN_MUTE_TIME)}'
+        auto = f'\n🔇 Автомут на {fmt_time(WARN_MUTE_TIME)}'
 
-    bot.send_message(c.message.chat.id,
-                     f'🟡 <code>{target_uid}</code> получил варн ({warns}/5){auto_text}',
-                     parse_mode='HTML')
-    try: bot.send_message(target_uid, f'🟡 Ты получил варн ({warns}/5){auto_text}')
+    if auto:
+        bot.send_message(m.chat.id, f'⚡ Автонаказание:{auto}')
+
+    try: bot.send_message(target, f'⚠️ Ты получил варн ({warns}/5){auto}')
     except: pass
 
 
 # ============================================================
-# BAN / MUTE
+# МУТ
 # ============================================================
-@bot.callback_query_handler(func=lambda c: c.data.startswith('menu_ban_'))
-def cb_menu_ban(c):
-    uid = c.from_user.id
-    if not is_mod(uid): return bot.answer_callback_query(c.id, 'Нет доступа', show_alert=True)
-    target = int(c.data.replace('menu_ban_', ''))
-    bot.answer_callback_query(c.id)
-    bot.send_message(c.message.chat.id,
-                     f'🔴 На сколько забанить <code>{target}</code>?',
-                     parse_mode='HTML', reply_markup=ban_duration_kb('ban', target))
+@bot.message_handler(commands=['mute'])
+def cmd_mute(m):
+    uid = m.from_user.id
+    if not can(uid, 'mute'):
+        return bot.send_message(m.chat.id, '❌ Нет прав')
+    parts = m.text.split()[1:]
+    target = resolve_target(m, parts)
+    if not target:
+        return bot.send_message(m.chat.id, 'Использование: <code>/mute uid 1h</code>', parse_mode='HTML')
+    if target == uid:
+        return bot.send_message(m.chat.id, '❌ Себе нельзя')
+    if get_role(target) >= get_role(uid):
+        return bot.send_message(m.chat.id, '❌ Нельзя равному или выше')
 
+    time_str = parts[1] if len(parts) > 1 else '1h'
+    sec = parse_time(time_str)
+    if sec is None:
+        return bot.send_message(m.chat.id, '❌ Время: 5m, 1h, 1d, forever')
+    until = 0 if sec == 0 else int(time.time()) + sec
 
-@bot.callback_query_handler(func=lambda c: c.data.startswith('menu_mute_'))
-def cb_menu_mute(c):
-    uid = c.from_user.id
-    if not is_mod(uid): return bot.answer_callback_query(c.id, 'Нет доступа', show_alert=True)
-    target = int(c.data.replace('menu_mute_', ''))
-    bot.answer_callback_query(c.id)
-    bot.send_message(c.message.chat.id,
-                     f'🟠 На сколько замутить <code>{target}</code>?',
-                     parse_mode='HTML', reply_markup=ban_duration_kb('mute', target))
-
-
-@bot.callback_query_handler(func=lambda c: c.data.startswith('ban_dur_'))
-def cb_ban_dur(c):
-    uid = c.from_user.id
-    if not is_mod(uid): return bot.answer_callback_query(c.id, 'Нет доступа', show_alert=True)
-    parts = c.data.split('_')
-    target = int(parts[2])
-    seconds = parse_time(parts[3])
-    if seconds is None: return bot.answer_callback_query(c.id, 'Ошибка')
-    until = 0 if seconds == 0 else int(time.time()) + seconds
-
-    conn = sqlite3.connect(DB); c2 = conn.cursor()
-    c2.execute('INSERT OR REPLACE INTO bans (uid, until, reason, by_uid) VALUES (?, ?, ?, ?)',
-               (target, until, 'Бан', uid))
+    conn = sqlite3.connect(DB); c = conn.cursor()
+    c.execute('INSERT OR REPLACE INTO mutes (uid, until, reason, by_uid) VALUES (?, ?, ?, ?)',
+              (target, until, 'Мут', uid))
     conn.commit(); conn.close()
 
-    bot.answer_callback_query(c.id, '🔴 Забанен')
-    try: bot.edit_message_reply_markup(c.message.chat.id, c.message.message_id, reply_markup=None)
-    except: pass
-    bot.send_message(c.message.chat.id, f'🔴 <code>{target}</code> забанен на {time_until(until)}', parse_mode='HTML')
-    try: bot.send_message(target, f'🔴 Ты забанен на {time_until(until)}')
-    except: pass
-
-
-@bot.callback_query_handler(func=lambda c: c.data.startswith('mute_dur_'))
-def cb_mute_dur(c):
-    uid = c.from_user.id
-    if not is_mod(uid): return bot.answer_callback_query(c.id, 'Нет доступа', show_alert=True)
-    parts = c.data.split('_')
-    target = int(parts[2])
-    seconds = parse_time(parts[3])
-    if seconds is None: return bot.answer_callback_query(c.id, 'Ошибка')
-    until = 0 if seconds == 0 else int(time.time()) + seconds
-
-    conn = sqlite3.connect(DB); c2 = conn.cursor()
-    c2.execute('INSERT OR REPLACE INTO mutes (uid, until, reason, by_uid) VALUES (?, ?, ?, ?)',
-               (target, until, 'Мут', uid))
-    conn.commit(); conn.close()
-
-    bot.answer_callback_query(c.id, '🟠 Замучен')
-    try: bot.edit_message_reply_markup(c.message.chat.id, c.message.message_id, reply_markup=None)
-    except: pass
-    bot.send_message(c.message.chat.id, f'🟠 <code>{target}</code> замучен на {time_until(until)}', parse_mode='HTML')
-    try: bot.send_message(target, f'🟠 Ты замучен на {time_until(until)}')
-    except: pass
-
-
-@bot.callback_query_handler(func=lambda c: c.data == 'cancel')
-def cb_cancel(c):
-    bot.answer_callback_query(c.id, 'Отменено')
-    try: bot.delete_message(c.message.chat.id, c.message.message_id)
+    bot.send_message(m.chat.id, f'🔇 <code>{target}</code> замучен на {time_until(until)}', parse_mode='HTML')
+    try: bot.send_message(target, f'🔇 Ты замучен на {time_until(until)}')
     except: pass
 
 
 # ============================================================
-# КОМАНДЫ
+# БАН
 # ============================================================
 @bot.message_handler(commands=['ban'])
 def cmd_ban(m):
-    if not is_mod(m.from_user.id):
-        return bot.send_message(m.chat.id, '🔴 Нет доступа')
-    p = m.text.split()
-    if len(p) < 3:
-        return bot.send_message(m.chat.id, 'Использование: <code>/ban uid время</code>\nВремя: 5m, 1h, 1d, forever', parse_mode='HTML')
-    try: target = int(p[1])
-    except: return bot.send_message(m.chat.id, '🔴 Некорректный UID')
-    sec = parse_time(p[2])
-    if sec is None: return bot.send_message(m.chat.id, '🔴 Время: 5m, 1h, 1d, forever')
+    uid = m.from_user.id
+    if not can(uid, 'ban'):
+        return bot.send_message(m.chat.id, '❌ Нет прав')
+    parts = m.text.split()[1:]
+    target = resolve_target(m, parts)
+    if not target:
+        return bot.send_message(m.chat.id, 'Использование: <code>/ban uid 1d</code>', parse_mode='HTML')
+    if target == uid:
+        return bot.send_message(m.chat.id, '❌ Себе нельзя')
+    if get_role(target) >= get_role(uid):
+        return bot.send_message(m.chat.id, '❌ Нельзя равному или выше')
+
+    time_str = parts[1] if len(parts) > 1 else 'forever'
+    sec = parse_time(time_str)
+    if sec is None:
+        return bot.send_message(m.chat.id, '❌ Время: 5m, 1h, 1d, forever')
     until = 0 if sec == 0 else int(time.time()) + sec
+
     conn = sqlite3.connect(DB); c = conn.cursor()
     c.execute('INSERT OR REPLACE INTO bans (uid, until, reason, by_uid) VALUES (?, ?, ?, ?)',
-              (target, until, 'Бан', m.from_user.id))
+              (target, until, 'Бан', uid))
     conn.commit(); conn.close()
-    bot.send_message(m.chat.id, f'🔴 <code>{target}</code> забанен на {time_until(until)}', parse_mode='HTML')
+
+    bot.send_message(m.chat.id, f'🚫 <code>{target}</code> забанен на {time_until(until)}', parse_mode='HTML')
+    try: bot.send_message(target, f'🚫 Ты забанен на {time_until(until)}')
+    except: pass
 
 
-@bot.message_handler(commands=['mute'])
-def cmd_mute(m):
-    if not is_mod(m.from_user.id):
-        return bot.send_message(m.chat.id, '🔴 Нет доступа')
-    p = m.text.split()
-    if len(p) < 3:
-        return bot.send_message(m.chat.id, 'Использование: <code>/mute uid время</code>', parse_mode='HTML')
-    try: target = int(p[1])
-    except: return bot.send_message(m.chat.id, '🔴 Некорректный UID')
-    sec = parse_time(p[2])
-    if sec is None: return bot.send_message(m.chat.id, '🔴 Время: 5m, 1h, 1d, forever')
-    until = 0 if sec == 0 else int(time.time()) + sec
-    conn = sqlite3.connect(DB); c = conn.cursor()
-    c.execute('INSERT OR REPLACE INTO mutes (uid, until, reason, by_uid) VALUES (?, ?, ?, ?)',
-              (target, until, 'Мут', m.from_user.id))
-    conn.commit(); conn.close()
-    bot.send_message(m.chat.id, f'🟠 <code>{target}</code> замучен на {time_until(until)}', parse_mode='HTML')
-
-
+# ============================================================
+# РАЗБАН / РАЗМУТ
+# ============================================================
 @bot.message_handler(commands=['unban'])
 def cmd_unban(m):
-    if not is_mod(m.from_user.id): return
-    p = m.text.split()
-    if len(p) < 2: return
-    try: target = int(p[1])
-    except: return
+    uid = m.from_user.id
+    if not can(uid, 'ban'):
+        return bot.send_message(m.chat.id, '❌ Нет прав')
+    parts = m.text.split()[1:]
+    target = resolve_target(m, parts)
+    if not target:
+        return
     conn = sqlite3.connect(DB); c = conn.cursor()
     c.execute('DELETE FROM bans WHERE uid=?', (target,))
     conn.commit(); conn.close()
-    bot.send_message(m.chat.id, f'🟢 <code>{target}</code> разбанен', parse_mode='HTML')
+    bot.send_message(m.chat.id, f'✅ <code>{target}</code> разбанен', parse_mode='HTML')
 
 
 @bot.message_handler(commands=['unmute'])
 def cmd_unmute(m):
-    if not is_mod(m.from_user.id): return
-    p = m.text.split()
-    if len(p) < 2: return
-    try: target = int(p[1])
-    except: return
+    uid = m.from_user.id
+    if not can(uid, 'mute'):
+        return bot.send_message(m.chat.id, '❌ Нет прав')
+    parts = m.text.split()[1:]
+    target = resolve_target(m, parts)
+    if not target:
+        return
     conn = sqlite3.connect(DB); c = conn.cursor()
     c.execute('DELETE FROM mutes WHERE uid=?', (target,))
     conn.commit(); conn.close()
-    bot.send_message(m.chat.id, f'🟢 <code>{target}</code> размучен', parse_mode='HTML')
+    bot.send_message(m.chat.id, f'✅ <code>{target}</code> размучен', parse_mode='HTML')
+
+
+# ============================================================
+# ПОСТИНГ
+# ============================================================
+user_states = {}
+
+@bot.message_handler(func=lambda m: m.text == 'Опубликовать')
+def cmd_post(m):
+    uid = m.from_user.id
+    if not can(uid, 'post'):
+        return
+    if not CHANNEL_ID:
+        return bot.send_message(m.chat.id, '❌ Канал не настроен')
+    user_states[uid] = {'action': 'post_text'}
+    bot.send_message(m.chat.id, '📝 Отправь текст поста (можно с фото).')
+
+
+@bot.message_handler(func=lambda m: user_states.get(m.from_user.id, {}).get('action') == 'post_text', content_types=['text', 'photo'])
+def handle_post(m):
+    uid = m.from_user.id
+    if not can(uid, 'post'):
+        return
+    try:
+        if m.photo:
+            photo = m.photo[-1].file_id
+            caption = m.caption or ''
+            bot.send_photo(CHANNEL_ID, photo, caption=caption)
+        else:
+            bot.send_message(CHANNEL_ID, m.text)
+        bot.send_message(m.chat.id, '✅ Опубликовано!', reply_markup=main_kb(uid))
+    except Exception as e:
+        bot.send_message(m.chat.id, f'❌ Ошибка: {e}')
+    user_states.pop(uid, None)
+
+
+# ============================================================
+# УПРАВЛЕНИЕ РОЛЯМИ
+# ============================================================
+@bot.message_handler(commands=['setrole'])
+def cmd_setrole(m):
+    uid = m.from_user.id
+    if not can(uid, 'manage'):
+        return bot.send_message(m.chat.id, '❌ Нет прав')
+    parts = m.text.split()[1:]
+    target = resolve_target(m, parts)
+    if not target or len(parts) < 2:
+        return bot.send_message(m.chat.id, 'Использование: <code>/setrole uid 2</code>\n\n0 — Обычный\n1 — Младший мод\n2 — Старший мод\n3 — Постер\n4 — Админ', parse_mode='HTML')
+    try:
+        role = int(parts[1])
+    except:
+        return bot.send_message(m.chat.id, '❌ Роль от 0 до 4')
+    if role not in ROLES or role == 5:
+        return bot.send_message(m.chat.id, '❌ Роль от 0 до 4')
+    if get_role(target) >= get_role(uid) and target != uid:
+        return bot.send_message(m.chat.id, '❌ Нельзя менять равному или выше')
+
+    set_role(target, role)
+    info = ROLES[role]
+    bot.send_message(m.chat.id, f'✅ <code>{target}</code> → {info["icon"]} <b>{info["name"]}</b>', parse_mode='HTML')
+    try: bot.send_message(target, f'Твоя роль: {info["icon"]} <b>{info["name"]}</b>', parse_mode='HTML')
+    except: pass
+
+
+@bot.message_handler(commands=['removerole'])
+def cmd_removerole(m):
+    uid = m.from_user.id
+    if not can(uid, 'manage'):
+        return bot.send_message(m.chat.id, '❌ Нет прав')
+    parts = m.text.split()[1:]
+    target = resolve_target(m, parts)
+    if not target:
+        return bot.send_message(m.chat.id, 'Использование: <code>/removerole uid</code>', parse_mode='HTML')
+    set_role(target, 0)
+    bot.send_message(m.chat.id, f'✅ Роль <code>{target}</code> снята', parse_mode='HTML')
+
+
+@bot.message_handler(commands=['roles'])
+def cmd_roles(m):
+    uid = m.from_user.id
+    if not can(uid, 'manage'):
+        return bot.send_message(m.chat.id, '❌ Нет прав')
+    conn = sqlite3.connect(DB); c = conn.cursor()
+    c.execute('SELECT uid, role FROM roles WHERE role > 0 ORDER BY role DESC')
+    rows = c.fetchall()
+    conn.close()
+    if not rows:
+        return bot.send_message(m.chat.id, 'Нет назначенных ролей')
+    text = '<b>Роли</b>\n\n'
+    for r_uid, role in rows:
+        info = ROLES.get(role, {})
+        text += f'{info.get("icon", "?")} {info.get("name", "?")} — <code>{r_uid}</code>\n'
+    bot.send_message(m.chat.id, text, parse_mode='HTML')
+
+
+# ============================================================
+# ЛИЧНЫЙ ДОСТУП
+# ============================================================
+@bot.message_handler(commands=['ldk'])
+def cmd_ldk(m):
+    """+лдк — выдать личный доступ к команде"""
+    uid = m.from_user.id
+    if not can(uid, 'manage'):
+        return bot.send_message(m.chat.id, '❌ Нет прав')
+    parts = m.text.split()[1:]
+    target = resolve_target(m, parts)
+    if not target or len(parts) < 2:
+        return bot.send_message(m.chat.id, 'Использование: <code>/ldk uid команда</code>\n\nКоманды: ban, mute, warn, post', parse_mode='HTML')
+    command = parts[1].lower()
+    if command not in ('ban', 'mute', 'warn', 'post'):
+        return bot.send_message(m.chat.id, '❌ Команда: ban, mute, warn, post')
+    conn = sqlite3.connect(DB); c = conn.cursor()
+    c.execute('INSERT OR IGNORE INTO personal_access (uid, command) VALUES (?, ?)', (target, command))
+    conn.commit(); conn.close()
+    bot.send_message(m.chat.id, f'✅ <code>{target}</code> получил доступ к <b>{command}</b>', parse_mode='HTML')
+
+
+# ============================================================
+# ПРОВЕРКА МУТА/БАНА НА ВСЕ КОМАНДЫ
+# ============================================================
+@bot.message_handler(func=lambda m: True, content_types=['text'])
+def check_ban_mute(m):
+    uid = m.from_user.id
+    if is_banned(uid):
+        return bot.send_message(m.chat.id, f'🚫 Ты забанен. Осталось: {time_until(get_ban_until(uid))}')
+    # проверка мутов для команд, кроме модерации
+    if is_muted(uid):
+        # разрешаем модераторам писать
+        if not (can(uid, 'warn') or can(uid, 'mute') or can(uid, 'ban')):
+            return bot.send_message(m.chat.id, f'🔇 Ты в муте. Осталось: {time_until(get_mute_until(uid))}')
 
 
 if __name__ == '__main__':
-    print('Suggest bot started')
+    print('Roles bot started')
     bot.infinity_polling(timeout=30, long_polling_timeout=30)
