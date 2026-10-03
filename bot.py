@@ -5,7 +5,7 @@ import random
 import threading
 from telebot import types
 
-TOKEN = '8471116013:AAF-6O2aqW8j94f5td9QU81RmWD6fptakMQ'
+TOKEN = '8471116013:AAFyS76ncMIXh0I0poBvcXZ_LKFGRknAM48'
 COOLDOWN = 120
 START_STARS = 100
 
