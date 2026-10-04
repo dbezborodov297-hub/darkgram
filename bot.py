@@ -5,7 +5,7 @@ import random
 import threading
 from telebot import types
 
-TOKEN = '7844349770:AAEKpSAD6qNbk1xW0WvJp5OEULnBmS-EeLs'
+TOKEN = '7844349770:AAFtux-E13z9vAbpywau_GKydWEKUIWuEow'
 WEBAPP_URL = 'https://darkgram-2.onrender.com'
 COOLDOWN = 120
 START_STARS = 100
